@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AcademeForge Certificate Verification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --bg-soft: #e9eef6;
+      --surface: rgba(255, 255, 255, .82);
+      --surface-strong: rgba(255, 255, 255, .96);
+      --text: #172033;
+      --muted: #66748a;
+      --heading: #07111f;
+      --line: rgba(15, 23, 42, .1);
+      --orange: #f97316;
+      --orange-dark: #ea580c;
+      --blue: #2563eb;
+      --green: #16a34a;
+      --red: #dc2626;
+      --shadow: 0 24px 70px rgba(20, 31, 52, .14);
+      --radius: 28px;
+    }
+
+    html[data-theme="dark"] {
+      --bg: #07111f;
+      --bg-soft: #101827;
+      --surface: rgba(14, 23, 38, .78);
+      --surface-strong: rgba(15, 23, 42, .96);
+      --text: #f8fafc;
+      --muted: #a1adbd;
+      --heading: #ffffff;
+      --line: rgba(255, 255, 255, .1);
+      --shadow: 0 24px 80px rgba(0, 0, 0, .42);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-family: Inter, system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 8% 4%, rgba(249, 115, 22, .2), transparent 24rem),
+        radial-gradient(circle at 86% 12%, rgba(37, 99, 235, .18), transparent 24rem),
+        linear-gradient(145deg, var(--bg), var(--bg-soft));
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px);
+      background-size: 52px 52px;
+      mask-image: linear-gradient(180deg, #000, transparent 84%);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .cw {
+      width: min(100% - 40px, 1240px);
+      margin-inline: auto;
+    }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      border-bottom: 1px solid var(--line);
+      background: rgba(244, 247, 251, .72);
+      backdrop-filter: blur(18px);
+    }
+
+    html[data-theme="dark"] .header {
+      background: rgba(7, 17, 31, .72);
+    }
+
+    .header-inner {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-width: 0;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      color: #111827;
+      background: linear-gradient(135deg, var(--orange), #fb923c);
+      box-shadow: 0 12px 26px rgba(249, 115, 22, .32);
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .brand-title {
+      display: block;
+      color: var(--heading);
+      font-size: 1.02rem;
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
+    .brand-sub {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .05);
+    }
+
+    .nav a {
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0 15px;
+      color: var(--muted);
+      font-size: .88rem;
+      font-weight: 800;
+      transition: .18s ease;
+    }
+
+    .nav a:hover,
+    .nav a.active {
+      color: var(--heading);
+      background: rgba(249, 115, 22, .12);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .back-btn,
+    .theme-toggle,
+    .menu-btn,
+    .close-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      border: 1px solid var(--line);
+      color: var(--heading);
+      background: var(--surface);
+      backdrop-filter: blur(18px);
+      transition: transform .18s ease, border-color .18s ease, color .18s ease;
+    }
+
+    .back-btn {
+      border-radius: 999px;
+      padding: 0 16px;
+      font-size: .86rem;
+      font-weight: 900;
+    }
+
+    .theme-toggle {
+      gap: 10px;
+      border-radius: 999px;
+      padding: 0 14px;
+      font-size: .85rem;
+      font-weight: 900;
+    }
+
+    .back-btn:hover,
+    .theme-toggle:hover,
+    .menu-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(249, 115, 22, .42);
+      color: var(--orange);
+    }
+
+    .switch {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, .28);
+    }
+
+    .knob {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--orange), #fb923c);
+      transition: .2s ease;
+    }
+
+    html[data-theme="dark"] .knob {
+      transform: translateX(18px);
+    }
+
+    .menu-btn {
+      display: none;
+      width: 44px;
+      border-radius: 14px;
+      font-size: 22px;
+    }
+
+    .mobile-menu {
+      position: fixed;
+      inset: 0 0 0 auto;
+      width: min(88vw, 340px);
+      z-index: 100;
+      padding: 22px;
+      transform: translateX(110%);
+      background: var(--surface-strong);
+      border-left: 1px solid var(--line);
+      box-shadow: -28px 0 80px rgba(0, 0, 0, .38);
+      transition: transform .24s ease;
+    }
+
+    .mobile-menu.open {
+      transform: translateX(0);
+    }
+
+    .mobile-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .close-btn {
+      width: 42px;
+      border-radius: 14px;
+      font-size: 20px;
+    }
+
+    .mobile-nav {
+      display: grid;
+      gap: 10px;
+      margin-top: 28px;
+    }
+
+    .mobile-nav a {
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 0 16px;
+      color: var(--heading);
+      background: rgba(255, 255, 255, .04);
+      font-size: .94rem;
+      font-weight: 850;
+    }
+
+    .main {
+      min-height: calc(100vh - 76px);
+      padding: clamp(28px, 5vw, 68px) 0;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(380px, .74fr);
+      gap: clamp(26px, 4vw, 56px);
+      align-items: center;
+    }
+
+    .intro {
+      min-width: 0;
+      padding-block: 18px;
+    }
+
+    .verify-logo {
+      width: 74px;
+      height: 74px;
+      display: grid;
+      place-items: center;
+      border-radius: 24px;
+      color: #111827;
+      background: linear-gradient(135deg, var(--orange), #fb923c);
+      box-shadow: 0 18px 38px rgba(249, 115, 22, .34);
+      font-size: 32px;
+      font-weight: 900;
+    }
+
+    .eyebrow {
+      width: fit-content;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 26px;
+      padding: 9px 13px;
+      border: 1px solid rgba(249, 115, 22, .26);
+      border-radius: 999px;
+      color: var(--orange);
+      background: rgba(249, 115, 22, .1);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .title {
+      max-width: 760px;
+      margin-top: 22px;
+      color: var(--heading);
+      font-size: clamp(2.85rem, 6vw, 5.9rem);
+      line-height: .95;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .desc {
+      max-width: 650px;
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: clamp(1rem, 1.35vw, 1.12rem);
+      line-height: 1.8;
+    }
+
+    .trust-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      max-width: 660px;
+      margin-top: 34px;
+    }
+
+    .trust-item {
+      min-height: 96px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, .055);
+    }
+
+    .trust-value {
+      color: var(--heading);
+      font-size: 1.18rem;
+      font-weight: 900;
+    }
+
+    .trust-label {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: .78rem;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    .verify-panel {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: clamp(22px, 3vw, 34px);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(22px);
+    }
+
+    .verify-panel::before {
+      content: "";
+      position: absolute;
+      inset: -120px -110px auto auto;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(249, 115, 22, .26), transparent 68%);
+      pointer-events: none;
+    }
+
+    .panel-content {
+      position: relative;
+    }
+
+    .panel-kicker {
+      color: var(--orange);
+      font-size: .78rem;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .panel-title {
+      margin-top: 12px;
+      color: var(--heading);
+      font-size: clamp(1.45rem, 2vw, 2rem);
+      line-height: 1.18;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .panel-copy {
+      margin-top: 10px;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: .95rem;
+    }
+
+    .certificate-input-wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 132px;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .select-wrap {
+      position: relative;
+    }
+
+    .select-wrap::after {
+      content: "⌄";
+      position: absolute;
+      right: 16px;
+      bottom: 18px;
+      color: var(--muted);
+      pointer-events: none;
+      font-weight: 900;
+    }
+
+    select,
+    #certificateSuffix {
+      width: 100%;
+      height: 56px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      outline: none;
+      color: var(--heading);
+      background: rgba(255, 255, 255, .06);
+      transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    select {
+      appearance: none;
+      padding: 0 42px 0 16px;
+      cursor: pointer;
+      font-size: .94rem;
+      font-weight: 850;
+    }
+
+    html[data-theme="light"] select option {
+      color: #07111f;
+    }
+
+    html[data-theme="dark"] select option {
+      color: #f8fafc;
+      background: #0f172a;
+    }
+
+    #certificateSuffix {
+      padding: 0 14px;
+      text-align: center;
+      font-size: 1.22rem;
+      font-weight: 900;
+      letter-spacing: .14em;
+    }
+
+    select:focus,
+    #certificateSuffix:focus {
+      border-color: rgba(249, 115, 22, .58);
+      box-shadow: 0 0 0 4px rgba(249, 115, 22, .14);
+      background: rgba(255, 255, 255, .1);
+    }
+
+    .verify-btn {
+      width: 100%;
+      height: 58px;
+      margin-top: 16px;
+      border-radius: 16px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+      box-shadow: 0 16px 32px rgba(249, 115, 22, .26);
+      font-size: .98rem;
+      font-weight: 900;
+      transition: transform .18s ease, opacity .18s ease, box-shadow .18s ease;
+    }
+
+    .verify-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 20px 40px rgba(249, 115, 22, .32);
+    }
+
+    .verify-btn:disabled {
+      opacity: .65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .loading {
+      display: none;
+      align-items: center;
+      gap: 11px;
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: .92rem;
+      font-weight: 750;
+    }
+
+    .loading.active {
+      display: flex;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 3px solid rgba(148, 163, 184, .26);
+      border-top-color: var(--orange);
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .result {
+      display: none;
+      margin-top: 18px;
+    }
+
+    .result.active {
+      display: block;
+    }
+
+    .result-card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 20px;
+      background: rgba(255, 255, 255, .05);
+    }
+
+    .result-card.success {
+      border-color: rgba(22, 163, 74, .28);
+      background: linear-gradient(180deg, rgba(22, 163, 74, .13), rgba(255, 255, 255, .04));
+    }
+
+    .result-card.failed {
+      border-color: rgba(220, 38, 38, .3);
+      background: linear-gradient(180deg, rgba(220, 38, 38, .13), rgba(255, 255, 255, .04));
+    }
+
+    .verify-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .verify-icon {
+      width: 48px;
+      height: 48px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      color: #fff;
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .verify-icon.success {
+      background: linear-gradient(135deg, #22c55e, var(--green));
+    }
+
+    .verify-icon.failed {
+      background: linear-gradient(135deg, #ef4444, var(--red));
+    }
+
+    .verify-title {
+      color: var(--heading);
+      font-size: 1.16rem;
+      line-height: 1.25;
+      font-weight: 900;
+    }
+
+    .verify-sub {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: .92rem;
+      line-height: 1.6;
+    }
+
+    .details {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .detail {
+      min-width: 0;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, .045);
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .value {
+      margin-top: 8px;
+      color: var(--heading);
+      font-size: .92rem;
+      font-weight: 850;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+
+    .footer {
+      margin-top: 18px;
+      color: var(--muted);
+      text-align: center;
+      font-size: .78rem;
+      line-height: 1.65;
+    }
+
+    @media (max-width: 1080px) {
+      .hero {
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+
+      .intro {
+        padding-block: 0;
+      }
+
+      .title,
+      .desc,
+      .trust-row {
+        max-width: none;
+      }
+
+      .verify-panel {
+        max-width: 760px;
+      }
+    }
+
+    @media (max-width: 920px) {
+      .nav,
+      .back-btn {
+        display: none;
+      }
+
+      .menu-btn {
+        display: inline-flex;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .cw {
+        width: min(100% - 28px, 1240px);
+      }
+
+      .header-inner {
+        min-height: 68px;
+      }
+
+      .logo {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        font-size: 16px;
+      }
+
+      .brand-title {
+        font-size: .96rem;
+      }
+
+      .brand-sub {
+        max-width: 176px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .theme-toggle {
+        width: 44px;
+        padding: 0;
+      }
+
+      #themeText {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+      }
+
+      .main {
+        min-height: calc(100vh - 68px);
+        padding: 24px 0 34px;
+      }
+
+      .hero {
+        gap: 22px;
+      }
+
+      .verify-logo {
+        width: 60px;
+        height: 60px;
+        border-radius: 20px;
+        font-size: 27px;
+      }
+
+      .eyebrow {
+        margin-top: 20px;
+        font-size: 10px;
+        white-space: normal;
+      }
+
+      .title {
+        margin-top: 18px;
+        font-size: clamp(2.35rem, 13vw, 3.55rem);
+        line-height: 1.02;
+      }
+
+      .desc {
+        margin-top: 16px;
+        font-size: .98rem;
+        line-height: 1.7;
+      }
+
+      .trust-row {
+        grid-template-columns: 1fr;
+        margin-top: 22px;
+      }
+
+      .trust-item {
+        min-height: auto;
+        padding: 15px 16px;
+      }
+
+      .certificate-input-wrap,
+      .details {
+        grid-template-columns: 1fr;
+      }
+
+      .verify-panel {
+        border-radius: 22px;
+        padding: 20px;
+      }
+
+      .panel-title {
+        font-size: 1.38rem;
+      }
+
+      select,
+      #certificateSuffix,
+      .verify-btn {
+        height: 54px;
+        border-radius: 15px;
+      }
+
+      .verify-top {
+        gap: 12px;
+      }
+
+      .verify-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .brand-sub {
+        display: none;
+      }
+
+      .header-actions {
+        gap: 8px;
+      }
+
+      .title {
+        font-size: 2.28rem;
+      }
+
+      .verify-panel {
+        padding: 18px;
+      }
+
+      .result-card {
+        padding: 16px;
+      }
+    }
+    .mobile-back-btn{
+
+  width:100%;
+
+  min-height:52px;
+
+  border:none;
+
+  border-radius:16px;
+
+  color:#fff;
+
+  font-size:.95rem;
+
+  font-weight:800;
+
+  background:
+  linear-gradient(
+    135deg,
+    #f97316,
+    #ea580c
+  );
+
+  box-shadow:
+  0 12px 24px
+  rgba(249,115,22,.25);
+
+}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="cw header-inner">
+      <a href="/app/#settings" class="brand">
+        <div class="logo">AF</div>
+        <div>
+          <span class="brand-title">AcademeForge</span>
+          <span class="brand-sub">Certificate Verification</span>
+        </div>
+      </a>
+      
+      <div class="header-actions">
+       <button
+  type="button"
+  class="back-btn"
+  onclick="sessionStorage.setItem('af_return_section','settings'); window.location.href='/app/#settings';">
+
+  ← Back
+
+</button>
+        <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme">
+          <span id="themeText">Light</span>
+          <span class="switch" aria-hidden="true"><span class="knob"></span></span>
+        </button>
+        <button id="menuBtn" class="menu-btn" type="button" aria-label="Open menu">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <aside id="mobileMenu" class="mobile-menu" aria-label="Mobile navigation" aria-hidden="true">
+    <div class="mobile-top">
+      <div class="logo">AF</div>
+      <button id="closeBtn" class="close-btn" type="button" aria-label="Close menu">✕</button>
+    </div>
+
+   <nav class="mobile-nav">
+
+  <button
+    type="button"
+    class="mobile-back-btn"
+    onclick="sessionStorage.setItem('af_return_section','settings');window.location.href='/app/#settings';">
+
+    ← Back To Settings
+
+  </button>
+
+</nav>
+  </aside>
+
+  <main class="main">
+    <div class="cw hero">
+     
+<section class="verify-panel" aria-label="Certificate verification form">
+        <div class="panel-content">
+          <div class="panel-kicker">Credential lookup</div>
+          <h2 class="panel-title">Enter certificate details</h2>
+          <p class="panel-copy">
+            Choose the certificate year prefix and type the four-digit certificate number.
+          </p>
+
+          <div class="certificate-input-wrap">
+            <label class="select-wrap">
+              <span class="field-label">Certificate prefix</span>
+              <select id="certificatePrefix">
+                <option value="AF-CERT-2024-">AF-CERT-2024-</option>
+                <option value="AF-CERT-2025-">AF-CERT-2025-</option>
+                <option value="AF-CERT-2026-" selected>AF-CERT-2026-</option>
+                <option value="AF-CERT-2027-">AF-CERT-2027-</option>
+                <option value="AF-CERT-2028-">AF-CERT-2028-</option>
+                <option value="AF-CERT-2029-">AF-CERT-2029-</option>
+              </select>
+            </label>
+
+            <label>
+              <span class="field-label">Number</span>
+              <input
+                id="certificateSuffix"
+                type="text"
+                placeholder="0001"
+                maxlength="4"
+                inputmode="numeric"
+                autocomplete="off"
+                spellcheck="false"
+              />
+            </label>
+          </div>
+
+          <button id="verifyBtn" class="verify-btn" type="button">Verify Certificate</button>
+
+          <div id="loading" class="loading">
+            <div class="spinner" aria-hidden="true"></div>
+            <span>Verifying certificate...</span>
+          </div>
+
+          <div id="result" class="result"></div>
+
+          <div class="footer">
+            © 2026 AcademeForge
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const API_URL = "https://afooyyydhlwngzssgqih.supabase.co/functions/v1/verify-af-certificate";
+
+    const html = document.documentElement;
+    const themeToggle = document.getElementById("themeToggle");
+    const themeText = document.getElementById("themeText");
+    const menuBtn = document.getElementById("menuBtn");
+    const closeBtn = document.getElementById("closeBtn");
+    const mobileMenu = document.getElementById("mobileMenu");
+    const certificatePrefix = document.getElementById("certificatePrefix");
+    const certificateSuffix = document.getElementById("certificateSuffix");
+    const verifyBtn = document.getElementById("verifyBtn");
+    const result = document.getElementById("result");
+    const loading = document.getElementById("loading");
+
+    let isLoading = false;
+
+    const savedTheme = localStorage.getItem("af-theme");
+
+    if (savedTheme) {
+      html.setAttribute("data-theme", savedTheme);
+    }
+
+    updateThemeText();
+
+    themeToggle.addEventListener("click", () => {
+      const current = html.getAttribute("data-theme");
+      const next = current === "dark" ? "light" : "dark";
+
+      html.setAttribute("data-theme", next);
+      localStorage.setItem("af-theme", next);
+      updateThemeText();
+    });
+
+    function updateThemeText() {
+      const isDark = html.getAttribute("data-theme") === "dark";
+      themeText.textContent = isDark ? "Light" : "Dark";
+    }
+
+    menuBtn.addEventListener("click", () => {
+      mobileMenu.classList.add("open");
+      mobileMenu.setAttribute("aria-hidden", "false");
+    });
+
+    closeBtn.addEventListener("click", closeMobileMenu);
+
+    document.addEventListener("click", event => {
+      const clickedInside = mobileMenu.contains(event.target) || menuBtn.contains(event.target);
+
+      if (!clickedInside && mobileMenu.classList.contains("open")) {
+        closeMobileMenu();
+      }
+    });
+
+    window.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        closeMobileMenu();
+      }
+    });
+
+    function closeMobileMenu() {
+      mobileMenu.classList.remove("open");
+      mobileMenu.setAttribute("aria-hidden", "true");
+    }
+
+    async function verifyCertificate() {
+      if (isLoading) {
+        return;
+      }
+
+      const suffix = certificateSuffix.value.replace(/\D/g, "").trim();
+
+      if (!suffix) {
+        showFailed("Please enter certificate number.");
+        return;
+      }
+
+      const certificateNumber = (certificatePrefix.value + suffix.padStart(4, "0")).toUpperCase();
+
+      try {
+        isLoading = true;
+        verifyBtn.disabled = true;
+        loading.classList.add("active");
+        result.classList.remove("active");
+
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            certificate_number: certificateNumber
+          })
+        });
+
+        let data = null;
+
+        try {
+          data = await response.json();
+        } catch {
+          throw new Error("Invalid server response");
+        }
+
+        if (response.ok && data?.found && data?.certificate) {
+          showSuccess(data.certificate);
+        } else {
+          showFailed(data?.message || "Certificate not found");
+        }
+      } catch (error) {
+        console.error(error);
+        showFailed(error?.message || "Verification failed");
+      } finally {
+        isLoading = false;
+        verifyBtn.disabled = false;
+        loading.classList.remove("active");
+      }
+    }
+
+    function showSuccess(certificate) {
+      result.innerHTML = `
+        <div class="result-card success">
+          <div class="verify-top">
+            <div class="verify-icon success">✓</div>
+            <div>
+              <div class="verify-title">Certificate Verified</div>
+              <div class="verify-sub">This certificate is officially issued and verified by AcademeForge.</div>
+            </div>
+          </div>
+
+          <div class="details">
+            ${detailTemplate("Certificate ID", certificate.certificate_id)}
+            ${detailTemplate("Full Name", certificate.full_name)}
+            ${detailTemplate("Role", certificate.role)}
+            ${detailTemplate("Certificate Type", certificate.certificate_type)}
+            ${detailTemplate("Issue Date", certificate.issue_date)}
+            ${detailTemplate("Work Type", certificate.work_type)}
+            ${certificate.start_date ? detailTemplate("Start Date", certificate.start_date) : ""}
+            ${certificate.end_date ? detailTemplate("End Date", certificate.end_date) : ""}
+          </div>
+        </div>
+      `;
+
+      result.classList.add("active");
+      result.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest"
+      });
+    }
+
+    function showFailed(message) {
+      result.innerHTML = `
+        <div class="result-card failed">
+          <div class="verify-top">
+            <div class="verify-icon failed">✕</div>
+            <div>
+              <div class="verify-title">Certificate Not Found</div>
+              <div class="verify-sub">${escapeHtml(message)}</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      result.classList.add("active");
+    }
+
+    function detailTemplate(label, value) {
+      return `
+        <div class="detail">
+          <div class="label">${escapeHtml(label)}</div>
+          <div class="value">${escapeHtml(value)}</div>
+        </div>
+      `;
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    certificateSuffix.addEventListener("input", () => {
+      certificateSuffix.value = certificateSuffix.value.replace(/\D/g, "");
+    });
+
+    verifyBtn.addEventListener("click", verifyCertificate);
+
+    certificateSuffix.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        verifyCertificate();
+      }
+    });
+  </script>
+</body>
+</html>
