@@ -893,14 +893,10 @@
       </a>
       
       <div class="header-actions">
-       <button
-  type="button"
-  class="back-btn"
-  onclick="sessionStorage.setItem('af_return_section','settings'); window.location.href='/app/#settings';">
+       <button type="button" class="back-btn" onclick="history.back()" type="button" aria-label="Back">← Back</button>
 
-  ← Back
-
-</button>
+          
+        
         <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme">
           <span id="themeText">Light</span>
           <span class="switch" aria-hidden="true"><span class="knob"></span></span>
