@@ -1,1179 +1,900 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AcademeForge Certificate Verification</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg: #f4f7fb;
-      --bg-soft: #e9eef6;
-      --surface: rgba(255, 255, 255, .82);
-      --surface-strong: rgba(255, 255, 255, .96);
-      --text: #172033;
-      --muted: #66748a;
-      --heading: #07111f;
-      --line: rgba(15, 23, 42, .1);
-      --orange: #f97316;
-      --orange-dark: #ea580c;
-      --blue: #2563eb;
-      --green: #16a34a;
-      --red: #dc2626;
-      --shadow: 0 24px 70px rgba(20, 31, 52, .14);
-      --radius: 28px;
-    }
-
-    html[data-theme="dark"] {
-      --bg: #07111f;
-      --bg-soft: #101827;
-      --surface: rgba(14, 23, 38, .78);
-      --surface-strong: rgba(15, 23, 42, .96);
-      --text: #f8fafc;
-      --muted: #a1adbd;
-      --heading: #ffffff;
-      --line: rgba(255, 255, 255, .1);
-      --shadow: 0 24px 80px rgba(0, 0, 0, .42);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      min-height: 100vh;
-      overflow-x: hidden;
-      font-family: Inter, system-ui, sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at 8% 4%, rgba(249, 115, 22, .2), transparent 24rem),
-        radial-gradient(circle at 86% 12%, rgba(37, 99, 235, .18), transparent 24rem),
-        linear-gradient(145deg, var(--bg), var(--bg-soft));
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      pointer-events: none;
-      background-image:
-        linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px);
-      background-size: 52px 52px;
-      mask-image: linear-gradient(180deg, #000, transparent 84%);
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    button,
-    input,
-    select {
-      font: inherit;
-    }
-
-    button {
-      border: 0;
-      cursor: pointer;
-    }
-
-    .cw {
-      width: min(100% - 40px, 1240px);
-      margin-inline: auto;
-    }
-
-    .header {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      border-bottom: 1px solid var(--line);
-      background: rgba(244, 247, 251, .72);
-      backdrop-filter: blur(18px);
-    }
-
-    html[data-theme="dark"] .header {
-      background: rgba(7, 17, 31, .72);
-    }
-
-    .header-inner {
-      min-height: 76px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 13px;
-      min-width: 0;
-    }
-
-    .logo {
-      width: 48px;
-      height: 48px;
-      flex: 0 0 auto;
-      display: grid;
-      place-items: center;
-      border-radius: 16px;
-      color: #111827;
-      background: linear-gradient(135deg, var(--orange), #fb923c);
-      box-shadow: 0 12px 26px rgba(249, 115, 22, .32);
-      font-size: 18px;
-      font-weight: 900;
-    }
-
-    .brand-title {
-      display: block;
-      color: var(--heading);
-      font-size: 1.02rem;
-      font-weight: 900;
-      line-height: 1.1;
-    }
-
-    .brand-sub {
-      display: block;
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-
-    .nav {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: rgba(255, 255, 255, .05);
-    }
-
-    .nav a {
-      min-height: 40px;
-      display: flex;
-      align-items: center;
-      border-radius: 999px;
-      padding: 0 15px;
-      color: var(--muted);
-      font-size: .88rem;
-      font-weight: 800;
-      transition: .18s ease;
-    }
-
-    .nav a:hover,
-    .nav a.active {
-      color: var(--heading);
-      background: rgba(249, 115, 22, .12);
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .back-btn,
-    .theme-toggle,
-    .menu-btn,
-    .close-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 44px;
-      border: 1px solid var(--line);
-      color: var(--heading);
-      background: var(--surface);
-      backdrop-filter: blur(18px);
-      transition: transform .18s ease, border-color .18s ease, color .18s ease;
-    }
-
-    .back-btn {
-      border-radius: 999px;
-      padding: 0 16px;
-      font-size: .86rem;
-      font-weight: 900;
-    }
-
-    .theme-toggle {
-      gap: 10px;
-      border-radius: 999px;
-      padding: 0 14px;
-      font-size: .85rem;
-      font-weight: 900;
-    }
-
-    .back-btn:hover,
-    .theme-toggle:hover,
-    .menu-btn:hover {
-      transform: translateY(-1px);
-      border-color: rgba(249, 115, 22, .42);
-      color: var(--orange);
-    }
-
-    .switch {
-      position: relative;
-      width: 40px;
-      height: 22px;
-      border-radius: 999px;
-      background: rgba(148, 163, 184, .28);
-    }
-
-    .knob {
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--orange), #fb923c);
-      transition: .2s ease;
-    }
-
-    html[data-theme="dark"] .knob {
-      transform: translateX(18px);
-    }
-
-    .menu-btn {
-      display: none;
-      width: 44px;
-      border-radius: 14px;
-      font-size: 22px;
-    }
-
-    .mobile-menu {
-      position: fixed;
-      inset: 0 0 0 auto;
-      width: min(88vw, 340px);
-      z-index: 100;
-      padding: 22px;
-      transform: translateX(110%);
-      background: var(--surface-strong);
-      border-left: 1px solid var(--line);
-      box-shadow: -28px 0 80px rgba(0, 0, 0, .38);
-      transition: transform .24s ease;
-    }
-
-    .mobile-menu.open {
-      transform: translateX(0);
-    }
-
-    .mobile-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .close-btn {
-      width: 42px;
-      border-radius: 14px;
-      font-size: 20px;
-    }
-
-    .mobile-nav {
-      display: grid;
-      gap: 10px;
-      margin-top: 28px;
-    }
-
-    .mobile-nav a {
-      min-height: 52px;
-      display: flex;
-      align-items: center;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 0 16px;
-      color: var(--heading);
-      background: rgba(255, 255, 255, .04);
-      font-size: .94rem;
-      font-weight: 850;
-    }
-
-    .main {
-      min-height: calc(100vh - 76px);
-      padding: clamp(28px, 5vw, 68px) 0;
-    }
-
-    .hero {
-      display: grid;
-      grid-template-columns: minmax(0, 1.02fr) minmax(380px, .74fr);
-      gap: clamp(26px, 4vw, 56px);
-      align-items: center;
-    }
-
-    .intro {
-      min-width: 0;
-      padding-block: 18px;
-    }
-
-    .verify-logo {
-      width: 74px;
-      height: 74px;
-      display: grid;
-      place-items: center;
-      border-radius: 24px;
-      color: #111827;
-      background: linear-gradient(135deg, var(--orange), #fb923c);
-      box-shadow: 0 18px 38px rgba(249, 115, 22, .34);
-      font-size: 32px;
-      font-weight: 900;
-    }
-
-    .eyebrow {
-      width: fit-content;
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      margin-top: 26px;
-      padding: 9px 13px;
-      border: 1px solid rgba(249, 115, 22, .26);
-      border-radius: 999px;
-      color: var(--orange);
-      background: rgba(249, 115, 22, .1);
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: .13em;
-      text-transform: uppercase;
-    }
-
-    .title {
-      max-width: 760px;
-      margin-top: 22px;
-      color: var(--heading);
-      font-size: clamp(2.85rem, 6vw, 5.9rem);
-      line-height: .95;
-      font-weight: 900;
-      letter-spacing: 0;
-    }
-
-    .desc {
-      max-width: 650px;
-      margin-top: 20px;
-      color: var(--muted);
-      font-size: clamp(1rem, 1.35vw, 1.12rem);
-      line-height: 1.8;
-    }
-
-    .trust-row {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-      max-width: 660px;
-      margin-top: 34px;
-    }
-
-    .trust-item {
-      min-height: 96px;
-      padding: 18px;
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      background: rgba(255, 255, 255, .055);
-    }
-
-    .trust-value {
-      color: var(--heading);
-      font-size: 1.18rem;
-      font-weight: 900;
-    }
-
-    .trust-label {
-      margin-top: 8px;
-      color: var(--muted);
-      font-size: .78rem;
-      line-height: 1.5;
-      font-weight: 700;
-    }
-
-    .verify-panel {
-      position: relative;
-      overflow: hidden;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: clamp(22px, 3vw, 34px);
-      background: var(--surface);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(22px);
-    }
-
-    .verify-panel::before {
-      content: "";
-      position: absolute;
-      inset: -120px -110px auto auto;
-      width: 240px;
-      height: 240px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(249, 115, 22, .26), transparent 68%);
-      pointer-events: none;
-    }
-
-    .panel-content {
-      position: relative;
-    }
-
-    .panel-kicker {
-      color: var(--orange);
-      font-size: .78rem;
-      font-weight: 900;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-    }
-
-    .panel-title {
-      margin-top: 12px;
-      color: var(--heading);
-      font-size: clamp(1.45rem, 2vw, 2rem);
-      line-height: 1.18;
-      font-weight: 900;
-      letter-spacing: 0;
-    }
-
-    .panel-copy {
-      margin-top: 10px;
-      color: var(--muted);
-      line-height: 1.65;
-      font-size: .95rem;
-    }
-
-    .certificate-input-wrap {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 132px;
-      gap: 12px;
-      margin-top: 24px;
-    }
-
-    .field-label {
-      display: block;
-      margin-bottom: 8px;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-    }
-
-    .select-wrap {
-      position: relative;
-    }
-
-    .select-wrap::after {
-      content: "⌄";
-      position: absolute;
-      right: 16px;
-      bottom: 18px;
-      color: var(--muted);
-      pointer-events: none;
-      font-weight: 900;
-    }
-
-    select,
-    #certificateSuffix {
-      width: 100%;
-      height: 56px;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      outline: none;
-      color: var(--heading);
-      background: rgba(255, 255, 255, .06);
-      transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
-    }
-
-    select {
-      appearance: none;
-      padding: 0 42px 0 16px;
-      cursor: pointer;
-      font-size: .94rem;
-      font-weight: 850;
-    }
-
-    html[data-theme="light"] select option {
-      color: #07111f;
-    }
-
-    html[data-theme="dark"] select option {
-      color: #f8fafc;
-      background: #0f172a;
-    }
-
-    #certificateSuffix {
-      padding: 0 14px;
-      text-align: center;
-      font-size: 1.22rem;
-      font-weight: 900;
-      letter-spacing: .14em;
-    }
-
-    select:focus,
-    #certificateSuffix:focus {
-      border-color: rgba(249, 115, 22, .58);
-      box-shadow: 0 0 0 4px rgba(249, 115, 22, .14);
-      background: rgba(255, 255, 255, .1);
-    }
-
-    .verify-btn {
-      width: 100%;
-      height: 58px;
-      margin-top: 16px;
-      border-radius: 16px;
-      color: #fff;
-      background: linear-gradient(135deg, var(--orange), var(--orange-dark));
-      box-shadow: 0 16px 32px rgba(249, 115, 22, .26);
-      font-size: .98rem;
-      font-weight: 900;
-      transition: transform .18s ease, opacity .18s ease, box-shadow .18s ease;
-    }
-
-    .verify-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 20px 40px rgba(249, 115, 22, .32);
-    }
-
-    .verify-btn:disabled {
-      opacity: .65;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .loading {
-      display: none;
-      align-items: center;
-      gap: 11px;
-      margin-top: 18px;
-      color: var(--muted);
-      font-size: .92rem;
-      font-weight: 750;
-    }
-
-    .loading.active {
-      display: flex;
-    }
-
-    .spinner {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      border: 3px solid rgba(148, 163, 184, .26);
-      border-top-color: var(--orange);
-      animation: spin .8s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    .result {
-      display: none;
-      margin-top: 18px;
-    }
-
-    .result.active {
-      display: block;
-    }
-
-    .result-card {
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      padding: 20px;
-      background: rgba(255, 255, 255, .05);
-    }
-
-    .result-card.success {
-      border-color: rgba(22, 163, 74, .28);
-      background: linear-gradient(180deg, rgba(22, 163, 74, .13), rgba(255, 255, 255, .04));
-    }
-
-    .result-card.failed {
-      border-color: rgba(220, 38, 38, .3);
-      background: linear-gradient(180deg, rgba(220, 38, 38, .13), rgba(255, 255, 255, .04));
-    }
-
-    .verify-top {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-    }
-
-    .verify-icon {
-      width: 48px;
-      height: 48px;
-      flex: 0 0 auto;
-      display: grid;
-      place-items: center;
-      border-radius: 16px;
-      color: #fff;
-      font-size: 22px;
-      font-weight: 900;
-    }
-
-    .verify-icon.success {
-      background: linear-gradient(135deg, #22c55e, var(--green));
-    }
-
-    .verify-icon.failed {
-      background: linear-gradient(135deg, #ef4444, var(--red));
-    }
-
-    .verify-title {
-      color: var(--heading);
-      font-size: 1.16rem;
-      line-height: 1.25;
-      font-weight: 900;
-    }
-
-    .verify-sub {
-      margin-top: 6px;
-      color: var(--muted);
-      font-size: .92rem;
-      line-height: 1.6;
-    }
-
-    .details {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      margin-top: 18px;
-    }
-
-    .detail {
-      min-width: 0;
-      padding: 14px;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: rgba(255, 255, 255, .045);
-    }
-
-    .label {
-      color: var(--muted);
-      font-size: 10px;
-      font-weight: 900;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-    }
-
-    .value {
-      margin-top: 8px;
-      color: var(--heading);
-      font-size: .92rem;
-      font-weight: 850;
-      line-height: 1.45;
-      overflow-wrap: anywhere;
-    }
-
-    .footer {
-      margin-top: 18px;
-      color: var(--muted);
-      text-align: center;
-      font-size: .78rem;
-      line-height: 1.65;
-    }
-
-    @media (max-width: 1080px) {
-      .hero {
-        grid-template-columns: 1fr;
-        align-items: start;
-      }
-
-      .intro {
-        padding-block: 0;
-      }
-
-      .title,
-      .desc,
-      .trust-row {
-        max-width: none;
-      }
-
-      .verify-panel {
-        max-width: 760px;
-      }
-    }
-
-    @media (max-width: 920px) {
-      .nav,
-      .back-btn {
-        display: none;
-      }
-
-      .menu-btn {
-        display: inline-flex;
-      }
-    }
-
-    @media (max-width: 680px) {
-      .cw {
-        width: min(100% - 28px, 1240px);
-      }
-
-      .header-inner {
-        min-height: 68px;
-      }
-
-      .logo {
-        width: 42px;
-        height: 42px;
-        border-radius: 14px;
-        font-size: 16px;
-      }
-
-      .brand-title {
-        font-size: .96rem;
-      }
-
-      .brand-sub {
-        max-width: 176px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .theme-toggle {
-        width: 44px;
-        padding: 0;
-      }
-
-      #themeText {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-      }
-
-      .main {
-        min-height: calc(100vh - 68px);
-        padding: 24px 0 34px;
-      }
-
-      .hero {
-        gap: 22px;
-      }
-
-      .verify-logo {
-        width: 60px;
-        height: 60px;
-        border-radius: 20px;
-        font-size: 27px;
-      }
-
-      .eyebrow {
-        margin-top: 20px;
-        font-size: 10px;
-        white-space: normal;
-      }
-
-      .title {
-        margin-top: 18px;
-        font-size: clamp(2.35rem, 13vw, 3.55rem);
-        line-height: 1.02;
-      }
-
-      .desc {
-        margin-top: 16px;
-        font-size: .98rem;
-        line-height: 1.7;
-      }
-
-      .trust-row {
-        grid-template-columns: 1fr;
-        margin-top: 22px;
-      }
-
-      .trust-item {
-        min-height: auto;
-        padding: 15px 16px;
-      }
-
-      .certificate-input-wrap,
-      .details {
-        grid-template-columns: 1fr;
-      }
-
-      .verify-panel {
-        border-radius: 22px;
-        padding: 20px;
-      }
-
-      .panel-title {
-        font-size: 1.38rem;
-      }
-
-      select,
-      #certificateSuffix,
-      .verify-btn {
-        height: 54px;
-        border-radius: 15px;
-      }
-
-      .verify-top {
-        gap: 12px;
-      }
-
-      .verify-icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 14px;
-      }
-    }
-
-    @media (max-width: 420px) {
-      .brand-sub {
-        display: none;
-      }
-
-      .header-actions {
-        gap: 8px;
-      }
-
-      .title {
-        font-size: 2.28rem;
-      }
-
-      .verify-panel {
-        padding: 18px;
-      }
-
-      .result-card {
-        padding: 16px;
-      }
-    }
-    .mobile-back-btn{
-
-  width:100%;
-
-  min-height:52px;
-
-  border:none;
-
-  border-radius:16px;
-
-  color:#fff;
-
-  font-size:.95rem;
-
-  font-weight:800;
-
-  background:
-  linear-gradient(
-    135deg,
-    #f97316,
-    #ea580c
-  );
-
-  box-shadow:
-  0 12px 24px
-  rgba(249,115,22,.25);
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AcademeForge — Certificate Verification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS — INHERITED FROM AF TEST PORTAL
+═══════════════════════════════════════════ */
+:root {
+  color-scheme: dark;
+  --bg-base:    #080B14;
+  --bg-1:       #0D1120;
+  --bg-2:       #111827;
+  --bg-3:       #161E30;
+  --bg-4:       #1C2540;
+  --surf-1:     #141926;
+  --surf-2:     #1A2235;
+  --surf-3:     #202B42;
+  --surf-4:     #27334E;
+  --surf-glass: rgba(20, 25, 38, 0.72);
+  --bdr-1:      rgba(255,255,255,.055);
+  --bdr-2:      rgba(255,255,255,.10);
+  --bdr-3:      rgba(255,255,255,.16);
+  --bdr-accent: rgba(108,99,255,.35);
+  --pri:        #6C63FF;
+  --pri-d:      #5751E5;
+  --pri-l:      #8B85FF;
+  --pri-bg:     rgba(108,99,255,.12);
+  --pri-bg-2:   rgba(108,99,255,.22);
+  --pri-glow:   rgba(108,99,255,.45);
+  --sec:        #3D8EF8;
+  --sec-bg:     rgba(61,142,248,.12);
+  --suc:        #10D98A;
+  --suc-d:      #0ABF7A;
+  --suc-bg:     rgba(16,217,138,.11);
+  --suc-bg-2:   rgba(16,217,138,.20);
+  --suc-glow:   rgba(16,217,138,.4);
+  --wrn:        #F5A623;
+  --wrn-bg:     rgba(245,166,35,.11);
+  --wrn-bg-2:   rgba(245,166,35,.20);
+  --dan:        #FF5F7E;
+  --dan-bg:     rgba(255,95,126,.11);
+  --dan-bg-2:   rgba(255,95,126,.20);
+  --gld:        #FFD447;
+  --gld-bg:     rgba(255,212,71,.12);
+  --t-1:        #F0F2FF;
+  --t-2:        #A8B2CC;
+  --t-3:        #5C6882;
+  --t-4:        #2E3650;
+  --t-inv:      #080B14;
+  --hdr-h:      60px;
+  --ff:  'Plus Jakarta Sans', sans-serif;
+  --ff-d:'Syne', sans-serif;
+  --ff-m:'JetBrains Mono', monospace;
+  --sh-xs:  0 1px 3px rgba(0,0,0,.3);
+  --sh-sm:  0 2px 10px rgba(0,0,0,.35);
+  --sh-md:  0 6px 24px rgba(0,0,0,.45);
+  --sh-lg:  0 16px 48px rgba(0,0,0,.55);
+  --sh-pri: 0 8px 32px rgba(108,99,255,.4);
+  --sh-suc: 0 8px 28px rgba(16,217,138,.35);
+  --sh-glow:0 0 40px rgba(108,99,255,.25);
+  --grad-pri:  linear-gradient(135deg, #6C63FF 0%, #A78BFA 100%);
+  --grad-hero: linear-gradient(145deg, #1A0F3C 0%, #0D1A3A 40%, #0A1628 100%);
+  --grad-suc:  linear-gradient(135deg, #10D98A 0%, #05B0A0 100%);
+  --grad-amber:linear-gradient(135deg, #F5A623 0%, #F97316 100%);
+  --grad-card: linear-gradient(145deg, rgba(255,255,255,.04) 0%, rgba(255,255,255,.01) 100%);
+  --grad-mesh: radial-gradient(ellipse at 20% 50%, rgba(108,99,255,.15) 0%, transparent 60%),
+               radial-gradient(ellipse at 80% 20%, rgba(61,142,248,.1) 0%, transparent 60%),
+               radial-gradient(ellipse at 60% 80%, rgba(16,217,138,.08) 0%, transparent 50%);
+  --ease-spring: cubic-bezier(.34,1.56,.64,1);
+  --ease-out:    cubic-bezier(.22,1,.36,1);
+  --ease-in-out: cubic-bezier(.65,0,.35,1);
+  --r-xs:6px;--r-sm:10px;--r-md:16px;--r-lg:20px;--r-xl:28px;--r-2xl:36px;--r-full:9999px;
 }
-  </style>
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg-base:#F0F2FF;--bg-1:#EAECF8;--bg-2:#E3E6F5;--bg-3:#DDE0F0;--bg-4:#D5D9EC;
+  --surf-1:#FFFFFF;--surf-2:#F5F6FE;--surf-3:#EDEFFE;--surf-4:#E5E8FC;
+  --surf-glass:rgba(255,255,255,.82);
+  --bdr-1:rgba(0,0,0,.06);--bdr-2:rgba(0,0,0,.10);--bdr-3:rgba(0,0,0,.16);
+  --bdr-accent:rgba(108,99,255,.25);
+  --t-1:#0D0F1A;--t-2:#3A4060;--t-3:#7880A0;--t-4:#BBC1D8;
+  --sh-xs:0 1px 3px rgba(0,0,0,.08);--sh-sm:0 2px 10px rgba(0,0,0,.10);
+  --sh-md:0 6px 24px rgba(0,0,0,.12);--sh-lg:0 16px 48px rgba(0,0,0,.15);
+  --grad-hero:linear-gradient(145deg, #2D1B8A 0%, #1A2B6E 40%, #0F2057 100%);
+  --grad-mesh:radial-gradient(ellipse at 20% 50%, rgba(108,99,255,.10) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 20%, rgba(61,142,248,.07) 0%, transparent 60%),
+              radial-gradient(ellipse at 60% 80%, rgba(16,217,138,.05) 0%, transparent 50%);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme:light;
+    --bg-base:#F0F2FF;--bg-1:#EAECF8;--bg-2:#E3E6F5;--bg-3:#DDE0F0;--bg-4:#D5D9EC;
+    --surf-1:#FFFFFF;--surf-2:#F5F6FE;--surf-3:#EDEFFE;--surf-4:#E5E8FC;
+    --surf-glass:rgba(255,255,255,.82);
+    --bdr-1:rgba(0,0,0,.06);--bdr-2:rgba(0,0,0,.10);--bdr-3:rgba(0,0,0,.16);
+    --bdr-accent:rgba(108,99,255,.25);
+    --t-1:#0D0F1A;--t-2:#3A4060;--t-3:#7880A0;--t-4:#BBC1D8;
+    --sh-xs:0 1px 3px rgba(0,0,0,.08);--sh-sm:0 2px 10px rgba(0,0,0,.10);
+    --sh-md:0 6px 24px rgba(0,0,0,.12);--sh-lg:0 16px 48px rgba(0,0,0,.15);
+    --grad-hero:linear-gradient(145deg, #2D1B8A 0%, #1A2B6E 40%, #0F2057 100%);
+    --grad-mesh:radial-gradient(ellipse at 20% 50%, rgba(108,99,255,.10) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(61,142,248,.07) 0%, transparent 60%),
+                radial-gradient(ellipse at 60% 80%, rgba(16,217,138,.05) 0%, transparent 50%);
+  }
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{-webkit-tap-highlight-color:transparent;scroll-behavior:smooth;}
+body{
+  font-family:var(--ff);background:var(--bg-base);color:var(--t-1);
+  min-height:100dvh;overflow-x:hidden;font-size:15px;line-height:1.5;
+  display:flex;justify-content:center;
+  transition:background .3s,color .3s;
+}
+button{cursor:pointer;border:none;outline:none;font:inherit;background:none;}
+a{text-decoration:none;color:inherit;}
+input{font:inherit;outline:none;}
+::-webkit-scrollbar{width:2px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bdr-3);border-radius:99px;}
+
+/* APP SHELL — always mobile width */
+.app {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--bg-base);
+}
+
+/* ── HEADER ── */
+.header{
+  position:sticky;top:0;z-index:300;
+  width:100%;height:var(--hdr-h);
+  background:var(--surf-glass);backdrop-filter:blur(24px) saturate(1.4);
+  -webkit-backdrop-filter:blur(24px) saturate(1.4);
+  border-bottom:1px solid var(--bdr-1);
+}
+.header-inner{height:100%;padding:0 18px;display:flex;align-items:center;justify-content:space-between;}
+.logo-group{display:flex;align-items:center;gap:10px;}
+.logo-mark{
+  width:36px;height:36px;border-radius:11px;background:var(--grad-pri);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--ff-d);font-size:.75rem;font-weight:800;color:#fff;
+  flex-shrink:0;overflow:hidden;position:relative;
+  box-shadow:0 4px 16px rgba(108,99,255,.5);
+}
+.logo-mark img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+.logo-text .name{font-family:var(--ff-d);font-size:.92rem;font-weight:700;color:var(--t-1);line-height:1;letter-spacing:-.01em;}
+.logo-text .sub{font-size:.56rem;font-weight:600;color:var(--t-3);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;}
+.hdr-right{display:flex;gap:6px;align-items:center;}
+.icon-btn{
+  width:36px;height:36px;border-radius:10px;background:var(--surf-3);color:var(--t-2);
+  font-size:.9rem;display:flex;align-items:center;justify-content:center;
+  transition:all .2s var(--ease-spring);border:1px solid var(--bdr-1);
+}
+.icon-btn:hover{background:var(--surf-4);border-color:var(--bdr-2);}
+.icon-btn:active{transform:scale(.88);}
+
+/* ── MAIN ── */
+.main{
+  flex:1;padding:16px 16px 40px;
+  display:flex;flex-direction:column;gap:14px;
+}
+
+/* ── HERO BANNER ── */
+.hero{
+  border-radius:var(--r-xl);
+  background:var(--grad-hero);
+  padding:26px 20px 22px;
+  position:relative;overflow:hidden;
+  border:1px solid rgba(108,99,255,.2);
+  box-shadow:0 20px 60px rgba(0,0,0,.5), var(--sh-glow);
+}
+.hero::before{content:'';position:absolute;inset:0;background:var(--grad-mesh);pointer-events:none;}
+.hero::after{
+  content:'';position:absolute;right:-60px;top:-60px;
+  width:220px;height:220px;
+  background:radial-gradient(circle,rgba(108,99,255,.25) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-dots{position:absolute;bottom:16px;right:16px;display:grid;grid-template-columns:repeat(4,6px);gap:4px;opacity:.2;}
+.hero-dots span{display:block;width:6px;height:6px;border-radius:50%;background:#fff;}
+.hero-dots span:nth-child(even){opacity:.5;}
+.hero-eyebrow{font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:7px;}
+.hero-title{font-family:var(--ff-d);font-size:1.45rem;font-weight:700;color:#fff;line-height:1.1;letter-spacing:-.02em;margin-bottom:5px;}
+.hero-sub{font-size:.72rem;color:rgba(255,255,255,.4);line-height:1.6;position:relative;z-index:1;}
+.shield-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  margin-top:14px;padding:6px 14px;
+  background:rgba(16,217,138,.15);
+  border:1px solid rgba(16,217,138,.25);
+  border-radius:var(--r-full);position:relative;z-index:1;
+  font-size:.6rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--suc);
+}
+.shield-dot{width:6px;height:6px;border-radius:50%;background:var(--suc);animation:pulse-dot 1.4s ease-in-out infinite;}
+@keyframes pulse-dot{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(16,217,138,.5)}50%{opacity:.6;box-shadow:0 0 0 5px rgba(16,217,138,0)}}
+
+/* ── SEARCH CARD ── */
+.search-card{
+  background:var(--surf-1);border-radius:var(--r-xl);
+  border:1px solid var(--bdr-1);box-shadow:var(--sh-sm);
+  overflow:hidden;position:relative;
+}
+.search-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad-pri);}
+.search-inner{padding:20px 18px 18px;}
+.search-lbl{font-size:.6rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--t-3);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.search-lbl::after{content:'';flex:1;height:1px;background:var(--bdr-1);}
+.input-wrap{
+  display:flex;align-items:center;gap:10px;
+  background:var(--surf-2);border:1.5px solid var(--bdr-1);
+  border-radius:var(--r-md);padding:0 14px;height:50px;
+  transition:border-color .2s,box-shadow .2s;margin-bottom:10px;
+}
+.input-wrap:focus-within{border-color:var(--pri);box-shadow:0 0 0 3px rgba(108,99,255,.15);}
+.input-ico{font-size:1rem;color:var(--t-3);flex-shrink:0;}
+.input-wrap input{
+  flex:1;border:none;background:none;
+  font-family:var(--ff-m);font-size:.85rem;font-weight:500;
+  color:var(--t-1);letter-spacing:.05em;text-transform:uppercase;
+}
+.input-wrap input::placeholder{color:var(--t-4);text-transform:none;font-family:var(--ff);letter-spacing:0;font-weight:400;}
+.clear-btn{
+  width:28px;height:28px;border-radius:var(--r-xs);
+  background:var(--surf-3);color:var(--t-3);
+  display:none;align-items:center;justify-content:center;
+  font-size:.7rem;border:1px solid var(--bdr-1);
+  transition:all .15s;flex-shrink:0;
+}
+.clear-btn.show{display:flex;}
+.clear-btn:hover{background:var(--surf-4);}
+.verify-btn{
+  width:100%;height:50px;border-radius:var(--r-md);
+  background:var(--grad-pri);color:#fff;
+  font-family:var(--ff);font-size:.9rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all .22s var(--ease-spring);
+  box-shadow:var(--sh-pri);letter-spacing:.01em;
+}
+.verify-btn:hover{opacity:.9;transform:translateY(-1px);box-shadow:0 12px 40px rgba(108,99,255,.5);}
+.verify-btn:active{transform:scale(.97);}
+.verify-btn:disabled{opacity:.35;pointer-events:none;box-shadow:none;}
+.hint-row{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:.63rem;color:var(--t-3);}
+
+/* ── STATE CARDS ── */
+.state-card{
+  background:var(--surf-1);border-radius:var(--r-xl);
+  border:1px solid var(--bdr-1);box-shadow:var(--sh-sm);
+  padding:36px 20px;text-align:center;display:none;
+  animation:fadeUp .28s var(--ease-out);
+}
+.state-card.show{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.state-ico{font-size:3rem;margin-bottom:14px;line-height:1;display:block;}
+.state-ttl{font-family:var(--ff-d);font-size:1.15rem;font-weight:700;margin-bottom:8px;color:var(--t-1);}
+.state-sub{font-size:.78rem;color:var(--t-3);line-height:1.75;max-width:260px;margin:0 auto;}
+
+/* LOADING */
+.spin{width:36px;height:36px;border-radius:50%;border:3px solid var(--bdr-2);border-top-color:var(--pri);animation:spin .7s linear infinite;margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── RESULT CARD ── */
+.result-card{
+  background:var(--surf-1);border-radius:var(--r-xl);
+  border:1px solid var(--bdr-1);box-shadow:var(--sh-md);
+  overflow:hidden;display:none;
+  animation:fadeUp .3s var(--ease-out);
+}
+.result-card.show{display:block;}
+
+/* Valid / Invalid accent bar */
+.result-accent{height:4px;width:100%;}
+.result-accent.valid{background:var(--grad-suc);}
+.result-accent.invalid{background:var(--dan);}
+
+/* Result header */
+.result-hdr{
+  padding:22px 20px 18px;
+  display:flex;align-items:flex-start;gap:16px;
+  position:relative;
+}
+.result-hdr::before{
+  content:'';position:absolute;inset:0;
+  background:var(--grad-card);pointer-events:none;
+}
+.result-badge-wrap{flex-shrink:0;}
+.result-badge{
+  width:58px;height:58px;border-radius:var(--r-lg);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;position:relative;
+}
+.result-badge.valid{background:var(--suc-bg-2);}
+.result-badge.invalid{background:var(--dan-bg-2);}
+.result-badge-ring{
+  position:absolute;inset:-3px;border-radius:calc(var(--r-lg) + 3px);
+  border:2px solid transparent;
+}
+.result-badge.valid .result-badge-ring{border-color:rgba(16,217,138,.35);}
+.result-badge.invalid .result-badge-ring{border-color:rgba(255,95,126,.3);}
+
+.result-hdr-info{flex:1;min-width:0;}
+.result-status-lbl{font-size:.58rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;margin-bottom:4px;}
+.result-status-lbl.valid{color:var(--suc);}
+.result-status-lbl.invalid{color:var(--dan);}
+.result-name{font-family:var(--ff-d);font-size:1.1rem;font-weight:700;color:var(--t-1);line-height:1.2;margin-bottom:4px;}
+.result-role{font-size:.72rem;color:var(--t-3);line-height:1.5;}
+.result-cert-id{
+  font-family:var(--ff-m);font-size:.58rem;font-weight:700;
+  letter-spacing:.07em;color:var(--pri-l);
+  background:var(--pri-bg);border:1px solid var(--bdr-accent);
+  padding:4px 10px;border-radius:var(--r-full);
+  display:inline-block;margin-top:6px;
+}
+
+/* Chips row */
+.chips-row{
+  display:flex;flex-wrap:wrap;gap:6px;
+  padding:12px 20px;border-top:1px solid var(--bdr-1);
+  background:var(--surf-2);
+}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:var(--r-full);font-size:.59rem;font-weight:700;letter-spacing:.02em;}
+.chip-p{background:var(--pri-bg);color:var(--pri-l);border:1px solid var(--bdr-accent);}
+.chip-s{background:var(--suc-bg);color:var(--suc);border:1px solid rgba(16,217,138,.2);}
+.chip-w{background:var(--wrn-bg);color:var(--wrn);border:1px solid rgba(245,166,35,.15);}
+.chip-n{background:var(--surf-3);color:var(--t-3);border:1px solid var(--bdr-1);}
+
+/* Details grid */
+.details-body{padding:18px 20px;}
+.sec-lbl{
+  font-size:.58rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--t-3);
+  margin-bottom:12px;display:flex;align-items:center;gap:8px;
+}
+.sec-lbl::after{content:'';flex:1;height:1px;background:var(--bdr-1);}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.detail-grid.full{grid-template-columns:1fr;}
+.detail-cell{
+  background:var(--surf-3);border-radius:var(--r-sm);
+  padding:11px 12px;border:1px solid var(--bdr-1);
+}
+.detail-val{font-family:var(--ff-m);font-size:.76rem;font-weight:700;color:var(--t-1);line-height:1.25;word-break:break-word;}
+.detail-lbl{font-size:.49rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t-3);margin-top:4px;}
+
+/* Signatory strip */
+.sign-strip{
+  display:flex;align-items:center;gap:13px;
+  background:var(--pri-bg);border:1px solid var(--bdr-accent);
+  border-radius:var(--r-md);padding:12px 14px;
+}
+.sign-ava{
+  width:40px;height:40px;border-radius:var(--r-sm);
+  background:var(--grad-pri);display:flex;align-items:center;justify-content:center;
+  font-family:var(--ff-d);font-size:.75rem;font-weight:700;color:#fff;flex-shrink:0;
+  box-shadow:0 4px 12px rgba(108,99,255,.35);
+}
+.sign-name{font-size:.85rem;font-weight:700;color:var(--t-1);}
+.sign-role{font-size:.65rem;color:var(--t-3);margin-top:2px;}
+.sign-verified{
+  margin-left:auto;font-size:.58rem;font-weight:800;
+  padding:4px 10px;border-radius:var(--r-full);
+  background:var(--suc-bg-2);color:var(--suc);
+  border:1px solid rgba(16,217,138,.2);flex-shrink:0;
+}
+
+/* Description block */
+.desc-block{
+  background:var(--surf-2);border:1px solid var(--bdr-1);
+  border-radius:var(--r-md);padding:12px 14px;
+  font-size:.78rem;color:var(--t-2);line-height:1.75;
+}
+
+/* Action row */
+.action-row{
+  padding:14px 20px 20px;border-top:1px solid var(--bdr-1);
+  display:flex;gap:8px;
+}
+.action-row .btn{
+  flex:1;height:44px;border-radius:var(--r-md);
+  font-size:.78rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:all .2s var(--ease-spring);
+}
+.btn-pri-sm{background:var(--grad-pri);color:#fff;box-shadow:var(--sh-pri);}
+.btn-pri-sm:hover{opacity:.9;transform:translateY(-1px);}
+.btn-gho-sm{background:var(--surf-3);color:var(--t-2);border:1px solid var(--bdr-2);}
+.btn-gho-sm:hover{background:var(--surf-4);}
+.btn:active{transform:scale(.96);}
+
+/* ── NOT FOUND ── */
+.not-found-card{
+  background:var(--surf-1);border-radius:var(--r-xl);
+  border:1px solid rgba(255,95,126,.2);
+  box-shadow:0 6px 24px rgba(255,95,126,.1);
+  padding:36px 20px;text-align:center;
+  display:none;animation:fadeUp .28s var(--ease-out);
+}
+.not-found-card.show{display:block;}
+.nf-ico{font-size:2.8rem;margin-bottom:14px;display:block;}
+.nf-ttl{font-family:var(--ff-d);font-size:1.15rem;font-weight:700;color:var(--dan);margin-bottom:8px;}
+.nf-sub{font-size:.76rem;color:var(--t-3);line-height:1.75;margin-bottom:16px;}
+.nf-id{
+  font-family:var(--ff-m);font-size:.78rem;font-weight:700;
+  background:var(--dan-bg-2);color:var(--dan);
+  padding:8px 16px;border-radius:var(--r-full);
+  display:inline-block;border:1px solid rgba(255,95,126,.2);
+  margin-bottom:16px;
+}
+
+/* ── INFO SECTION ── */
+.info-section{
+  background:var(--surf-1);border-radius:var(--r-xl);
+  border:1px solid var(--bdr-1);box-shadow:var(--sh-xs);
+  overflow:hidden;
+}
+.info-section-hdr{
+  padding:14px 18px;border-bottom:1px solid var(--bdr-1);
+  background:var(--surf-2);
+  font-size:.62rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--t-3);
+  display:flex;align-items:center;gap:8px;
+}
+.info-row{
+  display:flex;align-items:flex-start;gap:14px;
+  padding:14px 18px;border-bottom:1px solid var(--bdr-1);
+}
+.info-row:last-child{border-bottom:none;}
+.info-ico{font-size:1.15rem;flex-shrink:0;margin-top:1px;}
+.info-txt .ttl{font-size:.82rem;font-weight:700;color:var(--t-1);margin-bottom:2px;}
+.info-txt .sub{font-size:.67rem;color:var(--t-3);line-height:1.65;}
+
+/* ── FOOTER ── */
+.footer{
+  text-align:center;padding-bottom:20px;
+  font-size:.58rem;color:var(--t-4);
+  line-height:1.9;
+}
+.footer a{color:var(--t-3);}
+
+/* ── TOAST ── */
+.toast-wrap{position:fixed;top:calc(var(--hdr-h) + 10px);left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:440px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{display:flex;align-items:flex-start;gap:12px;padding:13px 15px;border-radius:var(--r-lg);background:var(--surf-glass);border:1px solid var(--bdr-2);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:var(--sh-lg);pointer-events:all;animation:toastIn .3s var(--ease-spring);position:relative;overflow:hidden;}
+.toast.out{animation:toastOut .2s var(--ease-in-out) forwards;}
+.toast-bar{position:absolute;bottom:0;left:0;height:2px;animation:toastProg linear forwards;}
+.toast.success .toast-bar{background:var(--suc);}
+.toast.error   .toast-bar{background:var(--dan);}
+.toast.info    .toast-bar{background:var(--pri);}
+.toast-ico{font-size:1.05rem;flex-shrink:0;margin-top:1px;}
+.toast-body{flex:1;}
+.toast-ttl{font-size:.82rem;font-weight:700;color:var(--t-1);}
+.toast-msg{font-size:.71rem;color:var(--t-3);margin-top:2px;}
+.toast-x{color:var(--t-4);font-size:.75rem;cursor:pointer;padding:2px 0 0 6px;flex-shrink:0;}
+@keyframes toastIn{from{opacity:0;transform:translateY(-12px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0;transform:translateY(-8px) scale(.97)}}
+@keyframes toastProg{from{width:100%}to{width:0%}}
+</style>
 </head>
 <body>
-  <header class="header">
-    <div class="cw header-inner">
-      <a href="/app/#settings" class="brand">
-        <div class="logo">AF</div>
-        <div>
-          <span class="brand-title">AcademeForge</span>
-          <span class="brand-sub">Certificate Verification</span>
-        </div>
-      </a>
-      
-      <div class="header-actions">
-       <button type="button" class="back-btn" onclick="history.back()" type="button" aria-label="Back">← Back</button>
 
-          
-        
-        <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme">
-          <span id="themeText">Light</span>
-          <span class="switch" aria-hidden="true"><span class="knob"></span></span>
-        </button>
-        <button id="menuBtn" class="menu-btn" type="button" aria-label="Open menu">☰</button>
+<div class="app">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo-group">
+        <div class="logo-mark">
+          <img src="../IMG/AF LOGO 2.jpeg" alt="AF" onerror="this.style.display='none'">
+          AF
+        </div>
+        <div class="logo-text">
+          <div class="name">AcademeForge</div>
+          <div class="sub">Verify Certificate</div>
+        </div>
+      </div>
+      <div class="hdr-right">
+        <button class="icon-btn" id="backBtn" onclick="history.back()" title="Go Back">⬅️</button>
+        <button class="icon-btn" id="darkBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
       </div>
     </div>
   </header>
 
-  <aside id="mobileMenu" class="mobile-menu" aria-label="Mobile navigation" aria-hidden="true">
-    <div class="mobile-top">
-      <div class="logo">AF</div>
-      <button id="closeBtn" class="close-btn" type="button" aria-label="Close menu">✕</button>
-    </div>
+  <!-- TOAST -->
+  <div class="toast-wrap" id="toastWrap"></div>
 
-   <nav class="mobile-nav">
-
-  <button
-    type="button"
-    class="mobile-back-btn"
-    onclick="sessionStorage.setItem('af_return_section','settings');window.location.href='/app/#settings';">
-
-    ← Back To Settings
-
-  </button>
-
-</nav>
-  </aside>
-
+  <!-- MAIN -->
   <main class="main">
-    <div class="cw hero">
-     
-<section class="verify-panel" aria-label="Certificate verification form">
-        <div class="panel-content">
-          <div class="panel-kicker">Credential lookup</div>
-          <h2 class="panel-title">Enter certificate details</h2>
-          <p class="panel-copy">
-            Choose the certificate year prefix and type the four-digit certificate number.
-          </p>
 
-          <div class="certificate-input-wrap">
-            <label class="select-wrap">
-              <span class="field-label">Certificate prefix</span>
-              <select id="certificatePrefix">
-                <option value="AF-CERT-2024-">AF-CERT-2024-</option>
-                <option value="AF-CERT-2025-">AF-CERT-2025-</option>
-                <option value="AF-CERT-2026-" selected>AF-CERT-2026-</option>
-                <option value="AF-CERT-2027-">AF-CERT-2027-</option>
-                <option value="AF-CERT-2028-">AF-CERT-2028-</option>
-                <option value="AF-CERT-2029-">AF-CERT-2029-</option>
-              </select>
-            </label>
-
-            <label>
-              <span class="field-label">Number</span>
-              <input
-                id="certificateSuffix"
-                type="text"
-                placeholder="0001"
-                maxlength="4"
-                inputmode="numeric"
-                autocomplete="off"
-                spellcheck="false"
-              />
-            </label>
-          </div>
-
-          <button id="verifyBtn" class="verify-btn" type="button">Verify Certificate</button>
-
-          <div id="loading" class="loading">
-            <div class="spinner" aria-hidden="true"></div>
-            <span>Verifying certificate...</span>
-          </div>
-
-          <div id="result" class="result"></div>
-
-          <div class="footer">
-            © 2026 AcademeForge
-          </div>
-        </div>
-      </section>
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-eyebrow">🔐 Authenticity Portal</div>
+      <div class="hero-title">Certificate<br>Verification</div>
+      <div class="hero-sub">Enter the certificate ID to instantly verify the authenticity of any AcademeForge certificate.</div>
+      <div class="shield-badge"><div class="shield-dot"></div>Secured by AcademeForge</div>
+      <div class="hero-dots">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+      </div>
     </div>
+
+    <!-- SEARCH CARD -->
+    <div class="search-card">
+      <div class="search-inner">
+        <div class="search-lbl">Certificate ID</div>
+        <div class="input-wrap">
+          <span class="input-ico">🪪</span>
+          <input
+            type="text"
+            id="certInput"
+            placeholder="e.g. AFC-2025-001"
+            autocomplete="off"
+            autocorrect="off"
+            spellcheck="false"
+            oninput="onInput()"
+            onkeydown="onKey(event)"
+          >
+          <button class="clear-btn" id="clearBtn" onclick="clearInput()">✕</button>
+        </div>
+        <button class="verify-btn" id="verifyBtn" onclick="verify()" disabled>
+          🔍 Verify Certificate
+        </button>
+        <div class="hint-row">
+          ℹ️ Certificate IDs are case-insensitive — e.g. <strong>AFC-2024-042</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOADING STATE -->
+    <div class="state-card" id="loadingCard">
+      <div class="spin"></div>
+      <div class="state-ttl">Verifying…</div>
+      <div class="state-sub">Checking authenticity against our secure database. This takes just a moment.</div>
+    </div>
+
+    <!-- VALID RESULT -->
+    <div class="result-card" id="resultCard">
+      <div class="result-accent valid" id="resultAccent"></div>
+      <div class="result-hdr">
+        <div class="result-badge-wrap">
+          <div class="result-badge valid" id="resultBadge">
+            🏅
+            <div class="result-badge-ring"></div>
+          </div>
+        </div>
+        <div class="result-hdr-info">
+          <div class="result-status-lbl valid" id="resultStatusLbl">✅ Verified Authentic</div>
+          <div class="result-name" id="resultName">—</div>
+          <div class="result-role" id="resultRole">—</div>
+          <div class="result-cert-id" id="resultCertId">—</div>
+        </div>
+      </div>
+
+      <div class="chips-row" id="chipsRow"></div>
+
+      <div class="details-body">
+
+        <!-- Core details -->
+        <div class="sec-lbl">Certificate Details</div>
+        <div class="detail-grid" id="detailGrid"></div>
+
+        <!-- Signatory -->
+        <div id="signatorySection" style="display:none;margin-bottom:14px;">
+          <div class="sec-lbl">Authorized By</div>
+          <div class="sign-strip">
+            <div class="sign-ava" id="signAva">—</div>
+            <div>
+              <div class="sign-name" id="signName">—</div>
+              <div class="sign-role" id="signRole">—</div>
+            </div>
+            <div class="sign-verified">✓ Authorized</div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div id="descSection" style="display:none;">
+          <div class="sec-lbl">Description</div>
+          <div class="desc-block" id="descBlock">—</div>
+        </div>
+
+      </div>
+
+      <div class="action-row">
+        <button class="btn btn-gho-sm" onclick="resetSearch()">← Search Again</button>
+        <button class="btn btn-pri-sm" onclick="copyId()">📋 Copy ID</button>
+      </div>
+    </div>
+
+    <!-- NOT FOUND -->
+    <div class="not-found-card" id="notFoundCard">
+      <span class="nf-ico">🚫</span>
+      <div class="nf-ttl">Certificate Not Found</div>
+      <div class="nf-id" id="nfId">—</div>
+      <div class="nf-sub">No certificate matches this ID in our records. The ID may be incorrect, or the certificate may not have been issued by AcademeForge.</div>
+      <button class="verify-btn" style="max-width:220px;margin:0 auto;" onclick="resetSearch()">← Try Again</button>
+    </div>
+
+    <!-- ERROR STATE -->
+    <div class="state-card" id="errorCard">
+      <span class="state-ico">⚠️</span>
+      <div class="state-ttl">Connection Error</div>
+      <div class="state-sub">Could not reach the verification server. Please check your connection and try again.</div>
+      <button class="verify-btn" style="max-width:200px;margin:20px auto 0;" onclick="retryVerify()">↺ Retry</button>
+    </div>
+
+    <!-- INFO SECTION (always visible initially) -->
+    <div class="info-section" id="infoSection">
+      <div class="info-section-hdr">ℹ️ How it works</div>
+      <div class="info-row">
+        <span class="info-ico">1️⃣</span>
+        <div class="info-txt">
+          <div class="ttl">Find your Certificate ID</div>
+          <div class="sub">The unique ID is printed on your certificate, typically at the bottom or in the header.</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <span class="info-ico">2️⃣</span>
+        <div class="info-txt">
+          <div class="ttl">Enter &amp; Verify</div>
+          <div class="sub">Type or paste the certificate ID above and tap Verify Certificate.</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <span class="info-ico">3️⃣</span>
+        <div class="info-txt">
+          <div class="ttl">Instant Result</div>
+          <div class="sub">We check against our secure database and display full certificate details instantly.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      AcademeForge · Certificate Verification Portal<br>
+      Built by <a href="#">Devraj Kumar</a> · 2026
+    </div>
+
   </main>
+</div>
 
-  <script>
-    const API_URL = "https://afooyyydhlwngzssgqih.supabase.co/functions/v1/verify-af-certificate";
+<script>
+/* ══════════════════════════════════════
+   CONFIG
+══════════════════════════════════════ */
+const API_URL = "https://afooyyydhlwngzssgqih.supabase.co/functions/v1/af-certificates-api";
+let _lastCertId = '';
 
-    const html = document.documentElement;
-    const themeToggle = document.getElementById("themeToggle");
-    const themeText = document.getElementById("themeText");
-    const menuBtn = document.getElementById("menuBtn");
-    const closeBtn = document.getElementById("closeBtn");
-    const mobileMenu = document.getElementById("mobileMenu");
-    const certificatePrefix = document.getElementById("certificatePrefix");
-    const certificateSuffix = document.getElementById("certificateSuffix");
-    const verifyBtn = document.getElementById("verifyBtn");
-    const result = document.getElementById("result");
-    const loading = document.getElementById("loading");
+/* ══════════════════════════════════════
+   THEME
+══════════════════════════════════════ */
+(function initTheme() {
+  const stored = localStorage.getItem('af_theme');
+  if (stored) document.documentElement.setAttribute('data-theme', stored);
+  updateThemeUI();
+})();
 
-    let isLoading = false;
+function isDark() {
+  const s = localStorage.getItem('af_theme');
+  if (s) return s === 'dark';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function updateThemeUI() {
+  document.getElementById('darkBtn').textContent = isDark() ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  const n = isDark() ? 'light' : 'dark';
+  localStorage.setItem('af_theme', n);
+  document.documentElement.setAttribute('data-theme', n);
+  updateThemeUI();
+}
 
-    const savedTheme = localStorage.getItem("af-theme");
+/* ══════════════════════════════════════
+   TOAST
+══════════════════════════════════════ */
+function toast(title, msg = '', type = 'info', dur = 3200) {
+  const icons = { success:'✅', error:'❌', info:'ℹ️' };
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `
+    <span class="toast-ico">${icons[type]||'ℹ️'}</span>
+    <div class="toast-body">
+      <div class="toast-ttl">${title}</div>
+      ${msg ? `<div class="toast-msg">${msg}</div>` : ''}
+    </div>
+    <button class="toast-x" onclick="this.parentElement.remove()">✕</button>
+    <div class="toast-bar" style="animation-duration:${dur}ms"></div>`;
+  wrap.appendChild(el);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 220); }, dur);
+}
 
-    if (savedTheme) {
-      html.setAttribute("data-theme", savedTheme);
-    }
+/* ══════════════════════════════════════
+   INPUT HANDLERS
+══════════════════════════════════════ */
+function onInput() {
+  const val = document.getElementById('certInput').value.trim();
+  document.getElementById('verifyBtn').disabled = val.length < 2;
+  document.getElementById('clearBtn').classList.toggle('show', val.length > 0);
+}
 
-    updateThemeText();
+function clearInput() {
+  document.getElementById('certInput').value = '';
+  document.getElementById('verifyBtn').disabled = true;
+  document.getElementById('clearBtn').classList.remove('show');
+  document.getElementById('certInput').focus();
+  resetCards();
+}
 
-    themeToggle.addEventListener("click", () => {
-      const current = html.getAttribute("data-theme");
-      const next = current === "dark" ? "light" : "dark";
+function onKey(e) {
+  if (e.key === 'Enter') verify();
+}
 
-      html.setAttribute("data-theme", next);
-      localStorage.setItem("af-theme", next);
-      updateThemeText();
+function resetCards() {
+  ['loadingCard','resultCard','notFoundCard','errorCard'].forEach(id => {
+    document.getElementById(id).classList.remove('show');
+  });
+  document.getElementById('infoSection').style.display = '';
+}
+
+function resetSearch() {
+  resetCards();
+  document.getElementById('certInput').value = '';
+  document.getElementById('verifyBtn').disabled = true;
+  document.getElementById('clearBtn').classList.remove('show');
+  document.getElementById('certInput').focus();
+}
+
+/* ══════════════════════════════════════
+   VERIFY
+══════════════════════════════════════ */
+let _retryId = '';
+
+async function verify() {
+  const id = document.getElementById('certInput').value.trim().toUpperCase();
+  if (!id) return;
+
+  _retryId = id;
+  _lastCertId = id;
+
+  // Hide info, show loader
+  document.getElementById('infoSection').style.display = 'none';
+  ['resultCard','notFoundCard','errorCard'].forEach(i => document.getElementById(i).classList.remove('show'));
+  document.getElementById('loadingCard').classList.add('show');
+  document.getElementById('verifyBtn').disabled = true;
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'verify', certificate_id: id })
     });
+    const data = await res.json();
 
-    function updateThemeText() {
-      const isDark = html.getAttribute("data-theme") === "dark";
-      themeText.textContent = isDark ? "Light" : "Dark";
+    document.getElementById('loadingCard').classList.remove('show');
+    document.getElementById('verifyBtn').disabled = false;
+
+    if (!data.success) {
+      showError();
+      return;
     }
 
-    menuBtn.addEventListener("click", () => {
-      mobileMenu.classList.add("open");
-      mobileMenu.setAttribute("aria-hidden", "false");
-    });
-
-    closeBtn.addEventListener("click", closeMobileMenu);
-
-    document.addEventListener("click", event => {
-      const clickedInside = mobileMenu.contains(event.target) || menuBtn.contains(event.target);
-
-      if (!clickedInside && mobileMenu.classList.contains("open")) {
-        closeMobileMenu();
-      }
-    });
-
-    window.addEventListener("keydown", event => {
-      if (event.key === "Escape") {
-        closeMobileMenu();
-      }
-    });
-
-    function closeMobileMenu() {
-      mobileMenu.classList.remove("open");
-      mobileMenu.setAttribute("aria-hidden", "true");
+    if (!data.found) {
+      showNotFound(id);
+    } else {
+      showResult(data.record);
     }
 
-    async function verifyCertificate() {
-      if (isLoading) {
-        return;
-      }
+  } catch (e) {
+    document.getElementById('loadingCard').classList.remove('show');
+    document.getElementById('verifyBtn').disabled = false;
+    showError();
+  }
+}
 
-      const suffix = certificateSuffix.value.replace(/\D/g, "").trim();
+function retryVerify() {
+  document.getElementById('errorCard').classList.remove('show');
+  document.getElementById('certInput').value = _retryId;
+  onInput();
+  verify();
+}
 
-      if (!suffix) {
-        showFailed("Please enter certificate number.");
-        return;
-      }
+/* ══════════════════════════════════════
+   SHOW STATES
+══════════════════════════════════════ */
+function showNotFound(id) {
+  document.getElementById('nfId').textContent = id;
+  document.getElementById('notFoundCard').classList.add('show');
+}
 
-      const certificateNumber = (certificatePrefix.value + suffix.padStart(4, "0")).toUpperCase();
+function showError() {
+  document.getElementById('errorCard').classList.add('show');
+  toast('Connection error', 'Could not reach verification server.', 'error');
+}
 
-      try {
-        isLoading = true;
-        verifyBtn.disabled = true;
-        loading.classList.add("active");
-        result.classList.remove("active");
+function showResult(r) {
+  // Header
+  document.getElementById('resultAccent').className = 'result-accent valid';
+  document.getElementById('resultBadge').className = 'result-badge valid';
+  document.getElementById('resultBadge').innerHTML = '🏅<div class="result-badge-ring"></div>';
+  document.getElementById('resultStatusLbl').className = 'result-status-lbl valid';
+  document.getElementById('resultStatusLbl').textContent = '✅ Verified Authentic';
+  document.getElementById('resultName').textContent = r.full_name || '—';
+  document.getElementById('resultRole').textContent = [r.role, r.department].filter(Boolean).join(' · ') || '—';
+  document.getElementById('resultCertId').textContent = r.certificate_id || '—';
 
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            certificate_number: certificateNumber
-          })
-        });
+  // Chips
+  const chips = [];
+  if (r.certificate_type) chips.push(`<span class="chip chip-p">📜 ${r.certificate_type}</span>`);
+  if (r.category)         chips.push(`<span class="chip chip-n">🏷 ${r.category}</span>`);
+  if (r.work_type)        chips.push(`<span class="chip chip-w">⚡ ${r.work_type}</span>`);
+  if (r.stipend)          chips.push(`<span class="chip chip-s">💰 ${r.stipend}</span>`);
+  document.getElementById('chipsRow').innerHTML = chips.join('');
 
-        let data = null;
+  // Detail grid
+  const cells = [];
+  if (r.issue_date)   cells.push(detailCell(fmtDate(r.issue_date), 'Issue Date'));
+  if (r.start_date)   cells.push(detailCell(fmtDate(r.start_date), 'Start Date'));
+  if (r.end_date)     cells.push(detailCell(fmtDate(r.end_date), 'End Date'));
+  if (r.department)   cells.push(detailCell(r.department, 'Department'));
+  if (r.role)         cells.push(detailCell(r.role, 'Role'));
+  if (r.certificate_type) cells.push(detailCell(r.certificate_type, 'Type'));
+  if (r.doc_key)      cells.push(detailCell(r.doc_key, 'Document Key'));
+  if (r.certificate_id) cells.push(detailCell(r.certificate_id, 'Certificate ID'));
+  document.getElementById('detailGrid').innerHTML = cells.join('');
 
-        try {
-          data = await response.json();
-        } catch {
-          throw new Error("Invalid server response");
-        }
+  // Signatory
+  if (r.signatory_name) {
+    document.getElementById('signatorySection').style.display = '';
+    document.getElementById('signName').textContent = r.signatory_name;
+    document.getElementById('signRole').textContent = r.signatory_role || 'Authorized Signatory';
+    document.getElementById('signAva').textContent = initials(r.signatory_name);
+  } else {
+    document.getElementById('signatorySection').style.display = 'none';
+  }
 
-        if (response.ok && data?.found && data?.certificate) {
-          showSuccess(data.certificate);
-        } else {
-          showFailed(data?.message || "Certificate not found");
-        }
-      } catch (error) {
-        console.error(error);
-        showFailed(error?.message || "Verification failed");
-      } finally {
-        isLoading = false;
-        verifyBtn.disabled = false;
-        loading.classList.remove("active");
-      }
-    }
+  // Description
+  if (r.description) {
+    document.getElementById('descSection').style.display = '';
+    document.getElementById('descBlock').textContent = r.description;
+  } else {
+    document.getElementById('descSection').style.display = 'none';
+  }
 
-    function showSuccess(certificate) {
-      result.innerHTML = `
-        <div class="result-card success">
-          <div class="verify-top">
-            <div class="verify-icon success">✓</div>
-            <div>
-              <div class="verify-title">Certificate Verified</div>
-              <div class="verify-sub">This certificate is officially issued and verified by AcademeForge.</div>
-            </div>
-          </div>
+  document.getElementById('resultCard').classList.add('show');
+  document.getElementById('resultCard').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
 
-          <div class="details">
-            ${detailTemplate("Certificate ID", certificate.certificate_id)}
-            ${detailTemplate("Full Name", certificate.full_name)}
-            ${detailTemplate("Role", certificate.role)}
-            ${detailTemplate("Certificate Type", certificate.certificate_type)}
-            ${detailTemplate("Issue Date", certificate.issue_date)}
-            ${detailTemplate("Work Type", certificate.work_type)}
-            ${certificate.start_date ? detailTemplate("Start Date", certificate.start_date) : ""}
-            ${certificate.end_date ? detailTemplate("End Date", certificate.end_date) : ""}
-          </div>
-        </div>
-      `;
+/* ══════════════════════════════════════
+   HELPERS
+══════════════════════════════════════ */
+function detailCell(val, lbl) {
+  return `<div class="detail-cell"><div class="detail-val">${val}</div><div class="detail-lbl">${lbl}</div></div>`;
+}
 
-      result.classList.add("active");
-      result.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest"
-      });
-    }
+function fmtDate(d) {
+  if (!d) return '—';
+  try {
+    return new Date(d).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
+  } catch { return d; }
+}
 
-    function showFailed(message) {
-      result.innerHTML = `
-        <div class="result-card failed">
-          <div class="verify-top">
-            <div class="verify-icon failed">✕</div>
-            <div>
-              <div class="verify-title">Certificate Not Found</div>
-              <div class="verify-sub">${escapeHtml(message)}</div>
-            </div>
-          </div>
-        </div>
-      `;
+function initials(name) {
+  return (name||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join('');
+}
 
-      result.classList.add("active");
-    }
+function copyId() {
+  const id = document.getElementById('resultCertId').textContent;
+  navigator.clipboard.writeText(id).then(() => {
+    toast('Copied!', `Certificate ID ${id} copied to clipboard.`, 'success', 2500);
+  }).catch(() => {
+    toast('Copy failed', 'Please copy manually.', 'error');
+  });
+}
 
-    function detailTemplate(label, value) {
-      return `
-        <div class="detail">
-          <div class="label">${escapeHtml(label)}</div>
-          <div class="value">${escapeHtml(value)}</div>
-        </div>
-      `;
-    }
+/* ══════════════════════════════════════
+   URL PARAM AUTO-VERIFY
+══════════════════════════════════════ */
+(function checkUrlParam() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id') || params.get('cert') || params.get('certificate_id');
+  if (id) {
+    document.getElementById('certInput').value = id.toUpperCase();
+    onInput();
+    setTimeout(verify, 400);
+  }
+})();
 
-    function escapeHtml(value) {
-      return String(value || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-    }
-
-    certificateSuffix.addEventListener("input", () => {
-      certificateSuffix.value = certificateSuffix.value.replace(/\D/g, "");
-    });
-
-    verifyBtn.addEventListener("click", verifyCertificate);
-
-    certificateSuffix.addEventListener("keydown", event => {
-      if (event.key === "Enter") {
-        verifyCertificate();
-      }
-    });
-  </script>
+/* prevent right click & devtools */
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  if (e.key==='F12' || (e.ctrlKey&&e.shiftKey&&['i','j','c'].includes(e.key.toLowerCase())) || (e.ctrlKey&&['u'].includes(e.key.toLowerCase()))) e.preventDefault();
+});
+</script>
 </body>
 </html>
