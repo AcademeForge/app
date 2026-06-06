@@ -1,0 +1,2553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+/>
+<title>Sudoku Master V5 — Nxdb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500;600&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary:#ff7a18;--primary-dark:#d95f00;--primary-light:rgba(255,122,24,.12);--primary-glow:rgba(255,122,24,.35);
+  --green:#22c55e;--green-light:rgba(34,197,94,.12);--green-glow:rgba(34,197,94,.3);
+  --blue:#3b82f6;--red:#ef4444;--yellow:#f59e0b;--purple:#8b5cf6;
+  --bg:#f5f3ee;--bg2:#ede9e0;--surface:#ffffff;--surface-2:#faf9f6;--surface-3:#f5f2ed;
+  --text:#1a150e;--text-soft:#7a6f5d;--text-muted:#b5a898;
+  --border:rgba(0,0,0,.07);--border-medium:rgba(0,0,0,.12);
+  --shadow-xs:0 1px 3px rgba(0,0,0,.06);--shadow-sm:0 2px 8px rgba(0,0,0,.07);
+  --shadow:0 6px 24px rgba(0,0,0,.09);--shadow-lg:0 16px 48px rgba(0,0,0,.13);
+  --shadow-xl:0 28px 72px rgba(0,0,0,.17);
+  --radius:20px;--radius-sm:14px;--radius-xs:10px;--nav-height:76px;
+  --font-display:'Sora',sans-serif;--font-body:'Nunito',sans-serif;--font-mono:'DM Mono',monospace;
+  --quick:#22c55e;--quick-dark:#16a34a;--quick-light:rgba(34,197,94,.11);
+  --classic:#f97316;--classic-dark:#d05f00;--classic-light:rgba(249,115,22,.11);
+}
+body.dark {
+  --bg:#0c0a08;--bg2:#141210;--surface:#1a1714;--surface-2:#1e1b18;--surface-3:#252220;
+  --text:#f5f0e8;--text-soft:#a09278;--text-muted:#6b5c48;
+  --border:rgba(255,255,255,.07);--border-medium:rgba(255,255,255,.12);
+  --shadow:0 6px 24px rgba(0,0,0,.4);--shadow-lg:0 16px 48px rgba(0,0,0,.5);--shadow-xl:0 28px 72px rgba(0,0,0,.6);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{-webkit-tap-highlight-color:transparent;scroll-behavior:smooth;}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s;}
+button{cursor:pointer;border:none;outline:none;font:inherit;background:none;}
+a{text-decoration:none;color:inherit;}
+input{font:inherit;outline:none;}
+
+.app{width:100%;max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:calc(var(--nav-height)+32px);position:relative;}
+.app::before{content:'';position:fixed;inset:0;background-image:radial-gradient(ellipse 60% 40% at 80% 10%,rgba(255,122,24,.05) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 10% 80%,rgba(34,197,94,.04) 0%,transparent 60%);pointer-events:none;z-index:0;}
+
+/* ════════════════════════════════════════════
+   OFFLINE BANNER
+════════════════════════════════════════════ */
+
+.offline-banner{
+  display:none;
+  align-items:center;
+
+  position:fixed;
+  top:64px;
+  left:50%;
+  transform:translateX(-50%);
+
+  width:100%;
+  max-width:480px;
+  height:38px;
+
+  overflow:hidden;
+
+  background:rgba(245,158,11,.12);
+  border-bottom:1px solid rgba(245,158,11,.25);
+
+  color:#b45309;
+  font-size:.75rem;
+  font-weight:700;
+
+  z-index:190;
+
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+
+.offline-banner.show{
+  display:flex;
+}
+
+body.dark .offline-banner{
+  background:rgba(245,158,11,.08);
+  color:#fbbf24;
+}
+
+.offline-banner .offline-marquee{
+  display:inline-block;
+  white-space:nowrap;
+  min-width:100%;
+  padding-left:100%;
+  animation:offlineTickerNx 7s linear infinite;
+}
+
+@keyframes offlineTickerNx{
+  0%{
+    transform:translateX(0);
+  }
+  100%{
+    transform:translateX(-100%);
+  }
+}
+
+/* ════════════════════════════════════════════
+   MAIN CONTENT SPACING
+════════════════════════════════════════════ */
+
+.main{
+  padding:14px;
+  padding-top:14px;
+}
+
+/* When offline */
+body.offline-mode .main{
+  padding-top:52px;
+}
+/* SYNC QUEUE BADGE */
+.sync-queue-badge{display:none;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;background:rgba(59,130,246,.1);color:var(--blue);font-size:.68rem;font-weight:700;border:1px solid rgba(59,130,246,.2);}
+.sync-queue-badge.show{display:inline-flex;}
+
+.header{position:sticky;top:0;z-index:200;backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);background:rgba(255,255,255,.85);border-bottom:1px solid var(--border);}
+body.dark .header{background:rgba(26,23,20,.9);}
+.header-inner{height:64px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;}
+.logo-wrap{display:flex;align-items:center;gap:10px;}
+.logo{width:40px;height:40px;border-radius:12px;overflow:hidden;box-shadow:0 3px 12px rgba(255,122,24,.3);flex-shrink:0;}
+.logo img{width:100%;height:100%;object-fit:cover;display:block;}
+.logo-fallback{width:100%;height:100%;background:linear-gradient(135deg,var(--primary),var(--primary-dark));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.85rem;color:white;font-family:var(--font-display);}
+.logo-title{font-family:var(--font-display);font-size:.92rem;font-weight:800;letter-spacing:-.02em;}
+.logo-sub{font-size:.68rem;color:var(--text-soft);font-weight:600;margin-top:1px;}
+.header-actions{display:flex;gap:8px;align-items:center;}
+.icon-btn{width:40px;height:40px;border-radius:11px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.icon-btn:active{transform:scale(.92);}
+.icon-btn:hover{border-color:var(--primary);box-shadow:0 2px 8px var(--primary-light);}
+
+.refresh-indicator-Nx{position:fixed;top:70px;left:50%;transform:translateX(-50%);display:none;align-items:center;gap:7px;padding:6px 14px;border-radius:999px;background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-sm);z-index:500;font-size:.72rem;font-weight:700;color:var(--text-soft);animation:slideDownNx .25s ease;}
+.refresh-indicator-Nx.visible{display:flex;}
+.refresh-indicator-Nx .spin-Nx{width:13px;height:13px;border-radius:50%;border:2px solid var(--primary-light);border-top-color:var(--primary);animation:spinNx .6s linear infinite;}
+@keyframes spinNx{to{transform:rotate(360deg);}}
+@keyframes slideDownNx{from{opacity:0;transform:translateX(-50%) translateY(-6px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+
+/* AF SYNC BAR */
+.af-sync-bar{margin:12px 14px 0;padding:13px 15px;border-radius:16px;border:1px solid var(--border);background:var(--surface);box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:11px;transition:all .3s;}
+.af-sync-bar.synced{background:linear-gradient(135deg,rgba(34,197,94,.07),rgba(59,130,246,.05));border-color:rgba(34,197,94,.22);}
+.af-sync-bar.unsynced{background:rgba(239,68,68,.04);border-color:rgba(239,68,68,.15);}
+.af-avatar{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#4f46e5,#06b6d4);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:.85rem;font-weight:700;color:white;flex-shrink:0;}
+.af-info{flex:1;min-width:0;}
+.af-name{font-size:.87rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.af-sub{font-size:.7rem;color:var(--text-soft);margin-top:1px;}
+.af-badge{font-size:.68rem;font-weight:800;padding:4px 9px;border-radius:999px;white-space:nowrap;flex-shrink:0;}
+.af-badge.ok{background:rgba(34,197,94,.12);color:#16a34a;border:1px solid rgba(34,197,94,.2);}
+.af-badge.warn{background:rgba(239,68,68,.1);color:#dc2626;border:1px solid rgba(239,68,68,.18);}
+
+.main{padding:14px;position:relative;z-index:1;}
+.screen{display:none;}
+.screen.active{display:block;animation:screenIn .22s ease;}
+@keyframes screenIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);}
+
+/* HOME HERO */
+.hero-card{padding:22px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);position:relative;overflow:hidden;}
+.hero-card::after{content:'';position:absolute;right:-60px;top:-60px;width:180px;height:180px;background:radial-gradient(circle,rgba(255,122,24,.1) 0%,transparent 70%);pointer-events:none;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:.68rem;font-weight:800;letter-spacing:.05em;background:var(--primary-light);color:var(--primary);text-transform:uppercase;font-family:var(--font-display);}
+.hero-title{font-family:var(--font-display);font-size:1.7rem;font-weight:900;letter-spacing:-.03em;line-height:1.1;margin-top:10px;}
+.hero-sub{font-size:.85rem;color:var(--text-soft);margin-top:7px;line-height:1.6;}
+.xp-section{margin-top:18px;}
+.xp-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.xp-level{font-family:var(--font-display);font-size:.88rem;font-weight:800;}
+.xp-nums{font-family:var(--font-mono);font-size:.78rem;color:var(--text-soft);}
+.xp-bar{height:10px;border-radius:999px;background:var(--surface-3);overflow:hidden;border:1px solid var(--border);}
+.xp-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--primary),var(--primary-dark));transition:width .6s cubic-bezier(.4,0,.2,1);position:relative;}
+.xp-fill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:20px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3));border-radius:999px;}
+
+/* QUICK STATS (home) */
+.quick-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
+.qs-card{padding:12px 8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-xs);text-align:center;}
+.qs-val{font-family:var(--font-mono);font-size:1.1rem;font-weight:600;}
+.qs-lbl{font-size:.6rem;color:var(--text-soft);font-weight:700;margin-top:3px;text-transform:uppercase;letter-spacing:.04em;}
+
+/* DAILY CARD */
+.daily-card{margin-top:14px;padding:18px 20px;border-radius:var(--radius);background:linear-gradient(135deg,#1a1714,#2d2420);border:1px solid rgba(255,122,24,.2);box-shadow:0 8px 32px rgba(0,0,0,.2);position:relative;overflow:hidden;cursor:pointer;transition:transform .2s;}
+body.dark .daily-card{background:linear-gradient(135deg,#0c0a08,#1e1710);}
+.daily-card:hover{transform:translateY(-2px);}
+.daily-card:active{transform:scale(.98);}
+.daily-card::before{content:'';position:absolute;right:-20px;top:-20px;width:120px;height:120px;background:radial-gradient(circle,rgba(255,122,24,.2) 0%,transparent 70%);}
+.daily-tag{display:inline-flex;align-items:center;gap:5px;font-size:.65rem;font-weight:800;letter-spacing:.06em;color:var(--primary);text-transform:uppercase;font-family:var(--font-display);margin-bottom:8px;}
+.daily-title{font-family:var(--font-display);font-size:1rem;font-weight:800;color:#f5f0e8;line-height:1.3;}
+.daily-desc{font-size:.78rem;color:rgba(245,240,232,.55);margin-top:5px;}
+.daily-reward{display:inline-flex;align-items:center;gap:5px;margin-top:12px;padding:6px 12px;border-radius:999px;background:rgba(255,122,24,.2);color:#ffb36a;font-size:.75rem;font-weight:800;border:1px solid rgba(255,122,24,.3);}
+.daily-streak{position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:2.2rem;opacity:.6;}
+
+.section-title{font-family:var(--font-display);font-size:.82rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--text-soft);margin:20px 0 10px;}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.stat-card{padding:14px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-xs);text-align:center;}
+.stat-value{font-family:var(--font-mono);font-size:1.3rem;font-weight:600;}
+.stat-label{font-size:.68rem;color:var(--text-soft);font-weight:700;margin-top:3px;text-transform:uppercase;letter-spacing:.04em;}
+
+/* PLAY SETUP */
+.setup-hero{padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px;position:relative;overflow:hidden;}
+.setup-hero::after{content:'';position:absolute;right:-40px;top:-40px;width:150px;height:150px;background:radial-gradient(circle,rgba(255,122,24,.1) 0%,transparent 70%);pointer-events:none;}
+.setup-hero-title{font-family:var(--font-display);font-size:1.4rem;font-weight:900;letter-spacing:-.02em;margin-bottom:4px;}
+.setup-hero-sub{font-size:.82rem;color:var(--text-soft);}
+
+.steps{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:20px;}
+.step-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;font-family:var(--font-display);background:var(--surface-3);color:var(--text-muted);border:2px solid var(--border);transition:all .25s;position:relative;z-index:1;}
+.step-dot.active{background:var(--primary);color:white;border-color:var(--primary);box-shadow:0 0 0 4px var(--primary-light);}
+.step-dot.done{background:var(--green);color:white;border-color:var(--green);box-shadow:0 0 0 4px var(--green-light);}
+.step-line{flex:1;height:2px;background:var(--border);max-width:56px;transition:background .25s;}
+.step-line.done{background:var(--green);}
+.step-panel{display:none;}
+.step-panel.active{display:block;animation:screenIn .2s ease;}
+
+.board-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.board-card{padding:22px 14px 20px;border-radius:var(--radius);border:2px solid var(--border);background:var(--surface);cursor:pointer;transition:all .2s;position:relative;overflow:hidden;text-align:center;}
+.board-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);}
+.board-card:active{transform:scale(.98);}
+.board-card::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;transition:opacity .2s;opacity:.7;}
+.board-card.quick-card::before{background:linear-gradient(90deg,var(--quick),var(--quick-dark));}
+.board-card.classic-card::before{background:linear-gradient(90deg,var(--classic),var(--classic-dark));}
+.board-card.selected{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light),var(--shadow-lg);transform:translateY(-4px);}
+.board-card.quick-card.selected{border-color:var(--quick);box-shadow:0 0 0 3px var(--green-light),var(--shadow-lg);}
+.board-card.classic-card.selected{border-color:var(--classic);box-shadow:0 0 0 3px rgba(249,115,22,.15),var(--shadow-lg);}
+.bc-check{position:absolute;top:12px;right:12px;width:22px;height:22px;border-radius:50%;display:none;align-items:center;justify-content:center;font-size:.68rem;color:white;font-weight:900;}
+.board-card.quick-card.selected .bc-check{display:flex;background:var(--quick);}
+.board-card.classic-card.selected .bc-check{display:flex;background:var(--classic);}
+.bc-icon{font-size:2.4rem;margin-bottom:10px;}
+.bc-mode{font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px;font-family:var(--font-display);}
+.board-card.quick-card .bc-mode{color:var(--quick);}
+.board-card.classic-card .bc-mode{color:var(--classic);}
+.bc-title{font-family:var(--font-display);font-size:1.1rem;font-weight:900;letter-spacing:-.02em;}
+.bc-desc{font-size:.72rem;color:var(--text-soft);margin-top:6px;line-height:1.5;}
+.bc-tags{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:10px;}
+.bc-tag{font-size:.62rem;font-weight:700;padding:3px 9px;border-radius:999px;}
+.board-card.quick-card .bc-tag{background:var(--green-light);color:var(--quick-dark);}
+.board-card.classic-card .bc-tag{background:var(--classic-light);color:var(--classic-dark);}
+
+.diff-list{display:flex;flex-direction:column;gap:10px;}
+.diff-card{padding:16px 17px;border-radius:var(--radius-sm);border:2px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;gap:14px;transition:all .18s;}
+.diff-card:hover{border-color:var(--primary);background:var(--primary-light);transform:translateX(4px);}
+.diff-card.selected{border-color:var(--primary);background:var(--primary-light);box-shadow:0 0 0 3px var(--primary-light);transform:translateX(4px);}
+.diff-icon{font-size:1.6rem;flex-shrink:0;}
+.diff-info{flex:1;}
+.diff-name{font-family:var(--font-display);font-size:.92rem;font-weight:800;}
+.diff-desc{font-size:.72rem;color:var(--text-soft);margin-top:3px;}
+.diff-xp-badge{font-family:var(--font-mono);font-size:.72rem;font-weight:600;padding:5px 11px;border-radius:999px;background:var(--surface-3);color:var(--text-soft);border:1px solid var(--border);flex-shrink:0;}
+.diff-card.selected .diff-xp-badge{background:var(--primary);color:white;border-color:transparent;}
+
+.step-actions{display:flex;gap:9px;margin-top:16px;}
+.btn-back{height:50px;padding:0 20px;border-radius:var(--radius-sm);font-weight:700;background:var(--surface);border:1.5px solid var(--border);color:var(--text-soft);transition:all .15s;flex-shrink:0;}
+.btn-back:hover{border-color:var(--primary);color:var(--primary);}
+.btn-next{flex:1;height:50px;border-radius:var(--radius-sm);font-family:var(--font-display);font-weight:800;font-size:.9rem;color:white;background:linear-gradient(135deg,var(--primary),var(--primary-dark));box-shadow:0 4px 16px var(--primary-glow);transition:all .2s;}
+.btn-next:hover{transform:translateY(-1px);box-shadow:0 6px 20px var(--primary-glow);}
+.btn-next:active{transform:scale(.97);}
+.btn-next:disabled{opacity:.4;pointer-events:none;}
+
+.start-summary{padding:26px 20px;text-align:center;}
+.ss-icon{font-size:3.4rem;margin-bottom:14px;}
+.ss-title{font-family:var(--font-display);font-size:1.25rem;font-weight:900;letter-spacing:-.02em;}
+.ss-desc{font-size:.82rem;color:var(--text-soft);margin-top:8px;line-height:1.6;}
+.ss-tags{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+.ss-tag{padding:6px 14px;border-radius:999px;font-size:.75rem;font-weight:700;background:var(--surface-3);color:var(--text-soft);border:1px solid var(--border);}
+.ss-tag.accent{background:var(--primary-light);color:var(--primary);border-color:transparent;}
+.ss-xp-preview{margin-top:18px;padding:14px 16px;border-radius:var(--radius-xs);background:var(--surface-3);border:1px solid var(--border);}
+.ss-xp-label{font-size:.7rem;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+.ss-xp-val{font-family:var(--font-mono);font-size:1.5rem;font-weight:600;color:var(--primary);margin-top:2px;}
+.btn-start{width:100%;height:56px;margin-top:20px;border-radius:var(--radius-sm);font-family:var(--font-display);font-size:1rem;font-weight:900;letter-spacing:.01em;color:white;background:linear-gradient(135deg,var(--primary),var(--primary-dark));box-shadow:0 6px 24px var(--primary-glow);transition:all .2s;}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 10px 30px var(--primary-glow);}
+.btn-start:active{transform:scale(.97);}
+
+/* ACTIVE GAME */
+.game-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.game-title{font-family:var(--font-display);font-size:1.08rem;font-weight:900;letter-spacing:-.02em;}
+.game-meta{font-size:.72rem;color:var(--text-soft);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.diff-badge-game{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.62rem;font-weight:800;letter-spacing:.03em;font-family:var(--font-display);}
+.diff-badge-game.easy{background:rgba(34,197,94,.12);color:#15803d;}
+.diff-badge-game.moderate{background:rgba(245,158,11,.12);color:#b45309;}
+.diff-badge-game.hard{background:rgba(239,68,68,.12);color:#b91c1c;}
+.reward-preview{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;background:var(--primary-light);color:var(--primary);font-size:.68rem;font-weight:800;font-family:var(--font-mono);border:1px solid rgba(255,122,24,.18);}
+.saving-badge-Nx{display:none;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:rgba(59,130,246,.1);color:var(--blue);font-size:.68rem;font-weight:700;border:1px solid rgba(59,130,246,.2);animation:pulseNx .8s ease-in-out infinite alternate;}
+.saving-badge-Nx.show{display:inline-flex;}
+@keyframes pulseNx{from{opacity:.6}to{opacity:1}}
+
+.game-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px;}
+.gs-card{padding:11px 6px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-xs);}
+.gs-val{font-family:var(--font-mono);font-size:1rem;font-weight:600;}
+.gs-lbl{font-size:.58rem;color:var(--text-soft);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-top:3px;}
+.lives-display{font-size:.85rem;letter-spacing:1px;}
+.hints-display{font-size:.85rem;}
+
+.tools{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px;}
+.tool-btn{height:46px;border-radius:var(--radius-sm);background:var(--surface);border:1.5px solid var(--border);color:var(--text);font-weight:700;font-size:.7rem;transition:all .15s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
+.tool-btn .t-icon{font-size:.95rem;}
+.tool-btn .t-lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.04em;opacity:.7;}
+.tool-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light);}
+.tool-btn:active{transform:scale(.94);}
+.tool-btn.active{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border-color:transparent;box-shadow:0 3px 12px var(--primary-glow);}
+
+.sudoku-card{padding:9px;}
+.sudoku-board{display:grid;aspect-ratio:1;border:2.5px solid var(--primary);border-radius:12px;overflow:hidden;background:var(--surface-2);}
+.sudoku-board.g4{grid-template-columns:repeat(4,1fr);}
+.sudoku-board.g9{grid-template-columns:repeat(9,1fr);}
+.cell{display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:600;cursor:pointer;user-select:none;border:1px solid var(--border);background:var(--surface);transition:background .1s;}
+.sudoku-board.g9 .cell{font-size:.75rem;}
+.sudoku-board.g4 .cell{font-size:.95rem;}
+.cell.fixed{font-weight:700;color:var(--text);}
+.cell.selected{background:rgba(255,122,24,.22)!important;}
+.cell.highlight{background:rgba(255,122,24,.06);}
+.cell.same-value{background:rgba(255,122,24,.12);}
+.cell.correct{color:var(--primary);}
+.cell.wrong{background:rgba(239,68,68,.18)!important;color:var(--red);animation:shakeCellNx .3s ease;}
+@keyframes shakeCellNx{0%,100%{transform:translateX(0);}25%{transform:translateX(-3px);}75%{transform:translateX(3px);}}
+.sudoku-board.g9 .cell[data-col="2"],.sudoku-board.g9 .cell[data-col="5"]{border-right:2px solid rgba(255,122,24,.35);}
+.sudoku-board.g9 .cell[data-row="2"],.sudoku-board.g9 .cell[data-row="5"]{border-bottom:2px solid rgba(255,122,24,.35);}
+.sudoku-board.g4 .cell[data-col="1"]{border-right:2px solid rgba(255,122,24,.35);}
+.sudoku-board.g4 .cell[data-row="1"]{border-bottom:2px solid rgba(255,122,24,.35);}
+
+.numpad{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:12px;}
+.num-btn{height:52px;border-radius:var(--radius-sm);font-family:var(--font-mono);font-weight:600;font-size:1.1rem;background:var(--surface);border:1.5px solid var(--border);color:var(--text);transition:all .1s;}
+.num-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light);box-shadow:0 2px 8px var(--primary-light);}
+.num-btn:active{transform:scale(.9);}
+
+.play-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px;}
+.btn{height:50px;border-radius:var(--radius-sm);font-weight:800;font-size:.85rem;transition:all .15s;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;box-shadow:0 4px 14px var(--primary-glow);}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px var(--primary-glow);}
+.btn-secondary{background:var(--surface);border:1.5px solid var(--border);color:var(--text);}
+.btn-secondary:hover{border-color:var(--border-medium);}
+
+/* PROFILE */
+.profile-hero{padding:28px 20px 22px;text-align:center;}
+.avatar-ring{width:84px;height:84px;margin:0 auto;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-dark));display:flex;align-items:center;justify-content:center;font-size:2.1rem;box-shadow:0 8px 28px var(--primary-glow);}
+.profile-name{font-family:var(--font-display);font-size:1.2rem;font-weight:900;margin-top:12px;}
+.profile-level-badge{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:4px 12px;border-radius:999px;background:var(--primary-light);color:var(--primary);font-size:.75rem;font-weight:800;font-family:var(--font-display);}
+.profile-email{font-size:.75rem;color:var(--text-muted);margin-top:5px;}
+.tier-badge{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:5px 14px;border-radius:999px;font-size:.78rem;font-weight:800;font-family:var(--font-display);}
+.tier-bronze{background:rgba(180,120,80,.12);color:#8b5a30;border:1px solid rgba(180,120,80,.25);}
+.tier-silver{background:rgba(150,150,170,.12);color:#7a7a9a;border:1px solid rgba(150,150,170,.25);}
+.tier-gold{background:rgba(245,158,11,.12);color:#b45309;border:1px solid rgba(245,158,11,.25);}
+.tier-platinum{background:rgba(6,182,212,.12);color:#0891b2;border:1px solid rgba(6,182,212,.25);}
+.tier-diamond{background:rgba(139,92,246,.12);color:#7c3aed;border:1px solid rgba(139,92,246,.25);}
+.profile-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;}
+.pstat{padding:16px 14px;}
+.pstat-value{font-family:var(--font-mono);font-size:1.45rem;font-weight:600;}
+.pstat-label{font-size:.68rem;color:var(--text-soft);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-top:4px;}
+.profile-xp-section{margin:0 0 2px;padding:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-xs);}
+.pxp-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.pxp-level{font-family:var(--font-display);font-size:.88rem;font-weight:800;}
+.pxp-nums{font-family:var(--font-mono);font-size:.78rem;color:var(--text-soft);}
+.pxp-bar{height:9px;border-radius:999px;background:var(--surface-3);overflow:hidden;border:1px solid var(--border);}
+.pxp-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--primary),var(--primary-dark));transition:width .6s;}
+.pxp-remaining{font-size:.68rem;color:var(--text-muted);margin-top:5px;text-align:right;}
+.achievements-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+.ach-card{padding:14px 10px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-xs);transition:all .15s;}
+.ach-card.unlocked{border-color:rgba(255,122,24,.2);background:linear-gradient(135deg,rgba(255,122,24,.06),var(--surface));}
+.ach-card.locked{opacity:.45;filter:grayscale(1);}
+.ach-icon{font-size:1.6rem;margin-bottom:6px;}
+.ach-name{font-size:.65rem;font-weight:800;letter-spacing:.02em;line-height:1.3;}
+
+.settings-list{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-xs);overflow:hidden;}
+.settings-row{padding:17px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);}
+.settings-row:last-child{border-bottom:none;}
+.settings-label{font-weight:700;font-size:.88rem;}
+.settings-sub{font-size:.72rem;color:var(--text-soft);margin-top:2px;}
+.toggle{width:46px;height:25px;border-radius:999px;background:var(--border-medium);cursor:pointer;border:none;position:relative;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--primary);}
+.toggle::after{content:'';position:absolute;width:19px;height:19px;border-radius:50%;background:white;top:3px;left:3px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.toggle.on::after{transform:translateX(21px);}
+
+/* LEADERBOARD */
+.lb-header-card{padding:20px;background:linear-gradient(135deg,#1a1714,#2d2420);border:1px solid rgba(255,122,24,.2);border-radius:var(--radius);text-align:center;margin-bottom:16px;position:relative;overflow:hidden;}
+body.dark .lb-header-card{background:linear-gradient(135deg,#0c0a08,#1e1710);}
+.lb-header-card::before{content:'';position:absolute;left:50%;top:-40px;transform:translateX(-50%);width:200px;height:200px;background:radial-gradient(circle,rgba(255,122,24,.15) 0%,transparent 70%);}
+.lb-header-title{font-family:var(--font-display);font-size:1.3rem;font-weight:900;color:#f5f0e8;letter-spacing:-.02em;}
+.lb-header-sub{font-size:.78rem;color:rgba(245,240,232,.5);margin-top:4px;}
+.lb-podium{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:9px;margin-bottom:16px;align-items:end;}
+.lb-podium-card{padding:18px 10px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);text-align:center;background:var(--surface);box-shadow:var(--shadow-xs);position:relative;}
+.lb-podium-card.rank1{border-color:rgba(245,158,11,.35);padding:22px 10px 20px;background:linear-gradient(170deg,rgba(245,158,11,.07),var(--surface));box-shadow:0 8px 28px rgba(245,158,11,.1);}
+.lb-podium-card.rank2{background:linear-gradient(170deg,rgba(150,150,170,.07),var(--surface));border-color:rgba(150,150,170,.25);}
+.lb-podium-card.rank3{background:linear-gradient(170deg,rgba(180,120,80,.07),var(--surface));border-color:rgba(180,120,80,.25);}
+.podium-medal{font-size:1.6rem;margin-bottom:6px;}
+.podium-avatar{font-size:1.4rem;margin-bottom:5px;}
+.podium-name{font-size:.72rem;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px;}
+.podium-xp{font-family:var(--font-mono);font-size:.68rem;color:var(--text-soft);margin-top:2px;}
+.podium-level{font-size:.62rem;color:var(--primary);font-weight:700;margin-top:2px;}
+.lb-you-banner{margin:0 0 12px;padding:14px 16px;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--primary-light),rgba(255,122,24,.05));border:1.5px solid rgba(255,122,24,.3);display:flex;align-items:center;justify-content:space-between;}
+.lb-you-left{display:flex;align-items:center;gap:10px;}
+.lb-you-ava{font-size:1.3rem;}
+.lb-you-name{font-size:.84rem;font-weight:800;color:var(--primary);}
+.lb-you-sub{font-size:.68rem;color:var(--text-soft);margin-top:1px;}
+.lb-you-rank-badge{font-family:var(--font-mono);font-size:1rem;font-weight:700;color:var(--primary);background:rgba(255,122,24,.12);padding:6px 14px;border-radius:999px;border:1px solid rgba(255,122,24,.2);}
+.lb-list-header{display:grid;grid-template-columns:40px 1fr auto;padding:8px 14px;font-size:.65rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;}
+.lb-list{display:flex;flex-direction:column;gap:6px;}
+.lb-item{display:grid;grid-template-columns:40px 1fr auto;padding:13px 15px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-xs);transition:all .15s;}
+.lb-item:hover{border-color:var(--border-medium);transform:translateY(-1px);box-shadow:var(--shadow-sm);}
+.lb-item.is-me{border-color:rgba(255,122,24,.25);background:var(--primary-light);}
+.lb-rank-col{font-family:var(--font-mono);font-size:.9rem;font-weight:700;color:var(--text-soft);}
+.lb-rank-col.top3{font-size:1.1rem;color:var(--text);}
+.lb-player-col{display:flex;align-items:center;gap:10px;}
+.lb-avatar{font-size:1.25rem;}
+.lb-player-name{font-size:.85rem;font-weight:800;}
+.lb-player-sub{font-size:.68rem;color:var(--text-soft);margin-top:1px;}
+.lb-xp-col{text-align:right;}
+.lb-xp-val{font-family:var(--font-mono);font-size:.88rem;font-weight:700;color:var(--primary);}
+.lb-xp-wins{font-size:.65rem;color:var(--text-muted);margin-top:1px;}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:100%;max-width:480px;height:var(--nav-height);background:var(--surface);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,1fr);z-index:200;backdrop-filter:blur(20px);box-shadow:0 -4px 24px rgba(0,0,0,.07);}
+body.dark .bottom-nav{background:rgba(26,23,20,.95);}
+.nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--text-muted);transition:all .2s;position:relative;}
+.nav-btn.active{color:var(--primary);}
+.nav-btn.active::before{content:'';position:absolute;top:0;width:28px;height:2.5px;border-radius:0 0 4px 4px;background:var(--primary);}
+.nav-icon-wrap{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:transparent;transition:all .2s;}
+.nav-btn[data-screen="playScreen"] .nav-icon-wrap{background:var(--surface-3);border:1.5px solid var(--border);}
+.nav-btn[data-screen="playScreen"].active .nav-icon-wrap{background:linear-gradient(135deg,var(--primary),var(--primary-dark));box-shadow:0 4px 16px var(--primary-glow);transform:scale(1.08);border-color:transparent;}
+.nav-btn[data-screen="playScreen"].active::before{display:none;}
+.nav-icon{font-size:1.1rem;}
+.nav-text{font-size:.62rem;font-weight:800;letter-spacing:.02em;font-family:var(--font-display);}
+
+/* TOAST */
+.toast-wrap{position:fixed;top:76px;left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:440px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{display:flex;align-items:flex-start;gap:11px;padding:13px 15px;border-radius:16px;background:var(--surface);border:1.5px solid var(--border);box-shadow:var(--shadow-lg);pointer-events:all;animation:toastIn .3s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden;}
+.toast.out{animation:toastOut .2s ease forwards;}
+.toast::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px;}
+.toast.success::before{background:var(--green);}
+.toast.error::before{background:var(--red);}
+.toast.warning::before{background:var(--yellow);}
+.toast.info::before{background:var(--blue);}
+.toast-icon{font-size:1.2rem;flex-shrink:0;margin-top:1px;}
+.toast-body{flex:1;}
+.toast-title{font-size:.84rem;font-weight:800;font-family:var(--font-display);}
+.toast-msg{font-size:.76rem;color:var(--text-soft);margin-top:2px;line-height:1.4;}
+.toast-close{color:var(--text-muted);font-size:.95rem;cursor:pointer;flex-shrink:0;margin-top:1px;}
+@keyframes toastIn{from{opacity:0;transform:translateY(-10px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0;transform:translateY(-8px) scale(.95)}}
+
+/* MODAL */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.55);backdrop-filter:blur(12px);z-index:5000;}
+.modal.show{display:flex;}
+.modal-card{width:100%;max-width:400px;padding:28px 22px;background:var(--surface);border:1px solid var(--border);border-radius:24px;box-shadow:var(--shadow-xl);animation:modalIn .25s cubic-bezier(.34,1.3,.64,1);}
+@keyframes modalIn{from{opacity:0;transform:scale(.94) translateY(8px)}to{opacity:1;transform:none}}
+.modal-icon{font-size:2.8rem;text-align:center;margin-bottom:12px;}
+.modal-card h2{font-family:var(--font-display);font-size:1.3rem;font-weight:900;text-align:center;letter-spacing:-.02em;}
+.modal-card p{margin-top:9px;line-height:1.6;color:var(--text-soft);text-align:center;font-size:.85rem;}
+.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:20px;}
+.win-breakdown{margin-top:16px;padding:14px;background:var(--surface-3);border-radius:var(--radius-sm);border:1px solid var(--border);}
+.win-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;}
+.win-row+.win-row{border-top:1px solid var(--border);}
+.win-lbl{font-size:.78rem;color:var(--text-soft);font-weight:600;}
+.win-val{font-family:var(--font-mono);font-size:.82rem;font-weight:600;}
+.win-val.xp{color:var(--primary);font-weight:700;}
+.win-total{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:2px solid var(--border);}
+.win-total-lbl{font-family:var(--font-display);font-size:.85rem;font-weight:800;}
+.win-total-val{font-family:var(--font-mono);font-size:1.1rem;font-weight:600;color:var(--primary);}
+.level-up-banner{margin-top:12px;padding:12px 16px;border-radius:var(--radius-xs);background:linear-gradient(135deg,rgba(255,122,24,.15),rgba(255,122,24,.05));border:1px solid rgba(255,122,24,.25);text-align:center;font-family:var(--font-display);font-size:.88rem;font-weight:800;color:var(--primary);}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-soft);}
+.empty-state .e-icon{font-size:2.5rem;margin-bottom:10px;}
+.empty-state p{font-size:.85rem;}
+.nxdb-status-Nx{display:inline-flex;align-items:center;gap:5px;font-size:.65rem;font-weight:700;color:var(--text-muted);padding:3px 9px;border-radius:999px;background:var(--surface-3);border:1px solid var(--border);}
+.nxdb-status-Nx.ok{color:#16a34a;background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.15);}
+.nxdb-status-Nx.syncing{color:var(--blue);background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.15);}
+.nxdb-status-Nx.err{color:var(--red);background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.15);}
+
+@media(max-width:380px){
+  .hero-title{font-size:1.5rem;}
+  .cell{font-size:.7rem!important;}
+  .num-btn{height:44px;font-size:.95rem;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .achievements-grid{grid-template-columns:repeat(3,1fr);}
+  .lb-podium{grid-template-columns:1fr 1.1fr 1fr;}
+}
+  .screen{
+  padding-bottom:120px !important;
+}
+ /* ==========================================
+   EDIT PROFILE MODAL SCROLL FIX
+========================================== */
+
+#editProfileModal{
+  overflow-y:auto !important;
+  padding:20px !important;
+}
+
+#editProfileModal .modal-card{
+  max-height:90vh !important;
+  overflow-y:auto !important;
+  -webkit-overflow-scrolling:touch;
+}
+  #editAvatarGridNx{
+  max-height:260px;
+  overflow-y:auto;
+  padding-right:4px;
+}
+  
+</style>
+</head>
+<body>
+  
+<div class="app">
+  
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo-wrap">
+      <div class="logo">
+        <img src="../IMG/AF LOGO 2.jpeg" alt="AF" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="logo-fallback" style="display:none">AF</div>
+      </div>
+      <div>
+        <div class="logo-title">AcademeForge</div>
+        <div class="logo-sub">Sudoku Master</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button
+  class="af-back-btn"
+  onclick="history.back()"
+  type="button"
+  aria-label="Back"
+>
+  ←
+</button>
+      
+      <button class="icon-btn" id="headerAvatarBtnNx" onclick="openScreenNx('profileScreen')">👤</button>
+    </div>
+  </div>
+</header>
+  
+<!-- Offline Banner -->
+<div id="offlineBannerNx" class="offline-banner">
+  <div class="offline-marquee">
+    📡 Offline Mode • Games continue normally • Progress will sync automatically when connection returns • Pending Sync:
+    📡 Offline Mode • Games continue normally • Progress will sync automatically when connection returns • Pending Sync:
+    📡 Offline Mode • Games continue normally • Progress will sync automatically when connection returns • Pending Sync:
+    📡 Offline Mode • Games continue normally • Progress will sync automatically when connection returns • Pending Sync:
+    <span id="queueCountNx">0</span>
+  </div>
+</div>
+
+<!-- Refresh Indicator -->
+<div id="refreshIndicatorNx" class="refresh-indicator-Nx">
+  <div class="spin-Nx"></div>
+  <span id="refreshLabelNx">Refreshing…</span>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<main class="main">
+
+<!-- ══ HOME ══ -->
+<section id="homeScreen" class="screen active">
+ 
+  <div class="hero-card">
+    <div class="hero-eyebrow">⚡ Level <span id="heroLevelNx">1</span></div>
+    <h2 class="hero-title">Challenge<br>Your Brain</h2>
+    <p class="hero-sub">Play Sudoku, earn XP, climb the leaderboard.</p>
+    <div class="xp-section">
+      <div class="xp-row">
+        <span class="xp-level" id="heroLevelLabelNx">Level 1</span>
+        <span class="xp-nums" id="heroXpNumsNx">0 / 500 XP</span>
+      </div>
+      <div class="xp-bar"><div id="heroXpFillNx" class="xp-fill" style="width:0%"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px;align-items:center">
+        <span id="nxdbStatusChipNx" class="nxdb-status-Nx">AF Nexus</span>
+        <span style="font-size:.68rem;color:var(--text-muted)" id="heroXpRemainingNx">500 XP to next level</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="daily-card" onclick="startDailyChallengeNx()">
+    <div class="daily-tag">🗓️ Daily Challenge</div>
+    <div class="daily-title">Today's Sudoku Challenge</div>
+    <div class="daily-desc" id="dailyChallengeDescNx">Complete today's puzzle for a bonus reward</div>
+    <div class="daily-reward">🎁 +25 Bonus XP</div>
+    <div class="daily-streak" id="dailyStreakIconNx">🔥</div>
+  </div>
+  
+  <!-- Quick Stats -->
+  <div class="quick-stats-row">
+    <div class="qs-card"><div id="qsLevelNx" class="qs-val">1</div><div class="qs-lbl">Level</div></div>
+    <div class="qs-card"><div id="qsWinsNx" class="qs-val">0</div><div class="qs-lbl">Wins</div></div>
+    <div class="qs-card"><div id="qsRankNx" class="qs-val">#--</div><div class="qs-lbl">Rank</div></div>
+  </div>
+
+
+  <div style="margin-top:16px;padding:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);text-align:center">
+    <div style="font-size:2rem;margin-bottom:8px">🎮</div>
+    <div style="font-family:var(--font-display);font-size:.95rem;font-weight:800;margin-bottom:6px">Ready to Play?</div>
+    <div style="font-size:.78rem;color:var(--text-soft);margin-bottom:14px">Tap Play below to start a new game</div>
+    <button onclick="openScreenNx('playScreen')" style="width:100%;height:48px;border-radius:12px;font-family:var(--font-display);font-weight:800;font-size:.88rem;color:white;background:linear-gradient(135deg,var(--primary),var(--primary-dark));box-shadow:0 4px 16px var(--primary-glow);transition:all .2s;border:none;cursor:pointer">🚀 Start Playing</button>
+  </div>
+
+   <div id="afSyncBarNx" class="af-sync-bar unsynced" style="margin-bottom:14px;margin-left:0;margin-right:0">
+    <div id="afAvatarNx" class="af-avatar">?</div>
+    <div class="af-info">
+      <div id="afNameNx" class="af-name">Not Synced</div>
+      <div id="afSubNx" class="af-sub">Open AcademeForge app to sync</div>
+    </div>
+    <span id="afBadgeNx" class="af-badge warn">Not Synced</span>
+  </div>
+</section>
+
+<!-- ══ PLAY ══ -->
+<section id="playScreen" class="screen">
+  <div id="setupViewNx">
+    <div class="setup-hero">
+      <div class="setup-hero-title">🎮 New Game</div>
+      <div class="setup-hero-sub">Configure your puzzle and start playing</div>
+    </div>
+    <div class="steps">
+      <div class="step-dot active" id="sdNx1">1</div>
+      <div class="step-line" id="slNx1"></div>
+      <div class="step-dot" id="sdNx2">2</div>
+      <div class="step-line" id="slNx2"></div>
+      <div class="step-dot" id="sdNx3">3</div>
+    </div>
+    <div class="step-panel active" id="stepNx1">
+      <div class="board-grid">
+        <div class="board-card quick-card" data-board="4" onclick="selectBoardNx(4)">
+          <div class="bc-check">✓</div>
+          <div class="bc-icon">⚡</div>
+          <div class="bc-mode">Quick Play</div>
+          <div class="bc-title">4 × 4</div>
+          <div class="bc-desc">Fast games, beginner friendly, 2–3 min sessions</div>
+          <div class="bc-tags"><span class="bc-tag">3 Hints</span><span class="bc-tag">Lower XP</span></div>
+        </div>
+        <div class="board-card classic-card" data-board="9" onclick="selectBoardNx(9)">
+          <div class="bc-check">✓</div>
+          <div class="bc-icon">🧩</div>
+          <div class="bc-mode">Classic Sudoku</div>
+          <div class="bc-title">9 × 9</div>
+          <div class="bc-desc">Competitive mode, longer sessions, full challenge</div>
+          <div class="bc-tags"><span class="bc-tag">5 Hints</span><span class="bc-tag">Higher XP</span></div>
+        </div>
+      </div>
+      <div class="step-actions">
+        <button class="btn-next" id="stepNx1Next" onclick="goStepNx(2)" disabled>Choose Difficulty →</button>
+      </div>
+    </div>
+    <div class="step-panel" id="stepNx2">
+      <div class="diff-list" id="diffListNx"></div>
+      <div class="step-actions">
+        <button class="btn-back" onclick="goStepNx(1)">← Back</button>
+        <button class="btn-next" id="stepNx2Next" onclick="goStepNx(3)" disabled>Preview →</button>
+      </div>
+    </div>
+    <div class="step-panel" id="stepNx3">
+      <div class="card start-summary">
+        <div class="ss-icon" id="ssIconNx">🧩</div>
+        <div class="ss-title" id="ssTitleNx">Ready to Play!</div>
+        <p class="ss-desc" id="ssDescNx">Your puzzle is ready.</p>
+        <div class="ss-tags">
+          <span class="ss-tag accent" id="ssBoardNx">9×9</span>
+          <span class="ss-tag accent" id="ssDiffNx">Easy</span>
+          <span class="ss-tag" id="ssHintsNx">5 Hints</span>
+          <span class="ss-tag" id="ssMistakesNx">5 Lives</span>
+        </div>
+        <div class="ss-xp-preview">
+          <div class="ss-xp-label">Reward on completion</div>
+          <div class="ss-xp-val" id="ssXpNx">+50 XP</div>
+        </div>
+        <button class="btn-start" onclick="startGameNx()">🚀 Start Game</button>
+      </div>
+      <div class="step-actions">
+        <button class="btn-back" onclick="goStepNx(2)">← Change Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="gameViewNx" style="display:none">
+    <div class="game-header">
+      <div>
+        <div class="game-title" id="gameTitleNx">Sudoku Match</div>
+        <div class="game-meta">
+          <span id="gameDiffBadgeNx" class="diff-badge-game easy">Easy</span>
+          <span id="gameSubtitleNx">9×9</span>
+          <span id="gameRewardPreviewNx" class="reward-preview">+50 XP</span>
+          <span id="savingBadgeNx" class="saving-badge-Nx">⏳ Saving…</span>
+        </div>
+      </div>
+      <button class="icon-btn" onclick="confirmNewGameNx()" title="New game">🔄</button>
+    </div>
+    <div class="game-stats">
+      <div class="gs-card"><div id="timerDisplayNx" class="gs-val">00:00</div><div class="gs-lbl">Time</div></div>
+      <div class="gs-card"><div id="livesDisplayNx" class="gs-val lives-display">❤️❤️❤️❤️❤️</div><div class="gs-lbl">Lives</div></div>
+      <div class="gs-card"><div id="hintsDisplayNx" class="gs-val hints-display">💡 x5</div><div class="gs-lbl">Hints</div></div>
+      <div class="gs-card"><div id="diffDisplayNx" class="gs-val" style="font-size:.82rem">Easy</div><div class="gs-lbl">Mode</div></div>
+    </div>
+    <div class="tools">
+      <button id="notesBtnNx" class="tool-btn" onclick="toggleNotesNx()">
+        <span class="t-icon">📝</span><span class="t-lbl">Notes</span>
+      </button>
+      <button class="tool-btn" onclick="eraseCellNx()">
+        <span class="t-icon">🧹</span><span class="t-lbl">Erase</span>
+      </button>
+      <button class="tool-btn" onclick="useHintNx()">
+        <span class="t-icon">💡</span><span class="t-lbl">Hint</span>
+      </button>
+      <button class="tool-btn" onclick="solvePuzzleNx()">
+        <span class="t-icon">🎯</span><span class="t-lbl">Solve</span>
+      </button>
+    </div>
+    <div class="card sudoku-card">
+      <div id="sudokuBoardNx" class="sudoku-board g9"></div>
+    </div>
+    <div id="numpadNx" class="numpad"></div>
+    <div class="play-actions">
+      <button class="btn btn-secondary" onclick="checkBoardNx()">✔ Check</button>
+      <button class="btn btn-primary" onclick="confirmNewGameNx()">🔄 New Game</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PROFILE ══ -->
+<section id="profileScreen" class="screen">
+  <div class="card profile-hero">
+    <div id="profileAvatarNx" class="avatar-ring">😀</div>
+    <div id="profileNameNx" class="profile-name">Guest Player</div>
+    <div id="profileLevelBadgeNx" class="profile-level-badge">⚡ Level 1</div>
+    <div id="profileTierBadgeNx" class="tier-badge tier-bronze">🥉 Bronze</div>
+    <div id="profileEmailNx" class="profile-email"></div>
+    <div id="syncStatusNx" style="margin-top:8px;font-size:.72rem;color:var(--text-muted)"></div>
+  </div>
+  <div class="profile-xp-section" style="margin-top:10px">
+    <div class="pxp-row">
+      <span class="pxp-level" id="pxpLevelNx">Level 1</span>
+      <span class="pxp-nums" id="pxpNumsNx">0 / 500 XP</span>
+    </div>
+    <div class="pxp-bar"><div id="pxpFillNx" class="pxp-fill" style="width:0%"></div></div>
+    <div class="pxp-remaining" id="pxpRemainingNx">500 XP to next level</div>
+  </div>
+  <div class="section-title">Statistics</div>
+  <div class="profile-stats">
+    <div class="card pstat"><div class="pstat-value" id="pTotalXpNx">0</div><div class="pstat-label">Total XP</div></div>
+    <div class="card pstat"><div class="pstat-value" id="pWinsNx">0</div><div class="pstat-label">Wins</div></div>
+    <div class="card pstat"><div class="pstat-value" id="pPlayedNx">0</div><div class="pstat-label">Played</div></div>
+    <div class="card pstat"><div class="pstat-value" id="pWinRateNx">0%</div><div class="pstat-label">Win Rate</div></div>
+    <div class="card pstat"><div class="pstat-value" id="pBestTimeNx">--</div><div class="pstat-label">Best Time</div></div>
+    <div class="card pstat"><div class="pstat-value" id="pGlobalRankNx">#--</div><div class="pstat-label">Global Rank</div></div>
+  </div>
+  <div class="section-title">Achievements</div>
+  <div class="achievements-grid" id="achievementsGridNx"></div>
+  <div id="afProfileCardNx" style="display:none;margin-top:14px">
+    <div class="section-title">AcademeForge Account</div>
+    <div class="settings-list">
+      <div class="settings-row"><div><div class="settings-label">Name</div></div><div id="afpcNameNx" style="font-size:.84rem;font-weight:700;color:var(--text-soft)">-</div></div>
+      <div class="settings-row"><div><div class="settings-label">Phone / ID</div></div><div id="afpcPhoneNx" style="font-size:.84rem;font-weight:700;color:var(--text-soft)">-</div></div>
+      <div class="settings-row"><div><div class="settings-label">Email</div></div><div id="afpcEmailNx" style="font-size:.84rem;font-weight:700;color:var(--text-soft)">-</div></div>
+      <div class="settings-row"><div><div class="settings-label">Student ID</div></div><div id="afpcSidNx" style="font-size:.84rem;font-weight:700;color:var(--text-soft)">-</div></div>
+    </div>
+  </div>
+  <div class="section-title">Synced Status</div>
+  <div class="settings-list">
+    <div class="settings-row">
+  <div>
+    <div class="settings-label">Profile Sync</div>
+    <div class="settings-sub">Account information synced</div>
+  </div>
+  <span id="nxdbPlayerStatusNx" class="nxdb-status-Nx">—</span>
+</div>
+
+<div class="settings-row">
+  <div>
+    <div class="settings-label">Game Statistics</div>
+    <div class="settings-sub">Progress and achievements synced</div>
+  </div>
+  <span id="nxdbStatsStatusNx" class="nxdb-status-Nx">—</span>
+</div>
+
+<div class="settings-row">
+  <div>
+    <div class="settings-label">Leaderboard</div>
+    <div class="settings-sub">Rankings updated automatically</div>
+  </div>
+  <span id="nxdbLbStatusNx" class="nxdb-status-Nx">—</span>
+</div>
+
+<div class="settings-row">
+  <div>
+    <div class="settings-label">Last Sync</div>
+    <div class="settings-sub">Updated automatically during gameplay</div>
+  </div>
+  <span id="nxdbLastSyncNx" style="font-size:.72rem;color:var(--text-muted)">—</span>
+</div>
+</section>
+
+<!-- ══ LEADERBOARD ══ -->
+<section id="leaderboardScreen" class="screen">
+  <div class="lb-header-card">
+    <div style="font-size:2rem;margin-bottom:8px">🏆</div>
+    <div class="lb-header-title">Global Leaderboard</div>
+    <div class="lb-header-sub">Powered by AF Nexus</div>
+  </div>
+  <div id="lbYouBannerNx" style="display:none" class="lb-you-banner">
+    <div class="lb-you-left">
+      <div class="lb-you-ava" id="lbYouAvaNx">😀</div>
+      <div>
+        <div class="lb-you-name" id="lbYouNameNx">You</div>
+        <div class="lb-you-sub" id="lbYouSubNx">Your current ranking</div>
+      </div>
+    </div>
+    <div class="lb-you-rank-badge" id="lbYouRankNx">#--</div>
+  </div>
+  <div id="lbPodiumNx" class="lb-podium" style="display:none"></div>
+  <div class="lb-list-header"><span>Rank</span><span>Player</span><span>XP</span></div>
+  <div id="lbListNx" class="lb-list">
+    <div class="empty-state"><div class="e-icon">⏳</div><p>Loading leaderboard…</p></div>
+  </div>
+</section>
+
+<!-- ══ SETTINGS ══ -->
+<section id="settingsScreen" class="screen">
+  <div class="section-title">Account &amp; Settings</div>
+  <div class="settings-list">
+    <div class="settings-row">
+      <div><div class="settings-label">Edit Profile</div><div class="settings-sub">Change username or avatar</div></div>
+      <button class="icon-btn" onclick="openEditProfileNx()">✏️</button>
+    </div>
+    <div class="settings-row">
+      <div><div class="settings-label">Dark Mode</div></div>
+      <button id="darkToggleNx" class="toggle" onclick="toggleThemeNx()"></button>
+    </div>
+    <div class="settings-row">
+      <div><div class="settings-label">Sound Effects</div></div>
+      <button id="soundToggleNx" class="toggle" onclick="toggleSoundNx()"></button>
+    </div>
+    <div class="settings-row">
+      <div><div class="settings-label">Manual Refresh</div><div class="settings-sub">Pull latest data</div></div>
+      <button class="icon-btn" onclick="refreshSudokuNxdb()">🔄</button>
+    </div>
+    <div class="settings-row">
+      <div><div class="settings-label">Sync Offline Games</div><div class="settings-sub" id="offlineSyncSubNx">No pending games</div></div>
+      <button class="icon-btn" onclick="flushOfflineQueueNx()">☁️</button>
+    </div>
+    <div class="settings-row">
+      <div><div class="settings-label">Reset Progress</div><div class="settings-sub">Clear all local game data</div></div>
+      <button class="icon-btn" onclick="confirmResetProgressNx()">🗑️</button>
+    </div>
+  </div>
+
+  <h3 class="section-title">Rank Tiers</h3>
+
+<div class="settings-list">
+
+  <div class="settings-row">
+    <div class="settings-label">🥉 Bronze</div>
+    <span style="font-family:var(--font-mono);font-size:.8rem;color:#cd7f32">
+      Level 1 - 4
+    </span>
+  </div>
+
+  <div class="settings-row">
+    <div class="settings-label">🥈 Silver</div>
+    <span style="font-family:var(--font-mono);font-size:.8rem;color:#c0c0c0">
+      Level 5 - 9
+    </span>
+  </div>
+
+  <div class="settings-row">
+    <div class="settings-label">🥇 Gold</div>
+    <span style="font-family:var(--font-mono);font-size:.8rem;color:#ffd700">
+      Level 10 - 14
+    </span>
+  </div>
+
+  <div class="settings-row">
+    <div class="settings-label">🔷 Platinum</div>
+    <span style="font-family:var(--font-mono);font-size:.8rem;color:#60a5fa">
+      Level 15 - 19
+    </span>
+  </div>
+
+  <div class="settings-row">
+    <div class="settings-label">💎 Diamond</div>
+    <span style="font-family:var(--font-mono);font-size:.8rem;color:#22d3ee">
+      Level 20+
+    </span>
+  </div>
+
+</div>
+  
+  <h3 class="section-title">XP System</h3>
+  <div class="settings-list">
+    <div class="settings-row"><div class="settings-label">4×4 Easy</div><span style="font-family:var(--font-mono);font-size:.8rem;color:var(--primary)">+25 XP</span></div>
+    <div class="settings-row"><div class="settings-label">4×4 Moderate</div><span style="font-family:var(--font-mono);font-size:.8rem;color:var(--primary)">+40 XP</span></div>
+    <div class="settings-row"><div class="settings-label">4×4 Hard</div><span style="font-family:var(--font-mono);font-size:.8rem;color:var(--primary)">+60 XP</span></div>
+    <div class="settings-row"><div class="settings-label">9×9 Easy</div><span style="font-family:var(--font-mono);font-size:.8rem;color:var(--primary)">+50 XP</span></div>
+    <div class="settings-row"><div class="settings-label">9×9 Moderate</div><span style="font-family:var(--font-mono);font-size:.8rem;color:var(--primary)">+80 XP</span></div>
+    <div class="settings-row"><div class="settings-label">9×9 Hard</div><span style="font-family:var(--font-mono);font-size:.8rem;color:var(--primary)">+120 XP</span></div>
+    <div class="settings-row"><div class="settings-label">Perfect Game Bonus</div><span style="font-family:var(--font-mono);font-size:.8rem;color:var(--green)">+10 XP</span></div>
+    <div class="settings-row"><div class="settings-label">No Hint Bonus</div><span style="font-family:var(--font-mono);font-size:.8rem;color:var(--green)">+10 XP</span></div>
+    <div class="settings-row"><div class="settings-label">Daily Challenge Bonus</div><span style="font-family:var(--font-mono);font-size:.8rem;color:var(--yellow)">+25 XP</span></div>
+    <div class="settings-row"><div class="settings-label">Architecture</div><span style="color:var(--text-soft);font-size:.78rem;font-family:var(--font-mono)">AF Sudoku v5</span></div>
+  </div>
+  
+</section>
+
+</main>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" data-screen="homeScreen" onclick="openScreenNx('homeScreen')">
+    <div class="nav-icon-wrap"><div class="nav-icon">🏠</div></div>
+    <div class="nav-text">Home</div>
+  </button>
+  <button class="nav-btn" data-screen="playScreen" onclick="navToPlayNx()">
+    <div class="nav-icon-wrap"><div class="nav-icon">🎮</div></div>
+    <div class="nav-text">Play</div>
+  </button>
+  <button class="nav-btn" data-screen="profileScreen" onclick="openScreenNx('profileScreen')">
+    <div class="nav-icon-wrap"><div class="nav-icon">👤</div></div>
+    <div class="nav-text">Profile</div>
+  </button>
+  <button class="nav-btn" data-screen="leaderboardScreen" onclick="openScreenNx('leaderboardScreen')">
+    <div class="nav-icon-wrap"><div class="nav-icon">🏆</div></div>
+    <div class="nav-text">Rank</div>
+  </button>
+  <button class="nav-btn" data-screen="settingsScreen" onclick="openScreenNx('settingsScreen')">
+    <div class="nav-icon-wrap"><div class="nav-icon">⚙️</div></div>
+    <div class="nav-text">More</div>
+  </button>
+</nav>
+</div>
+
+<!-- MODALS -->
+<div id="winModal" class="modal">
+  <div class="modal-card">
+    <div class="modal-icon">🎉</div>
+    <h2>Puzzle Solved!</h2>
+    <div class="win-breakdown" id="winBreakdownNx"></div>
+    <div id="levelUpBannerNx" class="level-up-banner" style="display:none"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="closeModalNx('winModal');newGameAfterWinNx()">Play Again</button>
+      <button class="btn btn-secondary" onclick="closeModalNx('winModal');openScreenNx('homeScreen')">Home</button>
+    </div>
+  </div>
+</div>
+
+<div id="gameOverModal" class="modal">
+  <div class="modal-card">
+    <div class="modal-icon">💀</div>
+    <h2>Game Over</h2>
+    <p id="gameOverMsgNx">You used all your lives. Try again!</p>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="closeModalNx('gameOverModal');newGameAfterWinNx()">Try Again</button>
+      <button class="btn btn-secondary" onclick="closeModalNx('gameOverModal');openScreenNx('homeScreen')">Home</button>
+    </div>
+  </div>
+</div>
+
+<div id="editProfileModal" class="modal">
+  <div class="modal-card">
+    <h2 style="margin-bottom:18px;font-family:var(--font-display)">Edit Profile ✏️</h2>
+    <div style="margin-bottom:14px">
+      <label style="display:block;font-size:.72rem;font-weight:800;color:var(--text-soft);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em">Username</label>
+      <input id="editUsernameNx" type="text" maxlength="20" placeholder="Your username"
+        style="width:100%;height:46px;padding:0 13px;border-radius:11px;border:1.5px solid var(--border);background:var(--surface-2);color:var(--text);font-size:.9rem;font-family:var(--font-body)">
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="display:block;font-size:.72rem;font-weight:800;color:var(--text-soft);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">Avatar</label>
+      <div id="editAvatarGridNx" style="display:grid;grid-template-columns:repeat(6,1fr);gap:7px"></div>
+    </div>
+    <div style="display:flex;gap:9px;margin-top:4px">
+      <button class="btn btn-secondary" style="flex:1;height:48px" onclick="closeModalNx('editProfileModal')">Cancel</button>
+      <button class="btn btn-primary" style="flex:2;height:48px" onclick="saveProfileEditNx()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="confirmModal" class="modal">
+  <div class="modal-card">
+    <div id="confirmIconNx" class="modal-icon">⚠️</div>
+    <h2 id="confirmTitleNx">Are you sure?</h2>
+    <p id="confirmMsgNx">This action cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="confirmOkBtnNx">Confirm</button>
+      <button class="btn btn-secondary" onclick="closeModalNx('confirmModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════
+   NXDB CONFIG
+════════════════════════════════════════════ */
+const NXDB_API_URL         = "https://afooyyydhlwngzssgqih.supabase.co/functions/v1/sudoku-sync-player-nxdb";
+const NXDB_PROGRESS_URL    = "https://afooyyydhlwngzssgqih.supabase.co/functions/v1/sudoku-save-progress-nxdb";
+const NXDB_LEADERBOARD_URL = "https://afooyyydhlwngzssgqih.supabase.co/functions/v1/sudoku-leaderboard-nxdb";
+const NXDB_ACHIEVEMENT_URL = "https://afooyyydhlwngzssgqih.supabase.co/functions/v1/sudoku-achievement-nxdb";
+const NXDB_REFRESH_URL     = "https://afooyyydhlwngzssgqih.supabase.co/functions/v1/sudoku-refresh-player-nxdb";
+
+/* ════════════════════════════════════════════
+   CONSTANTS
+════════════════════════════════════════════ */
+const AVATARS_Nx = [
+  "🧠","🎓","🏆","👑","⚡","🎯","🚀","🔥","💎","🌟",
+  "🤖","🧩","🎮","🕹️","🥇","🥈","🥉","🏅","📚","🔮",
+  "🦁","🐯","🦅","🦊","🐺","🐼","🐨","🐱","🐵","🐸",
+
+  "😎","🗿","💀","😈","👹","🐉","🦖","🦈","🦍","🐲",
+  "⚔️","🛡️","🏹","🔱","🪓","⚜️","☠️","👁️","🌪️","🌋",
+
+  "💰","💸","💼","🎩","🕶️","⌚","📈","🏛️","🏰","🛸",
+
+  "🌌","🌠","☄️","🪐","🌙","☀️","⭐","🌍","🛰️","🚁",
+
+  "💻","⌨️","🖥️","📱","🎧","🎤","📡","🔋","⚙️","🧪",
+
+  "👽","🐅","🦄","👻",
+
+  "🇮🇳","🚩","🕉️","☸️","🪔","🦚",
+
+  "🐺","🦅","🦁","🐉","🦈","🦍","🗡️","⚔️","🛡️","🏹",
+  "👑","💎","🏆","🎩","🕶️","⌚","💰","📈","⚜️","🔱",
+
+  "🌑","🌒","🌘","🌚","🌙","☄️","🌌","🖤","🕳️","☠️",
+  "💀","👁️","👁️‍🗨️","🌪️","🌋","⚫","🌫️","🌊","🦂","🐍",
+
+  "💻","🖥️","⌨️","🖱️","📱","📡","⚙️","🔋","🛰️","🤖",
+  "🧪","🔬","📊","📈","🧬","🛸","🚀","🎮","🕹️","🎧",
+
+  "🐲","🦄","🔥","⚡","🌟","⭐","💫","☄️","🏅","🥇",
+  "🥈","🥉","🎖️","🏵️","💠","🔶","🔷","🔰","🎯","🚩",
+
+  "👑","🤴","🫅","🏰","🏛️","💎","💍","👔","🎩","🪙",
+
+  "🦁","🐯","🦅","🐺","🦈","🦖","🦍","🐲","🐉","🦂",
+
+  "🪐","🌌","🌠","☀️","🌙","⭐","🌍","🌎","🌏","🚁",
+
+  "💰","💸","💼","📈","📊","🏦","🪙","💵","💳","🏅"
+];
+const XP_TABLE_Nx = {
+  '4-easy':25,'4-moderate':40,'4-hard':60,
+  '9-easy':50,'9-moderate':80,'9-hard':120,
+  perfect:10, nohint:10, daily:25
+};
+const DIFF_CONFIG_Nx = {
+  easy:     {icon:'🌱',label:'Easy',    desc:'Relaxed pace, more given cells',        color:'#22c55e'},
+  moderate: {icon:'🔥',label:'Moderate',desc:'Balanced challenge for all levels',     color:'#f59e0b'},
+  hard:     {icon:'💀',label:'Hard',    desc:'Maximum brain workout',                 color:'#ef4444'}
+};
+const BOARD_LIMITS_Nx = {4:{hints:3,maxLives:3},9:{hints:5,maxLives:5}};
+
+function getTierNx(level){
+  if(level>=20) return {name:'Diamond', css:'tier-diamond', icon:'💎'};
+  if(level>=15) return {name:'Platinum',css:'tier-platinum',icon:'🔷'};
+  if(level>=10) return {name:'Gold',    css:'tier-gold',    icon:'🥇'};
+  if(level>=5)  return {name:'Silver',  css:'tier-silver',  icon:'🥈'};
+  return {name:'Bronze',css:'tier-bronze',icon:'🥉'};
+}
+
+const ACHIEVEMENTS_Nx = [
+  {id:'first_win', icon:'🏆',name:'First Victory',  condition:s=>s.wins>=1},
+  {id:'streak7',   icon:'🔥',name:'7-Day Streak',   condition:s=>s.streak>=7},
+  {id:'speed',     icon:'⚡',name:'Speed Solver',   condition:s=>s.bestTime>0&&s.bestTime<=120},
+  {id:'expert',    icon:'🧠',name:'Sudoku Expert',  condition:s=>s.wins>=50},
+  {id:'perfect',   icon:'🎯',name:'Perfectionist',  condition:s=>s.perfectGames>=5},
+  {id:'top10',     icon:'👑',name:'Top Ranked',     condition:s=>s.globalRank>0&&s.globalRank<=10},
+  {id:'level5',    icon:'⭐',name:'Rising Star',    condition:s=>s.level>=5},
+  {id:'daily10',   icon:'📅',name:'Daily Devotion', condition:s=>s.dailyChallenges>=10},
+  {id:'nohints',   icon:'🕵️',name:'No Hints Needed',condition:s=>s.noHintWins>=5},
+];
+
+/* ════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════ */
+let nxdbPlayer = null;
+let nxdbStats  = null;
+let nxdbLeaderboard = [];
+let nxdbAchievements = [];
+let soundEnabledNx = false;
+let setupBoardNx = null, setupDiffNx = null;
+let puzzleNx = [], solutionNx = [];
+let selectedCellNx = null;
+let notesModeNx = false;
+let mistakesNx = 0, maxLivesNx = 5, hintsNx = 5;
+let timerSecsNx = 0, timerIntervalNx = null;
+let gameActiveNx = false;
+let currentBoardSizeNx = 9, currentDiffNx = 'easy';
+let usedHintsNx = 0, isDailyChallengeNx = false;
+let editSelectedAvatarNx = '😀';
+let confirmCallbackNx = null;
+let _isOnline = navigator.onLine;
+let _syncInProgress = false;
+
+/* ── Offline queue ── */
+let offlineQueueNx = [];
+
+/* ── Local fallback stats ── */
+let localFallbackNx = {
+  xp:0,level:1,wins:0,played:0,bestTime:0,streak:0,
+  lastPlayDate:null,perfectGames:0,dailyChallenges:0,noHintWins:0,
+  dailyDone:null,globalRank:0
+};
+
+/* ════════════════════════════════════════════
+   NXDB HELPERS
+════════════════════════════════════════════ */
+function getXpNx()      {return nxdbPlayer?(nxdbPlayer.xp||0)           :localFallbackNx.xp;}
+function getLevelNx()   {return nxdbPlayer?(nxdbPlayer.level||1)        :localFallbackNx.level;}
+function getWinsNx()    {return nxdbStats ?(nxdbStats.games_won||0)     :localFallbackNx.wins;}
+function getPlayedNx()  {return nxdbStats ?(nxdbStats.games_played||0)  :localFallbackNx.played;}
+function getBestTimeNx(){return nxdbStats ?(nxdbStats.best_time||0)     :localFallbackNx.bestTime;}
+function getStreakNx()  {return nxdbPlayer?(nxdbPlayer.streak||0)       :localFallbackNx.streak;}
+function getRankNx()    {return nxdbPlayer?(nxdbPlayer.rank||0)         :localFallbackNx.globalRank;}
+
+function computeLevelNx(xp){
+  let lv=1,total=0;
+  while(total+lv*500<=xp){total+=lv*500;lv++;}
+  return lv;
+}
+function xpForCurrentLevelNx(xp){
+  let lv=1,total=0;
+  while(total+lv*500<=xp){total+=lv*500;lv++;}
+  return {level:lv,progress:xp-total,needed:lv*500};
+}
+
+/* ════════════════════════════════════════════
+   AF STUDENT — reads from localStorage set by main AcademeForge app
+════════════════════════════════════════════ */
+function getAFStudentNx(){
+  return {
+    name:       localStorage.getItem('af_student_name')      ||'',
+    phone:      localStorage.getItem('af_student_mobile')    ||localStorage.getItem('af_student_phone')||'',
+    email:      localStorage.getItem('af_student_email')     ||'',
+    studentId:  localStorage.getItem('af_student_id')        ||'',
+    uuid:       localStorage.getItem('af_student_uuid')      ||'',
+    profilePhoto:localStorage.getItem('af_student_photo')   ||'',
+    loggedIn:   localStorage.getItem('af_student_logged_in')==='true'
+  };
+}
+
+/* ════════════════════════════════════════════
+   LOCAL PERSISTENCE
+════════════════════════════════════════════ */
+function loadLocalFallbackNx(){
+  try{const s=localStorage.getItem('sm_nxdb_fallback');if(s)localFallbackNx={...localFallbackNx,...JSON.parse(s)};}catch(e){}
+}
+function saveLocalFallbackNx(){localStorage.setItem('sm_nxdb_fallback',JSON.stringify(localFallbackNx));}
+function addLocalXpNx(amount){
+  localFallbackNx.xp+=amount;
+  localFallbackNx.level=computeLevelNx(localFallbackNx.xp);
+  saveLocalFallbackNx();
+}
+function loadOfflineQueueNx(){
+  try{const s=localStorage.getItem('sm_offline_queue');if(s)offlineQueueNx=JSON.parse(s)||[];}catch(e){offlineQueueNx=[];}
+}
+function saveOfflineQueueNx(){localStorage.setItem('sm_offline_queue',JSON.stringify(offlineQueueNx));}
+function updateOfflineSyncSubNx(){
+  const el=document.getElementById('offlineSyncSubNx');
+  const badge=document.getElementById('queueCountNx');
+  if(!el)return;
+  const n=offlineQueueNx.length;
+  el.textContent=n>0?`${n} game${n>1?'s':''} waiting to sync`:'No pending games';
+  if(badge){
+    badge.textContent=`${n} pending`;
+    badge.classList.toggle('show',n>0);
+  }
+}
+
+/* ════════════════════════════════════════════
+   ONLINE / OFFLINE DETECTION
+════════════════════════════════════════════ */
+/* ════════════════════════════════════════════
+   ONLINE / OFFLINE DETECTION
+════════════════════════════════════════════ */
+function setOnlineStateNx(online){
+  _isOnline = online;
+
+  const banner = document.getElementById("offlineBannerNx");
+
+  if (banner) {
+    banner.classList.toggle("show", !online);
+  }
+
+  if (online) {
+    document.body.classList.remove("offline-mode");
+    flushOfflineQueueNx();
+  } else {
+    document.body.classList.add("offline-mode");
+  }
+}
+
+window.addEventListener("online", () => setOnlineStateNx(true));
+window.addEventListener("offline", () => setOnlineStateNx(false));
+
+/* ════════════════════════════════════════════
+   OFFLINE QUEUE FLUSH
+════════════════════════════════════════════ */
+async function flushOfflineQueueNx(){
+  const af=getAFStudentNx();
+  if(!af.loggedIn||!af.studentId||!_isOnline||!offlineQueueNx.length)return;
+  if(_syncInProgress)return;
+  _syncInProgress=true;
+
+  const toFlush=[...offlineQueueNx];
+  let flushed=0;
+  for(const item of toFlush){
+    try{
+      await nxdbApi(NXDB_PROGRESS_URL,{...item,action:'save',student_id:af.studentId});
+      offlineQueueNx=offlineQueueNx.filter(q=>q._id!==item._id);
+      flushed++;
+    }catch(e){
+      console.warn('Flush failed for item:',e);
+      break; // stop on first failure, retry later
+    }
+  }
+  saveOfflineQueueNx();
+  updateOfflineSyncSubNx();
+  _syncInProgress=false;
+
+  if(flushed>0){
+    toastNx(`${flushed} offline game${flushed>1?'s':''} synced!`,'','success',3000);
+    await refreshSudokuNxdb();
+  }
+}
+
+/* ════════════════════════════════════════════
+   NXDB API CALL
+════════════════════════════════════════════ */
+async function nxdbApi(url,payload){
+  const res=await fetch(url,{
+    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
+  });
+  const data=await res.json();
+  if(!res.ok)throw new Error(data.message||data.error||'Nxdb request failed');
+  return data;
+}
+
+/* ════════════════════════════════════════════
+   REFRESH INDICATOR
+════════════════════════════════════════════ */
+let refreshTimerNx=null;
+function showRefreshNx(label='Refreshing…'){
+  const el=document.getElementById('refreshIndicatorNx');
+  document.getElementById('refreshLabelNx').textContent=label;
+  el.classList.add('visible');
+  clearTimeout(refreshTimerNx);
+}
+function hideRefreshNx(){
+  clearTimeout(refreshTimerNx);
+  refreshTimerNx=setTimeout(()=>{
+    document.getElementById('refreshIndicatorNx').classList.remove('visible');
+  },600);
+}
+/* ════════════════════════════════════════════
+   SYNC STATUS CHIPS
+════════════════════════════════════════════ */
+
+function setNxdbStatusNx(el, state, label) {
+  if (!el) return;
+
+  el.className = `nxdb-status-Nx ${state}`;
+  el.textContent = label;
+}
+
+function updateNxdbStatusChipsNx(ok) {
+  setNxdbStatusNx(
+    document.getElementById("nxdbStatusChipNx"),
+    ok ? "ok" : "err",
+    ok ? "✓ Online" : "✕ Offline"
+  );
+
+  setNxdbStatusNx(
+    document.getElementById("nxdbPlayerStatusNx"),
+    ok ? "ok" : "err",
+    ok ? "Connected" : "Offline"
+  );
+
+  setNxdbStatusNx(
+    document.getElementById("nxdbStatsStatusNx"),
+    ok ? "ok" : "err",
+    ok ? "Updated" : "Offline"
+  );
+
+  setNxdbStatusNx(
+    document.getElementById("nxdbLbStatusNx"),
+    ok ? "ok" : "err",
+    ok ? "Live" : "Offline"
+  );
+
+  const ts = document.getElementById("nxdbLastSyncNx");
+
+  if (ts) {
+    ts.textContent = ok
+      ? new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit"
+        })
+      : "Sync Failed";
+  }
+}
+
+/* ════════════════════════════════════════════
+   GLOBAL REFRESH MANAGER
+════════════════════════════════════════════ */
+async function refreshSudokuNxdb(){
+  const af=getAFStudentNx();
+  if(!af.loggedIn||!af.studentId){
+    refreshUIFromNxdbNx();
+    return;
+  }
+  if(!_isOnline){refreshUIFromNxdbNx();return;}
+
+  showRefreshNx('Refreshing…');
+  setNxdbStatusNx(document.getElementById('nxdbStatusChipNx'),'syncing','⟳ Offline');
+
+  try{
+    const syncRes=await syncPlayerNx(af);
+    if(syncRes&&syncRes.player)  nxdbPlayer=syncRes.player;
+    if(syncRes&&syncRes.stats)   nxdbStats=syncRes.stats;
+    if(syncRes&&syncRes.achievements) nxdbAchievements=syncRes.achievements;
+    updateNxdbStatusChipsNx(true);
+    refreshUIFromNxdbNx();
+    refreshLeaderboardNx().catch(()=>{});
+    // flush any queued offline games
+    flushOfflineQueueNx().catch(()=>{});
+  }catch(e){
+    console.warn('Nxdb refresh failed:',e);
+    updateNxdbStatusChipsNx(false);
+    refreshUIFromNxdbNx();
+  }finally{
+    hideRefreshNx();
+  }
+}
+
+/* ════════════════════════════════════════════
+   SYNC PLAYER
+════════════════════════════════════════════ */
+async function syncPlayerNx(af){
+  return await nxdbApi(NXDB_API_URL,{
+    action:'sync',
+    student_id:af.studentId,
+    name:af.name,
+    email:af.email,
+    phone:af.phone,
+    profile_photo:af.profilePhoto||''
+  });
+}
+
+/* ════════════════════════════════════════════
+   SAVE GAME PROGRESS (with offline fallback)
+════════════════════════════════════════════ */
+async function saveGameProgressNx({won,time,mistakes,hintsUsed,difficulty,boardSize,isDaily,xpEarned,perfect,noHints}){
+  const af=getAFStudentNx();
+  if(!af.loggedIn||!af.studentId)return null;
+
+  const payload={
+    action:'save',
+    student_id:af.studentId,
+    won, time_seconds:time||0, mistakes, hints_used:hintsUsed,
+    difficulty, board_size:boardSize, is_daily:isDaily||false,
+    xp_earned:xpEarned||0, perfect:perfect||false, no_hints:noHints||false
+  };
+
+  // If offline, queue it
+  if(!_isOnline){
+    payload._id=Date.now()+'_'+Math.random().toString(36).slice(2,7);
+    offlineQueueNx.push(payload);
+    saveOfflineQueueNx();
+    updateOfflineSyncSubNx();
+    toastNx('Saved offline','Will sync when connection returns.','info',3000);
+    return null;
+  }
+
+  const badge=document.getElementById('savingBadgeNx');
+  if(badge)badge.classList.add('show');
+
+  try{
+    const res=await nxdbApi(NXDB_PROGRESS_URL,payload);
+    if(res.player)nxdbPlayer=res.player;
+    if(res.stats) nxdbStats=res.stats;
+    return res;
+  }catch(e){
+    // On network failure, queue it
+    payload._id=Date.now()+'_'+Math.random().toString(36).slice(2,7);
+    offlineQueueNx.push(payload);
+    saveOfflineQueueNx();
+    updateOfflineSyncSubNx();
+    console.warn('saveGameProgressNx queued:',e);
+    return null;
+  }finally{
+    if(badge)badge.classList.remove('show');
+  }
+}
+
+/* ════════════════════════════════════════════
+   LEADERBOARD
+════════════════════════════════════════════ */
+async function refreshLeaderboardNx(){
+  const podium=document.getElementById('lbPodiumNx');
+  const list=document.getElementById('lbListNx');
+  const youBanner=document.getElementById('lbYouBannerNx');
+  list.innerHTML='<div class="empty-state"><div class="e-icon">⏳</div><p>Loading rankings…</p></div>';
+  if(podium)podium.style.display='none';
+  if(youBanner)youBanner.style.display='none';
+  const af=getAFStudentNx();
+
+  if(!_isOnline){
+    list.innerHTML='<div class="empty-state"><div class="e-icon">📡</div><p>Connect to see live rankings</p></div>';
+    return;
+  }
+
+  try{
+    const res=await nxdbApi(NXDB_LEADERBOARD_URL,{action:'get'});
+    const lb=res.leaderboard||[];
+    nxdbLeaderboard=lb;
+    if(!lb.length){list.innerHTML='<div class="empty-state"><div class="e-icon">🏆</div><p>No players yet — be the first!</p></div>';return;}
+
+    // Podium
+    if(lb.length>=1&&podium){
+      podium.style.display='grid';
+      const podiumOrder=lb.length>=3?[lb[1],lb[0],lb[2]]:lb.length===2?[lb[1],lb[0],null]:[null,lb[0],null];
+      const podiumClasses=['rank2','rank1','rank3'],podiumMedals=['🥈','🥇','🥉'];
+      podium.innerHTML=podiumOrder.map((p,i)=>{
+        if(!p)return`<div></div>`;
+        return`<div class="lb-podium-card ${podiumClasses[i]}">
+          <div class="podium-medal">${podiumMedals[i]}</div>
+          <div class="podium-avatar">${p.avatar||p.name?.[0]||'😀'}</div>
+          <div class="podium-name">${p.name||p.username}</div>
+          <div class="podium-xp">${(p.xp||0).toLocaleString()} XP</div>
+          <div class="podium-level">Lv.${p.level||1}</div>
+        </div>`;
+      }).join('');
+    }
+
+    // You banner
+    const myIdx=lb.findIndex(p=>(af.studentId&&p.student_id===af.studentId)||(af.email&&p.email===af.email));
+    if(myIdx>=0&&youBanner){
+      const myP=lb[myIdx],myRank=myIdx+1;
+      if(nxdbPlayer)nxdbPlayer.rank=myRank;
+      localFallbackNx.globalRank=myRank;saveLocalFallbackNx();
+      document.getElementById('lbYouAvaNx').textContent =myP.avatar||myP.name?.[0]||'😀';
+      document.getElementById('lbYouNameNx').textContent=myP.name||myP.username;
+      document.getElementById('lbYouSubNx').textContent =`${(myP.xp||0).toLocaleString()} XP · Lv.${myP.level||1} · ${myP.wins||0} wins`;
+      document.getElementById('lbYouRankNx').textContent=`#${myRank}`;
+      youBanner.style.display='flex';
+      updateRankNx(myRank);
+    }
+
+    list.innerHTML=lb.map((p,i)=>{
+      const rank=i+1,isMe=(af.studentId&&p.student_id===af.studentId)||(af.email&&p.email===af.email);
+      const rankDisplay=rank<=3?['🥇','🥈','🥉'][rank-1]:`#${rank}`;
+      return`<div class="lb-item${isMe?' is-me':''}">
+        <div class="lb-rank-col${rank<=3?' top3':''}">${rankDisplay}</div>
+        <div class="lb-player-col">
+          <div class="lb-avatar">${p.avatar||p.name?.[0]||'😀'}</div>
+          <div>
+            <div class="lb-player-name">${p.name||p.username||'Player'}${isMe?` <span style="font-size:.62rem;background:var(--primary);color:white;padding:1px 6px;border-radius:999px;margin-left:4px">You</span>`:''}</div>
+            <div class="lb-player-sub">Lv.${p.level||1} · ${p.wins||0} wins · ${p.games_played||0} games</div>
+          </div>
+        </div>
+        <div class="lb-xp-col">
+          <div class="lb-xp-val">${(p.xp||0).toLocaleString()}</div>
+          <div class="lb-xp-wins">XP</div>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    list.innerHTML='<div class="empty-state"><div class="e-icon">⚠️</div><p>Could not load leaderboard.</p></div>';
+    console.error('Leaderboard error:',e);
+  }
+}
+
+function updateRankNx(rank){
+  const r=rank>0?`#${rank}`:'#--';
+  ['qsRankNx','pGlobalRankNx'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=r;});
+}
+
+/* ════════════════════════════════════════════
+   ACHIEVEMENTS
+════════════════════════════════════════════ */
+async function syncAchievementsNx(){
+  const af=getAFStudentNx();
+  if(!af.loggedIn||!af.studentId||!_isOnline)return;
+  const stats=buildAchievementStatsNx();
+  try{
+    const res=await nxdbApi(NXDB_ACHIEVEMENT_URL,{action:'sync',student_id:af.studentId,stats});
+    if(res.achievements)nxdbAchievements=res.achievements;
+    if(res.newly_unlocked&&res.newly_unlocked.length){
+      const unlocked=ACHIEVEMENTS_Nx.filter(a=>res.newly_unlocked.includes(a.id));
+      unlocked.forEach(a=>toastNx(`Achievement Unlocked! ${a.icon}`,a.name,'success',4000));
+    }
+    buildAchievementsUINx();
+  }catch(e){console.warn('Achievement sync failed:',e);}
+}
+function buildAchievementStatsNx(){
+  return{wins:getWinsNx(),streak:getStreakNx(),bestTime:getBestTimeNx(),perfectGames:localFallbackNx.perfectGames,dailyChallenges:localFallbackNx.dailyChallenges,noHintWins:localFallbackNx.noHintWins,level:getLevelNx(),globalRank:getRankNx()};
+}
+function buildAchievementsUINx(){
+  const grid=document.getElementById('achievementsGridNx');
+  if(!grid)return;
+  const stats=buildAchievementStatsNx();
+  const unlockedIds=nxdbAchievements.map(a=>a.achievement_id||a.id);
+  grid.innerHTML=ACHIEVEMENTS_Nx.map(a=>{
+    const unlocked=unlockedIds.includes(a.id)||a.condition(stats);
+    return`<div class="ach-card ${unlocked?'unlocked':'locked'}">
+      <div class="ach-icon">${a.icon}</div>
+      <div class="ach-name">${a.name}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════ */
+function toastNx(title,msg='',type='info',dur=3500){
+  const icons={success:'✅',error:'❌',warning:'⚠️',info:'ℹ️'};
+  const wrap=document.getElementById('toastWrap');
+  const el=document.createElement('div');
+  el.className=`toast ${type}`;
+  el.innerHTML=`<div class="toast-icon">${icons[type]}</div>
+    <div class="toast-body">
+      <div class="toast-title">${title}</div>
+      ${msg?`<div class="toast-msg">${msg}</div>`:''}
+    </div>
+    <button class="toast-close" onclick="this.parentElement.remove()">✕</button>`;
+  wrap.appendChild(el);
+  setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),220);},dur);
+}
+
+/* ════════════════════════════════════════════
+   MODALS
+════════════════════════════════════════════ */
+function openModalNx(id) {document.getElementById(id).classList.add('show');}
+function closeModalNx(id){document.getElementById(id).classList.remove('show');}
+document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show');}));
+function showConfirmNx({title,msg,icon='⚠️',onConfirm}){
+  document.getElementById('confirmTitleNx').textContent=title||'Are you sure?';
+  document.getElementById('confirmMsgNx').textContent=msg||'';
+  document.getElementById('confirmIconNx').textContent=icon;
+  confirmCallbackNx=onConfirm;
+  openModalNx('confirmModal');
+}
+document.getElementById('confirmOkBtnNx').addEventListener('click',()=>{
+  closeModalNx('confirmModal');if(typeof confirmCallbackNx==='function')confirmCallbackNx();
+});
+
+/* ════════════════════════════════════════════
+   SCREEN NAV
+════════════════════════════════════════════ */
+function openScreenNx(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const btn=document.querySelector(`.nav-btn[data-screen="${id}"]`);
+  if(btn)btn.classList.add('active');
+  if(id==='leaderboardScreen')refreshLeaderboardNx();
+  if(id==='profileScreen')    refreshProfileScreenNx();
+  if(id==='homeScreen')       refreshUIFromNxdbNx();
+}
+function navToPlayNx(){
+  openScreenNx('playScreen');
+  if(gameActiveNx){
+    document.getElementById('setupViewNx').style.display='none';
+    document.getElementById('gameViewNx').style.display='block';
+  }else{
+    document.getElementById('setupViewNx').style.display='block';
+    document.getElementById('gameViewNx').style.display='none';
+  }
+}
+
+/* ════════════════════════════════════════════
+   THEME & SOUND
+════════════════════════════════════════════ */
+function loadThemeNx(){
+  const dark=localStorage.getItem('sm_nxdb_theme')==='dark';
+  document.body.classList.toggle('dark',dark);
+  document.getElementById('darkToggleNx').classList.toggle('on',dark);
+}
+function toggleThemeNx(){
+  document.body.classList.toggle('dark');
+  const dark=document.body.classList.contains('dark');
+  localStorage.setItem('sm_nxdb_theme',dark?'dark':'light');
+  document.getElementById('darkToggleNx').classList.toggle('on',dark);
+}
+
+let bgAudioNx=null;
+function initSoundNx(){
+  soundEnabledNx=localStorage.getItem('sm_nxdb_sound')!=='off';
+  document.getElementById('soundToggleNx').classList.toggle('on',soundEnabledNx);
+  if(soundEnabledNx&&!bgAudioNx){
+    bgAudioNx=new Audio('../IMG/game-musicc.mp3');
+    bgAudioNx.loop=true;bgAudioNx.volume=.3;
+  }
+}
+function toggleSoundNx(){
+  soundEnabledNx=!soundEnabledNx;
+  localStorage.setItem('sm_nxdb_sound',soundEnabledNx?'on':'off');
+  document.getElementById('soundToggleNx').classList.toggle('on',soundEnabledNx);
+  if(soundEnabledNx){
+    if(!bgAudioNx){bgAudioNx=new Audio('../IMG/game-musicc.mp3');bgAudioNx.loop=true;bgAudioNx.volume=.3;}
+    bgAudioNx.play().catch(()=>{});
+  }else{
+    if(bgAudioNx){bgAudioNx.pause();bgAudioNx.currentTime=0;}
+  }
+}
+document.addEventListener('click',()=>{
+  if(soundEnabledNx&&bgAudioNx&&bgAudioNx.paused)bgAudioNx.play().catch(()=>{});
+},{once:true});
+
+/* ════════════════════════════════════════════
+   SETUP FLOW
+════════════════════════════════════════════ */
+function selectBoardNx(size){
+  setupBoardNx=size;
+  document.querySelectorAll('.board-card').forEach(c=>c.classList.toggle('selected',Number(c.dataset.board)===size));
+  document.getElementById('stepNx1Next').disabled=false;
+}
+function buildDiffOptionsNx(){
+  const list=document.getElementById('diffListNx');
+  if(!list)return;
+  list.innerHTML=['easy','moderate','hard'].map(d=>{
+    const c=DIFF_CONFIG_Nx[d];
+    const xp=XP_TABLE_Nx[`${setupBoardNx||9}-${d}`]||50;
+    return`<div class="diff-card${setupDiffNx===d?' selected':''}" data-diff="${d}" onclick="selectDiffNx('${d}')">
+      <div class="diff-icon">${c.icon}</div>
+      <div class="diff-info"><div class="diff-name">${c.label}</div><div class="diff-desc">${c.desc}</div></div>
+      <div class="diff-xp-badge">+${xp} XP</div>
+    </div>`;
+  }).join('');
+}
+function selectDiffNx(d){
+  setupDiffNx=d;
+  document.querySelectorAll('.diff-card').forEach(c=>c.classList.toggle('selected',c.dataset.diff===d));
+  document.getElementById('stepNx2Next').disabled=false;
+}
+function goStepNx(step){
+  if(step===2&&!setupBoardNx){toastNx('Select a board','Choose 4×4 or 9×9 first.','warning');return;}
+  if(step===3&&!setupDiffNx) {toastNx('Select difficulty','Choose a difficulty level.','warning');return;}
+  [1,2,3].forEach(i=>{
+    document.getElementById(`sdNx${i}`).classList.toggle('active',i===step);
+    document.getElementById(`sdNx${i}`).classList.toggle('done',i<step);
+  });
+  [1,2].forEach(i=>document.getElementById(`slNx${i}`)?.classList.toggle('done',i<step));
+  document.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(`stepNx${step}`).classList.add('active');
+  if(step===2)buildDiffOptionsNx();
+  if(step===3)updateSummaryNx();
+}
+function updateSummaryNx(){
+  const sz=setupBoardNx,d=setupDiffNx;
+  const xp=XP_TABLE_Nx[`${sz}-${d}`]||50,lim=BOARD_LIMITS_Nx[sz],cfg=DIFF_CONFIG_Nx[d];
+  document.getElementById('ssIconNx').textContent =cfg.icon;
+  document.getElementById('ssTitleNx').textContent='Ready to Play!';
+  document.getElementById('ssDescNx').textContent =`${sz}×${sz} ${cfg.label} · Level ${getLevelNx()}`;
+  document.getElementById('ssBoardNx').textContent=`${sz}×${sz}`;
+  document.getElementById('ssDiffNx').textContent =cfg.label;
+  document.getElementById('ssHintsNx').textContent=`${lim.hints} Hints`;
+  document.getElementById('ssMistakesNx').textContent=`${lim.maxLives} Lives`;
+  document.getElementById('ssXpNx').textContent=`+${xp} XP`;
+}
+
+/* ════════════════════════════════════════════
+   DAILY CHALLENGE
+════════════════════════════════════════════ */
+function startDailyChallengeNx(){
+  const today=new Date().toDateString();
+  if(localFallbackNx.dailyDone===today){toastNx('Already done!','You\'ve completed today\'s challenge.','info');return;}
+  isDailyChallengeNx=true;
+  setupBoardNx=9;setupDiffNx='moderate';
+  toastNx('Daily Challenge! 🗓️','+25 Bonus XP on completion','success');
+  startGameNx();
+}
+
+/* ════════════════════════════════════════════
+   GAME START
+════════════════════════════════════════════ */
+function startGameNx(){
+  if(setupBoardNx)currentBoardSizeNx=setupBoardNx;
+  if(setupDiffNx) currentDiffNx=setupDiffNx;
+  const lim=BOARD_LIMITS_Nx[currentBoardSizeNx];
+  hintsNx=lim.hints;maxLivesNx=lim.maxLives;
+  mistakesNx=0;usedHintsNx=0;notesModeNx=false;
+  gameActiveNx=true;selectedCellNx=null;
+  document.getElementById('notesBtnNx').classList.remove('active');
+  document.getElementById('setupViewNx').style.display='none';
+  document.getElementById('gameViewNx').style.display='block';
+  currentBoardSizeNx===4?create4x4PuzzleNx():create9x9PuzzleNx();
+  const cfg=DIFF_CONFIG_Nx[currentDiffNx],xp=XP_TABLE_Nx[`${currentBoardSizeNx}-${currentDiffNx}`]||50;
+  document.getElementById('gameTitleNx').textContent=currentBoardSizeNx===4?'⚡ Quick Play':'🧩 Classic Sudoku';
+  const db=document.getElementById('gameDiffBadgeNx');
+  db.textContent=cfg.label;db.className=`diff-badge-game ${currentDiffNx}`;
+  document.getElementById('gameSubtitleNx').textContent=`${currentBoardSizeNx}×${currentBoardSizeNx}`;
+  document.getElementById('gameRewardPreviewNx').textContent=`+${xp} XP`;
+  document.getElementById('diffDisplayNx').textContent=cfg.label;
+  renderLivesNx();renderHintsNx();renderBoardNx();renderNumpadNx();
+  startTimerNx();
+  openScreenNx('playScreen');
+}
+function newGameAfterWinNx(){
+  setupBoardNx=null;setupDiffNx=null;
+  document.getElementById('setupViewNx').style.display='block';
+  document.getElementById('gameViewNx').style.display='none';
+  goStepNx(1);
+  document.querySelectorAll('.board-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('stepNx1Next').disabled=true;
+  document.getElementById('stepNx2Next').disabled=true;
+  openScreenNx('playScreen');
+}
+
+/* ════════════════════════════════════════════
+   PUZZLE GENERATORS
+════════════════════════════════════════════ */
+function shuffleNx(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function generate4x4SolutionNx(){
+  const bases=[
+    [[1,2,3,4],[3,4,1,2],[2,1,4,3],[4,3,2,1]],
+    [[1,2,3,4],[3,4,1,2],[4,3,2,1],[2,1,4,3]],
+    [[2,1,4,3],[4,3,2,1],[1,2,3,4],[3,4,1,2]],
+  ];
+  return bases[Math.floor(Math.random()*bases.length)];
+}
+function create4x4PuzzleNx(){
+  solutionNx=generate4x4SolutionNx();puzzleNx=solutionNx.map(r=>[...r]);
+  const removeCounts={easy:4,moderate:7,hard:10};
+  let remove=removeCounts[currentDiffNx]||4,tries=0;
+  while(remove>0&&tries<200){const r=Math.floor(Math.random()*4),c=Math.floor(Math.random()*4);if(puzzleNx[r][c]!==0){puzzleNx[r][c]=0;remove--;}tries++;}
+}
+function generate9x9SolutionNx(){
+  const base=[[1,2,3,4,5,6,7,8,9],[4,5,6,7,8,9,1,2,3],[7,8,9,1,2,3,4,5,6],[2,3,4,5,6,7,8,9,1],[5,6,7,8,9,1,2,3,4],[8,9,1,2,3,4,5,6,7],[3,4,5,6,7,8,9,1,2],[6,7,8,9,1,2,3,4,5],[9,1,2,3,4,5,6,7,8]];
+  const nums=shuffleNx([1,2,3,4,5,6,7,8,9]);
+  return base.map(row=>row.map(n=>nums[n-1]));
+}
+function create9x9PuzzleNx(){
+  solutionNx=generate9x9SolutionNx();puzzleNx=solutionNx.map(r=>[...r]);
+  const removeCounts={easy:30,moderate:42,hard:54};
+  let remove=removeCounts[currentDiffNx]||30,tries=0;
+  while(remove>0&&tries<1000){const r=Math.floor(Math.random()*9),c=Math.floor(Math.random()*9);if(puzzleNx[r][c]!==0){puzzleNx[r][c]=0;remove--;}tries++;}
+}
+
+/* ════════════════════════════════════════════
+   BOARD RENDER
+════════════════════════════════════════════ */
+function renderBoardNx(){
+  const board=document.getElementById('sudokuBoardNx');
+  board.innerHTML='';board.className=`sudoku-board g${currentBoardSizeNx}`;
+  selectedCellNx=null;
+  puzzleNx.forEach((row,ri)=>row.forEach((val,ci)=>{
+    const cell=document.createElement('div');
+    cell.className='cell';cell.dataset.row=ri;cell.dataset.col=ci;
+    if(val!==0){cell.textContent=val;cell.classList.add('fixed');}
+    cell.addEventListener('click',()=>selectCellNx(ri,ci));
+    board.appendChild(cell);
+  }));
+}
+function selectCellNx(row,col){
+  document.querySelectorAll('.cell').forEach(c=>c.classList.remove('selected','highlight','same-value'));
+  const el=getCellElNx(row,col);if(!el)return;
+  selectedCellNx={row,col,el};el.classList.add('selected');
+  const val=puzzleNx[row][col],sz=currentBoardSizeNx;
+  document.querySelectorAll('.cell').forEach(c=>{
+    if(c===el)return;
+    const r=+c.dataset.row,co=+c.dataset.col;
+    let hl=r===row||co===col;
+    if(sz===9)hl|=(Math.floor(r/3)===Math.floor(row/3)&&Math.floor(co/3)===Math.floor(col/3));
+    else      hl|=(Math.floor(r/2)===Math.floor(row/2)&&Math.floor(co/2)===Math.floor(col/2));
+    if(hl)c.classList.add('highlight');
+    else if(val!==0&&puzzleNx[r][co]===val)c.classList.add('same-value');
+  });
+}
+function getCellElNx(r,c){return document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);}
+
+/* ════════════════════════════════════════════
+   NUMPAD
+════════════════════════════════════════════ */
+function renderNumpadNx(){
+  const pad=document.getElementById('numpadNx');pad.innerHTML='';
+  for(let n=1;n<=currentBoardSizeNx;n++){
+    const btn=document.createElement('button');
+    btn.className='num-btn';btn.textContent=n;
+    btn.addEventListener('click',()=>placeNumberNx(n));
+    pad.appendChild(btn);
+  }
+}
+function renderLivesNx(){
+  const rem=maxLivesNx-mistakesNx;
+  document.getElementById('livesDisplayNx').textContent='❤️'.repeat(Math.max(0,rem))+'🤍'.repeat(Math.min(mistakesNx,maxLivesNx));
+}
+function renderHintsNx(){document.getElementById('hintsDisplayNx').textContent=`💡 x${hintsNx}`;}
+
+/* ════════════════════════════════════════════
+   TIMER
+════════════════════════════════════════════ */
+function startTimerNx(){
+  clearInterval(timerIntervalNx);timerSecsNx=0;
+  document.getElementById('timerDisplayNx').textContent='00:00';
+  timerIntervalNx=setInterval(()=>{
+    timerSecsNx++;
+    const m=Math.floor(timerSecsNx/60),s=timerSecsNx%60;
+    document.getElementById('timerDisplayNx').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  },1000);
+}
+
+/* ════════════════════════════════════════════
+   GAME ACTIONS
+════════════════════════════════════════════ */
+function placeNumberNx(num){
+  if(!selectedCellNx||!gameActiveNx)return;
+  const{row,col,el}=selectedCellNx;
+  if(el.classList.contains('fixed'))return;
+  if(notesModeNx){
+    const existing=el.dataset.notes?el.dataset.notes.split(',').filter(Boolean):[];
+    const ns=String(num),idx=existing.indexOf(ns);
+    if(idx>-1)existing.splice(idx,1);else existing.push(ns);
+    el.dataset.notes=existing.join(',');
+    el.textContent=existing.sort().join(' ');
+    el.style.fontSize=currentBoardSizeNx===4?'.55rem':'.48rem';el.style.color='var(--text-soft)';
+    return;
+  }
+  el.dataset.notes='';el.style.fontSize='';el.style.color='';
+  if(solutionNx[row][col]===num){
+    puzzleNx[row][col]=num;el.textContent=num;
+    el.classList.remove('wrong');el.classList.add('correct');
+    selectCellNx(row,col);checkWinNx();
+  }else{
+    mistakesNx++;renderLivesNx();
+    el.classList.add('wrong');
+    setTimeout(()=>el.classList.remove('wrong'),700);
+    if(mistakesNx>=maxLivesNx)triggerGameOverNx();
+  }
+}
+function toggleNotesNx(){
+  notesModeNx=!notesModeNx;
+  document.getElementById('notesBtnNx').classList.toggle('active',notesModeNx);
+  toastNx(notesModeNx?'Notes mode ON':'Notes mode OFF','','info',1500);
+}
+function useHintNx(){
+  if(hintsNx<=0){toastNx('No hints left','','warning');return;}
+  if(!selectedCellNx){toastNx('Select a cell','Tap an empty cell first.','info');return;}
+  const{row,col,el}=selectedCellNx;
+  if(el.classList.contains('fixed'))return;
+  if(puzzleNx[row][col]===solutionNx[row][col]){toastNx('Already correct!','','info');return;}
+  hintsNx--;usedHintsNx++;renderHintsNx();
+  puzzleNx[row][col]=solutionNx[row][col];
+  el.textContent=solutionNx[row][col];el.dataset.notes='';
+  el.style.fontSize='';el.style.color='';
+  el.classList.remove('wrong');el.classList.add('correct');
+  checkWinNx();
+}
+function eraseCellNx(){
+  if(!selectedCellNx)return;
+  const{row,col,el}=selectedCellNx;
+  if(el.classList.contains('fixed'))return;
+  puzzleNx[row][col]=0;el.textContent='';el.dataset.notes='';
+  el.style.fontSize='';el.style.color='';el.classList.remove('correct','wrong');
+}
+function solvePuzzleNx(){
+  showConfirmNx({
+    title:'Reveal Solution',msg:'No XP will be awarded.',icon:'🎯',
+    onConfirm(){
+      clearInterval(timerIntervalNx);gameActiveNx=false;
+      puzzleNx=solutionNx.map(r=>[...r]);renderBoardNx();
+      document.querySelectorAll('.cell').forEach(c=>c.classList.add('correct'));
+      toastNx('Solution revealed','Better luck next time!','info');
+      recordGameNx(false,0,timerSecsNx);
+    }
+  });
+}
+function checkBoardNx(){
+  let empty=false,errors=false;
+  for(let r=0;r<currentBoardSizeNx;r++)for(let c=0;c<currentBoardSizeNx;c++){
+    if(puzzleNx[r][c]===0){empty=true;continue;}
+    if(puzzleNx[r][c]!==solutionNx[r][c]){
+      errors=true;const el=getCellElNx(r,c);
+      el?.classList.add('wrong');setTimeout(()=>el?.classList.remove('wrong'),1500);
+    }
+  }
+  if(empty)toastNx('Not done yet','Some cells are still empty.','info');
+  else if(errors)toastNx('Errors found','Incorrect cells highlighted.','warning');
+  else toastNx('Looking good!','No errors found so far.','success',2000);
+}
+function triggerGameOverNx(){
+  clearInterval(timerIntervalNx);gameActiveNx=false;
+  document.getElementById('gameOverMsgNx').textContent=
+    `You used all ${maxLivesNx} lives on ${DIFF_CONFIG_Nx[currentDiffNx].label} ${currentBoardSizeNx}×${currentBoardSizeNx}.`;
+  openModalNx('gameOverModal');
+  recordGameNx(false,0,timerSecsNx);
+}
+
+/* ════════════════════════════════════════════
+   CHECK WIN
+════════════════════════════════════════════ */
+async function checkWinNx(){
+  for(let r=0;r<puzzleNx.length;r++)
+    for(let c=0;c<puzzleNx[r].length;c++)
+      if(puzzleNx[r][c]!==solutionNx[r][c])return;
+
+  clearInterval(timerIntervalNx);gameActiveNx=false;
+  const baseXp=XP_TABLE_Nx[`${currentBoardSizeNx}-${currentDiffNx}`]||50;
+  const perfect=mistakesNx===0,noHints=usedHintsNx===0,daily=isDailyChallengeNx;
+  let bonusXp=0;
+  if(perfect)bonusXp+=XP_TABLE_Nx.perfect;
+  if(noHints)bonusXp+=XP_TABLE_Nx.nohint;
+  if(daily)  bonusXp+=XP_TABLE_Nx.daily;
+  const totalXp=baseXp+bonusXp;
+  const prevLevel=getLevelNx();
+
+  const rows=[
+    `<div class="win-row"><span class="win-lbl">Time</span><span class="win-val">${formatTimeNx(timerSecsNx)}</span></div>`,
+    `<div class="win-row"><span class="win-lbl">Mistakes</span><span class="win-val">${mistakesNx}</span></div>`,
+    `<div class="win-row"><span class="win-lbl">Base XP</span><span class="win-val xp">+${baseXp} XP</span></div>`,
+    perfect?`<div class="win-row"><span class="win-lbl">🎯 Perfect Game</span><span class="win-val xp">+${XP_TABLE_Nx.perfect} XP</span></div>`:'',
+    noHints?`<div class="win-row"><span class="win-lbl">🕵️ No Hints Used</span><span class="win-val xp">+${XP_TABLE_Nx.nohint} XP</span></div>`:'',
+    daily?  `<div class="win-row"><span class="win-lbl">🗓️ Daily Bonus</span><span class="win-val xp">+${XP_TABLE_Nx.daily} XP</span></div>`:'',
+  ].join('');
+  const total=`<div class="win-total"><span class="win-total-lbl">Total Earned</span><span class="win-total-val">+${totalXp} XP</span></div>`;
+  document.getElementById('winBreakdownNx').innerHTML=rows+total;
+  document.getElementById('levelUpBannerNx').style.display='none';
+  openModalNx('winModal');
+  isDailyChallengeNx=false;
+
+  await recordGameNx(true,totalXp,timerSecsNx,perfect,noHints,daily);
+
+  const newLevel=getLevelNx();
+  if(newLevel>prevLevel){
+    const banner=document.getElementById('levelUpBannerNx');
+    banner.textContent=`🎉 Level Up! You reached Level ${newLevel}!`;
+    banner.style.display='block';
+    toastNx(`Level ${newLevel}! 🎉`,'You levelled up!','success',4000);
+  }
+}
+
+/* ════════════════════════════════════════════
+   RECORD GAME
+════════════════════════════════════════════ */
+async function recordGameNx(won,xpEarned=0,time=0,perfect=false,noHints=false,daily=false){
+  // 1. Update local immediately (instant UI)
+  localFallbackNx.played++;
+  if(won){
+    localFallbackNx.wins++;
+    addLocalXpNx(xpEarned);
+    if(perfect)localFallbackNx.perfectGames++;
+    if(noHints)localFallbackNx.noHintWins++;
+    if(!localFallbackNx.bestTime||(time>0&&time<localFallbackNx.bestTime))localFallbackNx.bestTime=time;
+    const today=new Date().toDateString(),yesterday=new Date(Date.now()-86400000).toDateString();
+    if(localFallbackNx.lastPlayDate===yesterday)localFallbackNx.streak++;
+    else if(localFallbackNx.lastPlayDate!==today)localFallbackNx.streak=1;
+    localFallbackNx.lastPlayDate=today;
+    if(daily){localFallbackNx.dailyDone=today;localFallbackNx.dailyChallenges++;}
+  }
+  saveLocalFallbackNx();
+  refreshUIFromNxdbNx(); // instant local render
+
+  // 2. Save to Nxdb (or queue if offline)
+  showRefreshNx('Saving to Nxdb…');
+  const res=await saveGameProgressNx({
+    won,time,mistakes:mistakesNx,hintsUsed:usedHintsNx,
+    difficulty:currentDiffNx,boardSize:currentBoardSizeNx,
+    isDaily:daily,xpEarned,perfect,noHints
+  });
+
+  if(res&&_isOnline){
+    // 3. Full Nxdb refresh after save
+    await refreshSudokuNxdb();
+    await syncAchievementsNx();
+    refreshLeaderboardNx().catch(()=>{});
+  }
+  hideRefreshNx();
+}
+
+/* ════════════════════════════════════════════
+   CONFIRM NEW GAME
+════════════════════════════════════════════ */
+function confirmNewGameNx(){
+  if(!gameActiveNx){newGameAfterWinNx();return;}
+  showConfirmNx({
+    title:'Start New Game',msg:'Your current progress will be lost.',icon:'🔄',
+    onConfirm(){
+      clearInterval(timerIntervalNx);gameActiveNx=false;
+      recordGameNx(false,0,timerSecsNx);
+      newGameAfterWinNx();
+    }
+  });
+}
+
+/* ════════════════════════════════════════════
+   AF SYNC BAR
+════════════════════════════════════════════ */
+function refreshAFSyncBarNx(){
+  const af=getAFStudentNx();
+  const bar=document.getElementById('afSyncBarNx'),
+        avatar=document.getElementById('afAvatarNx'),
+        name=document.getElementById('afNameNx'),
+        sub=document.getElementById('afSubNx'),
+        badge=document.getElementById('afBadgeNx');
+  if(af.loggedIn&&af.name){
+    bar.className='af-sync-bar synced';
+    const initials=af.name.trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join('');
+    avatar.textContent=initials||'AF';
+    name.textContent=af.name;
+    sub.textContent=af.phone?`📱 ${af.phone}`:(af.email||'AcademeForge Student');
+    badge.textContent='✓ AF Synced';badge.className='af-badge ok';
+  }else{
+    bar.className='af-sync-bar unsynced';
+    avatar.textContent='?';name.textContent='Not Synced';
+    sub.textContent='Login in AcademeForge app first';
+    badge.textContent='Not Synced';badge.className='af-badge warn';
+  }
+}
+
+/* ════════════════════════════════════════════
+   GLOBAL UI REFRESH
+════════════════════════════════════════════ */
+function refreshUIFromNxdbNx(){
+  const af=getAFStudentNx();
+  const xp=getXpNx(),level=getLevelNx(),wins=getWinsNx(),played=getPlayedNx(),best=getBestTimeNx();
+  const xpData=xpForCurrentLevelNx(xp),tier=getTierNx(level),rank=getRankNx();
+
+  const displayName=(af.loggedIn&&af.name)?af.name:(nxdbPlayer?.name||localStorage.getItem('sm_nxdb_username')||'Guest Player');
+  const displayAvatar=localStorage.getItem('sm_nxdb_avatar')||(af.loggedIn?'🎓':'😀');
+
+  // Header
+  document.getElementById('headerAvatarBtnNx').textContent=displayAvatar;
+
+  // Hero XP
+  document.getElementById('heroLevelNx').textContent=level;
+  document.getElementById('heroLevelLabelNx').textContent=`Level ${level}`;
+  document.getElementById('heroXpNumsNx').textContent=`${xpData.progress.toLocaleString()} / ${xpData.needed.toLocaleString()} XP`;
+  document.getElementById('heroXpFillNx').style.width=`${Math.min(100,Math.round((xpData.progress/xpData.needed)*100))}%`;
+  document.getElementById('heroXpRemainingNx').textContent=`${(xpData.needed-xpData.progress).toLocaleString()} XP to next level`;
+
+  // Quick stats
+  document.getElementById('qsLevelNx').textContent=level;
+  document.getElementById('qsWinsNx').textContent=wins;
+  if(rank>0)updateRankNx(rank);
+
+  // Daily
+  const today=new Date().toDateString(),todayDone=localFallbackNx.dailyDone===today;
+  document.getElementById('dailyChallengeDescNx').textContent=todayDone?'✅ Completed! Come back tomorrow.':'Complete today\'s puzzle for a bonus reward';
+  document.getElementById('dailyStreakIconNx').textContent=getStreakNx()>=3?'🔥':'🗓️';
+
+  // Profile
+  document.getElementById('profileAvatarNx').textContent=displayAvatar;
+  document.getElementById('profileNameNx').textContent=displayName;
+  document.getElementById('profileLevelBadgeNx').textContent=`⚡ Level ${level}`;
+  const tierBadge=document.getElementById('profileTierBadgeNx');
+  tierBadge.textContent=`${tier.icon} ${tier.name}`;tierBadge.className=`tier-badge ${tier.css}`;
+  document.getElementById('profileEmailNx').textContent=nxdbPlayer?.email||af.email||'';
+
+  // Sync status label
+  const syncEl=document.getElementById('syncStatusNx');
+  if(syncEl){
+    if(!_isOnline){syncEl.textContent='📡 Offline — playing locally';syncEl.style.color='var(--yellow)';}
+    else if(nxdbPlayer){syncEl.textContent='☁️ connected';syncEl.style.color='var(--green)';}
+    else if(af.loggedIn){syncEl.textContent='⏳ Syncing…';syncEl.style.color='var(--yellow)';}
+    else syncEl.textContent='';
+  }
+
+  // Profile XP bar
+  document.getElementById('pxpLevelNx').textContent=`Level ${level}`;
+  document.getElementById('pxpNumsNx').textContent=`${xpData.progress.toLocaleString()} / ${xpData.needed.toLocaleString()} XP`;
+  document.getElementById('pxpFillNx').style.width=`${Math.min(100,Math.round((xpData.progress/xpData.needed)*100))}%`;
+  document.getElementById('pxpRemainingNx').textContent=`${(xpData.needed-xpData.progress).toLocaleString()} XP to reach Level ${level+1}`;
+
+  // Profile stats
+  document.getElementById('pTotalXpNx').textContent=xp.toLocaleString();
+  document.getElementById('pWinsNx').textContent=wins;
+  document.getElementById('pPlayedNx').textContent=played;
+  document.getElementById('pWinRateNx').textContent=played>0?`${Math.round((wins/played)*100)}%`:'0%';
+  document.getElementById('pBestTimeNx').textContent=best?formatTimeNx(best):'--';
+  if(rank>0)document.getElementById('pGlobalRankNx').textContent=`#${rank}`;
+
+  refreshAFSyncBarNx();
+  buildAchievementsUINx();
+  updateOfflineSyncSubNx();
+}
+
+/* ════════════════════════════════════════════
+   PROFILE SCREEN REFRESH
+════════════════════════════════════════════ */
+function refreshProfileScreenNx(){
+  const af=getAFStudentNx();
+  const afCard=document.getElementById('afProfileCardNx');
+  if(af.loggedIn&&af.name){
+    afCard.style.display='block';
+    document.getElementById('afpcNameNx').textContent =af.name||'-';
+    document.getElementById('afpcPhoneNx').textContent=af.phone||'-';
+    document.getElementById('afpcEmailNx').textContent=af.email||'-';
+    document.getElementById('afpcSidNx').textContent  =af.studentId||'-';
+  }else{
+    afCard.style.display='none';
+  }
+  buildAchievementsUINx();
+  refreshUIFromNxdbNx();
+}
+
+/* ════════════════════════════════════════════
+   EDIT PROFILE
+════════════════════════════════════════════ */
+function openEditProfileNx(){
+  const username=nxdbPlayer?.name||localStorage.getItem('sm_nxdb_username')||'';
+  document.getElementById('editUsernameNx').value=username;
+  editSelectedAvatarNx=localStorage.getItem('sm_nxdb_avatar')||'😀';
+  const grid=document.getElementById('editAvatarGridNx');grid.innerHTML='';
+  AVATARS_Nx.forEach(av=>{
+    const btn=document.createElement('button');btn.type='button';
+    btn.style.cssText=`height:44px;font-size:1.4rem;border-radius:10px;background:var(--surface-3);border:2px solid ${av===editSelectedAvatarNx?'var(--primary)':'transparent'};transition:all .15s;cursor:pointer`;
+    btn.textContent=av;
+    btn.onclick=()=>{
+      grid.querySelectorAll('button').forEach(b=>{b.style.borderColor='transparent';b.style.background='var(--surface-3)';});
+      btn.style.borderColor='var(--primary)';btn.style.background='var(--primary-light)';
+      editSelectedAvatarNx=av;
+    };
+    grid.appendChild(btn);
+  });
+  openModalNx('editProfileModal');
+}
+async function saveProfileEditNx(){
+  const username=document.getElementById('editUsernameNx').value.trim();
+  if(username.length<3){toastNx('Username too short','Min 3 characters.','warning');return;}
+  localStorage.setItem('sm_nxdb_username',username);
+  localStorage.setItem('sm_nxdb_avatar',editSelectedAvatarNx);
+  const af=getAFStudentNx();
+  if(af.loggedIn&&af.studentId&&nxdbPlayer&&_isOnline){
+    try{await nxdbApi(NXDB_API_URL,{action:'update-profile',student_id:af.studentId,display_name:username,avatar:editSelectedAvatarNx});}
+    catch(e){/* silent */}
+  }
+  closeModalNx('editProfileModal');
+  toastNx('Profile updated!','','success');
+  refreshUIFromNxdbNx();
+}
+
+/* ════════════════════════════════════════════
+   SETTINGS
+════════════════════════════════════════════ */
+function confirmResetProgressNx(){
+  showConfirmNx({
+    title:'Reset All Progress',msg:'Clears all local fallback data. Nxdb data persists.',icon:'🗑️',
+    onConfirm(){
+      localFallbackNx={xp:0,level:1,wins:0,played:0,bestTime:0,streak:0,lastPlayDate:null,perfectGames:0,dailyChallenges:0,noHintWins:0,dailyDone:null,globalRank:0};
+      offlineQueueNx=[];
+      saveLocalFallbackNx();saveOfflineQueueNx();
+      refreshUIFromNxdbNx();
+      toastNx('Local data cleared','Nxdb data is safe.','info');
+    }
+  });
+}
+
+/* ════════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════════ */
+function formatTimeNx(secs){
+  const m=Math.floor(secs/60),s=secs%60;
+  return m>0?`${m}m ${s}s`:`${s}s`;
+}
+
+/* ════════════════════════════════════════════
+   KEYBOARD
+════════════════════════════════════════════ */
+document.addEventListener('keydown',e=>{
+  if(!gameActiveNx)return;
+  const num=parseInt(e.key);
+  if(num>=1&&num<=currentBoardSizeNx){placeNumberNx(num);return;}
+  if(e.key==='Backspace'||e.key==='Delete'){eraseCellNx();return;}
+  if(!selectedCellNx)return;
+  let{row,col}=selectedCellNx;const sz=currentBoardSizeNx;
+  if(e.key==='ArrowUp')   row=Math.max(0,row-1);
+  if(e.key==='ArrowDown') row=Math.min(sz-1,row+1);
+  if(e.key==='ArrowLeft') col=Math.max(0,col-1);
+  if(e.key==='ArrowRight')col=Math.min(sz-1,col+1);
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){
+    e.preventDefault();selectCellNx(row,col);
+  }
+});
+
+/* ════════════════════════════════════════════
+   STORAGE EVENT — syncs across tabs / main AF app
+   When AF app logs in, this fires and instantly updates the game
+════════════════════════════════════════════ */
+window.addEventListener('storage',e=>{
+  const afKeys=['af_student_name','af_student_mobile','af_student_email','af_student_logged_in','af_student_id','af_student_uuid'];
+  if(afKeys.includes(e.key)){
+    refreshAFSyncBarNx();
+    refreshUIFromNxdbNx();
+    const af=getAFStudentNx();
+    if(af.loggedIn&&af.studentId&&_isOnline){
+      // New login detected — sync immediately
+      refreshSudokuNxdb().catch(()=>{});
+    }
+  }
+});
+
+ 
+/* ==========================================
+   BASIC CLIENT PROTECTION
+========================================== */
+
+/* Disable right click */
+document.addEventListener("contextmenu", e => {
+  e.preventDefault();
+});
+
+/* Disable common devtools shortcuts */
+document.addEventListener("keydown", e => {
+  const key = e.key.toLowerCase();
+
+  if (
+    e.key === "F12" ||
+    (e.ctrlKey && e.shiftKey && ["i","j","c"].includes(key)) ||
+    (e.ctrlKey && key === "u") ||
+    (e.ctrlKey && key === "s")
+  ) {
+    e.preventDefault();
+    return false;
+  }
+});
+
+/* Disable text selection */
+document.addEventListener("selectstart", e => {
+  e.preventDefault();
+});
+
+/* Disable copy */
+document.addEventListener("copy", e => {
+  e.preventDefault();
+});
+
+/* Disable cut */
+document.addEventListener("cut", e => {
+  e.preventDefault();
+});
+
+/* Disable drag */
+document.addEventListener("dragstart", e => {
+  e.preventDefault();
+});
+
+/* Disable zoom via keyboard */
+window.addEventListener(
+  "keydown",
+  e => {
+    if (
+      e.ctrlKey &&
+      ["+","-","=","_","0"].includes(e.key)
+    ) {
+      e.preventDefault();
+    }
+  },
+  { passive: false }
+);
+
+/* Disable zoom via mouse wheel */
+window.addEventListener(
+  "wheel",
+  e => {
+    if (e.ctrlKey) {
+      e.preventDefault();
+    }
+  },
+  { passive: false }
+);
+
+/* Disable pinch zoom */
+document.addEventListener(
+  "touchmove",
+  e => {
+    if (e.touches.length > 1) {
+      e.preventDefault();
+    }
+  },
+  { passive: false }
+);
+
+/* Double tap zoom disable */
+let lastTouchEnd = 0;
+document.addEventListener(
+  "touchend",
+  e => {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+      e.preventDefault();
+    }
+    lastTouchEnd = now;
+  },
+  false
+);
+
+  /* ==========================================
+   PULL TO REFRESH
+========================================== */
+
+let pullStartYNx = 0;
+let pullingNx = false;
+const refreshThresholdNx = 90;
+
+document.addEventListener(
+  "touchstart",
+  (e) => {
+    if (window.scrollY <= 0) {
+      pullStartYNx = e.touches[0].clientY;
+      pullingNx = true;
+    }
+  },
+  { passive: true }
+);
+
+document.addEventListener(
+  "touchmove",
+  (e) => {
+    if (!pullingNx) return;
+
+    const pullDistance =
+      e.touches[0].clientY - pullStartYNx;
+
+    if (pullDistance > 40) {
+      const indicator =
+        document.getElementById("refreshIndicatorNx");
+
+      if (indicator) {
+        indicator.classList.add("show");
+      }
+
+      const label =
+        document.getElementById("refreshLabelNx");
+
+      if (label) {
+        label.textContent =
+          pullDistance >= refreshThresholdNx
+            ? "Release to refresh"
+            : "Pull to refresh";
+      }
+    }
+  },
+  { passive: true }
+);
+
+document.addEventListener(
+  "touchend",
+  async () => {
+    if (!pullingNx) return;
+
+    pullingNx = false;
+
+    const indicator =
+      document.getElementById("refreshIndicatorNx");
+
+    const label =
+      document.getElementById("refreshLabelNx");
+
+    const pullDistance =
+      window.scrollY <= 0
+        ? Math.max(
+            0,
+            event?.changedTouches?.[0]?.clientY -
+              pullStartYNx
+          )
+        : 0;
+
+    if (pullDistance >= refreshThresholdNx) {
+      try {
+        if (label) {
+          label.textContent = "Refreshing...";
+        }
+
+        if (typeof refreshSudokuNxdb === "function") {
+          await refreshSudokuNxdb();
+        }
+
+        if (
+          typeof refreshUIFromNxdbNx === "function"
+        ) {
+          refreshUIFromNxdbNx();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    setTimeout(() => {
+      if (indicator) {
+        indicator.classList.remove("show");
+      }
+
+      if (label) {
+        label.textContent = "Refreshing...";
+      }
+    }, 500);
+  },
+  { passive: true }
+);
+
+  /* ─────────────────────────────────────────
+   SWIPE NAVIGATION NX
+───────────────────────────────────────── */
+
+const NX_SCREEN_ORDER = [
+  "homeScreen",
+  "playScreen",
+  "profileScreen",
+  "leaderboardScreen",
+  "settingsScreen"
+];
+
+let nxTouchStartX = 0;
+let nxTouchStartY = 0;
+let nxTouchStartTime = 0;
+
+const nxApp = document.querySelector(".app");
+
+if (nxApp) {
+  nxApp.addEventListener(
+    "touchstart",
+    function (e) {
+      nxTouchStartX = e.changedTouches[0].clientX;
+      nxTouchStartY = e.changedTouches[0].clientY;
+      nxTouchStartTime = Date.now();
+    },
+    { passive: true }
+  );
+
+  nxApp.addEventListener(
+    "touchend",
+    function (e) {
+      handleSwipeNx(e);
+    },
+    { passive: true }
+  );
+}
+
+function handleSwipeNx(e) {
+  const touch = e.changedTouches[0];
+
+  const diffX = touch.clientX - nxTouchStartX;
+  const diffY = touch.clientY - nxTouchStartY;
+
+  const elapsed = Date.now() - nxTouchStartTime;
+
+  /* Ignore vertical scrolling */
+  if (Math.abs(diffY) > Math.abs(diffX)) return;
+
+  /* Ignore tiny accidental swipes */
+  if (Math.abs(diffX) < 90) return;
+
+  /* Ignore slow drags */
+  if (elapsed > 650) return;
+
+  /* Ignore modal interactions */
+  if (
+    e.target.closest(".modal") ||
+    e.target.closest(".modal-card") ||
+    e.target.closest("#editAvatarGridNx")
+  ) {
+    return;
+  }
+
+  const activeBtn = document.querySelector(
+    ".bottom-nav .nav-btn.active"
+  );
+
+  if (!activeBtn) return;
+
+  const currentScreen =
+    activeBtn.dataset.screen;
+
+  const currentIndex =
+    NX_SCREEN_ORDER.indexOf(currentScreen);
+
+  if (currentIndex === -1) return;
+
+  /* Swipe Left */
+  if (
+    diffX < 0 &&
+    currentIndex < NX_SCREEN_ORDER.length - 1
+  ) {
+    const nextScreen =
+      NX_SCREEN_ORDER[currentIndex + 1];
+
+    if (nextScreen === "playScreen") {
+      navToPlayNx();
+    } else {
+      openScreenNx(nextScreen);
+    }
+  }
+
+  /* Swipe Right */
+  if (
+    diffX > 0 &&
+    currentIndex > 0
+  ) {
+    const prevScreen =
+      NX_SCREEN_ORDER[currentIndex - 1];
+
+    if (prevScreen === "playScreen") {
+      navToPlayNx();
+    } else {
+      openScreenNx(prevScreen);
+    }
+  }
+}
+/* ════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════ */
+
+async function initNx() {
+  try {
+    loadThemeNx();
+    initSoundNx();
+    loadLocalFallbackNx();
+    loadOfflineQueueNx();
+
+    /* Online status */
+    setOnlineStateNx(navigator.onLine);
+
+    /* Instant render */
+    refreshUIFromNxdbNx();
+
+    const af = getAFStudentNx();
+
+    if (af.loggedIn && af.name) {
+      setTimeout(() => {
+        toastNx(
+          `Welcome back, ${af.name.split(" ")[0]}! 👋`,
+          _isOnline
+            ? "Syncing your progress..."
+            : "You're offline — playing locally",
+          _isOnline ? "success" : "info",
+          3000
+        );
+      }, 400);
+    }
+
+    /* Background sync - do NOT block UI */
+    if (_isOnline) {
+      refreshSudokuNxdb()
+        .then(() => {
+          refreshUIFromNxdbNx();
+
+          const lastSync = document.getElementById("nxdbLastSyncNx");
+          if (lastSync) {
+            lastSync.textContent = new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit"
+            });
+          }
+        })
+        .catch(err => {
+          console.error("Background sync failed:", err);
+        });
+    }
+
+    /* Queue label */
+    updateOfflineSyncSubNx();
+
+  } catch (err) {
+    console.error("Init failed:", err);
+  }
+}
+
+initNx();
+</script>
+</body>
+</html>
