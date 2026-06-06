@@ -1,754 +1,416 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AcademeForge Notes</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg: #050816;
-      --surface: #101726;
-      --surface-2: #171f31;
-      --border: rgba(255, 255, 255, .08);
-      --text: #ffffff;
-      --muted: #9ca3af;
-      --primary: #22c55e;
-      --primary-2: #16a34a;
-      --shadow: 0 20px 50px rgba(0, 0, 0, .35);
-    }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AcademeForge Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #050816;
+  --surface: #101726;
+  --surface-2: #171f31;
+  --border: rgba(255,255,255,.08);
+  --text: #ffffff;
+  --muted: #9ca3af;
+  --primary: #22c55e;
+  --primary-2: #16a34a;
+  --shadow: 0 20px 50px rgba(0,0,0,.35);
+  --ff-head: 'Syne', sans-serif;
+  --ff-body: 'DM Sans', sans-serif;
+}
+[data-theme="light"] {
+  --bg: #f5f7fb;
+  --surface: #ffffff;
+  --surface-2: #f1f5f9;
+  --border: rgba(15,23,42,.1);
+  --text: #0f172a;
+  --muted: #64748b;
+  --shadow: 0 20px 40px rgba(15,23,42,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;scrollbar-width:none;-ms-overflow-style:none;}
+*::-webkit-scrollbar{display:none;}
+html,body{height:100%;font-family:var(--ff-body);}
+body{
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;background:var(--bg);color:var(--text);
+}
+button{border:0;font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;}
 
-    [data-theme="light"] {
-      --bg: #f5f7fb;
-      --surface: #ffffff;
-      --surface-2: #f1f5f9;
-      --border: rgba(15, 23, 42, .1);
-      --text: #0f172a;
-      --muted: #64748b;
-      --shadow: 0 20px 40px rgba(15, 23, 42, .08);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html,
-    body {
-      height: 100%;
-    }
-
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      background: var(--bg);
-      color: var(--text);
-      font-family: Inter, system-ui, sans-serif;
-    }
-
-    button {
-      border: 0;
-      font: inherit;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .af-app {
-      position: relative;
-      width: 100%;
-      max-width: 430px;
-      height: 100vh;
-      overflow: hidden;
-      background: var(--bg);
-    }
-
-    @media (min-width: 768px) {
-      .af-app {
-        height: 92vh;
-        border: 1px solid var(--border);
-        border-radius: 36px;
-        box-shadow: var(--shadow);
-      }
-    }
-
-    .af-bg {
-      position: absolute;
-      inset: 0;
-      overflow: hidden;
-      pointer-events: none;
-    }
-
-    .af-blob {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(90px);
-      opacity: .32;
-    }
-
-    .af-blob-1 {
-      width: 240px;
-      height: 240px;
-      top: -60px;
-      left: -80px;
-      background: #22c55e;
-    }
-
-    .af-blob-2 {
-      width: 260px;
-      height: 260px;
-      top: 180px;
-      right: -100px;
-      background: #3b82f6;
-    }
-
-    .af-blob-3 {
-      width: 220px;
-      height: 220px;
-      bottom: -60px;
-      left: 90px;
-      background: #8b5cf6;
-    }
-
-    .af-header {
-      position: relative;
-      z-index: 10;
-      height: 82px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 16px;
-      border-bottom: 1px solid var(--border);
-      background: rgba(0, 0, 0, .18);
-      backdrop-filter: blur(20px);
-    }
-
-    [data-theme="light"] .af-header {
-      background: rgba(255, 255, 255, .72);
-    }
-
-    .af-brand {
-      min-width: 0;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .af-logo {
-      width: 44px;
-      height: 44px;
-      flex: 0 0 44px;
-      object-fit: contain;
-      padding: 4px;
-      border-radius: 14px;
-      background: #fff;
-    }
-
-    .af-brand-title {
-      color: var(--text);
-      font-size: 18px;
-      font-weight: 800;
-      line-height: 1.1;
-    }
-
-    .af-brand-sub {
-      margin-top: 2px;
-      color: var(--muted);
-      font-size: 11px;
-      white-space: nowrap;
-    }
-
-    .af-header-actions {
-      display: flex;
-      gap: 10px;
-    }
-
-    .af-icon-btn,
-    .af-floating-back {
-      display: grid;
-      place-items: center;
-      color: var(--text);
-      background: var(--surface);
-      transition: transform .18s ease, background .18s ease;
-    }
-
-    .af-icon-btn {
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      font-size: 18px;
-    }
-
-    .af-icon-btn:hover,
-    .af-floating-back:hover {
-      background: var(--surface-2);
-      transform: translateY(-1px);
-    }
-
-    .af-page {
-      position: absolute;
-      inset: 82px 0 0;
-      display: none;
-      overflow-y: auto;
-      padding: 22px 22px 92px;
-    }
-
-    .af-page.active {
-      display: block;
-      animation: fade .25s ease;
-    }
-
-    @keyframes fade {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-
-      to {
-        opacity: 1;
-        transform: none;
-      }
-    }
-
-    .af-home {
-      padding-top: 30px;
-      text-align: center;
-    }
-
-    .af-home-icon {
-      margin-bottom: 18px;
-      font-size: 58px;
-    }
-
-    .af-home h1 {
-      margin-bottom: 12px;
-      font-size: 36px;
-      font-weight: 900;
-      line-height: 1.1;
-    }
-
-    .af-home p {
-      color: var(--muted);
-      font-size: 15px;
-      line-height: 1.8;
-    }
-
-    .af-start-btn {
-      width: 100%;
-      height: 58px;
-      margin-top: 28px;
-      border-radius: 20px;
-      color: #fff;
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      font-size: 16px;
-      font-weight: 800;
-    }
-
-    .af-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-top: 22px;
-    }
-
-    .af-stat,
-    .af-card {
-      border: 1px solid var(--border);
-      background: var(--surface);
-    }
-
-    .af-stat {
-      padding: 16px;
-      border-radius: 18px;
-    }
-
-    .af-stat strong {
-      display: block;
-      font-size: 20px;
-    }
-
-    .af-stat span {
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .af-grid {
-      display: grid;
-      gap: 16px;
-      margin-top: 20px;
-    }
-
-    .af-card {
-      padding: 22px;
-      border-radius: 24px;
-      cursor: pointer;
-      transition: transform .2s ease, background .2s ease;
-    }
-
-    .af-card:hover {
-      transform: translateY(-3px);
-      background: var(--surface-2);
-    }
-
-    .af-card-title {
-      margin-bottom: 6px;
-      color: var(--text);
-      font-size: 18px;
-      font-weight: 800;
-    }
-
-    .af-card-sub {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .af-page-title {
-      margin-bottom: 6px;
-      font-size: 28px;
-      font-weight: 900;
-    }
-
-    .af-page-sub {
-      margin-bottom: 20px;
-      color: var(--muted);
-    }
-
-    .af-note-title {
-      margin-bottom: 12px;
-      font-size: 18px;
-      font-weight: 800;
-    }
-
-    .af-viewer {
-      width: 100%;
-      height: calc(100vh - 210px);
-      border: 0;
-      border-radius: 24px;
-      background: #fff;
-    }
-
-    @media (min-width: 768px) {
-      .af-viewer {
-        height: calc(92vh - 210px);
-      }
-    }
-
-    .af-floating-back {
-      position: absolute;
-      right: 18px;
-      bottom: 18px;
-      z-index: 20;
-      width: 56px;
-      height: 56px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      font-size: 22px;
-    }
-
-    @media (max-width: 420px) {
-      .af-brand-sub {
-        display: none;
-      }
-
-      .af-page {
-        padding-inline: 18px;
-      }
-    }
-    .af-app{
-
-    scrollbar-width:none;
-
-    -ms-overflow-style:none;
-
+.af-app{
+  position:relative;width:100%;max-width:430px;
+  height:100vh;overflow:hidden;background:var(--bg);
+}
+@media(min-width:768px){
+  .af-app{
+    height:92vh;border:1px solid var(--border);
+    border-radius:36px;box-shadow:var(--shadow);
+  }
 }
 
-.af-app::-webkit-scrollbar{
+.af-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.af-blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.32;}
+.af-blob-1{width:240px;height:240px;top:-60px;left:-80px;background:#22c55e;}
+.af-blob-2{width:260px;height:260px;top:180px;right:-100px;background:#3b82f6;}
+.af-blob-3{width:220px;height:220px;bottom:-60px;left:90px;background:#8b5cf6;}
 
-    display:none;
-
+.af-header{
+  position:relative;z-index:10;height:82px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:16px;border-bottom:1px solid var(--border);
+  background:rgba(0,0,0,.18);backdrop-filter:blur(20px);
 }
-    /* ===========================
-HIDE ALL SCROLLBARS
-=========================== */
-
-.af-app,
-.af-page,
-body,
-html{
-
-    scrollbar-width:none !important;
-    -ms-overflow-style:none !important;
-
+[data-theme="light"] .af-header{background:rgba(255,255,255,.72);}
+.af-brand{min-width:0;display:flex;align-items:center;gap:12px;}
+.af-logo{
+  width:44px;height:44px;flex:0 0 44px;
+  object-fit:contain;padding:4px;border-radius:14px;background:#fff;
 }
-
-.af-app::-webkit-scrollbar,
-.af-page::-webkit-scrollbar,
-body::-webkit-scrollbar,
-html::-webkit-scrollbar{
-
-    width:0 !important;
-    height:0 !important;
-    display:none !important;
-
+.af-logo-box{
+  width:44px;height:44px;flex:0 0 44px;border-radius:14px;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  display:grid;place-items:center;font-size:22px;
 }
-
-/* Floating Back Button Hide */
-
-.af-floating-back{
-
-    display:none !important;
-
+.af-brand-title{font-family:var(--ff-head);color:var(--text);font-size:18px;font-weight:800;line-height:1.1;}
+.af-brand-sub{margin-top:2px;color:var(--muted);font-size:11px;white-space:nowrap;}
+.af-header-actions{display:flex;gap:10px;}
+.af-icon-btn{
+  display:grid;place-items:center;color:var(--text);
+  background:var(--surface);width:42px;height:42px;
+  border-radius:14px;font-size:18px;
+  transition:transform .18s ease,background .18s ease;
 }
-
-/* Extra Safety */
-
-*{
-
-    scrollbar-width:none !important;
-
+.af-icon-btn:hover{background:var(--surface-2);transform:translateY(-1px);}
+.af-back-btn{
+  height:42px;padding:0 16px;border:none;border-radius:14px;
+  font-family:var(--ff-head);font-weight:700;color:#fff;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  box-shadow:0 10px 20px rgba(34,197,94,.25);
+  transition:all .2s ease;
 }
+.af-back-btn:hover{transform:translateY(-2px);}
 
-*::-webkit-scrollbar{
-
-    width:0 !important;
-    height:0 !important;
-    display:none !important;
-
+.af-page{
+  position:absolute;inset:82px 0 0;display:none;
+  overflow-y:auto;padding:22px 22px 92px;
 }
-    .af-back-btn{
+.af-page.active{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
 
-height:42px;
-
-padding:0 16px;
-
-border:none;
-
-border-radius:14px;
-
-font-weight:700;
-
-color:#fff;
-
-background:
-linear-gradient(
-135deg,
-#22c55e,
-#16a34a
-);
-
-box-shadow:
-0 10px 20px rgba(34,197,94,.25);
-
-transition:
-all .2s ease;
-
+.af-home{padding-top:30px;text-align:center;}
+.af-home-icon{margin-bottom:18px;font-size:58px;}
+.af-home h1{
+  margin-bottom:12px;font-family:var(--ff-head);
+  font-size:36px;font-weight:900;line-height:1.1;
 }
+.af-home p{color:var(--muted);font-size:15px;line-height:1.8;}
 
-.af-back-btn:hover{
-
-transform:
-translateY(-2px);
-
+.af-free-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  margin-top:18px;padding:10px 20px;border-radius:999px;
+  background:linear-gradient(135deg,rgba(34,197,94,.15),rgba(22,163,74,.08));
+  border:1.5px solid rgba(34,197,94,.4);
+  color:var(--primary);font-family:var(--ff-head);font-weight:800;font-size:15px;
+  box-shadow:0 0 24px rgba(34,197,94,.15);
+  animation:pulse-badge 2.4s ease-in-out infinite;
 }
-    
-  </style>
+@keyframes pulse-badge{
+  0%,100%{box-shadow:0 0 18px rgba(34,197,94,.15);}
+  50%{box-shadow:0 0 32px rgba(34,197,94,.35);}
+}
+.af-free-badge .badge-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--primary);animation:blink 1.2s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+.af-start-btn{
+  width:100%;height:58px;margin-top:22px;border-radius:20px;
+  color:#fff;background:linear-gradient(135deg,var(--primary),var(--primary-2));
+  font-family:var(--ff-head);font-size:16px;font-weight:800;
+  box-shadow:0 12px 28px rgba(34,197,94,.3);
+  transition:transform .2s ease,box-shadow .2s ease;
+}
+.af-start-btn:hover{transform:translateY(-2px);box-shadow:0 18px 36px rgba(34,197,94,.4);}
+
+.af-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:22px;}
+.af-stat{
+  padding:16px;border-radius:18px;
+  border:1px solid var(--border);background:var(--surface);text-align:center;
+}
+.af-stat strong{
+  display:block;font-family:var(--ff-head);font-size:20px;font-weight:900;color:var(--primary);
+}
+.af-stat span{color:var(--muted);font-size:12px;}
+
+.af-grid{display:grid;gap:16px;margin-top:20px;}
+.af-card{
+  padding:22px;border-radius:24px;cursor:pointer;
+  border:1px solid var(--border);background:var(--surface);
+  transition:transform .2s ease,background .2s ease,border-color .2s ease;
+  text-align:left;width:100%;
+}
+.af-card:hover{
+  transform:translateY(-3px);background:var(--surface-2);
+  border-color:rgba(34,197,94,.25);
+}
+.af-card-title{
+  margin-bottom:6px;color:var(--text);
+  font-family:var(--ff-head);font-size:18px;font-weight:800;
+}
+.af-card-sub{color:var(--muted);font-size:13px;}
+
+.af-page-title{margin-bottom:6px;font-family:var(--ff-head);font-size:28px;font-weight:900;}
+.af-page-sub{margin-bottom:20px;color:var(--muted);}
+
+.af-note-title{margin-bottom:12px;font-family:var(--ff-head);font-size:18px;font-weight:800;}
+.af-viewer{
+  width:100%;height:calc(100vh - 210px);
+  border:0;border-radius:24px;background:#fff;
+}
+@media(min-width:768px){.af-viewer{height:calc(92vh - 210px);}}
+
+.af-class-card{position:relative;overflow:hidden;}
+.af-class-card::before{
+  content:'';position:absolute;inset:0;opacity:0;
+  background:linear-gradient(135deg,rgba(34,197,94,.08),transparent);
+  transition:opacity .2s ease;border-radius:24px;
+}
+.af-class-card:hover::before{opacity:1;}
+.af-class-badge{
+  display:inline-block;margin-bottom:10px;
+  padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;
+  font-family:var(--ff-head);letter-spacing:.04em;text-transform:uppercase;
+}
+.badge-9{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.25);}
+.badge-10{background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.25);}
+
+.af-subj-card{display:flex;align-items:center;gap:16px;padding:18px 22px;}
+.af-subj-icon{
+  width:48px;height:48px;border-radius:16px;flex:0 0 48px;
+  display:grid;place-items:center;font-size:24px;
+  background:var(--surface-2);border:1px solid var(--border);
+  transition:transform .2s ease;
+}
+.af-card:hover .af-subj-icon{transform:scale(1.1) rotate(-4deg);}
+.af-subj-info{flex:1;min-width:0;}
+.af-subj-arrow{color:var(--muted);font-size:18px;transition:transform .2s ease;}
+.af-card:hover .af-subj-arrow{transform:translateX(4px);color:var(--primary);}
+
+@media(max-width:420px){
+  .af-brand-sub{display:none;}
+  .af-page{padding-inline:18px;}
+}
+</style>
 </head>
 <body>
-  <div class="af-app">
-    <div class="af-bg">
-      <div class="af-blob af-blob-1"></div>
-      <div class="af-blob af-blob-2"></div>
-      <div class="af-blob af-blob-3"></div>
-    </div>
-
-    <header class="af-header">
-      <div class="af-brand">
-        <img src="../IMG/AF LOGO 2.jpeg" class="af-logo" alt="AcademeForge" />
-        <div>
-          <div class="af-brand-title">AcademeForge</div>
-          <div class="af-brand-sub">Learning Beyond the Classroom</div>
-        </div>
-      </div>
-
-      <div class="af-header-actions">
-        <button class="af-icon-btn" id="themeBtn" type="button" aria-label="Toggle theme">🌙</button>
-   <button
-  class="af-back-btn"
-  onclick="history.back()"
-  type="button"
-  aria-label="Back"
->
-  ←
-</button>
-      </div>
-    </header>
-
-    <section id="homePage" class="af-page active">
-      <div class="af-home">
-        <div class="af-home-icon">📚</div>
-        <h1>AF Notes Hub</h1>
-        <p>Access Class 9 & Class 10 Revision notes instantly. Organized, fast and distraction free learning.</p>
-
-        <button class="af-start-btn" type="button" onclick="openPage('classPage')">👉🏻 Start Learning 👈🏻</button>
-
-        <div class="af-stats">
-          <div class="af-stat">
-            <strong>0</strong>
-            <span>Fees</span>
-          </div>
-          <div class="af-stat">
-            <strong>2024</strong>
-            <span>Started</span>
-          </div>
-          <div class="af-stat">
-            <strong>∞</strong>
-            <span>Access</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="af-grid">
-        <div class="af-card">
-          <div class="af-card-title">⚡ Instant Access</div>
-          <div class="af-card-sub">Open notes with one tap.</div>
-        </div>
-        <div class="af-card">
-          <div class="af-card-title">📖 Organized Notes</div>
-          <div class="af-card-sub">Subject wise note collection.</div>
-        </div>
-        <div class="af-card">
-          <div class="af-card-title">🌙 Reading Mode</div>
-          <div class="af-card-sub">Comfortable day and night reading.</div>
-        </div>
-      </div>
-    </section>
-
-    <section id="classPage" class="af-page">
-      <h2 class="af-page-title">Choose Class</h2>
-      <p class="af-page-sub">Select your class to continue.</p>
-
-      <div class="af-grid">
-        <div class="af-card" onclick="selectClass('9')">
-          <div class="af-card-title">🎓 Class 9</div>
-          <div class="af-card-sub">Foundation Learning Notes</div>
-        </div>
-        <div class="af-card" onclick="selectClass('10')">
-          <div class="af-card-title">🏆 Class 10</div>
-          <div class="af-card-sub">Board Exam Preparation</div>
-        </div>
-      </div>
-    </section>
-
-    <section id="subjectPage" class="af-page">
-      <h2 class="af-page-title">Subjects</h2>
-      <p class="af-page-sub">Choose a subject.</p>
-      <div id="subjectGrid" class="af-grid"></div>
-    </section>
-
-    <section id="viewerPage" class="af-page">
-      <div class="af-note-title" id="noteTitle">Loading...</div>
-      <iframe id="notesViewer" class="af-viewer" allowfullscreen title="Notes viewer"></iframe>
-    </section>
-
-    <button class="af-floating-back" id="floatingBackBtn" type="button" onclick="goBack()" aria-label="Go back">←</button>
+<div class="af-app">
+  <div class="af-bg">
+    <div class="af-blob af-blob-1"></div>
+    <div class="af-blob af-blob-2"></div>
+    <div class="af-blob af-blob-3"></div>
   </div>
 
-  <script>
+  <header class="af-header">
+    <div class="af-brand">
+      <!-- Replace with your actual logo: <img src="../IMG/AF LOGO 2.jpeg" class="af-logo" alt="AcademeForge"/> -->
+      <div class="af-logo-box">📚</div>
+      <div>
+        <div class="af-brand-title">AcademeForge</div>
+        <div class="af-brand-sub">Learning Beyond the Classroom</div>
+      </div>
+    </div>
+    <div class="af-header-actions">
+      <button class="af-icon-btn" id="themeBtn" type="button" aria-label="Toggle theme">🌙</button>
+      <button class="af-back-btn" type="button" onclick="goBack()">← Back</button>
+    </div>
+  </header>
+
+  <!-- HOME -->
+  <section id="homePage" class="af-page active">
+    <div class="af-home">
+      <div class="af-home-icon">📚</div>
+      <h1>AF Notes Hub</h1>
+      <p>Access Class 9 &amp; Class 10 revision notes instantly.<br/>Organized, fast, and distraction-free learning.</p>
+
+      <div class="af-free-badge">
+        <span class="badge-dot"></span>
+        100% Free — Always &amp; Forever
+      </div>
+
+      <button class="af-start-btn" type="button" onclick="openPage('classPage')">
+        👉🏻 Start Learning 👈🏻
+      </button>
+
+      <div class="af-stats">
+        <div class="af-stat"><strong>₹0</strong><span>Fees</span></div>
+        <div class="af-stat"><strong>2024</strong><span>Started</span></div>
+        <div class="af-stat"><strong>∞</strong><span>Access</span></div>
+      </div>
+    </div>
+
+    <div class="af-grid">
+      <div class="af-card">
+        <div class="af-card-title">⚡ Instant Access</div>
+        <div class="af-card-sub">Open notes with one tap — zero sign-up, zero cost.</div>
+      </div>
+      <div class="af-card">
+        <div class="af-card-title">📖 Organized Notes</div>
+        <div class="af-card-sub">Subject-wise, chapter-wise collection for every student.</div>
+      </div>
+      <div class="af-card">
+        <div class="af-card-title">🌙 Reading Mode</div>
+        <div class="af-card-sub">Comfortable day and night reading for long study sessions.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLASS -->
+  <section id="classPage" class="af-page">
+    <h2 class="af-page-title">Choose Class</h2>
+    <p class="af-page-sub">Select your class to view subjects.</p>
+    <div class="af-grid">
+      <button class="af-card af-class-card" onclick="selectClass('9')" type="button">
+        <span class="af-class-badge badge-9">Class 9</span>
+        <div class="af-card-title">🎓 Class 9</div>
+        <div class="af-card-sub">Foundation Learning Notes — Science, Math, SST, English</div>
+      </button>
+      <button class="af-card af-class-card" onclick="selectClass('10')" type="button">
+        <span class="af-class-badge badge-10">Class 10</span>
+        <div class="af-card-title">🏆 Class 10</div>
+        <div class="af-card-sub">Board Exam Preparation — Science, Math, SST, English</div>
+      </button>
+    </div>
+  </section>
+
+  <!-- SUBJECTS -->
+  <section id="subjectPage" class="af-page">
+    <h2 class="af-page-title" id="subjectPageTitle">Subjects</h2>
+    <p class="af-page-sub">All notes are completely free. Tap any subject to open.</p>
+    <div id="subjectGrid" class="af-grid"></div>
+  </section>
+
+  <!-- VIEWER -->
+  <section id="viewerPage" class="af-page">
+    <div class="af-note-title" id="noteTitle">Loading...</div>
+    <iframe id="notesViewer" class="af-viewer" allowfullscreen title="Notes viewer"></iframe>
+  </section>
+</div>
+
+<script>
 const NOTES = {
   "9": {
-    "Science": {
-      title: "Class 9 Science Notes",
-      folderId: "1-CtgsAx1kXo67-UUf6HsBunPIgm8FgUl",
-      icon: "🔬"
-    },
-    "Math": {
-      title: "Class 9 Mathematics Notes",
-      folderId: "1-DH3yoNSnF0iFSIH2CsGGf5RobYwYKyp",
-      icon: "🧮"
-    },
-    "Social Science": {
-      title: "Class 9 Social Science Notes",
-      folderId: "1-Dm4Tg6UIlYBiNqGYOYAWZvJExikh7my",
-      icon: "🌍"
-    },
-    "English": {
-      title: "Class 9 English Notes",
-      folderId: "1-Gd2i8_7ylzy-gM_sFQMGrtDbiE70vRr",
-      icon: "📖"
-    }
+    "Science":       { title:"Class 9 Science Notes",       folderId:"1-CtgsAx1kXo67-UUf6HsBunPIgm8FgUl", icon:"🔬" },
+    "Math":          { title:"Class 9 Mathematics Notes",   folderId:"1-DH3yoNSnF0iFSIH2CsGGf5RobYwYKyp", icon:"🧮" },
+    "Social Science":{ title:"Class 9 Social Science Notes",folderId:"1-Dm4Tg6UIlYBiNqGYOYAWZvJExikh7my", icon:"🌍" },
+    "English":       { title:"Class 9 English Notes",       folderId:"1-Gd2i8_7ylzy-gM_sFQMGrtDbiE70vRr", icon:"📖" }
   },
-
   "10": {
-    "Science": {
-      title: "Class 10 Science Notes",
-      folderId: "1-bVnCZbCabVmNGCxJ0gY4-FP4BwN9F02",
-      icon: "🔬"
-    },
-    "Math": {
-      title: "Class 10 Mathematics Notes",
-      folderId: "1-Z7LCbOvKhHvMxqXS3W4qVcAukPVmhXK",
-      icon: "🧮"
-    },
-    "Social Science": {
-      title: "Class 10 Social Science Notes",
-      folderId: "1-c9q3sV8BCZjtch0WqWnXnJWSE1il5uS",
-      icon: "🌍"
-    },
-    "English": {
-      title: "Class 10 English Notes",
-      folderId: "1-VKypMW3rybYR_0dPrro1JscD8eGtj9u",
-      icon: "📖"
-    }
+    "Science":       { title:"Class 10 Science Notes",      folderId:"1-bVnCZbCabVmNGCxJ0gY4-FP4BwN9F02", icon:"🔬" },
+    "Math":          { title:"Class 10 Mathematics Notes",  folderId:"1-Z7LCbOvKhHvMxqXS3W4qVcAukPVmhXK", icon:"🧮" },
+    "Social Science":{ title:"Class 10 Social Science Notes",folderId:"1-c9q3sV8BCZjtch0WqWnXnJWSE1il5uS", icon:"🌍" },
+    "English":       { title:"Class 10 English Notes",      folderId:"1-VKypMW3rybYR_0dPrro1JscD8eGtj9u", icon:"📖" }
   }
 };
-    let currentPage = "homePage";
-    let currentClass = null;
 
-    function openPage(pageId) {
-      document.querySelectorAll(".af-page").forEach(page => {
-        page.classList.remove("active");
-      });
+const subjectColors = {
+  "Science":       "rgba(59,130,246,.15)",
+  "Math":          "rgba(234,179,8,.12)",
+  "Social Science":"rgba(239,68,68,.12)",
+  "English":       "rgba(139,92,246,.12)"
+};
+const subjectBorders = {
+  "Science":       "rgba(59,130,246,.3)",
+  "Math":          "rgba(234,179,8,.3)",
+  "Social Science":"rgba(239,68,68,.3)",
+  "English":       "rgba(139,92,246,.3)"
+};
 
-      const page = document.getElementById(pageId);
+let currentPage = "homePage";
+let currentClass = null;
 
-      if (!page) {
-        return;
-      }
-
-      page.classList.add("active");
-      currentPage = pageId;
-      page.scrollTop = 0;
-    }
-
-    function selectClass(classValue) {
-      currentClass = classValue;
-
-      const subjectGrid = document.getElementById("subjectGrid");
-      subjectGrid.innerHTML = "";
-
-      Object.keys(NOTES[classValue]).forEach(subject => {
-        const note = NOTES[classValue][subject];
-        const card = document.createElement("button");
-
-        card.className = "af-card";
-        card.type = "button";
-        card.innerHTML = `
-          <div class="af-card-title">${note.icon} ${subject}</div>
-          <div class="af-card-sub">Tap to open notes</div>
-        `;
-
-        card.addEventListener("click", () => {
-          openNotes(classValue, subject);
-        });
-
-        subjectGrid.appendChild(card);
-      });
-
-      openPage("subjectPage");
-    }
-
-    function openNotes(classValue, subject) {
-      const note = NOTES[classValue][subject];
-
-      document.getElementById("noteTitle").textContent = note.title;
-      document.getElementById("notesViewer").src = `https://drive.google.com/embeddedfolderview?id=${note.folderId}#list`;
-
-      localStorage.setItem("af_last_note", JSON.stringify({
-        classValue,
-        subject
-      }));
-
-      openPage("viewerPage");
-    }
-
-    const themeBtn = document.getElementById("themeBtn");
-
-    function applyTheme(theme) {
-      document.documentElement.setAttribute("data-theme", theme);
-      localStorage.setItem("af_notes_theme", theme);
-      themeBtn.textContent = theme === "dark" ? "🌙" : "☀️";
-    }
-
-    function toggleTheme() {
-      const current = document.documentElement.getAttribute("data-theme");
-      applyTheme(current === "dark" ? "light" : "dark");
-    }
-
-    function goBack() {
-      if (currentPage === "viewerPage") {
-        document.getElementById("notesViewer").src = "";
-        openPage("subjectPage");
-        return;
-      }
-
-      if (currentPage === "subjectPage") {
-        openPage("classPage");
-        return;
-      }
-
-      if (currentPage === "classPage") {
-        openPage("homePage");
-        return;
-      }
-
-      window.location.href = "../index.html#settings";
-    }
-
-    themeBtn.addEventListener("click", toggleTheme);
-    applyTheme(localStorage.getItem("af_notes_theme") || "dark");
-
-    window.addEventListener("load", () => {
-      sessionStorage.setItem("af_return_section", "settings");
-    });
-
-  
-document.addEventListener(
-'copy',
-e => e.preventDefault()
-);
-
-document.addEventListener(
-'cut',
-e => e.preventDefault()
-);
-
-document.addEventListener(
-'selectstart',
-e => e.preventDefault()
-);
-
-document.addEventListener(
-'contextmenu',
-e => e.preventDefault()
-);
-
-document.addEventListener(
-'keydown',
-e => {
-
-if (
-e.key === 'F12' ||
-
-(e.ctrlKey && e.shiftKey && e.key === 'I') ||
-
-(e.ctrlKey && e.shiftKey && e.key === 'J') ||
-
-(e.ctrlKey && e.shiftKey && e.key === 'C') ||
-
-(e.ctrlKey && e.key === 'U')
-) {
-
-e.preventDefault();
-
+function openPage(pageId) {
+  document.querySelectorAll(".af-page").forEach(p => p.classList.remove("active"));
+  const page = document.getElementById(pageId);
+  if (!page) return;
+  page.classList.add("active");
+  currentPage = pageId;
+  page.scrollTop = 0;
 }
 
+function selectClass(classValue) {
+  currentClass = classValue;
+  document.getElementById("subjectPageTitle").textContent = "Class " + classValue + " Subjects";
+  const grid = document.getElementById("subjectGrid");
+  grid.innerHTML = "";
+  Object.keys(NOTES[classValue]).forEach(subject => {
+    const note = NOTES[classValue][subject];
+    const btn = document.createElement("button");
+    btn.className = "af-card af-subj-card";
+    btn.type = "button";
+    btn.innerHTML = `
+      <div class="af-subj-icon" style="background:${subjectColors[subject]||'var(--surface-2)'};border-color:${subjectBorders[subject]||'var(--border)'}">
+        ${note.icon}
+      </div>
+      <div class="af-subj-info">
+        <div class="af-card-title" style="margin-bottom:4px">${subject}</div>
+        <div class="af-card-sub">Free notes · Tap to open</div>
+      </div>
+      <span class="af-subj-arrow">→</span>
+    `;
+    btn.addEventListener("click", () => openNotes(classValue, subject));
+    grid.appendChild(btn);
+  });
+  openPage("subjectPage");
+}
+
+function openNotes(classValue, subject) {
+  const note = NOTES[classValue][subject];
+  document.getElementById("noteTitle").textContent = note.title;
+  document.getElementById("notesViewer").src =
+    `https://drive.google.com/embeddedfolderview?id=${note.folderId}#list`;
+  openPage("viewerPage");
+}
+
+function goBack() {
+  if (currentPage === "viewerPage") {
+    document.getElementById("notesViewer").src = "";
+    openPage("subjectPage"); return;
+  }
+  if (currentPage === "subjectPage") { openPage("classPage"); return; }
+  if (currentPage === "classPage")   { openPage("homePage");  return; }
+  history.back();
+}
+
+// Theme
+const themeBtn = document.getElementById("themeBtn");
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  localStorage.setItem("af_notes_theme", theme);
+  themeBtn.textContent = theme === "dark" ? "🌙" : "☀️";
+}
+function toggleTheme() {
+  applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
+}
+themeBtn.addEventListener("click", toggleTheme);
+applyTheme(localStorage.getItem("af_notes_theme") || "dark");
+
+window.addEventListener("load", () => {
+  sessionStorage.setItem("af_return_section", "settings");
 });
-  </script>
+
+// Security
+document.addEventListener("copy",        e => e.preventDefault());
+document.addEventListener("cut",         e => e.preventDefault());
+document.addEventListener("selectstart", e => e.preventDefault());
+document.addEventListener("contextmenu", e => e.preventDefault());
+document.addEventListener("keydown", e => {
+  if (
+    e.key === "F12" ||
+    (e.ctrlKey && e.shiftKey && ["I","J","C"].includes(e.key)) ||
+    (e.ctrlKey && e.key === "U")
+  ) e.preventDefault();
+});
+</script>
 </body>
 </html>
