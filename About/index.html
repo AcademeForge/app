@@ -1,1146 +1,982 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 <title>About AcademeForge — Learn Skills Schools Never Taught</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
 <style>
-:root{
-  --bg:#f2f3fb;
-  --ink:#07071a;
-  --ink2:#2e2e5e;
-  --ink3:#7b7ba0;
-  --surface:rgba(255,255,255,.95);
-  --surface2:rgba(245,245,255,.9);
-  --border:rgba(90,80,240,.1);
-  --border2:rgba(90,80,240,.22);
-  --v1:#4338ca;
-  --v2:#7c3aed;
-  --v3:#0ea5e9;
-  --v4:#ec4899;
-  --v5:#10b981;
-  --vg:linear-gradient(135deg,#4338ca,#7c3aed);
-  --ease:cubic-bezier(.22,1,.36,1);
-  --spring:cubic-bezier(.34,1.56,.64,1);
-  --shadow:0 4px 24px rgba(67,56,202,.10);
-  --shadow-lg:0 16px 48px rgba(67,56,202,.18);
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS — AF UNIFIED SYSTEM
+═══════════════════════════════════════════ */
+:root {
+  color-scheme: dark;
+  --bg-base:    #080B14;
+  --bg-1:       #0D1120;
+  --bg-2:       #111827;
+  --bg-3:       #161E30;
+  --bg-4:       #1C2540;
+  --surf-1:     #141926;
+  --surf-2:     #1A2235;
+  --surf-3:     #202B42;
+  --surf-4:     #27334E;
+  --surf-glass: rgba(20,25,38,.78);
+  --bdr-1:      rgba(255,255,255,.055);
+  --bdr-2:      rgba(255,255,255,.10);
+  --bdr-3:      rgba(255,255,255,.16);
+  --bdr-accent: rgba(108,99,255,.35);
+  --pri:        #6C63FF;
+  --pri-d:      #5751E5;
+  --pri-l:      #8B85FF;
+  --pri-bg:     rgba(108,99,255,.12);
+  --pri-bg-2:   rgba(108,99,255,.22);
+  --sec:        #3D8EF8;
+  --suc:        #10D98A;
+  --suc-bg:     rgba(16,217,138,.11);
+  --suc-bg-2:   rgba(16,217,138,.20);
+  --wrn:        #F5A623;
+  --wrn-bg:     rgba(245,166,35,.11);
+  --dan:        #FF5F7E;
+  --dan-bg:     rgba(255,95,126,.11);
+  --gld:        #FFD447;
+  --gld-bg:     rgba(255,212,71,.12);
+  --t-1:        #F0F2FF;
+  --t-2:        #A8B2CC;
+  --t-3:        #5C6882;
+  --t-4:        #2E3650;
+  --t-inv:      #080B14;
+  --nav-h:      72px;
+  --hdr-h:      60px;
+  --ff:  'Plus Jakarta Sans', sans-serif;
+  --ff-d:'Syne', sans-serif;
+  --ff-m:'JetBrains Mono', monospace;
+  --sh-xs:  0 1px 3px rgba(0,0,0,.3);
+  --sh-sm:  0 2px 10px rgba(0,0,0,.35);
+  --sh-md:  0 6px 24px rgba(0,0,0,.45);
+  --sh-lg:  0 16px 48px rgba(0,0,0,.55);
+  --sh-pri: 0 8px 32px rgba(108,99,255,.4);
+  --sh-suc: 0 8px 28px rgba(16,217,138,.35);
+  --sh-glow:0 0 40px rgba(108,99,255,.25);
+  --grad-pri:  linear-gradient(135deg,#6C63FF 0%,#A78BFA 100%);
+  --grad-hero: linear-gradient(145deg,#1A0F3C 0%,#0D1A3A 40%,#0A1628 100%);
+  --grad-suc:  linear-gradient(135deg,#10D98A 0%,#05B0A0 100%);
+  --grad-amber:linear-gradient(135deg,#F5A623 0%,#F97316 100%);
+  --grad-card: linear-gradient(145deg,rgba(255,255,255,.04) 0%,rgba(255,255,255,.01) 100%);
+  --grad-mesh: radial-gradient(ellipse at 20% 50%,rgba(108,99,255,.15) 0%,transparent 60%),
+               radial-gradient(ellipse at 80% 20%,rgba(61,142,248,.1) 0%,transparent 60%),
+               radial-gradient(ellipse at 60% 80%,rgba(16,217,138,.08) 0%,transparent 50%);
+  --ease-spring:cubic-bezier(.34,1.56,.64,1);
+  --ease-out:   cubic-bezier(.22,1,.36,1);
+  --ease-in-out:cubic-bezier(.65,0,.35,1);
+  --r-xs:6px;--r-sm:10px;--r-md:16px;--r-lg:20px;--r-xl:28px;--r-2xl:36px;--r-full:9999px;
 }
-[data-theme="dark"]{
-  --bg:#06060f;
-  --ink:#eeeeff;
-  --ink2:#9898c8;
-  --ink3:#4a4a7a;
-  --surface:rgba(13,13,30,.95);
-  --surface2:rgba(18,18,38,.9);
-  --border:rgba(120,100,255,.12);
-  --border2:rgba(120,100,255,.28);
-  --v1:#818cf8;
-  --v2:#a78bfa;
-  --v3:#38bdf8;
-  --v4:#f472b6;
-  --v5:#34d399;
-  --shadow:0 4px 24px rgba(0,0,0,.4);
-  --shadow-lg:0 16px 48px rgba(0,0,0,.55);
+
+[data-theme="light"] {
+  color-scheme:light;
+  --bg-base:#F0F2FF;--bg-1:#EAECF8;--bg-2:#E3E6F5;--bg-3:#DDE0F0;--bg-4:#D5D9EC;
+  --surf-1:#FFFFFF;--surf-2:#F5F6FE;--surf-3:#EDEFFE;--surf-4:#E5E8FC;
+  --surf-glass:rgba(255,255,255,.82);
+  --bdr-1:rgba(0,0,0,.06);--bdr-2:rgba(0,0,0,.10);--bdr-3:rgba(0,0,0,.16);
+  --bdr-accent:rgba(108,99,255,.25);
+  --t-1:#0D0F1A;--t-2:#3A4060;--t-3:#7880A0;--t-4:#BBC1D8;
+  --sh-xs:0 1px 3px rgba(0,0,0,.08);--sh-sm:0 2px 10px rgba(0,0,0,.10);
+  --sh-md:0 6px 24px rgba(0,0,0,.12);--sh-lg:0 16px 48px rgba(0,0,0,.15);
+  --grad-hero:linear-gradient(145deg,#2D1B8A 0%,#1A2B6E 40%,#0F2057 100%);
+  --grad-mesh:radial-gradient(ellipse at 20% 50%,rgba(108,99,255,.10) 0%,transparent 60%),
+              radial-gradient(ellipse at 80% 20%,rgba(61,142,248,.07) 0%,transparent 60%),
+              radial-gradient(ellipse at 60% 80%,rgba(16,217,138,.05) 0%,transparent 50%);
 }
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    color-scheme:light;
+    --bg-base:#F0F2FF;--bg-1:#EAECF8;--bg-2:#E3E6F5;--bg-3:#DDE0F0;--bg-4:#D5D9EC;
+    --surf-1:#FFFFFF;--surf-2:#F5F6FE;--surf-3:#EDEFFE;--surf-4:#E5E8FC;
+    --surf-glass:rgba(255,255,255,.82);
+    --bdr-1:rgba(0,0,0,.06);--bdr-2:rgba(0,0,0,.10);--bdr-3:rgba(0,0,0,.16);
+    --bdr-accent:rgba(108,99,255,.25);
+    --t-1:#0D0F1A;--t-2:#3A4060;--t-3:#7880A0;--t-4:#BBC1D8;
+    --sh-xs:0 1px 3px rgba(0,0,0,.08);--sh-sm:0 2px 10px rgba(0,0,0,.10);
+    --sh-md:0 6px 24px rgba(0,0,0,.12);--sh-lg:0 16px 48px rgba(0,0,0,.15);
+    --grad-hero:linear-gradient(145deg,#2D1B8A 0%,#1A2B6E 40%,#0F2057 100%);
+    --grad-mesh:radial-gradient(ellipse at 20% 50%,rgba(108,99,255,.10) 0%,transparent 60%),
+                radial-gradient(ellipse at 80% 20%,rgba(61,142,248,.07) 0%,transparent 60%),
+                radial-gradient(ellipse at 60% 80%,rgba(16,217,138,.05) 0%,transparent 50%);
+  }
+}
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth}
 body{
-  font-family:'Instrument Sans',sans-serif;
-  background:var(--bg);color:var(--ink);
-  overflow-x:hidden;transition:background .4s var(--ease),color .4s var(--ease);
-  padding-bottom:80px;
+  font-family:var(--ff);
+  background:var(--bg-base);color:var(--t-1);
+  display:flex;justify-content:center;
+  overflow-x:hidden;
+  transition:background .3s,color .3s;
+  font-size:15px;line-height:1.5;
 }
-.shell{max-width:430px;margin:0 auto;padding:0}
+button{cursor:pointer;border:none;outline:none;font:inherit;background:none;}
+img{display:block;max-width:100%;}
+::-webkit-scrollbar{width:2px;}
+::-webkit-scrollbar-thumb{background:var(--bdr-3);border-radius:99px;}
 
-/* NAV */
-.nav{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 16px;
+/* ── APP SHELL ── */
+.app{
+  width:100%;max-width:480px;min-height:100dvh;
+  display:flex;flex-direction:column;position:relative;
+  background:var(--bg-base);
+}
+
+/* ── HEADER ── */
+.header{
   position:sticky;top:0;z-index:300;
-  background:var(--bg);
-  transition:background .4s;
+  width:100%;height:var(--hdr-h);
+  background:var(--surf-glass);
+  backdrop-filter:blur(24px) saturate(1.4);
+  -webkit-backdrop-filter:blur(24px) saturate(1.4);
+  border-bottom:1px solid var(--bdr-1);
+  transition:background .3s,border-color .3s;
 }
-.nav-logo{
-  font-family:'Cabinet Grotesk',sans-serif;
-  font-size:16px;font-weight:900;letter-spacing:-.04em;
-  color:var(--v1);
+.header-inner{height:100%;padding:0 18px;display:flex;align-items:center;justify-content:space-between;}
+.logo-group{display:flex;align-items:center;gap:10px;}
+.logo-mark{
+  width:36px;height:36px;border-radius:11px;background:var(--grad-pri);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--ff-d);font-size:.75rem;font-weight:800;color:#fff;
+  flex-shrink:0;overflow:hidden;position:relative;
+  box-shadow:0 4px 16px rgba(108,99,255,.5);
 }
-.nav-logo span{color:var(--v2)}
-.theme-pill{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:7px 14px;border-radius:999px;
-  border:1px solid var(--border2);
-  font-family:'Cabinet Grotesk',sans-serif;font-size:11px;font-weight:800;
-  color:var(--ink2);background:var(--surface);cursor:pointer;
-  box-shadow:var(--shadow);
-  transition:transform .25s var(--spring),box-shadow .25s;
+.logo-mark img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+.logo-text .name{font-family:var(--ff-d);font-size:.92rem;font-weight:700;color:var(--t-1);line-height:1;letter-spacing:-.01em;}
+.logo-text .sub{font-size:.56rem;font-weight:600;color:var(--t-3);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;}
+.hdr-right{display:flex;gap:6px;align-items:center;}
+.icon-btn{
+  width:36px;height:36px;border-radius:10px;background:var(--surf-3);color:var(--t-2);
+  font-size:.9rem;display:flex;align-items:center;justify-content:center;
+  transition:all .2s var(--ease-spring);border:1px solid var(--bdr-1);
 }
-.theme-pill:hover{transform:scale(1.06);box-shadow:var(--shadow-lg)}
-.theme-icon{
-  width:18px;height:18px;border-radius:50%;
-  background:var(--vg);display:grid;place-items:center;
-  font-size:10px;color:#fff;
-  transition:transform .4s var(--spring);
-}
-.theme-pill:hover .theme-icon{transform:rotate(20deg)}
+.icon-btn:hover{background:var(--surf-4);border-color:var(--bdr-2);}
+.icon-btn:active{transform:scale(.88);}
 
-/* HERO — CINEMATIC */
-.hero{
-  margin:0 12px 0;border-radius:28px;overflow:hidden;
-  position:relative;min-height:420px;
-  display:flex;flex-direction:column;justify-content:flex-end;
-  padding:28px 22px 24px;
+/* ── BOTTOM NAV ── */
+.bottom-nav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;
+  height:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));
+  background:var(--surf-glass);backdrop-filter:blur(24px) saturate(1.4);
+  -webkit-backdrop-filter:blur(24px) saturate(1.4);
+  border-top:1px solid var(--bdr-1);
+  display:grid;grid-template-columns:repeat(5,1fr);
+  z-index:300;padding-bottom:env(safe-area-inset-bottom,0px);padding-top:4px;
 }
-.hero-bg{
-  position:absolute;inset:0;
-  background:linear-gradient(155deg,#050113 0%,#0c0435 25%,#1a0650 50%,#2f0870 65%,#1c1060 80%,#060518 100%);
-}
-.stars{position:absolute;inset:0;overflow:hidden}
-.star{
-  position:absolute;border-radius:50%;background:#fff;
-  animation:twinkle var(--d,3s) ease-in-out infinite var(--dl,0s);
-}
-@keyframes twinkle{0%,100%{opacity:var(--lo,.1)}50%{opacity:var(--hi,.9)}}
-.nebula{
-  position:absolute;border-radius:50%;filter:blur(48px);
-  animation:nebulaFloat var(--nd,9s) ease-in-out infinite var(--ndelay,0s);
-  pointer-events:none;
-}
-@keyframes nebulaFloat{0%,100%{transform:scale(1) translate(0,0)}50%{transform:scale(1.12) translate(8px,-10px)}}
-.scanline{
-  position:absolute;left:0;right:0;height:1px;top:0;
-  background:linear-gradient(90deg,transparent,rgba(129,140,248,.5),transparent);
-  animation:scan 5s linear infinite;pointer-events:none;
-}
-@keyframes scan{0%{top:0;opacity:0}5%{opacity:.8}90%{opacity:.3}100%{top:100%;opacity:0}}
-.spark-rail{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
-.spark{
-  position:absolute;border-radius:50%;background:#c4b5fd;opacity:0;
-  animation:sparkUp var(--sd,6s) linear infinite var(--sdl,0s);
-}
-@keyframes sparkUp{0%{transform:translateY(0) translateX(0);opacity:0}10%{opacity:.7}90%{opacity:.2}100%{transform:translateY(-320px) translateX(var(--sx,15px));opacity:0}}
+.nav-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--t-3);transition:all .25s var(--ease-spring);padding:4px 0;}
+.nav-btn:active{transform:scale(.82);}
+.nav-icon-wrap{width:44px;height:30px;border-radius:var(--r-full);display:flex;align-items:center;justify-content:center;font-size:1.05rem;transition:all .28s var(--ease-spring);position:relative;}
+.nav-btn.active .nav-icon-wrap{background:var(--pri-bg-2);transform:scale(1.1) translateY(-1px);}
+.nav-btn.active .nav-icon-wrap::after{content:'';position:absolute;bottom:-6px;width:4px;height:4px;border-radius:var(--r-full);background:var(--pri);}
+.nav-btn.active{color:var(--pri);}
+.nav-text{font-size:.46rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;transition:color .2s;}
+.nav-icon{font-size:1.1rem;transition:transform .28s var(--ease-spring);}
+.nav-btn.active .nav-icon{transform:scale(1.05);}
 
-.hero-eyebrow{
-  position:relative;z-index:2;
-  display:inline-flex;align-items:center;gap:7px;
-  padding:5px 13px;border-radius:999px;
-  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
-  backdrop-filter:blur(8px);
-  font-family:'Cabinet Grotesk',sans-serif;font-size:10px;font-weight:800;
-  color:rgba(196,181,253,.9);letter-spacing:.1em;text-transform:uppercase;
-  margin-bottom:14px;width:fit-content;
-}
-.pulse-dot{
-  width:6px;height:6px;border-radius:50%;background:#a78bfa;
-  animation:pdot 1.6s ease-in-out infinite;
-}
-@keyframes pdot{0%,100%{box-shadow:0 0 0 0 rgba(167,139,250,.7)}50%{box-shadow:0 0 0 5px rgba(167,139,250,.0)}}
+/* ── SCREENS ── */
+.screen{display:none;}
+.screen.active{display:block;animation:screenIn .3s var(--ease-out);}
+@keyframes screenIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
+/* ── MAIN PADDING ── */
+.main{
+  flex:1;padding:0 16px;
+  padding-top:calc(var(--hdr-h) + 12px);
+  padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 28px);
+}
+
+/* ── PRIMITIVES ── */
+.sec-lbl{
+  font-size:.58rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--t-3);
+  margin:22px 0 12px;display:flex;align-items:center;gap:8px;
+}
+.sec-lbl::after{content:'';flex:1;height:1px;background:var(--bdr-1);}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:var(--r-full);font-size:.58rem;font-weight:700;}
+.pill-p{background:var(--pri-bg);color:var(--pri-l);}
+.pill-s{background:var(--suc-bg);color:var(--suc);}
+.pill-w{background:var(--wrn-bg);color:var(--wrn);}
+.pill-n{background:var(--surf-3);color:var(--t-3);}
+
+/* ── HERO BANNER ── */
+.home-hero{
+  border-radius:var(--r-xl);background:var(--grad-hero);
+  padding:26px 20px 22px;position:relative;overflow:hidden;
+  margin-bottom:16px;border:1px solid rgba(108,99,255,.2);
+  box-shadow:0 20px 60px rgba(0,0,0,.5),var(--sh-glow);
+}
+.home-hero::before{content:'';position:absolute;inset:0;background:var(--grad-mesh);pointer-events:none;}
+.home-hero::after{content:'';position:absolute;right:-60px;top:-60px;width:220px;height:220px;background:radial-gradient(circle,rgba(108,99,255,.25) 0%,transparent 70%);pointer-events:none;}
+.hero-dots{position:absolute;bottom:16px;right:16px;display:grid;grid-template-columns:repeat(4,6px);gap:4px;opacity:.18;}
+.hero-dots span{display:block;width:6px;height:6px;border-radius:50%;background:#fff;}
+.hero-dots span:nth-child(even){opacity:.5;}
+/* stars */
+.stars-layer{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d,3s) ease-in-out infinite var(--dl,0s);}
+@keyframes twinkle{0%,100%{opacity:var(--lo,.1)}50%{opacity:var(--hi,.85)}}
+/* scanner */
+.scan-line{position:absolute;left:0;right:0;height:1px;top:0;background:linear-gradient(90deg,transparent,rgba(139,133,255,.5),transparent);animation:scan 6s linear infinite;pointer-events:none;}
+@keyframes scan{0%{top:0;opacity:0}5%{opacity:.7}90%{opacity:.2}100%{top:100%;opacity:0}}
+
+.hero-eyebrow{position:relative;z-index:2;display:inline-flex;align-items:center;gap:7px;padding:5px 13px;border-radius:var(--r-full);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(8px);font-size:.58rem;font-weight:800;color:rgba(196,181,253,.9);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px;width:fit-content;}
+.pulse-dot{width:6px;height:6px;border-radius:50%;background:#A78BFA;animation:pdot 1.6s ease-in-out infinite;}
+@keyframes pdot{0%,100%{box-shadow:0 0 0 0 rgba(167,139,250,.7)}50%{box-shadow:0 0 0 5px rgba(167,139,250,0)}}
 .hero-title{
   position:relative;z-index:2;
-  font-family:'Cabinet Grotesk',sans-serif;
-  font-size:clamp(30px,8vw,40px);
-  font-weight:900;line-height:.9;letter-spacing:-.065em;
-  color:#fff;margin-bottom:14px;
+  font-family:var(--ff-d);font-size:2rem;font-weight:700;
+  color:#fff;line-height:1.05;letter-spacing:-.03em;margin-bottom:12px;
 }
 .hero-title .shimmer{
   background:linear-gradient(90deg,#818cf8,#c084fc,#f472b6,#818cf8);
   background-size:200%;
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  animation:shimmer 3s linear infinite;
+  animation:shimmer 3.5s linear infinite;
 }
 @keyframes shimmer{from{background-position:200%}to{background-position:0%}}
+.hero-sub{position:relative;z-index:2;font-size:.76rem;line-height:1.75;color:rgba(175,190,255,.82);margin-bottom:20px;max-width:340px;}
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;position:relative;z-index:2;}
+.hero-stat{background:rgba(255,255,255,.07);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:var(--r-md);padding:11px 6px;text-align:center;transition:all .2s var(--ease-spring);}
+.hero-stat:active{transform:scale(.95);}
+.hs-val{font-family:var(--ff-m);font-size:.88rem;font-weight:700;color:#fff;line-height:1.1;}
+.hs-lbl{font-size:.47rem;font-weight:700;color:rgba(255,255,255,.38);margin-top:4px;text-transform:uppercase;letter-spacing:.06em;}
 
-.hero-sub{
-  position:relative;z-index:2;
-  font-size:13px;line-height:1.72;color:rgba(175,190,255,.85);
-  max-width:340px;margin-bottom:22px;
+/* ── BELIEF CARD ── */
+.belief-card{
+  border-radius:var(--r-xl);border:1px solid var(--bdr-accent);
+  background:var(--pri-bg);padding:22px 20px;position:relative;overflow:hidden;
+  margin-bottom:12px;box-shadow:0 4px 24px rgba(108,99,255,.18);
 }
-.hero-grid{
-  position:relative;z-index:2;
-  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
-}
-.hero-stat{
-  padding:10px 8px;border-radius:16px;text-align:center;
-  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
-  backdrop-filter:blur(12px);cursor:default;
-  transition:background .25s,transform .25s var(--ease);
-}
-.hero-stat:hover{background:rgba(255,255,255,.15);transform:translateY(-3px)}
-.hero-stat-v{
-  display:block;
-  font-family:'Cabinet Grotesk',sans-serif;font-size:18px;font-weight:900;
-  color:#fff;letter-spacing:-.04em;line-height:1;
-}
-.hero-stat-l{
-  display:block;margin-top:3px;
-  font-family:'Cabinet Grotesk',sans-serif;font-size:9px;font-weight:700;
-  color:rgba(165,180,252,.8);text-transform:uppercase;letter-spacing:.09em;
-}
+.belief-card::before{content:'';position:absolute;inset:0;background:var(--grad-card);pointer-events:none;}
+.belief-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:var(--r-full);background:var(--pri-bg-2);border:1px solid var(--bdr-accent);font-size:.56rem;font-weight:800;color:var(--pri-l);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;}
+.belief-text{font-family:var(--ff-d);font-size:1.15rem;font-weight:700;color:var(--t-1);line-height:1.3;margin-bottom:10px;letter-spacing:-.02em;}
+.belief-text em{font-style:normal;background:var(--grad-pri);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.belief-sub{font-size:.76rem;color:var(--t-2);line-height:1.75;}
 
-/* SECTION WRAPPER */
-.sec{padding:0 12px;margin-top:22px}
+/* ── STANDARD CARD ── */
+.card{background:var(--surf-1);border-radius:var(--r-xl);border:1px solid var(--bdr-1);box-shadow:var(--sh-sm);overflow:hidden;position:relative;margin-bottom:10px;transition:all .22s var(--ease-spring);}
+.card::before{content:'';position:absolute;inset:0;background:var(--grad-card);pointer-events:none;z-index:0;}
+.card-inner{padding:18px;position:relative;z-index:1;}
+.card-accent{height:3px;width:100%;}
+.card-accent-pri{background:var(--grad-pri);}
+.card-accent-suc{background:var(--grad-suc);}
+.card-accent-amber{background:var(--grad-amber);}
 
-/* PULLQUOTE */
-.pullquote{
-  text-align:center;padding:30px 20px;border-radius:24px;
-  background:linear-gradient(135deg,rgba(67,56,202,.06),rgba(124,58,237,.05));
-  border:1px solid var(--border2);position:relative;overflow:hidden;
-  transition:background .4s,border-color .4s;
-}
-.pullquote::before{
-  content:'';position:absolute;top:-50px;left:50%;transform:translateX(-50%);
-  width:180px;height:180px;border-radius:50%;
-  background:radial-gradient(circle,rgba(129,140,248,.16),transparent 70%);
-  animation:glow 4s ease-in-out infinite;pointer-events:none;
-}
-@keyframes glow{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.25)}}
-.pq-tag{
-  display:inline-block;margin-bottom:12px;
-  padding:4px 12px;border-radius:999px;
-  font-family:'Cabinet Grotesk',sans-serif;font-size:9.5px;font-weight:800;
-  color:var(--v1);background:rgba(67,56,202,.08);border:1px solid var(--border2);
-  position:relative;z-index:1;
-}
-.pq-text{
-  font-family:'Cabinet Grotesk',sans-serif;
-  font-size:clamp(19px,5vw,24px);font-weight:900;
-  letter-spacing:-.055em;line-height:1.1;color:var(--ink);
-  position:relative;z-index:1;margin-bottom:10px;
-  transition:color .4s;
-}
-.pq-text em{
-  font-style:normal;
-  background:linear-gradient(90deg,var(--v1),var(--v2),var(--v4));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-}
-.pq-sub{font-size:12.5px;line-height:1.7;color:var(--ink2);position:relative;z-index:1;transition:color .4s}
+/* ── TIMELINE STORY ── */
+.story-item{display:flex;gap:14px;padding:16px 18px;border-bottom:1px solid var(--bdr-1);position:relative;}
+.story-item:last-child{border-bottom:none;}
+.story-dot-col{display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0;padding-top:4px;}
+.story-dot{width:12px;height:12px;border-radius:50%;background:var(--grad-pri);border:2px solid var(--bg-base);box-shadow:0 0 0 2px var(--pri);flex-shrink:0;}
+.story-line{width:2px;flex:1;background:var(--bdr-2);margin-top:6px;min-height:30px;}
+.story-item:last-child .story-line{display:none;}
+.story-date{font-family:var(--ff-m);font-size:.58rem;font-weight:700;color:var(--pri-l);margin-bottom:5px;letter-spacing:.04em;}
+.story-title{font-family:var(--ff-d);font-size:.92rem;font-weight:700;color:var(--t-1);margin-bottom:5px;line-height:1.25;}
+.story-body-text{font-size:.76rem;color:var(--t-2);line-height:1.7;}
 
-/* STORY CARD */
-.story-card{
-  border-radius:22px;border:1px solid var(--border);
-  background:var(--surface);box-shadow:var(--shadow);
-  overflow:hidden;
-  transition:background .4s,border-color .4s,transform .28s var(--ease),box-shadow .28s;
-}
-.story-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--border2)}
-.story-header{
-  padding:20px 20px 0;display:flex;align-items:center;gap:14px;
-}
-.story-badge{
-  width:52px;height:52px;border-radius:18px;min-width:52px;
-  background:var(--vg);display:grid;place-items:center;
-  font-family:'Cabinet Grotesk',sans-serif;font-size:16px;font-weight:900;color:#fff;
-  box-shadow:0 8px 20px rgba(67,56,202,.3);
-  animation:float 3.2s ease-in-out infinite;
-}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-.story-meta{flex:1}
-.story-meta-tag{
-  font-family:'Cabinet Grotesk',sans-serif;font-size:9.5px;font-weight:800;
-  color:var(--v1);text-transform:uppercase;letter-spacing:.09em;margin-bottom:3px;
-}
-.story-meta-date{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:4px 11px;border-radius:999px;
-  font-family:'Cabinet Grotesk',sans-serif;font-size:10px;font-weight:800;
-  color:#fff;background:var(--vg);box-shadow:0 6px 16px rgba(67,56,202,.25);
-}
-.story-body{padding:16px 20px 20px}
-.story-body h3{
-  font-family:'Cabinet Grotesk',sans-serif;font-size:15.5px;font-weight:900;
-  letter-spacing:-.035em;color:var(--ink);margin-bottom:9px;transition:color .4s;
-}
-.story-body p{font-size:12.5px;line-height:1.72;color:var(--ink2);transition:color .4s}
-.timeline-line{
-  width:2px;height:30px;background:linear-gradient(180deg,var(--v1),var(--v2));
-  margin:0 auto;border-radius:2px;opacity:.25;
-}
+/* ── MANIFESTO ROWS ── */
+.manifesto-row{display:flex;gap:14px;padding:15px 18px;border-bottom:1px solid var(--bdr-1);align-items:flex-start;transition:background .2s;}
+.manifesto-row:last-child{border-bottom:none;}
+.manifesto-row:hover{background:var(--surf-2);}
+.m-num{font-family:var(--ff-m);font-size:.58rem;font-weight:700;color:var(--pri-l);min-width:22px;padding-top:2px;opacity:.7;}
+.m-title{font-family:var(--ff-d);font-size:.9rem;font-weight:700;color:var(--t-1);margin-bottom:5px;line-height:1.2;}
+.m-body{font-size:.74rem;color:var(--t-2);line-height:1.65;}
 
-/* SECTION HEADING */
-.sh{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
-.sh-num{
-  width:38px;height:38px;min-width:38px;border-radius:14px;
-  background:var(--vg);display:grid;place-items:center;
-  font-family:'Cabinet Grotesk',sans-serif;font-size:11.5px;font-weight:900;color:#fff;
-  box-shadow:0 8px 20px rgba(67,56,202,.24);
-  transition:transform .28s var(--spring);
-}
-.sh:hover .sh-num{transform:rotate(-6deg) scale(1.08)}
-.sh-text h2{
-  font-family:'Cabinet Grotesk',sans-serif;font-size:16px;font-weight:900;
-  letter-spacing:-.035em;color:var(--ink);margin-bottom:2px;transition:color .4s;
-}
-.sh-text p{font-size:11.5px;color:var(--ink3);font-weight:500;transition:color .4s}
-
-/* MANIFESTO */
-.manifesto{border-radius:22px;border:1px solid var(--border);background:var(--surface);overflow:hidden;box-shadow:var(--shadow)}
-.mrow{
-  display:flex;gap:16px;padding:16px 18px;
-  border-bottom:1px solid var(--border);align-items:flex-start;
-  position:relative;overflow:hidden;cursor:default;
-  transition:background .22s;
-}
-.mrow::after{
-  content:'';position:absolute;left:0;top:0;bottom:0;width:0;
-  background:linear-gradient(90deg,rgba(67,56,202,.05),rgba(124,58,237,.03));
-  transition:width .35s var(--ease);
-}
-.mrow:hover::after{width:100%}
-.mrow:last-child{border-bottom:none}
-.mrow-n{
-  font-family:'Cabinet Grotesk',sans-serif;font-size:10.5px;font-weight:900;
-  color:var(--v1);min-width:22px;padding-top:2px;opacity:.65;
-  position:relative;z-index:1;
-}
-.mrow-c{position:relative;z-index:1}
-.mrow-t{
-  font-family:'Cabinet Grotesk',sans-serif;font-size:13.5px;font-weight:900;
-  letter-spacing:-.025em;color:var(--ink);margin-bottom:5px;transition:color .4s;
-}
-.mrow-b{font-size:12px;line-height:1.65;color:var(--ink2);transition:color .4s}
-
-/* SKILLS */
-.skills{display:flex;flex-direction:column;gap:9px}
-.skill{
+/* ── SKILL ROWS ── */
+.skill-row{
   display:flex;align-items:center;gap:14px;
-  padding:13px 16px;border-radius:18px;
-  background:var(--surface);border:1px solid var(--border);
-  box-shadow:var(--shadow);
-  transition:transform .22s var(--ease),border-color .22s,background .22s;
-  cursor:default;
+  padding:14px 16px;background:var(--surf-1);border-radius:var(--r-lg);
+  border:1px solid var(--bdr-1);box-shadow:var(--sh-xs);margin-bottom:8px;
+  transition:all .22s var(--ease-spring);cursor:default;
 }
-.skill:hover{transform:translateX(5px);border-color:var(--border2)}
-.skill-icon{
-  width:44px;height:44px;min-width:44px;border-radius:16px;
-  display:grid;place-items:center;font-size:20px;
-  background:linear-gradient(135deg,rgba(67,56,202,.1),rgba(124,58,237,.08));
-  border:1px solid rgba(67,56,202,.15);
-  transition:transform .28s var(--spring),background .25s;
+.skill-row:hover{border-color:var(--bdr-accent);transform:translateX(4px);box-shadow:0 4px 20px rgba(108,99,255,.18);}
+.skill-row:active{transform:scale(.98);}
+.skill-icon-box{
+  width:46px;height:46px;min-width:46px;border-radius:var(--r-md);
+  display:flex;align-items:center;justify-content:center;font-size:1.2rem;
+  background:var(--pri-bg);border:1px solid var(--bdr-accent);
+  transition:transform .28s var(--ease-spring);flex-shrink:0;
 }
-.skill:hover .skill-icon{transform:rotate(-8deg) scale(1.1);background:linear-gradient(135deg,rgba(67,56,202,.2),rgba(124,58,237,.16))}
-.skill-info{flex:1}
-.skill-name{
-  font-family:'Cabinet Grotesk',sans-serif;font-size:13px;font-weight:900;
-  letter-spacing:-.02em;color:var(--ink);margin-bottom:2px;transition:color .4s;
-}
-.skill-desc{font-size:11px;color:var(--ink3);font-weight:500;transition:color .4s}
-.skill-pill{
-  flex-shrink:0;padding:4px 10px;border-radius:999px;
-  font-family:'Cabinet Grotesk',sans-serif;font-size:9px;font-weight:800;
-  color:var(--v1);background:rgba(67,56,202,.08);border:1px solid var(--border2);
-  transition:background .2s,color .2s,transform .2s var(--spring);
-}
-.skill:hover .skill-pill{background:var(--vg);color:#fff;border-color:transparent;transform:translateY(-1px) scale(1.05)}
+.skill-row:hover .skill-icon-box{transform:rotate(-8deg) scale(1.08);}
+.skill-info-text{flex:1;}
+.skill-name{font-family:var(--ff-d);font-size:.88rem;font-weight:700;color:var(--t-1);margin-bottom:3px;}
+.skill-desc{font-size:.67rem;color:var(--t-3);line-height:1.5;}
+.skill-pill{flex-shrink:0;padding:4px 10px;border-radius:var(--r-full);font-size:.56rem;font-weight:800;color:var(--wrn);background:var(--wrn-bg);border:1px solid rgba(245,166,35,.15);}
 
-/* FOUNDER */
-.founder-card{border-radius:24px;overflow:hidden;background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow);transition:background .4s,border-color .4s,transform .28s var(--ease),box-shadow .28s}
-.founder-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
-.founder-cover{
-  height:88px;position:relative;overflow:hidden;
-  background:linear-gradient(135deg,#050113,#1a0650,#4338ca,#7c3aed,#ec4899);
-  background-size:200%;animation:heroGrad 6s ease-in-out infinite;
-}
-@keyframes heroGrad{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-.founder-cover::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(120deg,transparent,rgba(255,255,255,.18),transparent);
-  transform:translateX(-120%) skewX(-16deg);animation:shine 4s ease-in-out infinite;
-}
-@keyframes shine{0%,45%{transform:translateX(-120%) skewX(-16deg)}75%,100%{transform:translateX(120%) skewX(-16deg)}}
-.founder-body{padding:0 18px 18px;margin-top:-36px;position:relative;z-index:1}
-.founder-avatar{
-  width:72px;height:72px;border-radius:22px;
-  background:var(--vg);display:grid;place-items:center;
-  font-family:'Cabinet Grotesk',sans-serif;font-size:22px;font-weight:900;color:#fff;
-  border:4px solid var(--surface);box-shadow:var(--shadow-lg);
-  margin-bottom:12px;
-  transition:transform .28s var(--spring),box-shadow .28s;
-}
-.founder-card:hover .founder-avatar{transform:translateY(-4px) rotate(-3deg) scale(1.05);box-shadow:0 20px 44px rgba(67,56,202,.35)}
-.founder-tag{
-  display:inline-flex;margin-bottom:7px;padding:3px 10px;border-radius:999px;
-  font-family:'Cabinet Grotesk',sans-serif;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
-  color:#1e40af;background:rgba(219,234,254,.9);
-}
-[data-theme="dark"] .founder-tag{color:#93c5fd;background:rgba(30,64,175,.22)}
-.founder-body h3{
-  font-family:'Cabinet Grotesk',sans-serif;font-size:19px;font-weight:900;
-  letter-spacing:-.045em;color:var(--ink);margin-bottom:7px;transition:color .4s;
-}
-.founder-body p{font-size:12.5px;line-height:1.72;color:var(--ink2);transition:color .4s}
-.founder-tags{display:flex;flex-wrap:wrap;gap:7px;padding:0 18px 18px;margin-top:-6px}
-.ftag{
-  padding:5px 12px;border-radius:999px;
-  font-family:'Cabinet Grotesk',sans-serif;font-size:10px;font-weight:800;
-  color:var(--v1);background:rgba(67,56,202,.08);border:1px solid var(--border);
-  transition:transform .22s var(--spring),background .2s,color .2s;cursor:default;
-}
-.ftag:hover{transform:translateY(-2px);background:var(--vg);color:#fff;border-color:transparent}
-
-/* TEAM */
-.team-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.team-card{
-  border-radius:20px;border:1px solid var(--border);background:var(--surface);
-  overflow:hidden;box-shadow:var(--shadow);cursor:default;
-  transition:transform .28s var(--ease),box-shadow .28s,border-color .28s,background .4s;
-}
-.team-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg);border-color:var(--border2)}
-.team-cover{
-  height:56px;position:relative;overflow:hidden;
-  background:linear-gradient(135deg,#0f172a,#1e1b6e,var(--v1),var(--v2));
-  background-size:180%;animation:heroGrad 5s ease-in-out infinite;
-}
-.team-avatar{
-  width:48px;height:48px;border-radius:16px;
-  display:grid;place-items:center;
-  font-family:'Cabinet Grotesk',sans-serif;font-size:14px;font-weight:900;color:#fff;
-  border:3px solid var(--surface);box-shadow:var(--shadow-lg);
-  margin:-24px 0 0 14px;margin-bottom:9px;position:relative;z-index:1;
-  transition:transform .28s var(--spring);
-}
-.team-card:hover .team-avatar{transform:translateY(-4px) rotate(-3deg) scale(1.06)}
-.team-role{
-  font-family:'Cabinet Grotesk',sans-serif;font-size:9px;font-weight:800;
-  text-transform:uppercase;letter-spacing:.09em;color:var(--v1);
-  padding:0 14px;margin-bottom:3px;
-}
-.team-name{
-  font-family:'Cabinet Grotesk',sans-serif;font-size:13px;font-weight:900;
-  letter-spacing:-.025em;color:var(--ink);padding:0 14px;
-  margin-bottom:12px;transition:color .4s;line-height:1.15;
-}
-
-/* VALUES */
-.values{display:grid;gap:9px}
-.value{
-  display:flex;align-items:center;gap:14px;
-  padding:13px 16px;border-radius:18px;
-  background:var(--surface);border:1px solid var(--border);
-  box-shadow:var(--shadow);position:relative;overflow:hidden;
-  transition:transform .22s var(--ease),border-color .22s,box-shadow .22s,background .4s;
-  cursor:default;
-}
-.value::before{
-  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
-  background:var(--vg);border-radius:0;
-}
-.value:hover{transform:translateX(5px);border-color:var(--border2);box-shadow:var(--shadow-lg)}
-.value-icon{font-size:22px;flex-shrink:0;transition:transform .28s var(--spring)}
-.value:hover .value-icon{transform:scale(1.2) rotate(-6deg)}
-.value strong{display:block;font-family:'Cabinet Grotesk',sans-serif;font-size:13px;font-weight:900;color:var(--ink);transition:color .4s}
-.value span{display:block;font-size:11px;color:var(--ink3);margin-top:2px;transition:color .4s}
-
-/* AI BLOCK */
+/* ── AI BLOCK ── */
 .ai-block{
-  border-radius:24px;overflow:hidden;
-  background:linear-gradient(160deg,#050113,#12054a,#1e0a5e);
-  padding:24px 20px;position:relative;
+  border-radius:var(--r-xl);overflow:hidden;
+  background:linear-gradient(155deg,#060211,#120545,#1e0a5e);
+  padding:24px 20px;position:relative;border:1px solid rgba(108,99,255,.2);
+  box-shadow:0 16px 48px rgba(0,0,0,.6);margin-bottom:10px;
 }
-.ai-block::after{
-  content:'';position:absolute;right:-40px;top:-40px;
-  width:150px;height:150px;border-radius:50%;
-  background:radial-gradient(circle,rgba(129,140,248,.22),transparent 70%);
-  animation:glow 3.5s ease-in-out infinite;pointer-events:none;
-}
-.ai-chip{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:4px 11px;border-radius:999px;
-  background:rgba(129,140,248,.18);border:1px solid rgba(129,140,248,.3);
-  font-family:'Cabinet Grotesk',sans-serif;font-size:9px;font-weight:800;
-  color:#c4b5fd;letter-spacing:.1em;text-transform:uppercase;margin-bottom:13px;
-}
-.ai-chip-dot{width:6px;height:6px;border-radius:50%;background:#a78bfa;animation:pdot 1.4s ease-in-out infinite}
-.ai-h{
-  font-family:'Cabinet Grotesk',sans-serif;font-size:21px;font-weight:900;
-  letter-spacing:-.055em;line-height:1.1;color:#fff;margin-bottom:10px;
-  position:relative;z-index:1;
-}
-.ai-h span{
-  background:linear-gradient(90deg,#818cf8,#e879f9,#22d3ee);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-}
-.ai-p{font-size:12.5px;line-height:1.7;color:rgba(165,180,252,.85);position:relative;z-index:1}
-.ai-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;position:relative;z-index:1}
-.aitag{
-  padding:5px 11px;border-radius:999px;
-  font-family:'Cabinet Grotesk',sans-serif;font-size:10px;font-weight:800;
-  color:rgba(165,180,252,.9);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
-  transition:transform .2s var(--spring),background .2s;cursor:default;
-}
-.aitag:hover{transform:translateY(-2px) scale(1.05);background:rgba(255,255,255,.15)}
+.ai-block::after{content:'';position:absolute;right:-40px;top:-40px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(129,140,248,.22),transparent 70%);animation:orb 3.5s ease-in-out infinite;pointer-events:none;}
+@keyframes orb{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.ai-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:var(--r-full);background:rgba(129,140,248,.18);border:1px solid rgba(129,140,248,.3);font-size:.56rem;font-weight:800;color:#c4b5fd;letter-spacing:.1em;text-transform:uppercase;margin-bottom:13px;}
+.ai-chip-dot{width:6px;height:6px;border-radius:50%;background:#a78bfa;animation:pdot 1.4s ease-in-out infinite;}
+.ai-h{font-family:var(--ff-d);font-size:1.3rem;font-weight:700;letter-spacing:-.03em;line-height:1.1;color:#fff;margin-bottom:10px;position:relative;z-index:1;}
+.ai-h span{background:linear-gradient(90deg,#818cf8,#e879f9,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.ai-p{font-size:.76rem;line-height:1.75;color:rgba(165,180,252,.85);position:relative;z-index:1;}
+.ai-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;position:relative;z-index:1;}
+.ai-tag{padding:5px 11px;border-radius:var(--r-full);font-size:.6rem;font-weight:700;color:rgba(165,180,252,.9);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);transition:all .2s var(--ease-spring);}
+.ai-tag:hover{background:rgba(255,255,255,.15);transform:translateY(-2px);}
 
-/* INCLUSION */
-.inclusion{
-  border-radius:22px;padding:22px 18px;
-  background:linear-gradient(135deg,rgba(16,185,129,.07),rgba(5,150,105,.05));
-  border:1px solid rgba(16,185,129,.2);
-  transition:transform .25s var(--ease),border-color .25s,background .4s;
+/* ── INCLUSION ── */
+.inclusion-card{
+  border-radius:var(--r-xl);padding:22px 18px;
+  background:linear-gradient(135deg,rgba(16,217,138,.07),rgba(5,150,105,.05));
+  border:1px solid rgba(16,217,138,.2);margin-bottom:10px;
+  transition:transform .25s var(--ease-spring);
 }
-.inclusion:hover{transform:translateY(-3px);border-color:rgba(16,185,129,.35)}
-.incl-emoji{font-size:36px;display:block;margin-bottom:12px;animation:float 3s ease-in-out infinite}
-.incl-title{
-  font-family:'Cabinet Grotesk',sans-serif;font-size:17px;font-weight:900;
-  letter-spacing:-.04em;color:var(--ink);margin-bottom:9px;transition:color .4s;
-}
-.incl-title em{font-style:normal;color:#059669}
-[data-theme="dark"] .incl-title em{color:#34d399}
-.incl-p{font-size:12.5px;line-height:1.72;color:var(--ink2);transition:color .4s}
-.incl-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
-.is{
-  padding:12px 14px;border-radius:16px;
-  background:rgba(16,185,129,.09);border:1px solid rgba(16,185,129,.15);
-  transition:transform .22s var(--ease);cursor:default;
-}
-.is:hover{transform:translateY(-3px)}
-.is-v{
-  font-family:'Cabinet Grotesk',sans-serif;font-size:21px;font-weight:900;
-  color:#065f46;letter-spacing:-.04em;display:block;
-}
-[data-theme="dark"] .is-v{color:#34d399}
-.is-l{font-size:10px;font-weight:700;color:#065f46;opacity:.7;display:block;margin-top:2px}
-[data-theme="dark"] .is-l{color:#6ee7b7}
+.inclusion-card:hover{transform:translateY(-3px);}
+.incl-emoji{font-size:2.2rem;display:block;margin-bottom:12px;animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.incl-title{font-family:var(--ff-d);font-size:1.1rem;font-weight:700;color:var(--t-1);margin-bottom:8px;line-height:1.25;}
+.incl-title em{font-style:normal;color:var(--suc);}
+.incl-p{font-size:.76rem;color:var(--t-2);line-height:1.75;}
+.incl-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;}
+.incl-stat{padding:12px 14px;border-radius:var(--r-md);background:var(--suc-bg-2);border:1px solid rgba(16,217,138,.2);}
+.incl-stat-val{font-family:var(--ff-m);font-size:1.1rem;font-weight:700;color:var(--suc);display:block;}
+.incl-stat-lbl{font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--suc);opacity:.65;display:block;margin-top:3px;}
 
-/* FUTURES */
-.futures{display:flex;flex-direction:column;gap:10px}
-.fcard{
-  display:flex;align-items:flex-start;gap:14px;
-  padding:16px 18px;border-radius:20px;
-  background:var(--surface);border:1px solid var(--border);
-  box-shadow:var(--shadow);cursor:default;
-  position:relative;overflow:hidden;
-  transition:transform .25s var(--ease),border-color .25s,box-shadow .25s,background .4s;
-}
-.fcard::after{
-  content:'';position:absolute;inset:0;border-radius:inherit;
-  background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(67,56,202,.12),transparent 40%);
-  opacity:0;transition:opacity .3s;pointer-events:none;
-}
-.fcard:hover{transform:translateY(-4px) translateX(3px);border-color:var(--border2);box-shadow:var(--shadow-lg)}
-.fcard:hover::after{opacity:1}
-.fnum{
-  width:36px;height:36px;min-width:36px;border-radius:14px;
-  background:var(--vg);display:grid;place-items:center;
-  font-family:'Cabinet Grotesk',sans-serif;font-size:12px;font-weight:900;color:#fff;
-  box-shadow:0 6px 14px rgba(67,56,202,.25);
-  transition:transform .28s var(--spring);
-}
-.fcard:hover .fnum{transform:rotate(-8deg) scale(1.1)}
-.ft{font-family:'Cabinet Grotesk',sans-serif;font-size:13px;font-weight:900;letter-spacing:-.025em;color:var(--ink);margin-bottom:4px;transition:color .4s}
-.fb{font-size:11.5px;line-height:1.6;color:var(--ink2);transition:color .4s}
-
-/* CLOSING */
-.closing{
-  border-radius:28px;overflow:hidden;
-  background:linear-gradient(155deg,#05011a,#110645,#1a0a5e);
-  padding:30px 22px;position:relative;text-align:center;
-}
-.c-orb1,.c-orb2{position:absolute;border-radius:50%;pointer-events:none}
-.c-orb1{left:-30px;top:-30px;width:130px;height:130px;background:radial-gradient(circle,rgba(129,140,248,.24),transparent 70%);animation:glow 4s ease-in-out infinite}
-.c-orb2{right:-30px;bottom:-30px;width:110px;height:110px;background:radial-gradient(circle,rgba(236,72,153,.2),transparent 70%);animation:glow 5s ease-in-out infinite .8s}
-.closing-kicker{
-  display:inline-flex;align-items:center;gap:7px;
-  padding:4px 13px;border-radius:999px;
-  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);
-  font-family:'Cabinet Grotesk',sans-serif;font-size:9px;font-weight:800;
-  color:rgba(196,181,253,.85);letter-spacing:.1em;text-transform:uppercase;
-  margin-bottom:18px;position:relative;z-index:1;
-}
-.closing-lines{position:relative;z-index:1;display:flex;flex-direction:column;gap:6px;margin-bottom:20px}
-.cl{
-  font-family:'Cabinet Grotesk',sans-serif;font-weight:900;
-  letter-spacing:-.055em;line-height:1;color:#fff;
-  opacity:0;transform:translateY(18px);animation:rise .6s var(--ease) both;
-}
-.cl:nth-child(1){font-size:clamp(19px,5.2vw,25px);animation-delay:.1s}
-.cl:nth-child(2){font-size:clamp(17px,4.5vw,22px);animation-delay:.22s;color:rgba(196,181,253,.8)}
-.cl:nth-child(3){font-size:clamp(16px,4vw,20px);animation-delay:.34s;color:rgba(167,139,250,.65)}
-.cl .grad{background:linear-gradient(90deg,#818cf8,#c084fc,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-@keyframes rise{to{opacity:1;transform:translateY(0)}}
-.closing-motto{
-  position:relative;z-index:1;display:inline-block;
-  padding:10px 22px;border-radius:999px;
-  background:linear-gradient(135deg,rgba(67,56,202,.35),rgba(124,58,237,.3));
-  border:1px solid rgba(129,140,248,.3);
-  font-family:'Cabinet Grotesk',sans-serif;font-size:11.5px;font-weight:900;
-  color:#c4b5fd;letter-spacing:.04em;
-  animation:rise .6s var(--ease) .46s both;
-}
-.closing-made{
-  position:relative;z-index:1;
-  margin-top:14px;
-  font-family:'Cabinet Grotesk',sans-serif;font-size:11px;font-weight:700;
-  color:rgba(196,181,253,.5);letter-spacing:.04em;
-  animation:rise .6s var(--ease) .55s both;
-}
-
-/* REVEAL */
-.reveal{
-  opacity:0;transform:translateY(20px) scale(.985);
-  transition:opacity .6s var(--ease),transform .6s var(--ease);
-  will-change:opacity,transform;
-}
-.reveal.vis{opacity:1;transform:none}
-
-/* SCROLLBAR */
-::-webkit-scrollbar{width:3px}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-@media(max-width:370px){
-  .team-grid{grid-template-columns:1fr}
-  .hero-grid{grid-template-columns:1fr}
-}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
-.af-topbar{
-  display:flex !important;
-  align-items:center !important;
-  justify-content:space-between !important;
-
-  margin:16px 12px 0 !important;
-  padding:10px 12px !important;
-
-  background:rgba(255,255,255,.92) !important;
-  border:1px solid #d8d4ff !important;
-
-  border-radius:28px 28px 0 0 !important;
-
-  backdrop-filter:blur(12px) !important;
-  -webkit-backdrop-filter:blur(12px) !important;
-
-  box-shadow:
-    0 4px 20px rgba(99,102,241,.08) !important,
-    inset 0 1px 0 rgba(255,255,255,.7) !important;
-}
-
-.af-topbar-brand{
-  display:flex !important;
-  align-items:center !important;
-  gap:10px !important;
-}
-
-.af-brand-logo{
-  width:34px !important;
-  height:34px !important;
-  object-fit:contain !important;
-}
-
-.af-brand-name{
-  font-size:15px !important;
-  font-weight:800 !important;
-  color:#1e1b4b !important;
-  line-height:1 !important;
-}
-
-.af-brand-tagline{
-  margin-top:2px !important;
-  font-size:10px !important;
-  font-weight:500 !important;
-  color:#8b90a7 !important;
-}
-
-.af-topbar-actions{
-  display:flex !important;
-  align-items:center !important;
-  gap:8px !important;
-}
-
-.af-back-btn,
-.af-theme-btn{
-  width:42px !important;
-  height:42px !important;
-
-  border:none !important;
-  outline:none !important;
-  cursor:pointer !important;
-
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-
-  border-radius:18px !important;
-
-  background:#f7f4ff !important;
-  border:1px solid #e2dcff !important;
-
-  color:#f59e0b !important;
-
-  font-size:20px !important;
-  font-weight:700 !important;
-
-  transition:.25s ease !important;
-}
-
-.af-back-btn:hover,
-.af-theme-btn:hover{
-  transform:translateY(-2px) !important;
-}
-
-.af-back-btn{
-  width:62px !important;
-  gap:6px !important;
-  color:#f59e0b !important;
-  font-size:17px !important;
-  font-weight:800 !important;
-}
-
-.af-back-btn::after{
-  content:"Back" !important;
-  font-size:13px !important;
-  font-weight:700 !important;
-}
-
-[data-theme="dark"] .af-topbar{
-  background:rgba(13,13,30,.92) !important;
-  border-color:rgba(120,100,255,.25) !important;
-}
-
-[data-theme="dark"] .af-brand-name{
-  color:#ffffff !important;
-}
-
-[data-theme="dark"] .af-brand-tagline{
-  color:#9ca3af !important;
-}
-
-[data-theme="dark"] .af-back-btn,
-[data-theme="dark"] .af-theme-btn{
-  background:rgba(255,255,255,.06) !important;
-  border-color:rgba(255,255,255,.08) !important;
-}
-  .founder-avatar{
-  overflow:hidden;
-}
-
-.founder-avatar-img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-}
-  .story-badge{
-  overflow:hidden;
-}
-
-.story-badge-logo{
-  width:34px;
-  height:34px;
-  object-fit:contain;
-  display:block;
-}
-  .story-badge{
-  overflow:hidden !important;
-}
-
-.story-badge-logo{
-  width:100% !important;
-  height:100% !important;
-  object-fit:contain !important;
-  padding:6px !important;
-  display:block !important;
-  background:white !important;
-}
-
+/* ── FOUNDER CARD ── */
+.founder-card{background:var(--surf-1);border-radius:var(--r-xl);border:1px solid var(--bdr-1);overflow:hidden;box-shadow:var(--sh-md);margin-bottom:10px;transition:all .25s var(--ease-spring);}
+.founder-card:hover{transform:translateY(-4px);box-shadow:var(--sh-lg);}
+.founder-cover{height:80px;background:var(--grad-hero);position:relative;overflow:hidden;}
+.founder-cover::before{content:'';position:absolute;inset:0;background:var(--grad-mesh);}
+.founder-cover::after{content:'';position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(108,99,255,.4),transparent 70%);}
+.founder-body-pad{padding:0 18px 18px;}
 .founder-avatar{
-  overflow:hidden !important;
+  width:66px;height:66px;border-radius:var(--r-lg);
+  background:var(--grad-pri);display:flex;align-items:center;justify-content:center;
+  font-family:var(--ff-d);font-size:1.1rem;font-weight:700;color:#fff;
+  border:3px solid var(--bg-base);box-shadow:var(--sh-lg);
+  margin-top:-33px;margin-bottom:12px;overflow:hidden;
+  transition:transform .28s var(--ease-spring);
 }
+.founder-card:hover .founder-avatar{transform:translateY(-4px) rotate(-3deg) scale(1.05);}
+.founder-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+.founder-tag-lbl{display:inline-flex;margin-bottom:7px;padding:3px 10px;border-radius:var(--r-full);font-size:.56rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--pri-l);background:var(--pri-bg);border:1px solid var(--bdr-accent);}
+.founder-name{font-family:var(--ff-d);font-size:1.15rem;font-weight:700;color:var(--t-1);margin-bottom:8px;line-height:1.1;}
+.founder-desc{font-size:.76rem;color:var(--t-2);line-height:1.75;}
+.founder-chips{display:flex;flex-wrap:wrap;gap:7px;padding:12px 18px;border-top:1px solid var(--bdr-1);}
+.fchip{padding:5px 12px;border-radius:var(--r-full);font-size:.58rem;font-weight:700;color:var(--t-3);background:var(--surf-3);border:1px solid var(--bdr-1);transition:all .2s var(--ease-spring);}
+.fchip:hover{background:var(--pri-bg-2);color:var(--pri-l);border-color:var(--bdr-accent);}
 
-.founder-avatar-img{
-  width:100% !important;
-  height:100% !important;
-  object-fit:cover !important;
-  display:block !important;
+/* ── TEAM GRID ── */
+.team-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.team-card{background:var(--surf-1);border-radius:var(--r-xl);border:1px solid var(--bdr-1);overflow:hidden;box-shadow:var(--sh-xs);transition:all .22s var(--ease-spring);}
+.team-card:hover{transform:translateY(-4px);border-color:var(--bdr-accent);box-shadow:var(--sh-md);}
+.team-cover{height:50px;background:var(--grad-hero);position:relative;overflow:hidden;}
+.team-cover::before{content:'';position:absolute;inset:0;background:var(--grad-mesh);}
+.team-body{padding:0 12px 14px;}
+.team-avatar{
+  width:46px;height:46px;border-radius:var(--r-md);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--ff-d);font-size:.85rem;font-weight:700;color:#fff;
+  border:2.5px solid var(--bg-base);box-shadow:var(--sh-md);
+  margin-top:-23px;margin-bottom:10px;overflow:hidden;
+  transition:transform .28s var(--ease-spring);
 }
+.team-card:hover .team-avatar{transform:rotate(-5deg) scale(1.1);}
+.team-role-lbl{font-size:.52rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--pri-l);margin-bottom:3px;}
+.team-name{font-family:var(--ff-d);font-size:.84rem;font-weight:700;color:var(--t-1);line-height:1.2;}
+
+/* ── VALUES ── */
+.value-row{
+  display:flex;align-items:center;gap:14px;padding:14px 16px;
+  background:var(--surf-1);border-radius:var(--r-lg);border:1px solid var(--bdr-1);
+  box-shadow:var(--sh-xs);margin-bottom:8px;position:relative;overflow:hidden;
+  transition:all .2s var(--ease-spring);cursor:default;
+}
+.value-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--grad-pri);border-radius:0;}
+.value-row:hover{transform:translateX(5px);border-color:var(--bdr-accent);}
+.value-row:hover .value-ico{transform:scale(1.2) rotate(-6deg);}
+.value-ico{font-size:1.3rem;flex-shrink:0;transition:transform .28s var(--ease-spring);}
+.value-strong{font-family:var(--ff-d);font-size:.88rem;font-weight:700;color:var(--t-1);display:block;margin-bottom:2px;}
+.value-span{font-size:.67rem;color:var(--t-3);display:block;line-height:1.55;}
+
+/* ── FUTURE CARDS ── */
+.future-card{
+  display:flex;align-items:flex-start;gap:14px;padding:16px 16px;
+  background:var(--surf-1);border-radius:var(--r-lg);border:1px solid var(--bdr-1);
+  box-shadow:var(--sh-xs);margin-bottom:8px;position:relative;overflow:hidden;
+  transition:all .25s var(--ease-spring);cursor:default;
+}
+.future-card:hover{transform:translateY(-3px) translateX(3px);border-color:var(--bdr-accent);box-shadow:var(--sh-md);}
+.future-card:hover .f-num{transform:rotate(-8deg) scale(1.08);}
+.f-num{
+  width:36px;height:36px;min-width:36px;border-radius:var(--r-sm);
+  background:var(--grad-pri);display:flex;align-items:center;justify-content:center;
+  font-family:var(--ff-m);font-size:.68rem;font-weight:700;color:#fff;
+  box-shadow:0 6px 14px rgba(108,99,255,.3);transition:transform .28s var(--ease-spring);
+}
+.f-title{font-family:var(--ff-d);font-size:.9rem;font-weight:700;color:var(--t-1);margin-bottom:5px;line-height:1.25;}
+.f-body{font-size:.72rem;color:var(--t-2);line-height:1.65;}
+
+/* ── CLOSING BLOCK ── */
+.closing-block{
+  border-radius:var(--r-xl);overflow:hidden;
+  background:linear-gradient(155deg,#05011a,#110645,#1a0a5e);
+  padding:30px 20px;position:relative;text-align:center;
+  border:1px solid rgba(108,99,255,.2);
+  box-shadow:0 20px 60px rgba(0,0,0,.7);
+}
+.c-orb1,.c-orb2{position:absolute;border-radius:50%;pointer-events:none;}
+.c-orb1{left:-30px;top:-30px;width:130px;height:130px;background:radial-gradient(circle,rgba(108,99,255,.3),transparent 70%);animation:orb 4s ease-in-out infinite;}
+.c-orb2{right:-30px;bottom:-30px;width:110px;height:110px;background:radial-gradient(circle,rgba(236,72,153,.22),transparent 70%);animation:orb 5s ease-in-out infinite .8s;}
+.closing-eyebrow{display:inline-flex;align-items:center;gap:7px;padding:4px 13px;border-radius:var(--r-full);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11);font-size:.56rem;font-weight:800;color:rgba(196,181,253,.85);letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px;position:relative;z-index:1;}
+.closing-lines{position:relative;z-index:1;margin-bottom:20px;}
+.cl{font-family:var(--ff-d);font-weight:700;letter-spacing:-.03em;line-height:1.1;color:#fff;opacity:0;transform:translateY(18px);animation:rise .6s var(--ease-out) both;}
+.cl:nth-child(1){font-size:1.55rem;animation-delay:.1s;}
+.cl:nth-child(2){font-size:1.3rem;animation-delay:.22s;color:rgba(196,181,253,.8);margin-top:4px;}
+.cl:nth-child(3){font-size:1.15rem;animation-delay:.34s;color:rgba(167,139,250,.65);margin-top:4px;}
+.cl .grad{background:linear-gradient(90deg,#818cf8,#c084fc,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+@keyframes rise{to{opacity:1;transform:translateY(0)}}
+.closing-motto{position:relative;z-index:1;display:inline-block;padding:10px 22px;border-radius:var(--r-full);background:linear-gradient(135deg,rgba(108,99,255,.35),rgba(124,58,237,.3));border:1px solid rgba(129,140,248,.3);font-family:var(--ff-d);font-size:.82rem;font-weight:700;color:#c4b5fd;letter-spacing:.03em;animation:rise .6s var(--ease-out) .46s both;margin-top:14px;display:block;}
+.closing-made{position:relative;z-index:1;margin-top:12px;font-size:.62rem;color:rgba(196,181,253,.4);letter-spacing:.04em;animation:rise .6s var(--ease-out) .55s both;}
+
+/* ── REVEAL ── */
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .55s var(--ease-out),transform .55s var(--ease-out);}
+.reveal.vis{opacity:1;transform:none;}
+
+/* ── SECTION HEADING ── */
+.sh{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;}
+.sh-num{width:36px;height:36px;min-width:36px;border-radius:var(--r-sm);background:var(--grad-pri);display:flex;align-items:center;justify-content:center;font-family:var(--ff-m);font-size:.65rem;font-weight:700;color:#fff;box-shadow:var(--sh-pri);transition:transform .28s var(--ease-spring);}
+.sh:hover .sh-num{transform:rotate(-6deg) scale(1.08);}
+.sh-info h2{font-family:var(--ff-d);font-size:.96rem;font-weight:700;color:var(--t-1);margin-bottom:2px;letter-spacing:-.01em;}
+.sh-info p{font-size:.65rem;color:var(--t-3);font-weight:500;}
+
+/* ── HOME WELCOME ── */
+.welcome-strip{
+  background:var(--surf-1);border-radius:var(--r-lg);border:1px solid var(--bdr-1);
+  padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:12px;
+  box-shadow:var(--sh-xs);
+}
+.welcome-strip-ico{width:40px;height:40px;border-radius:var(--r-sm);background:var(--grad-pri);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.welcome-strip-text .t{font-family:var(--ff-d);font-size:.88rem;font-weight:700;color:var(--t-1);}
+.welcome-strip-text .s{font-size:.65rem;color:var(--t-3);margin-top:2px;}
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
 </style>
 </head>
 <body>
-<div class="shell">
+<div class="app">
 
-<!-- TOPBAR -->
-<header class="af-topbar" role="banner">
-
-  <div class="af-topbar-brand">
-    <img
-      src="../IMG/AF LOGO 2.jpeg"
-      alt="AcademeForge"
-      class="af-brand-logo"
-      onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-    />
-   
-
-    <div class="af-brand-text">
-      <div class="af-brand-name">AcademeForge</div>
-      <div class="af-brand-tagline">Learning Beyond the Classroom</div>
-    </div>
-  </div>
-
-  <div class="af-topbar-actions">
-
-   <button
-  class="af-back-btn"
-  onclick="history.back()"
-  type="button"
-  aria-label="Back"
->
-  ←
-</button>
-
-<button
-  class="af-theme-btn"
-  id="themeBtn"
-  type="button"
-  aria-label="Theme"
->
-  <span id="themeIcon">☀</span>
-</button>
-
-  </div>
-
-</header>
-  
-  <!-- HERO -->
-  <div class="sec" style="margin-top:4px">
-    <div class="hero">
-      <div class="hero-bg"></div>
-      <div class="stars" id="starsEl"></div>
-      <div class="spark-rail" id="sparkEl"></div>
-      <div class="scanline"></div>
-      <div class="nebula" style="width:200px;height:200px;right:-50px;top:-50px;background:radial-gradient(circle,rgba(67,56,202,.5),transparent);--nd:8s;--ndelay:0s"></div>
-      <div class="nebula" style="width:160px;height:160px;left:-20px;bottom:20px;background:radial-gradient(circle,rgba(236,72,153,.38),transparent);--nd:10s;--ndelay:-3s"></div>
-      <div class="nebula" style="width:120px;height:120px;right:70px;top:90px;background:radial-gradient(circle,rgba(14,165,233,.32),transparent);--nd:7s;--ndelay:-5s"></div>
-
-      <div class="hero-eyebrow"><span class="pulse-dot"></span>About AcademeForge</div>
-      <h1 class="hero-title">
-        We imagine<br>a different<br><span class="shimmer">future.</span>
-      </h1>
-      <p class="hero-sub">Not one handed to students — but built by them. Through skills, creativity, AI, and the courage to create something real.</p>
-      <div class="hero-grid">
-        <div class="hero-stat">
-          <span class="hero-stat-v">Jan 2024</span>
-          <span class="hero-stat-l">Founded</span>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo-group">
+        <div class="logo-mark">
+          <img src="../IMG/AF LOGO 2.jpeg" alt="AF" onerror="this.style.display='none'">
+          AF
         </div>
-        <div class="hero-stat">
-          <span class="hero-stat-v">100K+</span>
-          <span class="hero-stat-l">Student Goal</span>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-v">5+</span>
-          <span class="hero-stat-l">Skill Tracks</span>
+        <div class="logo-text">
+          <div class="name">AcademeForge</div>
+          <div class="sub" id="hdrSub">About</div>
         </div>
       </div>
+      <div class="hdr-right">
+        <button class="icon-btn" onclick="history.back()" title="Back">←</button>
+        <button class="icon-btn" id="darkBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+      </div>
     </div>
-  </div>
+  </header>
 
-  <!-- PULLQUOTE -->
-  <div class="sec reveal" style="transition-delay:.04s">
-    <div class="pullquote">
-      <div class="pq-tag">Our Belief</div>
-      <div class="pq-text">Education should<br>prepare you for <em>life</em> —<br>not just exams.</div>
-      <p class="pq-sub">Schools teach what to memorise. AcademeForge teaches what to build. There's a gap between classroom knowledge and real-world capability — and we exist to close it.</p>
-    </div>
-  </div>
+  <!-- MAIN -->
+  <main class="main">
 
-  <!-- STORY -->
-  <div class="sec reveal" style="transition-delay:.05s;margin-top:22px">
-    <div class="sh">
-      <div class="sh-num">01</div>
-      <div class="sh-text"><h2>Our Beginning</h2><p>How it all started — and where it's headed.</p></div>
-    </div>
-    <div class="story-card">
-      <div class="story-header">
-        <div class="story-badge">
-  <img
-    src="../IMG/AF LOGO 2.jpeg"
-    alt="AcademeForge"
-    class="story-badge-logo"
-  />
-</div>
-        <div class="story-meta">
-          <div class="story-meta-tag">Founded</div>
-          <div class="story-meta-date">✦ 10 January 2024</div>
-        </div>
-      </div>
-      <div class="story-body">
-        <h3>The AcademeForge Story</h3>
-        <p>AcademeForge began as a small Telegram community for Class 10 students — solving doubts, running quizzes, and building community. Founded by Devraj Kumar at just 17, it grew into a modern learning ecosystem focused on practical education, digital creativity, and future-ready skills that schools rarely teach. Because students understand students best.</p>
-      </div>
-    </div>
-  </div>
+    <!-- ═══ SCREEN: OVERVIEW (HOME) ═══ -->
+    <section id="sc-overview" class="screen active">
 
-  <!-- MANIFESTO -->
-  <div class="sec reveal" style="transition-delay:.05s;margin-top:22px">
-    <div class="sh">
-      <div class="sh-num">02</div>
-      <div class="sh-text"><h2>What We Believe</h2><p>Our manifesto — deeply held.</p></div>
-    </div>
-    <div class="manifesto">
-      <div class="mrow">
-        <span class="mrow-n">01</span>
-        <div class="mrow-c">
-          <div class="mrow-t">Students are creators, not just consumers</div>
-          <div class="mrow-b">Every student has potential to build something real. We shift the identity from passive learner to active creator — someone who makes things, solves problems, and ships work.</div>
+      <!-- HERO -->
+      <div class="home-hero">
+        <div class="stars-layer" id="starsEl"></div>
+        <div class="scan-line"></div>
+        <div class="hero-eyebrow"><span class="pulse-dot"></span>About AcademeForge</div>
+        <h1 class="hero-title">
+          We imagine<br>a different<br><span class="shimmer">future.</span>
+        </h1>
+        <p class="hero-sub">Not handed to students — but built by them. Through skills, creativity, AI, and the courage to create something real.</p>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="hs-val">Jan 2024</div><div class="hs-lbl">Founded</div></div>
+          <div class="hero-stat"><div class="hs-val">100K+</div><div class="hs-lbl">Student Goal</div></div>
+          <div class="hero-stat"><div class="hs-val">5+</div><div class="hs-lbl">Skill Tracks</div></div>
         </div>
+        <div class="hero-dots"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
       </div>
-      <div class="mrow">
-        <span class="mrow-n">02</span>
-        <div class="mrow-c">
-          <div class="mrow-t">Practical beats theoretical, always</div>
-          <div class="mrow-b">You don't learn to swim by reading about water. Our curriculum is built around projects, execution, and hands-on experience — not slides and definitions.</div>
-        </div>
-      </div>
-      <div class="mrow">
-        <span class="mrow-n">03</span>
-        <div class="mrow-c">
-          <div class="mrow-t">Geography shouldn't limit ambition</div>
-          <div class="mrow-b">A student in a small town in Bihar deserves the same world-class skill education as anyone in a metro city. Location is not destiny. We're building for everyone.</div>
-        </div>
-      </div>
-      <div class="mrow">
-        <span class="mrow-n">04</span>
-        <div class="mrow-c">
-          <div class="mrow-t">AI is not a threat — it's a superpower</div>
-          <div class="mrow-b">We teach students to work with AI, not fear it. Those who understand and use AI intelligently will have an enormous advantage in every field they choose.</div>
-        </div>
-      </div>
-      <div class="mrow">
-        <span class="mrow-n">05</span>
-        <div class="mrow-c">
-          <div class="mrow-t">Community accelerates everything</div>
-          <div class="mrow-b">Learning alone is slow. Learning in a community of motivated peers — where you share, discuss, fail, and grow together — is exponentially faster. That's why AF Nexus exists.</div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- SKILLS -->
-  <div class="sec reveal" style="transition-delay:.05s;margin-top:22px">
-    <div class="sh">
-      <div class="sh-num">03</div>
-      <div class="sh-text"><h2>Skills We Teach</h2><p>What schools forgot to include.</p></div>
-    </div>
-    <div class="skills">
-      <div class="skill">
-        <div class="skill-icon">🎬</div>
-        <div class="skill-info">
-          <div class="skill-name">Video &amp; Media Editing</div>
-          <div class="skill-desc">Reels, shorts, YouTube, storytelling &amp; professional cuts</div>
+      <!-- BELIEF -->
+      <div class="reveal">
+        <div class="belief-card">
+          <div class="belief-tag">✦ Our Core Belief</div>
+          <div class="belief-text">Education should prepare you for <em>life</em> —<br>not just exams.</div>
+          <div class="belief-sub">Schools teach what to memorise. AcademeForge teaches what to build. There's a gap between classroom knowledge and real-world capability — and we exist to close it.</div>
         </div>
-        <span class="skill-pill">Soon</span>
       </div>
-      <div class="skill">
-        <div class="skill-icon">🎨</div>
-        <div class="skill-info">
-          <div class="skill-name">Creative &amp; Graphic Design</div>
-          <div class="skill-desc">Posters, thumbnails, brand kits &amp; visual identity</div>
-        </div>
-        <span class="skill-pill">Soon</span>
-      </div>
-      <div class="skill">
-        <div class="skill-icon">🧠</div>
-        <div class="skill-info">
-          <div class="skill-name">Coding &amp; Logic Building</div>
-          <div class="skill-desc">Programming thinking, AI-assisted coding &amp; real projects</div>
-        </div>
-        <span class="skill-pill">Soon</span>
-      </div>
-      <div class="skill">
-        <div class="skill-icon">💰</div>
-        <div class="skill-info">
-          <div class="skill-name">Freelancing &amp; Monetization</div>
-          <div class="skill-desc">Client work, pricing, portfolio &amp; online income</div>
-        </div>
-        <span class="skill-pill">Soon</span>
-      </div>
-      <div class="skill">
-        <div class="skill-icon">🤖</div>
-        <div class="skill-info">
-          <div class="skill-name">AI Prompt Engineering</div>
-          <div class="skill-desc">Smart prompting, AI tools &amp; productivity workflows</div>
-        </div>
-        <span class="skill-pill">Soon</span>
-      </div>
-    </div>
-  </div>
 
-  <!-- AI BLOCK -->
-  <div class="sec reveal" style="transition-delay:.05s;margin-top:22px">
-    <div class="ai-block">
-      <div class="ai-chip"><span class="ai-chip-dot"></span>Artificial Intelligence</div>
-      <div class="ai-h">AI is reshaping<br>everything. <span>Be ready.</span></div>
-      <p class="ai-p">We don't teach AI as a buzzword. We teach it as a daily tool — for creativity, productivity, learning, and building. At AcademeForge, AI is woven into how you learn, not just what you learn. Students who master AI will thrive in every field of the digital era.</p>
-      <div class="ai-tags">
-        <span class="aitag">Prompt Engineering</span>
-        <span class="aitag">AI-Assisted Coding</span>
-        <span class="aitag">Smart Workflows</span>
-        <span class="aitag">Content Creation</span>
-        <span class="aitag">Research Automation</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- INCLUSION -->
-  <div class="sec reveal" style="transition-delay:.05s;margin-top:22px">
-    <div class="inclusion">
-      <span class="incl-emoji">🌱</span>
-      <div class="incl-title">Built for <em>every</em> student — especially the overlooked ones.</div>
-      <p class="incl-p">The most motivated, creative learners don't always come from the biggest cities or the richest families. A Class 10 student from Patna, Bihar with curiosity and drive deserves the same shot at a digital future as anyone else. AcademeForge was literally founded by one such student — and that changes everything about how we build.</p>
-      <div class="incl-stats">
-        <div class="is"><span class="is-v">100K+</span><span class="is-l">10-year goal</span></div>
-        <div class="is"><span class="is-v">Soon</span><span class="is-l">Course access</span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- FOUNDER -->
-  <div class="sec reveal" style="transition-delay:.05s;margin-top:22px">
-    <div class="sh">
-      <div class="sh-num">04</div>
-      <div class="sh-text"><h2>Founder</h2><p>The person behind AcademeForge.</p></div>
-    </div>
-    <div class="founder-card">
-      <div class="founder-cover"></div>
-      <div class="founder-body">
-      <div class="founder-avatar">
-  <img
-    src="../IMG/founder-profile.jpeg"
-    alt="Devraj Kumar"
-    class="founder-avatar-img"
-  />
-</div>
-        <span class="founder-tag">Founder &amp; Developer</span>
-        <h3>Devraj Kumar</h3>
-        <p>Devraj founded AcademeForge at age 17 while studying in Class 10. He built the entire platform concept, app interface, student dashboard, learning system, community features, and product direction. His belief: students understand students best — and that understanding drives everything at AcademeForge.</p>
-      </div>
-      <div class="founder-tags">
-        <span class="ftag">Founder</span>
-        <span class="ftag">Product Direction</span>
-        <span class="ftag">App Development</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- VALUES -->
-  <div class="sec reveal" style="transition-delay:.05s;margin-top:22px">
-    <div class="sh">
-      <div class="sh-num">05</div>
-      <div class="sh-text"><h2>What We Stand For</h2><p>Values guiding every decision.</p></div>
-    </div>
-    <div class="values">
-      <div class="value"><span class="value-icon">✨</span><div><strong>Simple UI</strong><span>Easy for students to use every day without friction.</span></div></div>
-      <div class="value"><span class="value-icon">⚡</span><div><strong>Fast Access</strong><span>Courses, batches, and updates all in one place.</span></div></div>
-      <div class="value"><span class="value-icon">🔧</span><div><strong>Practical First</strong><span>Learning that connects directly with real-world work.</span></div></div>
-      <div class="value"><span class="value-icon">🤝</span><div><strong>Student-Led</strong><span>Built by students who understand students best.</span></div></div>
-      <div class="value"><span class="value-icon">🌏</span><div><strong>Made in India</strong><span>Founded in Patna, Bihar. Building for learners everywhere.</span></div></div>
-    </div>
-  </div>
-
-  <!-- FUTURES -->
-  <div class="sec reveal" style="transition-delay:.05s;margin-top:22px">
-    <div class="sh">
-      <div class="sh-num">06</div>
-      <div class="sh-text"><h2>The Future We're Building</h2><p>Three things we imagine.</p></div>
-    </div>
-    <div class="futures">
-      <div class="fcard" id="fc1">
-        <div class="fnum">01</div>
-        <div>
-          <div class="ft">Students who don't wait for opportunities — they create them</div>
-          <div class="fb">Every AcademeForge learner finishes a course and immediately starts building — a freelance project, portfolio, creative work, or income stream.</div>
+      <!-- QUICK NAV STRIPS -->
+      <div class="sec-lbl">Explore Sections</div>
+      <div class="reveal">
+        <div class="welcome-strip" onclick="openSection('sc-story')" style="cursor:pointer">
+          <div class="welcome-strip-ico">📖</div>
+          <div class="welcome-strip-text"><div class="t">Our Story & Manifesto</div><div class="s">How we started, what we believe</div></div>
+          <span style="color:var(--t-4);font-size:.9rem;margin-left:auto">›</span>
+        </div>
+        <div class="welcome-strip" onclick="openSection('sc-skills')" style="cursor:pointer">
+          <div class="welcome-strip-ico">🧠</div>
+          <div class="welcome-strip-text"><div class="t">Skills We Teach</div><div class="s">5 tracks schools never taught</div></div>
+          <span style="color:var(--t-4);font-size:.9rem;margin-left:auto">›</span>
+        </div>
+        <div class="welcome-strip" onclick="openSection('sc-team')" style="cursor:pointer">
+          <div class="welcome-strip-ico">👥</div>
+          <div class="welcome-strip-text"><div class="t">Founder & Team</div><div class="s">The people building AcademeForge</div></div>
+          <span style="color:var(--t-4);font-size:.9rem;margin-left:auto">›</span>
+        </div>
+        <div class="welcome-strip" onclick="openSection('sc-values')" style="cursor:pointer">
+          <div class="welcome-strip-ico">✨</div>
+          <div class="welcome-strip-text"><div class="t">Values & Future</div><div class="s">What we stand for, where we're going</div></div>
+          <span style="color:var(--t-4);font-size:.9rem;margin-left:auto">›</span>
         </div>
       </div>
-      <div class="fcard" id="fc2">
-        <div class="fnum">02</div>
-        <div>
-          <div class="ft">Learning driven by curiosity, not fear of exams</div>
-          <div class="fb">Imagine studying a skill because you're genuinely excited about it — not because a teacher said it'll be on the test. That's the emotional shift we're building toward.</div>
-        </div>
-      </div>
-      <div class="fcard" id="fc3">
-        <div class="fnum">03</div>
-        <div>
-          <div class="ft">Equal access to digital skills, regardless of background</div>
-          <div class="fb">The tools, skills, and mindset needed to thrive in the digital age — available to every student, from every city, at a price that leaves no one behind.</div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- CLOSING -->
-  <div class="sec reveal" style="transition-delay:.05s;margin-top:22px">
-    <div class="closing">
-      <div class="c-orb1"></div>
-      <div class="c-orb2"></div>
-      <div class="closing-kicker">✦ The AcademeForge Promise</div>
-      <div class="closing-lines">
-        <div class="cl">That is the <span class="grad">future</span></div>
-        <div class="cl">AcademeForge</div>
-        <div class="cl">aims to build.</div>
+      <!-- CLOSING -->
+      <div class="sec-lbl" style="margin-top:18px">The Promise</div>
+      <div class="reveal">
+        <div class="closing-block">
+          <div class="c-orb1"></div><div class="c-orb2"></div>
+          <div class="closing-eyebrow">✦ The AcademeForge Promise</div>
+          <div class="closing-lines">
+            <div class="cl">That is the <span class="grad">future</span></div>
+            <div class="cl">AcademeForge</div>
+            <div class="cl">aims to build.</div>
+          </div>
+          <div class="closing-motto">"Learn Skills Schools Never Taught." ✦</div>
+          <div class="closing-made">Made with ❤️ in India · Founded January 2024</div>
+        </div>
       </div>
-      <div class="closing-motto">"Learn Skills Schools Never Taught." ✦</div>
-      <div class="closing-made">Made with ❤️ in India · Founded 2024</div>
-    </div>
-  </div>
+
+    </section>
+
+    <!-- ═══ SCREEN: STORY & MANIFESTO ═══ -->
+    <section id="sc-story" class="screen">
+
+      <div class="sh reveal">
+        <div class="sh-num">01</div>
+        <div class="sh-info"><h2>Our Beginning</h2><p>How it all started — and where it's headed.</p></div>
+      </div>
+
+      <!-- TIMELINE -->
+      <div class="card reveal" style="margin-bottom:16px;">
+        <div class="card-accent card-accent-pri"></div>
+        <div style="position:relative;z-index:1;">
+          <div class="story-item">
+            <div class="story-dot-col"><div class="story-dot"></div><div class="story-line"></div></div>
+            <div>
+              <div class="story-date">10 January 2024</div>
+              <div class="story-title">AcademeForge is Founded</div>
+              <div class="story-body-text">A small Telegram community for Class 10 students solving doubts, running quizzes, building a community. Founded by Devraj Kumar at 17.</div>
+            </div>
+          </div>
+          <div class="story-item">
+            <div class="story-dot-col"><div class="story-dot"></div><div class="story-line"></div></div>
+            <div>
+              <div class="story-date">Mid 2024</div>
+              <div class="story-title">Platform Vision Expands</div>
+              <div class="story-body-text">From a Telegram group to a full learning ecosystem — app interface, student dashboard, test portal, and skill tracks conceived and built.</div>
+            </div>
+          </div>
+          <div class="story-item">
+            <div class="story-dot-col"><div class="story-dot" style="background:var(--grad-suc);box-shadow:0 0 0 2px var(--suc)"></div><div class="story-line"></div></div>
+            <div>
+              <div class="story-date" style="color:var(--suc)">2025 — Present</div>
+              <div class="story-title">Growing & Building</div>
+              <div class="story-body-text">Certificate portal, analytics, leaderboards, and community features launched. Focus on practical education that closes the gap schools left open.</div>
+            </div>
+          </div>
+          <div class="story-item">
+            <div class="story-dot-col"><div class="story-dot" style="background:var(--gld-bg);box-shadow:0 0 0 2px var(--gld)"></div></div>
+            <div>
+              <div class="story-date" style="color:var(--gld)">Goal: 100,000 Students</div>
+              <div class="story-title">The 10-Year Vision</div>
+              <div class="story-body-text">Reach every motivated, curious student regardless of geography, background, or school quality. Equal access to digital skills for all of India.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MANIFESTO -->
+      <div class="sh reveal">
+        <div class="sh-num">02</div>
+        <div class="sh-info"><h2>What We Believe</h2><p>Our manifesto — deeply held.</p></div>
+      </div>
+
+      <div class="card reveal">
+        <div class="card-accent card-accent-pri"></div>
+        <div style="position:relative;z-index:1;">
+          <div class="manifesto-row">
+            <div class="m-num">01</div>
+            <div><div class="m-title">Students are creators, not just consumers</div><div class="m-body">Every student has potential to build something real. We shift the identity from passive learner to active creator — someone who makes things, solves problems, and ships work.</div></div>
+          </div>
+          <div class="manifesto-row">
+            <div class="m-num">02</div>
+            <div><div class="m-title">Practical beats theoretical, always</div><div class="m-body">You don't learn to swim by reading about water. Our curriculum is built around projects, execution, and hands-on experience — not slides and definitions.</div></div>
+          </div>
+          <div class="manifesto-row">
+            <div class="m-num">03</div>
+            <div><div class="m-title">Geography shouldn't limit ambition</div><div class="m-body">A student in a small town in Bihar deserves the same world-class skill education as anyone in a metro city. Location is not destiny. We're building for everyone.</div></div>
+          </div>
+          <div class="manifesto-row">
+            <div class="m-num">04</div>
+            <div><div class="m-title">AI is not a threat — it's a superpower</div><div class="m-body">We teach students to work with AI, not fear it. Those who understand and use AI intelligently will have an enormous advantage in every field they choose.</div></div>
+          </div>
+          <div class="manifesto-row">
+            <div class="m-num">05</div>
+            <div><div class="m-title">Community accelerates everything</div><div class="m-body">Learning alone is slow. Learning in a community of motivated peers — where you share, discuss, fail, and grow together — is exponentially faster. That's why AF Nexus exists.</div></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ═══ SCREEN: SKILLS ═══ -->
+    <section id="sc-skills" class="screen">
+
+      <div class="sh reveal">
+        <div class="sh-num">03</div>
+        <div class="sh-info"><h2>Skills We Teach</h2><p>What schools forgot to include.</p></div>
+      </div>
+
+      <div class="reveal">
+        <div class="skill-row">
+          <div class="skill-icon-box">🎬</div>
+          <div class="skill-info-text"><div class="skill-name">Video &amp; Media Editing</div><div class="skill-desc">Reels, shorts, YouTube, storytelling &amp; professional cuts</div></div>
+          <span class="skill-pill">Soon</span>
+        </div>
+        <div class="skill-row">
+          <div class="skill-icon-box">🎨</div>
+          <div class="skill-info-text"><div class="skill-name">Creative &amp; Graphic Design</div><div class="skill-desc">Posters, thumbnails, brand kits &amp; visual identity</div></div>
+          <span class="skill-pill">Soon</span>
+        </div>
+        <div class="skill-row">
+          <div class="skill-icon-box">🧠</div>
+          <div class="skill-info-text"><div class="skill-name">Coding &amp; Logic Building</div><div class="skill-desc">Programming thinking, AI-assisted coding &amp; real projects</div></div>
+          <span class="skill-pill">Soon</span>
+        </div>
+        <div class="skill-row">
+          <div class="skill-icon-box">💰</div>
+          <div class="skill-info-text"><div class="skill-name">Freelancing &amp; Monetization</div><div class="skill-desc">Client work, pricing, portfolio &amp; online income</div></div>
+          <span class="skill-pill">Soon</span>
+        </div>
+        <div class="skill-row">
+          <div class="skill-icon-box">🤖</div>
+          <div class="skill-info-text"><div class="skill-name">AI Prompt Engineering</div><div class="skill-desc">Smart prompting, AI tools &amp; productivity workflows</div></div>
+          <span class="skill-pill">Soon</span>
+        </div>
+      </div>
+
+      <!-- AI BLOCK -->
+      <div class="sec-lbl">Artificial Intelligence</div>
+      <div class="reveal">
+        <div class="ai-block">
+          <div class="ai-chip"><span class="ai-chip-dot"></span>AI at the Core</div>
+          <div class="ai-h">AI is reshaping<br>everything. <span>Be ready.</span></div>
+          <p class="ai-p">We don't teach AI as a buzzword. We teach it as a daily tool — for creativity, productivity, learning, and building. At AcademeForge, AI is woven into how you learn, not just what you learn. Students who master AI will thrive in every field of the digital era.</p>
+          <div class="ai-tags">
+            <span class="ai-tag">Prompt Engineering</span>
+            <span class="ai-tag">AI-Assisted Coding</span>
+            <span class="ai-tag">Smart Workflows</span>
+            <span class="ai-tag">Content Creation</span>
+            <span class="ai-tag">Research Automation</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- INCLUSION -->
+      <div class="sec-lbl">Who We Build For</div>
+      <div class="reveal">
+        <div class="inclusion-card">
+          <span class="incl-emoji">🌱</span>
+          <div class="incl-title">Built for <em>every</em> student — especially the overlooked ones.</div>
+          <p class="incl-p">The most motivated, creative learners don't always come from the biggest cities. A Class 10 student from Patna, Bihar with curiosity and drive deserves the same shot at a digital future as anyone else. AcademeForge was literally founded by one such student — and that changes everything about how we build.</p>
+          <div class="incl-stats">
+            <div class="incl-stat"><span class="incl-stat-val">100K+</span><span class="incl-stat-lbl">10-year goal</span></div>
+            <div class="incl-stat"><span class="incl-stat-val">Soon</span><span class="incl-stat-lbl">Course access</span></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ═══ SCREEN: TEAM ═══ -->
+    <section id="sc-team" class="screen">
+
+      <!-- FOUNDER -->
+      <div class="sh reveal">
+        <div class="sh-num">04</div>
+        <div class="sh-info"><h2>Founder</h2><p>The person behind AcademeForge.</p></div>
+      </div>
+
+      <div class="reveal">
+        <div class="founder-card">
+          <div class="founder-cover"></div>
+          <div class="founder-body-pad">
+            <div class="founder-avatar">
+              <img src="../IMG/founder-profile.jpeg" alt="Devraj Kumar" onerror="this.textContent='DK';this.style.display='flex';this.style.alignItems='center';this.style.justifyContent='center';">
+            </div>
+            <div class="founder-tag-lbl">Founder &amp; Developer</div>
+            <div class="founder-name">Devraj Kumar</div>
+            <p class="founder-desc">Devraj founded AcademeForge at age 17 while studying in Class 10. He built the entire platform — app interface, student dashboard, test portal, learning system, community features, and product direction. His belief: students understand students best — and that understanding drives everything at AcademeForge.</p>
+          </div>
+          <div class="founder-chips">
+            <span class="fchip">Founder</span>
+            <span class="fchip">Product Direction</span>
+            <span class="fchip">App Development</span>
+            <span class="fchip">UI Design</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TEAM -->
+      <div class="sh reveal" style="margin-top:18px">
+        <div class="sh-num">05</div>
+        <div class="sh-info"><h2>The Team</h2><p>People who make it happen.</p></div>
+      </div>
+
+      <div class="team-grid reveal">
+        <div class="team-card">
+          <div class="team-cover"></div>
+          <div class="team-body">
+            <div class="team-avatar" style="background:var(--grad-pri)">DK</div>
+            <div class="team-role-lbl">Founder</div>
+            <div class="team-name">Devraj Kumar</div>
+          </div>
+        </div>
+        <div class="team-card">
+          <div class="team-cover" style="background:linear-gradient(135deg,#0a1628,#1a0650,#3D8EF8)"></div>
+          <div class="team-body">
+            <div class="team-avatar" style="background:linear-gradient(135deg,#3D8EF8,#6C63FF)">AF</div>
+            <div class="team-role-lbl">Community</div>
+            <div class="team-name">AF Nexus<br>Team</div>
+          </div>
+        </div>
+        <div class="team-card">
+          <div class="team-cover" style="background:linear-gradient(135deg,#0a1a0a,#0a3a1a,#10D98A)"></div>
+          <div class="team-body">
+            <div class="team-avatar" style="background:linear-gradient(135deg,#10D98A,#05B0A0)">CT</div>
+            <div class="team-role-lbl">Content</div>
+            <div class="team-name">Content &amp;<br>Educators</div>
+          </div>
+        </div>
+        <div class="team-card">
+          <div class="team-cover" style="background:linear-gradient(135deg,#1a0a0a,#3a0a1a,#FF5F7E)"></div>
+          <div class="team-body">
+            <div class="team-avatar" style="background:linear-gradient(135deg,#FF5F7E,#ec4899)">🌟</div>
+            <div class="team-role-lbl">Students</div>
+            <div class="team-name">Our Growing<br>Community</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ORIGIN NOTE -->
+      <div class="sec-lbl" style="margin-top:4px">Origin</div>
+      <div class="reveal">
+        <div class="card">
+          <div class="card-accent card-accent-pri"></div>
+          <div class="card-inner">
+            <div style="font-size:.78rem;color:var(--t-2);line-height:1.8">
+              <div style="font-family:var(--ff-d);font-size:.95rem;font-weight:700;color:var(--t-1);margin-bottom:8px">📍 Patna, Bihar — India</div>
+              AcademeForge was born in Patna, Bihar. Not Silicon Valley, not Bangalore — a city where a motivated 17-year-old believed that students everywhere deserve access to world-class skill education. That origin shapes every product decision we make.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ═══ SCREEN: VALUES & FUTURE ═══ -->
+    <section id="sc-values" class="screen">
+
+      <!-- VALUES -->
+      <div class="sh reveal">
+        <div class="sh-num">06</div>
+        <div class="sh-info"><h2>What We Stand For</h2><p>Values guiding every decision.</p></div>
+      </div>
+
+      <div class="reveal">
+        <div class="value-row"><span class="value-ico">✨</span><div><strong class="value-strong">Simple UI</strong><span class="value-span">Easy for students to use every day without friction.</span></div></div>
+        <div class="value-row"><span class="value-ico">⚡</span><div><strong class="value-strong">Fast Access</strong><span class="value-span">Courses, batches, and updates all in one place.</span></div></div>
+        <div class="value-row"><span class="value-ico">🔧</span><div><strong class="value-strong">Practical First</strong><span class="value-span">Learning that connects directly with real-world work.</span></div></div>
+        <div class="value-row"><span class="value-ico">🤝</span><div><strong class="value-strong">Student-Led</strong><span class="value-span">Built by students who understand students best.</span></div></div>
+        <div class="value-row"><span class="value-ico">🌏</span><div><strong class="value-strong">Made in India</strong><span class="value-span">Founded in Patna, Bihar. Building for learners everywhere.</span></div></div>
+        <div class="value-row"><span class="value-ico">🔐</span><div><strong class="value-strong">Privacy First</strong><span class="value-span">Student data handled with care. No ads, no tracking.</span></div></div>
+      </div>
+
+      <!-- FUTURE -->
+      <div class="sh reveal" style="margin-top:18px">
+        <div class="sh-num">07</div>
+        <div class="sh-info"><h2>The Future We're Building</h2><p>Three things we imagine.</p></div>
+      </div>
+
+      <div class="reveal">
+        <div class="future-card">
+          <div class="f-num">01</div>
+          <div><div class="f-title">Students who don't wait for opportunities — they create them</div><div class="f-body">Every AcademeForge learner finishes a course and immediately starts building — a freelance project, portfolio, creative work, or income stream.</div></div>
+        </div>
+        <div class="future-card">
+          <div class="f-num">02</div>
+          <div><div class="f-title">Learning driven by curiosity, not fear of exams</div><div class="f-body">Imagine studying a skill because you're genuinely excited about it — not because a teacher said it'll be on the test. That's the emotional shift we're building toward.</div></div>
+        </div>
+        <div class="future-card">
+          <div class="f-num">03</div>
+          <div><div class="f-title">Equal access to digital skills, regardless of background</div><div class="f-body">The tools, skills, and mindset needed to thrive in the digital age — available to every student, from every city, at a price that leaves no one behind.</div></div>
+        </div>
+      </div>
+
+      <!-- FINAL CLOSING -->
+      <div class="sec-lbl" style="margin-top:18px">The Promise</div>
+      <div class="reveal">
+        <div class="closing-block">
+          <div class="c-orb1"></div><div class="c-orb2"></div>
+          <div class="closing-eyebrow">✦ The AcademeForge Promise</div>
+          <div class="closing-lines">
+            <div class="cl">That is the <span class="grad">future</span></div>
+            <div class="cl">AcademeForge</div>
+            <div class="cl">aims to build.</div>
+          </div>
+          <div class="closing-motto">"Learn Skills Schools Never Taught." ✦</div>
+          <div class="closing-made">Made with ❤️ in India · Founded 2024</div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-sc="sc-overview" onclick="openSection('sc-overview')">
+      <div class="nav-icon-wrap"><span class="nav-icon">🏠</span></div>
+      <div class="nav-text">Overview</div>
+    </button>
+    <button class="nav-btn" data-sc="sc-story" onclick="openSection('sc-story')">
+      <div class="nav-icon-wrap"><span class="nav-icon">📖</span></div>
+      <div class="nav-text">Story</div>
+    </button>
+    <button class="nav-btn" data-sc="sc-skills" onclick="openSection('sc-skills')">
+      <div class="nav-icon-wrap"><span class="nav-icon">🧠</span></div>
+      <div class="nav-text">Skills</div>
+    </button>
+    <button class="nav-btn" data-sc="sc-team" onclick="openSection('sc-team')">
+      <div class="nav-icon-wrap"><span class="nav-icon">👥</span></div>
+      <div class="nav-text">Team</div>
+    </button>
+    <button class="nav-btn" data-sc="sc-values" onclick="openSection('sc-values')">
+      <div class="nav-icon-wrap"><span class="nav-icon">✨</span></div>
+      <div class="nav-text">Values</div>
+    </button>
+  </nav>
 
 </div>
 
 <script>
+/* ══════════════════════════════════════
+   THEME
+══════════════════════════════════════ */
 (function(){
-"use strict";
-
-/* THEME */
-var root=document.documentElement;
-function applyTheme(dark){
-  root.setAttribute("data-theme",dark?"dark":"light");
-  var icon=document.getElementById("themeIcon");
-  var lbl=document.getElementById("themeLabel");
-  if(icon)icon.textContent=dark?"☾":"☀";
-  if(lbl)lbl.textContent=dark?"Dark":"Light";
-  try{localStorage.setItem("af_dark_mode",dark?"1":"0")}catch(e){}
-}
-function readDark(){
-  try{var v=localStorage.getItem("af_dark_mode");if(v==="1")return true;if(v==="0")return false;}catch(e){}
-  return window.matchMedia&&window.matchMedia("(prefers-color-scheme:dark)").matches;
-}
-applyTheme(readDark());
-var _lt=null;try{_lt=localStorage.getItem("af_dark_mode")}catch(e){}
-setInterval(function(){
-  try{var c=localStorage.getItem("af_dark_mode");if(c!==_lt){_lt=c;applyTheme(c==="1");}}catch(e){}
-},800);
-var tbtn=document.getElementById("themeBtn");
-if(tbtn)tbtn.addEventListener("click",function(){applyTheme(root.getAttribute("data-theme")!=="dark")});
-
-/* STARS */
-var sf=document.getElementById("starsEl");
-if(sf){for(var i=0;i<65;i++){var s=document.createElement("div");s.className="star";var sz=Math.random()<.7?1:Math.random()<.7?2:3;s.style.cssText="width:"+sz+"px;height:"+sz+"px;left:"+Math.random()*100+"%;top:"+Math.random()*100+"%;"+"--d:"+(2+Math.random()*4).toFixed(1)+"s;--dl:-"+(Math.random()*5).toFixed(1)+"s;"+"--lo:"+(0.08+Math.random()*0.18).toFixed(2)+";--hi:"+(0.7+Math.random()*0.3).toFixed(2);sf.appendChild(s);}}
-
-/* SPARKS */
-var sp=document.getElementById("sparkEl");
-if(sp){for(var j=0;j<22;j++){var pk=document.createElement("div");pk.className="spark";pk.style.cssText="left:"+Math.random()*100+"%;bottom:0;--sd:"+(4+Math.random()*6).toFixed(1)+"s;--sdl:-"+(Math.random()*8).toFixed(1)+"s;--sx:"+((Math.random()-.5)*60).toFixed(0)+"px;width:"+(1+Math.random()*2)+"px;height:"+(1+Math.random()*2)+"px";sp.appendChild(pk);}}
-
-/* TILT on future cards */
-["fc1","fc2","fc3"].forEach(function(id){
-  var card=document.getElementById(id);
-  if(!card)return;
-  card.addEventListener("pointermove",function(e){
-    var r=card.getBoundingClientRect();
-    card.style.setProperty("--mx",((e.clientX-r.left)/r.width*100).toFixed(0)+"%");
-    card.style.setProperty("--my",((e.clientY-r.top)/r.height*100).toFixed(0)+"%");
-  });
-  card.addEventListener("pointerleave",function(){card.style.removeProperty("--mx");card.style.removeProperty("--my");});
-});
-
-/* SCROLL REVEAL */
-var revs=document.querySelectorAll(".reveal");
-if("IntersectionObserver" in window){
-  var ro=new IntersectionObserver(function(entries){
-    entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add("vis");ro.unobserve(e.target);}});
-  },{threshold:.08,rootMargin:"0px 0px -20px 0px"});
-  revs.forEach(function(el){ro.observe(el)});
-}else{revs.forEach(function(el){el.classList.add("vis")});}
-
+  const stored = localStorage.getItem('af_theme');
+  if(stored) document.documentElement.setAttribute('data-theme', stored);
+  window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change', updateThemeUI);
+  updateThemeUI();
+  // cross-tab sync
+  setInterval(()=>{
+    try{
+      const c = localStorage.getItem('af_theme');
+      if(c !== _lastTheme){ _lastTheme = c; if(c) document.documentElement.setAttribute('data-theme',c); updateThemeUI(); }
+    }catch(e){}
+  }, 800);
 })();
-  
+let _lastTheme = localStorage.getItem('af_theme');
+
+function isDark(){
+  const s = localStorage.getItem('af_theme');
+  if(s) return s === 'dark';
+  return window.matchMedia('(prefers-color-scheme:dark)').matches;
+}
+function updateThemeUI(){
+  document.getElementById('darkBtn').textContent = isDark() ? '☀️' : '🌙';
+}
+function toggleTheme(){
+  const n = isDark() ? 'light' : 'dark';
+  localStorage.setItem('af_theme', n);
+  _lastTheme = n;
+  document.documentElement.setAttribute('data-theme', n);
+  updateThemeUI();
+}
+
+/* ══════════════════════════════════════
+   SECTION NAV
+══════════════════════════════════════ */
+const sectionLabels = {
+  'sc-overview': 'About',
+  'sc-story':    'Story',
+  'sc-skills':   'Skills',
+  'sc-team':     'Team',
+  'sc-values':   'Values'
+};
+
+function openSection(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector(`.nav-btn[data-sc="${id}"]`);
+  if(btn) btn.classList.add('active');
+  document.getElementById('hdrSub').textContent = sectionLabels[id] || 'About';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // trigger reveal for newly shown screen
+  setTimeout(triggerReveal, 80);
+}
+
+/* ══════════════════════════════════════
+   STARS
+══════════════════════════════════════ */
+(function buildStars(){
+  const el = document.getElementById('starsEl');
+  if(!el) return;
+  for(let i = 0; i < 55; i++){
+    const s = document.createElement('div');
+    s.className = 'star';
+    const sz = Math.random() < .7 ? 1 : Math.random() < .7 ? 2 : 3;
+    s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;`+
+      `--d:${(2+Math.random()*4).toFixed(1)}s;--dl:-${(Math.random()*5).toFixed(1)}s;`+
+      `--lo:${(0.08+Math.random()*0.15).toFixed(2)};--hi:${(0.65+Math.random()*0.35).toFixed(2)}`;
+    el.appendChild(s);
+  }
+})();
+
+/* ══════════════════════════════════════
+   SCROLL REVEAL
+══════════════════════════════════════ */
+function triggerReveal(){
+  const reveals = document.querySelectorAll('.screen.active .reveal');
+  if('IntersectionObserver' in window){
+    const ro = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('vis'); ro.unobserve(e.target); }});
+    }, { threshold: .07, rootMargin: '0px 0px -20px 0px' });
+    reveals.forEach(el => {
+      if(!el.classList.contains('vis')) ro.observe(el);
+      else el.classList.add('vis');
+    });
+  } else {
+    reveals.forEach(el => el.classList.add('vis'));
+  }
+}
+// initial
+setTimeout(triggerReveal, 100);
 </script>
 </body>
 </html>
