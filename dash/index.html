@@ -61,15 +61,12 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
   .shell{border-radius:36px;min-height:calc(100dvh - 72px);max-height:900px;box-shadow:0 0 0 1px var(--bc),0 32px 80px rgba(0,0,0,.20),0 8px 24px rgba(79,70,229,.14);}
 }
 
-/* HEADER */
+/* HEADER — logout button removed */
 .hdr{position:sticky;top:0;z-index:100;height:var(--hdr-h);background:var(--nav);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;transition:background .18s;}
 .hdr-back{width:34px;height:34px;border-radius:10px;background:var(--grp);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-size:18px;transition:transform var(--dur) var(--spring),background var(--dur);}
 .hdr-back:hover{background:var(--grph);}
 .hdr-back:active{transform:scale(.92);}
 .hdr-title{flex:1;font-family:var(--fd);font-size:15px;font-weight:800;color:var(--t1);}
-.hdr-logout{height:32px;padding:0 13px;border-radius:var(--rf);font-size:11.5px;font-weight:800;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.20);color:var(--err);transition:transform var(--dur) var(--spring),background var(--dur);}
-.hdr-logout:hover{background:rgba(239,68,68,.14);}
-.hdr-logout:active{transform:scale(.95);}
 
 /* PAGE */
 .page{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:14px 13px calc(var(--nav-h) + 28px + env(safe-area-inset-bottom,0px));}
@@ -116,7 +113,7 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
 .empty-msg{text-align:center;font-size:13px;color:var(--tm);font-weight:700;padding:18px 12px;}
 .loading-msg{text-align:center;font-size:13px;color:var(--p);font-weight:700;padding:18px 12px;background:rgba(79,70,229,.06);border-radius:var(--r2);}
 
-/* SETTINGS ACCORDION */
+/* SETTINGS ACCORDION — fixed spacing */
 .settings-card{border-radius:var(--r4);background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);overflow:hidden;margin-bottom:12px;}
 .settings-toggle{width:100%;display:flex;align-items:center;gap:12px;padding:15px 16px;text-align:left;transition:background var(--dur);}
 .settings-toggle:hover{background:var(--grp);}
@@ -126,17 +123,13 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
 .settings-text small{font-size:11px;color:var(--tm);font-weight:600;margin-top:1px;display:block;}
 .settings-chevron{font-size:16px;color:var(--tm);transition:transform .20s var(--ease);}
 .settings-chevron.open{transform:rotate(180deg);}
+/* Removed padding-top from settings-body so there's no gap above the delete button */
 .settings-body{padding:0 14px 14px;}
 .del-open-btn{width:100%;border:1px solid rgba(239,68,68,.18);background:rgba(239,68,68,.06);border-radius:var(--r2);padding:13px 14px;display:flex;flex-direction:column;align-items:flex-start;cursor:pointer;text-align:left;transition:transform var(--dur) var(--spring),background var(--dur);}
 .del-open-btn:hover{background:rgba(239,68,68,.11);}
 .del-open-btn:active{transform:scale(.98);}
 .del-open-btn span{color:var(--err);font-size:13px;font-weight:900;}
 .del-open-btn small{margin-top:2px;color:var(--tm);font-size:11px;font-weight:600;}
-
-/* LOGOUT BTN */
-.logout-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:var(--r2);background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.20);color:var(--err);font-weight:800;font-size:15px;margin-bottom:12px;transition:transform var(--dur) var(--spring),background var(--dur);}
-.logout-btn:hover{background:rgba(239,68,68,.14);}
-.logout-btn:active{transform:scale(.98);}
 
 /* CREDIT */
 .credit{text-align:center;font-size:11.5px;color:var(--tm);font-weight:700;padding:6px 0 10px;}
@@ -167,7 +160,6 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
 .modal-save:active{transform:scale(.98);}
 .modal-save:disabled{opacity:.6;cursor:not-allowed;}
 
-  
 /* DELETE MODAL */
 .del-overlay{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(0,0,0,.65);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
 .del-card{width:100%;max-width:520px;max-height:92vh;border-radius:22px;background:var(--surface);border:1px solid var(--bc);box-shadow:var(--she);overflow:hidden;display:flex;flex-direction:column;animation:modalIn .26s var(--spring) both;}
@@ -215,11 +207,10 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
 
 <div class="shell">
 
-  <!-- HEADER -->
+  <!-- HEADER — logout button removed -->
   <header class="hdr">
     <button class="hdr-back" onclick="goBack()" title="Go back">←</button>
     <span class="hdr-title">My Profile</span>
-    <button class="hdr-logout" onclick="doLogout()">Logout</button>
   </header>
 
   <!-- PAGE -->
@@ -290,6 +281,7 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
         </span>
         <span class="settings-chevron" id="settingsChevron">⌄</span>
       </button>
+      <!-- No top padding so delete button sits flush against the divider line -->
       <div id="settingsBody" class="settings-body hidden">
         <button class="del-open-btn" onclick="openDeleteModal()">
           <span>🗑 Delete Account</span>
@@ -298,8 +290,7 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
       </div>
     </div>
 
-    <!-- LOGOUT -->
-    <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
+    <!-- Logout button removed from here -->
 
     <div class="credit">Made with ❤️ in India · Developed by Devraj Kumar</div>
 
@@ -413,6 +404,28 @@ const STUDENT_URL = "https://afooyyydhlwngzssgqih.supabase.co";
 const STUDENT_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb295eXlkaGx3bmd6c3NncWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDQxMjgsImV4cCI6MjA5NDIyMDEyOH0.KG0XO0oP_2MpewHoIwTtbrKg5FkyOYRUtVzLH1MSJiE";
 const studentDb = supabase.createClient(STUDENT_URL, STUDENT_KEY);
 
+/* ── CACHE CONFIG (mirrors batches page) ── */
+const BATCHES_CACHE_KEY = 'af_profile_batches_v1';
+const CACHE_TTL_MS      = 30 * 60 * 1000; // 30 minutes
+
+function cacheGet(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    if (Date.now() - obj.ts > CACHE_TTL_MS) return null;
+    return obj.data;
+  } catch(_) { return null; }
+}
+
+function cacheSet(key, data) {
+  try { localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch(_) {}
+}
+
+function cacheClear(key) {
+  try { localStorage.removeItem(key); } catch(_) {}
+}
+
 const $ = id => document.getElementById(id);
 const esc = t => String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const safe = (v, fb) => (v===null||v===undefined||v==='') ? (fb||'') : v;
@@ -445,7 +458,6 @@ function loadProfile() {
   const mobile    = safe(localStorage.getItem('af_student_mobile') || localStorage.getItem('af_student_phone'), '—');
   const studentId = safe(localStorage.getItem('af_student_id'), '—');
 
-  // Avatar initials
   const initials = name.trim().split(/\s+/).slice(0,2).map(w => w[0].toUpperCase()).join('');
   $('avatar').textContent = initials || 'S';
   $('heroName').textContent = name;
@@ -456,19 +468,51 @@ function loadProfile() {
   $('infoStudentId').textContent = studentId;
 }
 
-/* ── LOAD BATCHES FROM SUPABASE ── */
+/* ── RENDER BATCH LIST ── */
+function renderBatches(courses) {
+  const box  = $('batchList');
+  const icons = ['📚','🎥','🎨','💻','💡','🚀','🧩','📝','🔬','🎯'];
+
+  if (!courses || !courses.length) {
+    box.innerHTML = '<p class="empty-msg">No enrolled batches found.<br>Explore the Batches section to enroll.</p>';
+    return;
+  }
+
+  box.innerHTML = courses.map((c, i) => {
+    const title = safe(c.title || c.batch_title || c.course_slug, 'Batch');
+    const slug  = safe(c.short_description || c.course_slug || '', 'AcademeForge Course');
+    const icon  = safe(c.icon, icons[i % icons.length]);
+    return `<div class="batch-item">
+      <div class="batch-icon">${esc(icon)}</div>
+      <div class="batch-text">
+        <strong>${esc(title)}</strong>
+        <small>${esc(slug)}</small>
+      </div>
+      <span class="batch-badge">✓ Active</span>
+    </div>`;
+  }).join('');
+}
+
+/* ── LOAD BATCHES (cache-first, like batches page) ── */
 async function loadBatches() {
   const uuid  = localStorage.getItem('af_student_uuid') || '';
-  const email = localStorage.getItem('af_student_email') || '';
   const box   = $('batchList');
 
-  if (!uuid && !email) {
+  if (!uuid) {
     box.innerHTML = '<p class="empty-msg">No session found. Please login again.</p>';
     return;
   }
 
+  /* 1. Try cache first — show immediately with no spinner */
+  const cached = cacheGet(BATCHES_CACHE_KEY);
+  if (cached) {
+    renderBatches(cached);
+    return; // done — no network call
+  }
+
+  /* 2. No cache → fetch from Supabase */
   try {
-    const res = await studentDb.functions.invoke('student-courses-af', { body: { student_id: uuid } });
+    const res  = await studentDb.functions.invoke('student-courses-af', { body: { student_id: uuid } });
     const data = res.data;
 
     if (!data || !data.ok || !Array.isArray(data.courses) || !data.courses.length) {
@@ -476,20 +520,9 @@ async function loadBatches() {
       return;
     }
 
-    const icons = ['📚','🎥','🎨','💻','💡','🚀','🧩','📝','🔬','🎯'];
-    box.innerHTML = data.courses.map((c, i) => {
-      const title = safe(c.title || c.batch_title || c.course_slug, 'Batch');
-      const slug  = safe(c.short_description || c.course_slug || '', 'AcademeForge Course');
-      const icon  = safe(c.icon, icons[i % icons.length]);
-      return `<div class="batch-item">
-        <div class="batch-icon">${esc(icon)}</div>
-        <div class="batch-text">
-          <strong>${esc(title)}</strong>
-          <small>${esc(slug)}</small>
-        </div>
-        <span class="batch-badge">✓ Active</span>
-      </div>`;
-    }).join('');
+    /* 3. Save to cache for next visit */
+    cacheSet(BATCHES_CACHE_KEY, data.courses);
+    renderBatches(data.courses);
 
   } catch(err) {
     console.error('loadBatches error:', err);
@@ -571,11 +604,11 @@ function closeDeleteModal() { $('deleteModal').classList.add('hidden'); }
 
 async function submitDeleteRequest() {
   const submitBtn = $('delSubmitBtn'), msg = $('delMsg');
-  const fullName = ($('delName').value || '').trim();
-  const email    = ($('delEmail').value || '').trim();
-  const phone    = ($('delPhone').value || '').trim();
-  const reason   = ($('delReason').value || '').trim();
-  const details  = ($('delDetails').value || '').trim();
+  const fullName  = ($('delName').value  || '').trim();
+  const email     = ($('delEmail').value || '').trim();
+  const phone     = ($('delPhone').value || '').trim();
+  const reason    = ($('delReason').value|| '').trim();
+  const details   = ($('delDetails').value || '').trim();
   const confirmed = $('delConfirm').checked;
 
   if (!fullName || fullName.length < 2) { msg.textContent = 'Enter your full name.'; msg.style.color = 'var(--err)'; return; }
@@ -613,15 +646,6 @@ async function submitDeleteRequest() {
   }
 }
 
-/* ── LOGOUT ── */
-function doLogout() {
-  ['af_student_logged_in','af_student_uuid','af_student_id',
-   'af_student_mobile','af_student_name','af_student_email',
-   'af_session_token','af_student_phone'].forEach(k => localStorage.removeItem(k));
-  showToast('Logged out 👋', 'ok', 'Bye!');
-  setTimeout(() => window.location.href = '../index.html', 800);
-}
-
 /* ── BACK ── */
 function goBack() { window.history.back(); }
 
@@ -638,7 +662,6 @@ document.addEventListener('keydown', e => {
 
 /* ── INIT ── */
 document.addEventListener('DOMContentLoaded', () => {
-  // If not logged in, redirect to student login
   if (localStorage.getItem('af_student_logged_in') !== 'true') {
     window.location.href = '../Student/index.html';
     return;
