@@ -134,6 +134,7 @@ a{text-decoration:none;color:inherit;}
 .toast-x{font-size:16px;color:var(--tm);cursor:pointer;margin-left:auto;}
 html,body,*{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-touch-callout:none;}
 input{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
+
 </style>
 </head>
 <body>
@@ -303,7 +304,9 @@ function showCacheBar(ts) {
   const timeEl = $id('cacheTime');
   if (!bar || !timeEl || !ts) return;
   const mins = Math.round((Date.now() - ts) / 60000);
-  timeEl.textContent = mins < 1 ? 'Just loaded' : `Cached ${mins}m ago`;
+  timeEl.textContent = mins < 1
+  ? 'Updated just now'
+  : `Last updated ${mins}m ago`;
   bar.style.display = 'flex';
 }
 
