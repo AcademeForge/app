@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<script>
+(function () {
+  /* Inherit dark mode from main app instantly — zero flash */
+  var dm = localStorage.getItem("af_dark_mode");
+  document.documentElement.setAttribute("data-theme", dm === "1" ? "dark" : "light");
+})();
+</script>
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#4f46e5" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>Notifications — AcademeForge</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<style>
+/* ═══════════════════════════════════════════════════
+   ROOT TOKENS — mirrors main app exactly
+═══════════════════════════════════════════════════ */
+:root {
+  --af-primary:        #4f46e5;
+  --af-primary-dark:   #3730a3;
+  --af-primary-light:  #818cf8;
+  --af-accent:         #06b6d4;
+  --af-accent2:        #f59e0b;
+  --af-danger:         #ef4444;
+  --af-success:        #22c55e;
+
+  --bg-base:           #f0f2ff;
+  --bg-shell:          #ffffff;
+  --bg-card:           rgba(255,255,255,0.72);
+  --bg-card-solid:     #ffffff;
+  --bg-nav:            rgba(255,255,255,0.88);
+  --bg-header:         rgba(255,255,255,0.92);
+  --bg-group:          rgba(79,70,229,0.06);
+  --bg-group-hover:    rgba(79,70,229,0.10);
+  --bg-input:          #f4f5fb;
+
+  --text-primary:      #0f0e2a;
+  --text-secondary:    #4b5563;
+  --text-muted:        #9ca3af;
+  --text-on-primary:   #ffffff;
+  --text-link:         #4f46e5;
+
+  --border-subtle:     rgba(79,70,229,0.12);
+  --border-card:       rgba(79,70,229,0.15);
+  --border-input:      #d1d5db;
+
+  --shadow-card:       0 4px 24px rgba(79,70,229,0.10), 0 1px 4px rgba(0,0,0,0.06);
+  --shadow-btn:        0 4px 16px rgba(79,70,229,0.28);
+  --shadow-elevated:   0 12px 40px rgba(79,70,229,0.18);
+
+  --glass-blur:        12px;
+  --glass-sat:         160%;
+
+  --r-sm:    8px;
+  --r-md:    14px;
+  --r-lg:    20px;
+  --r-xl:    28px;
+  --r-full:  9999px;
+
+  --gap-xs:  6px;
+  --gap-sm:  10px;
+  --gap-md:  16px;
+  --gap-lg:  24px;
+
+  --font-display: 'Sora', sans-serif;
+  --font-body:    'Nunito', sans-serif;
+
+  --ease-spring: cubic-bezier(0.34,1.56,0.64,1);
+  --ease-out:    cubic-bezier(0.22,1,0.36,1);
+  --dur-fast:    140ms;
+  --dur-med:     240ms;
+
+  --shell-max: 430px;
+  --header-h:  64px;
+}
+
+[data-theme="dark"] {
+  --bg-base:           #0c0b1d;
+  --bg-shell:          #120f2a;
+  --bg-card:           rgba(30,27,60,0.80);
+  --bg-card-solid:     #1e1b3c;
+  --bg-nav:            rgba(18,15,42,0.95);
+  --bg-header:         rgba(18,15,42,0.96);
+  --bg-group:          rgba(129,140,248,0.08);
+  --bg-group-hover:    rgba(129,140,248,0.14);
+  --bg-input:          #1e1b3c;
+
+  --text-primary:      #f0eeff;
+  --text-secondary:    #a5a3c2;
+  --text-muted:        #6b6a8a;
+  --text-on-primary:   #ffffff;
+  --text-link:         #818cf8;
+
+  --border-subtle:     rgba(129,140,248,0.12);
+  --border-card:       rgba(129,140,248,0.18);
+  --border-input:      rgba(129,140,248,0.20);
+
+  --shadow-card:       0 4px 24px rgba(0,0,0,0.32), 0 1px 4px rgba(0,0,0,0.20);
+  --shadow-btn:        0 4px 16px rgba(79,70,229,0.40);
+  --shadow-elevated:   0 12px 40px rgba(0,0,0,0.50);
+}
+
+/* ═══════════════════════════════════════════════════
+   RESET
+═══════════════════════════════════════════════════ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0; padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+[data-theme="dark"] { color-scheme: dark; }
+[data-theme="light"] { color-scheme: light; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  transition: background var(--dur-med) var(--ease-out), color var(--dur-med) var(--ease-out);
+  overflow-x: hidden;
+}
+
+button { font-family: var(--font-body); cursor: pointer; border: none; background: none; color: inherit; }
+a { text-decoration: none; color: inherit; }
+img { display: block; max-width: 100%; }
+
+/* ═══════════════════════════════════════════════════
+   SHELL
+═══════════════════════════════════════════════════ */
+.af-shell {
+  width: 100%;
+  max-width: var(--shell-max);
+  min-height: 100dvh;
+  background: var(--bg-shell);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px var(--border-subtle), var(--shadow-elevated);
+  transition: background var(--dur-med) var(--ease-out);
+}
+
+@media (min-width: 700px) {
+  body { padding: 32px 0 48px; align-items: flex-start; }
+  .af-shell {
+    border-radius: 40px;
+    min-height: calc(100dvh - 80px);
+    max-height: 900px;
+    overflow-y: auto;
+    box-shadow:
+      0 0 0 1px var(--border-card),
+      0 32px 80px rgba(0,0,0,0.22),
+      0 8px 24px rgba(79,70,229,0.15);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   TOPBAR
+═══════════════════════════════════════════════════ */
+.af-topbar {
+  position: sticky; top: 0; z-index: 100;
+  height: var(--header-h);
+  background: var(--bg-header);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--gap-md);
+  gap: var(--gap-sm);
+  transition: background var(--dur-med) var(--ease-out);
+}
+
+.af-topbar-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+
+.af-back-btn {
+  width: 38px; height: 38px;
+  border-radius: var(--r-md);
+  background: var(--bg-group);
+  border: 1px solid var(--border-subtle);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: var(--text-primary);
+  transition: transform var(--dur-fast) var(--ease-spring), background var(--dur-fast);
+  flex-shrink: 0;
+}
+.af-back-btn:hover  { background: var(--bg-group-hover); transform: scale(1.06); }
+.af-back-btn:active { transform: scale(0.93); }
+
+.af-brand-logo {
+  width: 40px; height: 40px; border-radius: 12px;
+  object-fit: cover;
+  background: linear-gradient(135deg, var(--af-primary), var(--af-accent));
+  flex-shrink: 0;
+}
+
+.af-brand-name { font-family: var(--font-display); font-size: 15px; font-weight: 800; color: var(--text-primary); line-height: 1.1; }
+.af-brand-tagline { font-size: 10px; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
+
+.af-topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.af-icon-btn {
+  width: 38px; height: 38px;
+  border-radius: var(--r-md);
+  background: var(--bg-group);
+  border: 1px solid var(--border-subtle);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  transition: transform var(--dur-fast) var(--ease-spring), background var(--dur-fast);
+}
+.af-icon-btn:hover  { background: var(--bg-group-hover); transform: scale(1.08); }
+.af-icon-btn:active { transform: scale(0.93); }
+.af-icon-btn.spin   { animation: nfSpin 0.6s linear; }
+@keyframes nfSpin { to { transform: rotate(360deg); } }
+
+/* ═══════════════════════════════════════════════════
+   GLASS UTILITY
+═══════════════════════════════════════════════════ */
+.glass {
+  background: var(--bg-card);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  border: 1px solid var(--border-card);
+}
+
+/* ═══════════════════════════════════════════════════
+   PAGE AREA
+═══════════════════════════════════════════════════ */
+.af-page {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: var(--gap-md) var(--gap-md) 48px;
+  display: flex; flex-direction: column; gap: var(--gap-md);
+}
+.af-page::-webkit-scrollbar { width: 3px; }
+.af-page::-webkit-scrollbar-thumb { background: var(--border-card); border-radius: 99px; }
+
+/* ═══════════════════════════════════════════════════
+   HERO SECTION
+═══════════════════════════════════════════════════ */
+.nf-hero {
+  border-radius: var(--r-xl);
+  padding: 20px 18px;
+  display: flex; align-items: center; gap: 14px;
+  box-shadow: var(--shadow-card);
+  position: relative; overflow: hidden;
+}
+.nf-hero::before {
+  content: "";
+  position: absolute; top: -50px; right: -50px;
+  width: 160px; height: 160px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(79,70,229,0.14), transparent 70%);
+  pointer-events: none;
+}
+.nf-hero-icon {
+  font-size: 32px;
+  width: 56px; height: 56px; border-radius: var(--r-lg);
+  background: linear-gradient(135deg, var(--af-primary), var(--af-accent));
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(79,70,229,0.30);
+}
+.nf-hero-text { flex: 1; min-width: 0; }
+.nf-hero-title {
+  font-family: var(--font-display);
+  font-size: 20px; font-weight: 900; letter-spacing: -0.04em;
+  color: var(--text-primary);
+  background: linear-gradient(135deg, var(--text-primary) 0%, #c7d2fe 60%, var(--af-primary-light) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  line-height: 1.15;
+}
+.nf-hero-sub { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-top: 4px; line-height: 1.5; }
+
+/* Badge count */
+.nf-hero-badge {
+  padding: 6px 12px;
+  border-radius: var(--r-full);
+  background: linear-gradient(135deg, rgba(79,70,229,0.15), rgba(6,182,212,0.10));
+  border: 1px solid var(--border-card);
+  font-family: var(--font-display);
+  font-size: 13px; font-weight: 800;
+  color: var(--af-primary);
+  flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+}
+.nf-hero-badge span { font-size: 10px; font-weight: 600; color: var(--text-muted); }
+
+/* ═══════════════════════════════════════════════════
+   FILTER TABS
+═══════════════════════════════════════════════════ */
+.nf-filters {
+  display: flex; gap: 8px;
+  overflow-x: auto; padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.nf-filters::-webkit-scrollbar { display: none; }
+
+.nf-filter-btn {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: var(--r-full);
+  font-size: 12px; font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg-group);
+  border: 1px solid var(--border-subtle);
+  transition: all var(--dur-fast) var(--ease-spring);
+}
+.nf-filter-btn:active { transform: scale(0.95); }
+.nf-filter-btn.active {
+  background: linear-gradient(135deg, var(--af-primary), var(--af-primary-dark));
+  color: white;
+  border-color: transparent;
+  box-shadow: var(--shadow-btn);
+}
+
+/* ═══════════════════════════════════════════════════
+   NOTIFICATION CARDS
+═══════════════════════════════════════════════════ */
+.nf-list { display: flex; flex-direction: column; gap: 10px; }
+
+.nf-card {
+  border-radius: var(--r-xl);
+  padding: 16px;
+  box-shadow: var(--shadow-card);
+  display: flex; gap: 13px; align-items: flex-start;
+  position: relative; overflow: hidden;
+  transition: transform var(--dur-fast) var(--ease-spring), box-shadow var(--dur-fast);
+  animation: nfCardIn 0.35s var(--ease-out) both;
+}
+.nf-card:hover  { transform: translateY(-2px); box-shadow: var(--shadow-elevated); }
+.nf-card:active { transform: scale(0.99); }
+
+@keyframes nfCardIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* accent strip on left */
+.nf-card::before {
+  content: "";
+  position: absolute; top: 0; left: 0;
+  width: 4px; height: 100%;
+  border-radius: 4px 0 0 4px;
+}
+
+/* type-based accent colours */
+.nf-card[data-type="Lecture"]::before     { background: linear-gradient(180deg, #4f46e5, #818cf8); }
+.nf-card[data-type="Note"]::before        { background: linear-gradient(180deg, #0ea5e9, #38bdf8); }
+.nf-card[data-type="Batch"]::before       { background: linear-gradient(180deg, #f59e0b, #fbbf24); }
+.nf-card[data-type="Result"]::before      { background: linear-gradient(180deg, #22c55e, #4ade80); }
+.nf-card[data-type="Announcement"]::before { background: linear-gradient(180deg, #ef4444, #f87171); }
+.nf-card[data-type="General"]::before     { background: linear-gradient(180deg, #8b5cf6, #a78bfa); }
+.nf-card[data-type="Test"]::before        { background: linear-gradient(180deg, #f97316, #fb923c); }
+
+/* icon bubble */
+.nf-card-icon {
+  width: 44px; height: 44px; min-width: 44px;
+  border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+/* icon background by type */
+.nf-card[data-type="Lecture"]     .nf-card-icon { background: rgba(79,70,229,0.12); }
+.nf-card[data-type="Note"]        .nf-card-icon { background: rgba(14,165,233,0.12); }
+.nf-card[data-type="Batch"]       .nf-card-icon { background: rgba(245,158,11,0.12); }
+.nf-card[data-type="Result"]      .nf-card-icon { background: rgba(34,197,94,0.12); }
+.nf-card[data-type="Announcement"] .nf-card-icon { background: rgba(239,68,68,0.12); }
+.nf-card[data-type="General"]     .nf-card-icon { background: rgba(139,92,246,0.12); }
+.nf-card[data-type="Test"]        .nf-card-icon { background: rgba(249,115,22,0.12); }
+
+.nf-card-body { flex: 1; min-width: 0; }
+
+.nf-card-top {
+  display: flex; align-items: flex-start; gap: 8px;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.nf-card-title {
+  font-family: var(--font-display);
+  font-size: 14px; font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.25;
+  flex: 1; min-width: 0;
+}
+
+.nf-card-badge {
+  flex-shrink: 0;
+  font-size: 10px; font-weight: 800;
+  padding: 3px 8px;
+  border-radius: var(--r-full);
+  text-transform: uppercase; letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* badge colours by type */
+.nf-badge-Lecture     { background: rgba(79,70,229,0.12);  color: var(--af-primary); }
+.nf-badge-Note        { background: rgba(14,165,233,0.12); color: #0ea5e9; }
+.nf-badge-Batch       { background: rgba(245,158,11,0.12); color: var(--af-accent2); }
+.nf-badge-Result      { background: rgba(34,197,94,0.12);  color: var(--af-success); }
+.nf-badge-Announcement{ background: rgba(239,68,68,0.12);  color: var(--af-danger); }
+.nf-badge-General     { background: rgba(139,92,246,0.12); color: #8b5cf6; }
+.nf-badge-Test        { background: rgba(249,115,22,0.12); color: #f97316; }
+
+.nf-card-message {
+  font-size: 13px; font-weight: 600;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.nf-card-footer {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.nf-card-batch {
+  flex: 1; min-width: 0;
+  font-size: 11px; font-weight: 700;
+  color: var(--text-muted);
+  display: flex; align-items: center; gap: 4px;
+}
+.nf-card-batch::before { content: "📦"; font-size: 11px; }
+
+.nf-card-time {
+  font-size: 11px; font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════
+   EMPTY STATE
+═══════════════════════════════════════════════════ */
+.nf-empty {
+  border-radius: var(--r-xl);
+  padding: 36px 20px;
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  box-shadow: var(--shadow-card);
+}
+.nf-empty-icon { font-size: 52px; animation: nfFloat 3s ease-in-out infinite; }
+@keyframes nfFloat { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
+.nf-empty h3 { font-family: var(--font-display); font-size: 17px; font-weight: 800; color: var(--text-primary); }
+.nf-empty p  { font-size: 13px; color: var(--text-secondary); line-height: 1.6; max-width: 260px; }
+
+/* ═══════════════════════════════════════════════════
+   SKELETON LOADER
+═══════════════════════════════════════════════════ */
+.nf-skeleton-card {
+  border-radius: var(--r-xl);
+  padding: 16px; gap: 12px;
+  display: flex; align-items: flex-start;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-card);
+  background: var(--bg-card);
+}
+
+.nf-skel {
+  background: var(--bg-group);
+  border-radius: var(--r-sm);
+  position: relative; overflow: hidden;
+}
+.nf-skel::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.10) 50%, transparent 100%);
+  animation: nfShimmer 1.4s ease-in-out infinite;
+}
+@keyframes nfShimmer { from{transform:translateX(-100%);} to{transform:translateX(100%);} }
+
+.nf-skel-icon  { width: 44px; height: 44px; min-width: 44px; border-radius: var(--r-md); }
+.nf-skel-body  { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.nf-skel-title { height: 14px; border-radius: 4px; width: 70%; }
+.nf-skel-text  { height: 12px; border-radius: 4px; width: 95%; }
+.nf-skel-text2 { height: 12px; border-radius: 4px; width: 60%; }
+
+/* ═══════════════════════════════════════════════════
+   SECTION LABEL
+═══════════════════════════════════════════════════ */
+.nf-section-label {
+  font-family: var(--font-display);
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0 2px;
+}
+
+/* ═══════════════════════════════════════════════════
+   BOTTOM BACK LINK
+═══════════════════════════════════════════════════ */
+.nf-back-row { display: flex; justify-content: center; padding-top: 4px; }
+.nf-back-link {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 700; color: var(--text-muted);
+  padding: 10px 18px;
+  border-radius: var(--r-full);
+  background: var(--bg-group); border: 1px solid var(--border-subtle);
+  transition: transform var(--dur-fast) var(--ease-spring), background var(--dur-fast);
+}
+.nf-back-link:hover  { background: var(--bg-group-hover); transform: scale(1.03); }
+.nf-back-link:active { transform: scale(0.97); }
+
+/* ═══════════════════════════════════════════════════
+   ERROR STRIP
+═══════════════════════════════════════════════════ */
+.nf-error {
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.20);
+  display: flex; align-items: center; gap: 12px;
+  font-size: 13px; font-weight: 700; color: var(--af-danger);
+}
+.nf-error-retry {
+  margin-left: auto; flex-shrink: 0;
+  padding: 7px 14px; border-radius: var(--r-full);
+  background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.20);
+  font-size: 12px; font-weight: 700; color: var(--af-danger);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-spring);
+}
+.nf-error-retry:active { transform: scale(0.95); }
+
+/* ═══════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════ */
+.nf-toast-wrap {
+  position: fixed; bottom: 28px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 99999; width: min(90vw, 420px);
+  pointer-events: none;
+}
+.nf-toast {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: var(--bg-card-solid); border: 1px solid var(--border-card);
+  border-radius: 18px; padding: 13px 16px;
+  box-shadow: var(--shadow-elevated);
+  animation: nfToastIn .22s ease;
+  pointer-events: auto;
+}
+.nf-toast-success { border-left: 4px solid var(--af-success); }
+.nf-toast-error   { border-left: 4px solid var(--af-danger);  }
+.nf-toast-info    { border-left: 4px solid var(--af-primary);  }
+.nf-toast-title { font-size: 13px; font-weight: 700; }
+.nf-toast-msg   { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+@keyframes nfToastIn  { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:none;} }
+@keyframes nfToastOut { from{opacity:1;} to{opacity:0;transform:translateY(12px);} }
+
+/* ═══════════════════════════════════════════════════
+   PAGE-IN STAGGER
+═══════════════════════════════════════════════════ */
+@keyframes nfPageIn { from{opacity:0;transform:translateY(14px);} to{opacity:1;transform:none;} }
+.nf-anim { animation: nfPageIn 0.32s var(--ease-out) both; }
+.nf-anim:nth-child(1) { animation-delay: 0.00s; }
+.nf-anim:nth-child(2) { animation-delay: 0.06s; }
+.nf-anim:nth-child(3) { animation-delay: 0.10s; }
+.nf-anim:nth-child(4) { animation-delay: 0.14s; }
+.nf-anim:nth-child(5) { animation-delay: 0.18s; }
+</style>
+</head>
+<body>
+
+<div class="af-shell" id="afShell">
+
+  <!-- ── TOPBAR ── -->
+  <header class="af-topbar">
+    <div class="af-topbar-left">
+      <button class="af-back-btn" onclick="nfGoBack()" aria-label="Go back" type="button">←</button>
+      <img
+        src="../IMG/AF LOGO 1.jpeg" alt="AcademeForge" class="af-brand-logo"
+        onerror="this.style.display='none'"
+      />
+      <div>
+        <div class="af-brand-name">AcademeForge</div>
+        <div class="af-brand-tagline">Notifications</div>
+      </div>
+    </div>
+    <div class="af-topbar-actions">
+      <button
+        class="af-icon-btn" id="nfRefreshTopBtn"
+        onclick="nfLoad(true)" aria-label="Refresh notifications" type="button"
+      >↻</button>
+      <button
+        class="af-icon-btn" id="nfThemeBtn"
+        onclick="nfToggleTheme()" aria-label="Toggle dark mode" type="button"
+      >🌙</button>
+    </div>
+  </header>
+
+  <!-- ── PAGE ── -->
+  <div class="af-page" id="nfPage">
+
+    <!-- HERO -->
+    <div class="nf-hero glass nf-anim">
+      <div class="nf-hero-icon">🔔</div>
+      <div class="nf-hero-text">
+        <div class="nf-hero-title">Notifications</div>
+        <div class="nf-hero-sub">Lectures, batch updates, notes & important announcements.</div>
+      </div>
+      <div class="nf-hero-badge" id="nfHeroBadge">
+        <span id="nfCountEl">–</span>
+        <span>updates</span>
+      </div>
+    </div>
+
+    <!-- FILTER TABS -->
+    <div class="nf-filters nf-anim" id="nfFilters" role="group" aria-label="Filter notifications">
+      <button class="nf-filter-btn active" data-filter="All"          onclick="nfSetFilter(this)" type="button">All</button>
+      <button class="nf-filter-btn"        data-filter="Lecture"      onclick="nfSetFilter(this)" type="button">🎥 Lectures</button>
+      <button class="nf-filter-btn"        data-filter="Note"         onclick="nfSetFilter(this)" type="button">📝 Notes</button>
+      <button class="nf-filter-btn"        data-filter="Batch"        onclick="nfSetFilter(this)" type="button">📦 Batch</button>
+      <button class="nf-filter-btn"        data-filter="Test"         onclick="nfSetFilter(this)" type="button">🧪 Test</button>
+      <button class="nf-filter-btn"        data-filter="Result"       onclick="nfSetFilter(this)" type="button">🏆 Result</button>
+      <button class="nf-filter-btn"        data-filter="Announcement" onclick="nfSetFilter(this)" type="button">📢 Notice</button>
+      <button class="nf-filter-btn"        data-filter="General"      onclick="nfSetFilter(this)" type="button">💡 General</button>
+    </div>
+
+    <!-- LABEL -->
+    <div class="nf-section-label nf-anim" id="nfSectionLabel">Latest notifications</div>
+
+    <!-- LIST -->
+    <div class="nf-list" id="nfList">
+      <!-- Skeletons shown on first load -->
+      <div class="nf-skeleton-card nf-anim">
+        <div class="nf-skel nf-skel-icon"></div>
+        <div class="nf-skel-body"><div class="nf-skel nf-skel-title"></div><div class="nf-skel nf-skel-text"></div><div class="nf-skel nf-skel-text2"></div></div>
+      </div>
+      <div class="nf-skeleton-card nf-anim" style="animation-delay:0.06s;">
+        <div class="nf-skel nf-skel-icon"></div>
+        <div class="nf-skel-body"><div class="nf-skel nf-skel-title"></div><div class="nf-skel nf-skel-text"></div><div class="nf-skel nf-skel-text2"></div></div>
+      </div>
+      <div class="nf-skeleton-card nf-anim" style="animation-delay:0.10s;">
+        <div class="nf-skel nf-skel-icon"></div>
+        <div class="nf-skel-body"><div class="nf-skel nf-skel-title"></div><div class="nf-skel nf-skel-text"></div><div class="nf-skel nf-skel-text2"></div></div>
+      </div>
+    </div>
+
+    <!-- ERROR (hidden) -->
+    <div class="nf-error" id="nfError" style="display:none;">
+      <span id="nfErrorText">Could not load notifications.</span>
+      <button class="nf-error-retry" onclick="nfLoad(true)" type="button">Retry</button>
+    </div>
+
+    <!-- BOTTOM BACK -->
+    <div class="nf-back-row nf-anim">
+      <a class="nf-back-link" href="../index.html">← Back to AcademeForge</a>
+    </div>
+
+  </div><!-- /af-page -->
+</div><!-- /af-shell -->
+
+<!-- TOAST -->
+<div class="nf-toast-wrap" id="nfToastWrap"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   CONFIG — matches your edge function URL
+═══════════════════════════════════════════════════ */
+const NF_EDGE_URL =
+  "https://nltmolhlwgsrxadknzzq.supabase.co/functions/v1/app-notifications-af";
+
+/* Anon key for the main DB (notifications live there) */
+const NF_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sdG1vbGhsd2dzcnhhZGtuenpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MDMyMzksImV4cCI6MjA5NDE3OTIzOX0.HEvMlpp6XFbD9MuQhxFwsNpfvzfev3ISkJbA93SvMXc";
+
+/* ═══════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════ */
+let _nfAll    = [];      // full list from server
+let _nfFilter = "All";   // active filter
+let _nfLoading = false;
+
+/* ═══════════════════════════════════════════════════
+   TYPE → EMOJI MAP
+═══════════════════════════════════════════════════ */
+const NF_ICONS = {
+  Lecture:      "🎥",
+  Note:         "📝",
+  Batch:        "📦",
+  Result:       "🏆",
+  Announcement: "📢",
+  General:      "💡",
+  Test:         "🧪"
+};
+
+/* ═══════════════════════════════════════════════════
+   DARK MODE
+═══════════════════════════════════════════════════ */
+function nfIsDark() {
+  return document.documentElement.getAttribute("data-theme") === "dark";
+}
+function nfApplyTheme(dark) {
+  document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+  localStorage.setItem("af_dark_mode", dark ? "1" : "0");
+  const btn = document.getElementById("nfThemeBtn");
+  if (btn) btn.textContent = dark ? "☀️" : "🌙";
+}
+function nfToggleTheme() { nfApplyTheme(!nfIsDark()); }
+
+/* set icon on load */
+document.getElementById("nfThemeBtn").textContent = nfIsDark() ? "☀️" : "🌙";
+
+/* ═══════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════ */
+function nfGoBack() {
+  if (document.referrer && document.referrer.includes(location.hostname)) {
+    history.back();
+  } else {
+    window.location.href = "../index.html";
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════ */
+let _nfToastTimer = null;
+function nfToast(message, type, title, duration) {
+  type = type || "info"; duration = duration || 2600;
+  const titles = { success: "Success", error: "Error", info: "Info" };
+  const wrap = document.getElementById("nfToastWrap");
+  wrap.innerHTML = "";
+  if (_nfToastTimer) { clearTimeout(_nfToastTimer); _nfToastTimer = null; }
+  const t = document.createElement("div");
+  t.className = "nf-toast nf-toast-" + type;
+  t.innerHTML =
+    "<div><div class='nf-toast-title'>" + (title || titles[type]) + "</div>"
+    + "<div class='nf-toast-msg'>" + message + "</div></div>";
+  wrap.appendChild(t);
+  function close() {
+    t.style.animation = "nfToastOut 0.22s ease forwards";
+    setTimeout(() => { if (t.parentNode) t.parentNode.removeChild(t); }, 220);
+  }
+  _nfToastTimer = setTimeout(close, duration);
+}
+
+/* ═══════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════ */
+function esc(t) {
+  return String(t || "")
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function timeAgo(v) {
+  if (!v) return "";
+  try {
+    const d = new Date(v), now = new Date(), diff = Math.floor((now - d) / 1000);
+    if (diff < 60)     return "just now";
+    if (diff < 3600)   return Math.floor(diff / 60) + "m ago";
+    if (diff < 86400)  return Math.floor(diff / 3600) + "h ago";
+    if (diff < 604800) return Math.floor(diff / 86400) + "d ago";
+    return d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+  } catch (e) { return ""; }
+}
+
+/* ═══════════════════════════════════════════════════
+   FILTER
+═══════════════════════════════════════════════════ */
+function nfSetFilter(btn) {
+  _nfFilter = btn.dataset.filter || "All";
+  document.querySelectorAll(".nf-filter-btn").forEach(function(b) {
+    b.classList.toggle("active", b === btn);
+  });
+  nfRender();
+}
+
+function nfFiltered() {
+  if (_nfFilter === "All") return _nfAll;
+  return _nfAll.filter(function(n) {
+    return (n.type || "General") === _nfFilter;
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════════════ */
+function nfRender() {
+  const list    = document.getElementById("nfList");
+  const label   = document.getElementById("nfSectionLabel");
+  const countEl = document.getElementById("nfCountEl");
+  if (!list) return;
+
+  const items = nfFiltered();
+
+  /* count badge */
+  if (countEl) countEl.textContent = _nfAll.length;
+
+  /* section label */
+  if (label) {
+    label.textContent = _nfFilter === "All"
+      ? "All notifications (" + items.length + ")"
+      : items.length + " " + _nfFilter + " notification" + (items.length !== 1 ? "s" : "");
+  }
+
+  /* empty state */
+  if (!items.length) {
+    list.innerHTML =
+      '<div class="nf-empty glass nf-anim">'
+      + '<div class="nf-empty-icon">' + (NF_ICONS[_nfFilter] || "🔕") + '</div>'
+      + '<h3>No ' + esc(_nfFilter === "All" ? "" : _nfFilter) + ' Notifications</h3>'
+      + '<p>' + (_nfFilter === "All"
+          ? "You're all caught up! New notifications will appear here."
+          : "No " + esc(_nfFilter).toLowerCase() + " notifications right now. Check back later.")
+      + '</p></div>';
+    return;
+  }
+
+  /* cards */
+  list.innerHTML = items.map(function(n, i) {
+    const type   = n.type || "General";
+    const icon   = NF_ICONS[type] || "🔔";
+    const batch  = n.batch && n.batch !== "All" ? esc(n.batch) : "All Batches";
+    const delay  = Math.min(i * 0.04, 0.28);
+
+    return '<div class="nf-card glass" data-type="' + esc(type) + '" style="animation-delay:' + delay + 's;">'
+      + '<div class="nf-card-icon">' + icon + '</div>'
+      + '<div class="nf-card-body">'
+      +   '<div class="nf-card-top">'
+      +     '<div class="nf-card-title">' + esc(n.title) + '</div>'
+      +     '<span class="nf-card-badge nf-badge-' + esc(type) + '">' + esc(type) + '</span>'
+      +   '</div>'
+      +   '<div class="nf-card-message">' + esc(n.message) + '</div>'
+      +   '<div class="nf-card-footer">'
+      +     '<span class="nf-card-batch">' + batch + '</span>'
+      +     '<span class="nf-card-time">🕐 ' + timeAgo(n.created_at) + '</span>'
+      +   '</div>'
+      + '</div></div>';
+  }).join("");
+}
+
+/* ═══════════════════════════════════════════════════
+   FETCH FROM EDGE FUNCTION
+═══════════════════════════════════════════════════ */
+async function nfLoad(showSpinner) {
+  if (_nfLoading) return;
+  _nfLoading = true;
+
+  const refreshBtn = document.getElementById("nfRefreshTopBtn");
+  if (showSpinner && refreshBtn) refreshBtn.classList.add("spin");
+
+  /* hide error */
+  const errEl = document.getElementById("nfError");
+  if (errEl) errEl.style.display = "none";
+
+  try {
+    const res = await fetch(NF_EDGE_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": NF_ANON_KEY,
+        "Authorization": "Bearer " + NF_ANON_KEY
+      },
+      body: JSON.stringify({ action: "list" })
+    });
+
+    if (!res.ok) throw new Error("Server error " + res.status);
+
+    const data = await res.json();
+
+    if (!data || !data.ok) throw new Error(data?.message || "Unexpected response.");
+
+    _nfAll = Array.isArray(data.notifications) ? data.notifications : [];
+
+    /* cache for offline */
+    try { localStorage.setItem("af_notif_cache", JSON.stringify(_nfAll)); } catch (_) {}
+
+    nfRender();
+
+    if (showSpinner) {
+      nfToast("Notifications refreshed successfully.", "success", "Updated");
+    }
+
+  } catch (err) {
+    console.error("nfLoad error:", err);
+
+    /* try cache */
+    try {
+      const cached = JSON.parse(localStorage.getItem("af_notif_cache") || "null");
+      if (Array.isArray(cached) && cached.length) {
+        _nfAll = cached;
+        nfRender();
+        nfToast("Showing cached notifications. Pull to refresh.", "info", "Offline");
+        return;
+      }
+    } catch (_) {}
+
+    /* show error strip */
+    const errEl = document.getElementById("nfError");
+    if (errEl) {
+      errEl.style.display = "flex";
+      const errText = document.getElementById("nfErrorText");
+      if (errText) errText.textContent = err.message || "Could not load notifications.";
+    }
+
+    /* clear skeleton */
+    const list = document.getElementById("nfList");
+    if (list) list.innerHTML = "";
+
+    nfToast(err.message || "Failed to load notifications.", "error", "Load Failed");
+
+  } finally {
+    _nfLoading = false;
+    if (refreshBtn) refreshBtn.classList.remove("spin");
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════════════ */
+(function init() {
+  /* Show cached instantly before fetch */
+  try {
+    const cached = JSON.parse(localStorage.getItem("af_notif_cache") || "null");
+    if (Array.isArray(cached) && cached.length) {
+      _nfAll = cached;
+      nfRender();
+    }
+  } catch (_) {}
+
+  /* Live fetch */
+  nfLoad(false);
+})();
+</script>
+</body>
+</html>
