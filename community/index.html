@@ -229,15 +229,16 @@ ul{list-style:none;}
 .fab{
   position:fixed;
 
-  left:50%;
-  transform:translateX(-50%);
+  right:16px;
+  left:auto;
+  transform:none;
 
-  bottom:calc(var(--nav-h) + 20px + env(safe-area-inset-bottom,0px));
+  bottom:78px; /* bottom nav ke just upar */
 
   z-index:300;
 
-  width:54px;
-  height:54px;
+  width:58px;
+  height:58px;
   border-radius:18px;
 
   background:linear-gradient(135deg,var(--p),var(--p2));
@@ -250,7 +251,9 @@ ul{list-style:none;}
 
   gap:1px;
 
-  box-shadow:var(--shb),0 8px 24px rgba(79,70,229,.35);
+  box-shadow:
+    var(--shb),
+    0 8px 24px rgba(79,70,229,.35);
 
   font-size:22px;
 
@@ -260,19 +263,11 @@ ul{list-style:none;}
 }
 
 .fab:hover{
-  transform:translateX(-50%) scale(1.08);
-  box-shadow:0 8px 28px rgba(79,70,229,.45);
+  transform:scale(1.08);
 }
 
 .fab:active{
-  transform:translateX(-50%) scale(.95);
-}
-
-.fab-label{
-  font-size:8px;
-  font-weight:900;
-  letter-spacing:.03em;
-  line-height:1;
+  transform:scale(.95);
 }
   
 /* ── BOTTOM NAV (mirror main app) ── */
