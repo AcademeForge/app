@@ -492,9 +492,53 @@ textarea,input{font-family:var(--font-body);}
 /* ════════════════════════════════════════
    MISC
 ════════════════════════════════════════ */
-.hidden{display:none!important;}
-html,body,*{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-touch-callout:none;}
-textarea,input{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
+.hidden{
+  display:none !important;
+}
+
+/* Allow text selection everywhere */
+html,
+body,
+*{
+  -webkit-user-select:text;
+  -moz-user-select:text;
+  -ms-user-select:text;
+  user-select:text;
+
+  -webkit-touch-callout:default;
+}
+
+/* Inputs & Textareas */
+input,
+textarea{
+  -webkit-user-select:text;
+  -moz-user-select:text;
+  -ms-user-select:text;
+  user-select:text;
+
+  -webkit-touch-callout:default;
+}
+
+/* AI Messages */
+.bubble,
+.bubble-ai,
+.bubble-user,
+.msg-meta,
+.conv-title,
+.greeting-main,
+.greeting-sub,
+.greeting-time{
+  -webkit-user-select:text;
+  -moz-user-select:text;
+  -ms-user-select:text;
+  user-select:text;
+}
+
+/* Optional: Better cursor on selectable text */
+.bubble-ai,
+.bubble-user{
+  cursor:text;
+}
 </style>
 </head>
 <body>
