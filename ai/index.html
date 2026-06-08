@@ -1,821 +1,760 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<meta name="theme-color" content="#6366f1"/>
-<title>Ask AcademeForge AI</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>AcademeForge AI</title>
 <style>
-/* ── Fallback theme variables (auto-overridden if parent app injects its own) ── */
-:root {
-  --p: #6366f1;
-  --p2: #4f46e5;
-  --p3: #4338ca;
-  --acc: #0ea5e9;
-  --ok: #10b981;
-  --err: #ef4444;
-  --amber: #f59e0b;
-  --bg: #eef0fb;
-  --surface: #ffffff;
-  --card: rgba(255,255,255,.92);
-  --nav: rgba(255,255,255,.94);
-  --inp: #f3f4fd;
-  --t1: #0f0e23;
-  --t2: #4b5569;
-  --tm: #9499b7;
-  --b1: rgba(99,102,241,.11);
-  --bc: rgba(99,102,241,.16);
-  --sh: 0 2px 16px rgba(99,102,241,.09), 0 1px 3px rgba(0,0,0,.05);
-  --she: 0 8px 32px rgba(99,102,241,.14), 0 2px 8px rgba(0,0,0,.07);
-  --shb: 0 4px 18px rgba(99,102,241,.32);
-  --r1: 8px;
-  --r2: 12px;
-  --r3: 18px;
-  --r4: 26px;
-  --rf: 9999px;
-  --font-display: 'Space Grotesk', sans-serif;
-  --font-body: 'Plus Jakarta Sans', sans-serif;
-}
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-[data-theme="dark"] {
-  --bg: #0a0917;
-  --surface: #100e24;
-  --card: rgba(24,21,52,.90);
-  --nav: rgba(16,14,36,.97);
-  --inp: #1a1740;
-  --t1: #eceaff;
-  --t2: #9997be;
-  --tm: #5f5d80;
-  --b1: rgba(165,180,252,.11);
-  --bc: rgba(165,180,252,.17);
-  --sh: 0 2px 16px rgba(0,0,0,.30);
-  --she: 0 10px 40px rgba(0,0,0,.48);
-  --shb: 0 4px 18px rgba(99,102,241,.44);
-}
+  :root {
+    --bg:          #0d0f14;
+    --surface:     #161921;
+    --surface2:    #1e2230;
+    --border:      #2a2f3d;
+    --text:        #e8eaf0;
+    --text-muted:  #7a8099;
+    --af-accent:   #4f8aff;
+    --dev-accent:  #f97316;
+    --user-bg:     #1e2d4a;
+    --ai-bg:       #181c27;
+    --radius:      14px;
+    --input-h:     130px;
+  }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
 
-body {
-  font-family: var(--font-body, 'Plus Jakarta Sans', system-ui, sans-serif);
-  background: var(--bg);
-  color: var(--t1);
-  min-height: 100dvh;
-  display: flex;
-  justify-content: center;
-  overflow-x: hidden;
-}
+  /* ── Layout ── */
+  #app {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    max-width: 780px;
+    margin: 0 auto;
+  }
 
-/* ── SHELL ── */
-.shell {
-  width: 100%;
-  max-width: 430px;
-  min-height: 100dvh;
-  background: var(--surface);
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 0 0 1px var(--b1), var(--she);
-  overflow: hidden;
-}
+  /* ── Header ── */
+  header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: relative;
+    z-index: 10;
+  }
 
-@media (min-width: 700px) {
-  body { padding: 32px 0 48px; align-items: flex-start; }
-  .shell {
-    border-radius: 40px;
-    min-height: calc(100dvh - 80px);
-    max-height: 900px;
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #4f8aff 0%, #a855f7 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+
+  .logo-sub {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    display: block;
+    margin-top: -2px;
+  }
+
+  /* ── Usage bar ── */
+  .usage-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  .usage-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .usage-bar-track {
+    width: 72px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .usage-bar-fill {
+    height: 100%;
+    background: var(--af-accent);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+    width: 100%;
+  }
+
+  /* ── Chat window ── */
+  #chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 12px;
+    scroll-behavior: smooth;
+  }
+
+  #chat::-webkit-scrollbar { width: 4px; }
+  #chat::-webkit-scrollbar-track { background: transparent; }
+  #chat::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  /* ── Welcome ── */
+  #welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 24px;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .welcome-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #4f8aff 0%, #a855f7 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin-bottom: 4px;
+  }
+
+  #welcome h2 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.4px;
+  }
+
+  #welcome p {
+    font-size: 14px;
+    color: var(--text-muted);
+    max-width: 300px;
+    line-height: 1.55;
+  }
+
+  .welcome-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 8px;
+  }
+
+  .welcome-tag {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 5px 13px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ── Messages ── */
+  .msg-row {
+    display: flex;
+    padding: 10px 0;
+    gap: 10px;
+  }
+
+  .msg-row.user {
+    flex-direction: row-reverse;
+  }
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    align-self: flex-start;
+    margin-top: 2px;
+  }
+
+  .avatar.ai {
+    background: linear-gradient(135deg, #4f8aff 0%, #a855f7 100%);
+    color: #fff;
+  }
+
+  .avatar.user {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  .bubble {
+    max-width: 82%;
+    padding: 11px 14px;
+    border-radius: var(--radius);
+    font-size: 14.5px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .msg-row.user .bubble {
+    background: var(--user-bg);
+    border: 1px solid #2a4070;
+    border-bottom-right-radius: 4px;
+    color: #cdd8f0;
+  }
+
+  .msg-row.ai .bubble {
+    background: var(--ai-bg);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+    color: var(--text);
+  }
+
+  .msg-meta {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.3px;
+    padding: 0 2px;
+  }
+
+  .msg-row.user .msg-meta { text-align: right; }
+
+  .mode-badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    margin-right: 4px;
+  }
+
+  .mode-badge.af24  { background: rgba(79,138,255,0.15); color: #4f8aff; }
+  .mode-badge.dev39 { background: rgba(249,115,22,0.15); color: #f97316; }
+
+  /* ── Thinking indicator ── */
+  .thinking-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+  }
+
+  .thinking-bubble {
+    background: var(--ai-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    border-bottom-left-radius: 4px;
+    padding: 11px 14px;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* ── Input area ── */
+  #input-area {
+    flex-shrink: 0;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 10px 12px 14px;
+  }
+
+  /* ── Mode selector ── */
+  .mode-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 9px;
+  }
+
+  .mode-btn {
+    flex: 1;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    text-align: left;
+    color: var(--text-muted);
+  }
+
+  .mode-btn .mode-name {
+    font-size: 13px;
+    font-weight: 600;
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: -0.3px;
+  }
+
+  .mode-btn .mode-desc {
+    font-size: 10.5px;
+    display: block;
+    margin-top: 1px;
+    opacity: 0.7;
+  }
+
+  .mode-btn.active-af {
+    border-color: var(--af-accent);
+    background: rgba(79,138,255,0.08);
+    color: var(--text);
+  }
+
+  .mode-btn.active-af .mode-name { color: var(--af-accent); }
+
+  .mode-btn.active-dev {
+    border-color: var(--dev-accent);
+    background: rgba(249,115,22,0.08);
+    color: var(--text);
+  }
+
+  .mode-btn.active-dev .mode-name { color: var(--dev-accent); }
+
+  /* ── Textarea row ── */
+  .textarea-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 8px 8px 8px 12px;
+    transition: border-color 0.15s;
+  }
+
+  .textarea-row:focus-within {
+    border-color: var(--af-accent);
+  }
+
+  .textarea-row.dev-focus:focus-within {
+    border-color: var(--dev-accent);
+  }
+
+  #question {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 42px;
+    max-height: 120px;
     overflow-y: auto;
   }
-}
 
-/* ── HEADER ── */
-.hdr {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  height: 56px;
-  background: var(--nav);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid var(--b1);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 14px;
-  gap: 10px;
-  flex-shrink: 0;
-}
+  #question::placeholder { color: var(--text-muted); }
 
-.hdr-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
+  #send-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    border: none;
+    background: var(--af-accent);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, opacity 0.15s;
+  }
 
-.hdr-logo {
-  width: 36px;
-  height: 36px;
-  border-radius: 11px;
-  flex-shrink: 0;
-  background: linear-gradient(135deg, var(--p), var(--acc));
-  display: grid;
-  place-items: center;
-  font-size: 18px;
-  box-shadow: 0 2px 10px rgba(99,102,241,.35);
-  color: #fff;
-}
+  #send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  #send-btn.dev-mode { background: var(--dev-accent); }
 
-.hdr-info { min-width: 0; }
+  #send-btn svg { width: 16px; height: 16px; fill: currentColor; }
 
-.hdr-title {
-  font-family: var(--font-display, 'Space Grotesk', sans-serif);
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--t1);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.2;
-}
+  .char-hint {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-align: right;
+    margin-top: 5px;
+    font-family: 'JetBrains Mono', monospace;
+  }
 
-.hdr-sub {
-  font-size: 10.5px;
-  color: var(--tm);
-  font-weight: 600;
-  margin-top: 1px;
-}
+  /* ── Limit warning ── */
+  #limit-notice {
+    display: none;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #f87171;
+    text-align: center;
+    margin-bottom: 8px;
+  }
 
-.back-btn {
-  height: 32px;
-  padding: 0 14px;
-  border-radius: var(--rf);
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--p);
-  background: rgba(99,102,241,.10);
-  border: 1px solid rgba(99,102,241,.20);
-  cursor: pointer;
-  font-family: inherit;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
+  /* ── Toast ── */
+  #toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 18px;
+    font-size: 13px;
+    color: var(--text);
+    z-index: 999;
+    display: none;
+    white-space: nowrap;
+  }
 
-.back-btn:hover { background: rgba(99,102,241,.16); }
-.back-btn:active { transform: scale(.95); }
-
-/* ── MAIN CONTENT ── */
-.main {
-  flex: 1;
-  padding: 18px 14px 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  overflow-y: auto;
-}
-
-.main::-webkit-scrollbar { width: 3px; }
-.main::-webkit-scrollbar-thumb { background: var(--bc); border-radius: 99px; }
-
-/* ── USAGE CARD ── */
-.usage-card {
-  background: var(--card);
-  border: 1px solid var(--bc);
-  border-radius: var(--r3);
-  padding: 13px 15px;
-  box-shadow: var(--sh);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.usage-label {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--t2);
-}
-
-.usage-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.usage-bar-wrap {
-  width: 80px;
-  height: 5px;
-  background: var(--b1);
-  border-radius: 99px;
-  overflow: hidden;
-}
-
-.usage-bar-fill {
-  height: 100%;
-  border-radius: 99px;
-  background: var(--ok);
-  transition: width .35s ease, background .3s;
-}
-
-.usage-count {
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--ok);
-  min-width: 32px;
-  text-align: right;
-}
-
-/* ── INPUT CARD ── */
-.input-card {
-  background: var(--card);
-  border: 1px solid var(--bc);
-  border-radius: var(--r3);
-  padding: 15px;
-  box-shadow: var(--sh);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.card-label {
-  font-size: 12.5px;
-  font-weight: 800;
-  color: var(--t2);
-  letter-spacing: .02em;
-  text-transform: uppercase;
-}
-
-textarea {
-  width: 100%;
-  resize: none;
-  outline: none;
-  border-radius: var(--r2);
-  padding: 12px 14px;
-  font-size: 13.5px;
-  line-height: 1.68;
-  font-weight: 400;
-  color: var(--t1);
-  background: var(--inp);
-  border: 1.5px solid var(--bc);
-  font-family: inherit;
-  min-height: 110px;
-  transition: border-color .15s, box-shadow .15s, background .15s;
-}
-
-textarea:focus {
-  border-color: var(--p);
-  box-shadow: 0 0 0 3px rgba(99,102,241,.12);
-  background: var(--surface);
-}
-
-textarea.over {
-  border-color: var(--err);
-  box-shadow: 0 0 0 3px rgba(239,68,68,.10);
-}
-
-textarea:disabled { opacity: .55; }
-
-.input-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.char-count {
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--tm);
-}
-
-.char-count.over { color: var(--err); }
-
-.ask-btn {
-  height: 40px;
-  padding: 0 22px;
-  border-radius: var(--r2);
-  font-size: 13px;
-  font-weight: 800;
-  color: #fff;
-  background: linear-gradient(135deg, var(--p), var(--p3));
-  box-shadow: var(--shb);
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  letter-spacing: .01em;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.ask-btn:hover:not(:disabled) { opacity: .9; }
-.ask-btn:active:not(:disabled) { transform: scale(.97); }
-.ask-btn:disabled { opacity: .32; cursor: not-allowed; box-shadow: none; }
-
-.spinner {
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  border: 2.5px solid rgba(255,255,255,.35);
-  border-top-color: #fff;
-  animation: spin .7s linear infinite;
-  flex-shrink: 0;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── RESPONSE CARD ── */
-.response-card {
-  background: var(--card);
-  border: 1px solid var(--bc);
-  border-radius: var(--r3);
-  padding: 15px;
-  box-shadow: var(--sh);
-  display: none;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.response-card.visible { display: flex; }
-
-.response-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.response-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 9px;
-  background: linear-gradient(135deg, var(--p), var(--acc));
-  display: grid;
-  place-items: center;
-  font-size: 13px;
-  color: #fff;
-  flex-shrink: 0;
-}
-
-.response-name {
-  font-size: 12.5px;
-  font-weight: 800;
-  color: var(--t1);
-}
-
-.response-text {
-  font-size: 13.5px;
-  line-height: 1.75;
-  color: var(--t2);
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-/* ── ERROR / INFO BANNER ── */
-.banner {
-  border-radius: var(--r2);
-  padding: 12px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.5;
-  display: none;
-  align-items: flex-start;
-  gap: 9px;
-}
-
-.banner.visible { display: flex; }
-
-.banner-err {
-  background: rgba(239,68,68,.08);
-  border: 1px solid rgba(239,68,68,.20);
-  color: var(--err);
-}
-
-.banner-limit {
-  background: rgba(245,158,11,.08);
-  border: 1px solid rgba(245,158,11,.22);
-  color: var(--amber);
-}
-
-.banner-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-
-/* ── LOCKED STATE ── */
-.locked-box {
-  flex: 1;
-  display: none;
-  place-items: center;
-  padding: 40px 20px;
-}
-
-.locked-box.visible { display: grid; }
-
-.locked-card {
-  width: 100%;
-  max-width: 290px;
-  background: var(--card);
-  border: 1px solid var(--bc);
-  border-radius: var(--r4);
-  padding: 28px 20px;
-  text-align: center;
-  box-shadow: var(--sh);
-}
-
-.locked-icon {
-  width: 54px;
-  height: 54px;
-  border-radius: var(--r3);
-  background: rgba(239,68,68,.10);
-  border: 1px solid rgba(239,68,68,.20);
-  display: grid;
-  place-items: center;
-  font-size: 24px;
-  margin: 0 auto 14px;
-}
-
-.locked-card h2 {
-  font-family: var(--font-display, sans-serif);
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--err);
-  margin-bottom: 8px;
-}
-
-.locked-card p {
-  font-size: 13px;
-  color: var(--t2);
-  line-height: 1.6;
-  margin-bottom: 20px;
-}
-
-.login-btn {
-  width: 100%;
-  min-height: 44px;
-  border-radius: var(--r2);
-  font-size: 14px;
-  font-weight: 800;
-  color: #fff;
-  background: linear-gradient(135deg, var(--p), var(--p3));
-  box-shadow: var(--shb);
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.login-btn:active { transform: scale(.98); }
-
-/* ── SUGGESTION CHIPS ── */
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-}
-
-.chip {
-  height: 30px;
-  padding: 0 12px;
-  border-radius: var(--rf);
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--p);
-  background: rgba(99,102,241,.08);
-  border: 1px solid rgba(99,102,241,.18);
-  cursor: pointer;
-  font-family: inherit;
-  white-space: nowrap;
-}
-
-.chip:hover { background: rgba(99,102,241,.14); }
-.chip:active { transform: scale(.96); }
-
-.chips-label {
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--tm);
-  margin-bottom: 4px;
-}
-
-.hidden { display: none !important; }
+  /* ── Responsive ── */
+  @media (min-width: 640px) {
+    header { padding: 16px 20px; }
+    #chat   { padding: 0 20px; }
+    #input-area { padding: 12px 20px 18px; }
+    .bubble { font-size: 15px; }
+  }
 </style>
 </head>
 <body>
+<div id="app">
 
-<div class="shell" id="shell">
-
-  <!-- HEADER -->
-  <header class="hdr">
-    <div class="hdr-left">
-      <div class="hdr-logo">✦</div>
-      <div class="hdr-info">
-        <div class="hdr-title">AcademeForge AI</div>
-        <div class="hdr-sub">Your smart learning assistant</div>
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <div class="logo-mark">AF</div>
+      <div>
+        <span class="logo-text">AcademeForge</span>
+        <span class="logo-sub">AI Assistant</span>
       </div>
     </div>
-    <button class="back-btn" onclick="history.back()">← Back</button>
+    <div class="usage-wrap">
+      <div class="usage-label" id="usage-label">— / 5 left</div>
+      <div class="usage-bar-track">
+        <div class="usage-bar-fill" id="usage-bar"></div>
+      </div>
+    </div>
   </header>
 
-  <!-- LOCKED (not authenticated) -->
-  <div class="locked-box" id="lockedBox">
-    <div class="locked-card">
-      <div class="locked-icon">🔒</div>
-      <h2>Login Required</h2>
-      <p>Login with your Student ID to access AcademeForge AI.</p>
-      <button class="login-btn" onclick="goToLogin()">Login to continue</button>
+  <!-- Chat window -->
+  <div id="chat">
+    <!-- Welcome -->
+    <div id="welcome">
+      <div class="welcome-icon">🎓</div>
+      <h2>AcademeForge AI</h2>
+      <p>Your personal mentor for learning, building, and growing. Ask anything.</p>
+      <div class="welcome-tags">
+        <span class="welcome-tag">Coding</span>
+        <span class="welcome-tag">AI Skills</span>
+        <span class="welcome-tag">Career</span>
+        <span class="welcome-tag">Projects</span>
+        <span class="welcome-tag">Design</span>
+      </div>
     </div>
   </div>
 
-  <!-- MAIN (authenticated) -->
-  <div class="main hidden" id="mainContent">
+  <!-- Input area -->
+  <div id="input-area">
+    <div id="limit-notice">Daily limit reached. Come back tomorrow.</div>
 
-    <!-- USAGE -->
-    <div class="usage-card" id="usageCard">
-      <span class="usage-label">Daily Requests</span>
-      <div class="usage-right">
-        <div class="usage-bar-wrap">
-          <div class="usage-bar-fill" id="usageBar" style="width:100%"></div>
-        </div>
-        <span class="usage-count" id="usageCount">5 left</span>
-      </div>
+    <!-- Mode selector -->
+    <div class="mode-selector">
+      <button class="mode-btn active-af" id="btn-af24" onclick="setMode('af24')">
+        <span class="mode-name">AF 2.4</span>
+        <span class="mode-desc">Student Mentor</span>
+      </button>
+      <button class="mode-btn" id="btn-dev39" onclick="setMode('dev39')">
+        <span class="mode-name">Dev 3.9 Pro</span>
+        <span class="mode-desc">Founder Mode</span>
+      </button>
     </div>
 
-    <!-- LIMIT REACHED BANNER -->
-    <div class="banner banner-limit" id="limitBanner">
-      <span class="banner-icon">🚫</span>
-      <span>You have reached your daily AI limit. Please try again tomorrow.</span>
-    </div>
-
-    <!-- ERROR BANNER -->
-    <div class="banner banner-err" id="errorBanner">
-      <span class="banner-icon">⚠</span>
-      <span id="errorText">Something went wrong. Please try again.</span>
-    </div>
-
-    <!-- INPUT -->
-    <div class="input-card" id="inputCard">
-      <div class="card-label">Ask a question</div>
-
-      <!-- SUGGESTION CHIPS -->
-      <div>
-        <div class="chips-label">Try asking:</div>
-        <div class="chips">
-          <button class="chip" onclick="setChip('How do I start learning AI?')">How do I start learning AI?</button>
-          <button class="chip" onclick="setChip('Best free tools for design?')">Best free tools for design?</button>
-          <button class="chip" onclick="setChip('How to build my portfolio?')">How to build my portfolio?</button>
-          <button class="chip" onclick="setChip('Tips for learning to code?')">Tips for learning to code?</button>
-        </div>
-      </div>
-
+    <!-- Textarea -->
+    <div class="textarea-row" id="textarea-wrap">
       <textarea
-        id="questionInput"
-        placeholder="Ask about learning, coding, AI tools, design, career skills…"
-        oninput="onType()"
-        onkeydown="onKey(event)"
+        id="question"
+        placeholder="Ask AcademeForge AI..."
+        rows="1"
         maxlength="500"
       ></textarea>
-
-      <div class="input-foot">
-        <span class="char-count" id="charCount">0 / 500</span>
-        <button class="ask-btn" id="askBtn" onclick="askAI()" disabled>
-          <span id="askBtnText">Ask ✦</span>
-          <span id="askBtnSpinner" class="spinner hidden"></span>
-        </button>
-      </div>
+      <button id="send-btn" onclick="sendMessage()" title="Send">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+        </svg>
+      </button>
     </div>
+    <div class="char-hint" id="char-hint">0 / 500</div>
+  </div>
 
-    <!-- RESPONSE -->
-    <div class="response-card" id="responseCard">
-      <div class="response-head">
-        <div class="response-avatar">✦</div>
-        <span class="response-name">AcademeForge AI</span>
-      </div>
-      <p class="response-text" id="responseText"></p>
-    </div>
+</div>
 
-  </div><!-- /main -->
-
-</div><!-- /shell -->
+<div id="toast"></div>
 
 <script>
-// ── CONFIG ──────────────────────────────────────────────────────────────────
-const EDGE_URL = "https://afooyyydhlwngzssgqih.supabase.co/functions/v1/af-ask-ai";
-const SUPABASE_URL = "https://afooyyydhlwngzssgqih.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb295eXlkaGx3bmd6c3NncWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDQxMjgsImV4cCI6MjA5NDIyMDEyOH0.KG0XO0oP_2MpewHoIwTtbrKg5FkyOYRUtVzLH1MSJiE";
+// ── Config ─────────────────────────────────────────────────────────────────
+const ENDPOINT  = 'https://YOUR_SUPABASE_PROJECT.supabase.co/functions/v1/af-ask-ai';
+const AF_KEY    = 'YOUR_AF_STUDENT_KEY'; // replace or set dynamically
 const DAILY_LIMIT = 5;
-const MAX_CHARS = 500;
 
-// ── HELPERS ──────────────────────────────────────────────────────────────────
-const $ = id => document.getElementById(id);
-const show = el => el && el.classList.remove('hidden');
-const hide = el => el && el.classList.add('hidden');
-const showVis = el => el && el.classList.add('visible');
-const hideVis = el => el && el.classList.remove('visible');
+// ── State ──────────────────────────────────────────────────────────────────
+let currentMode   = 'af24';
+let remaining     = DAILY_LIMIT;
+let isLoading     = false;
 
-function getSession() {
-  // Try to read Supabase session from localStorage
-  // Supabase stores it under a key like: sb-{ref}-auth-token
+// ── Elements ───────────────────────────────────────────────────────────────
+const chat         = document.getElementById('chat');
+const welcome      = document.getElementById('welcome');
+const questionEl   = document.getElementById('question');
+const sendBtn      = document.getElementById('send-btn');
+const usageLabel   = document.getElementById('usage-label');
+const usageBar     = document.getElementById('usage-bar');
+const limitNotice  = document.getElementById('limit-notice');
+const charHint     = document.getElementById('char-hint');
+const textareaWrap = document.getElementById('textarea-wrap');
+const toast        = document.getElementById('toast');
+
+// ── Init ───────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  loadHistory();
+  autoResize();
+  questionEl.addEventListener('input', () => {
+    autoResize();
+    charHint.textContent = `${questionEl.value.length} / 500`;
+  });
+  questionEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+});
+
+// ── Mode ───────────────────────────────────────────────────────────────────
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('btn-af24').className  = 'mode-btn' + (mode === 'af24'  ? ' active-af'  : '');
+  document.getElementById('btn-dev39').className = 'mode-btn' + (mode === 'dev39' ? ' active-dev' : '');
+  sendBtn.className = mode === 'dev39' ? 'dev-mode' : '';
+  textareaWrap.className = mode === 'dev39' ? 'textarea-row dev-focus' : 'textarea-row';
+  questionEl.placeholder = mode === 'dev39'
+    ? 'Founder mode — what are you building?'
+    : 'Ask AcademeForge AI...';
+}
+
+// ── Load history ───────────────────────────────────────────────────────────
+async function loadHistory() {
   try {
-    for (const key of Object.keys(localStorage)) {
-      if (key.startsWith('sb-') && key.endsWith('-auth-token')) {
-        const val = JSON.parse(localStorage.getItem(key) || '{}');
-        if (val?.access_token) return val;
-      }
+    const res = await apiFetch({ action: 'history' });
+    const history = res.history || [];
+    if (history.length > 0) {
+      hideWelcome();
+      history.forEach(msg => renderMessage(msg.role, msg.content, msg.mode || 'af24', false));
+      scrollBottom();
     }
-    // Fallback: check common AF keys used in existing codebase
-    const email = localStorage.getItem('af_student_email');
-    const mobile = localStorage.getItem('af_student_mobile');
-    if (email || mobile) {
-      // Custom session — pass identifier to edge function
-      return { custom: true, key: email || mobile };
-    }
-  } catch (e) {}
-  return null;
-}
-
-function getAuthHeader(session) {
-  if (!session) return {};
-  if (session.access_token) {
-    return { Authorization: 'Bearer ' + session.access_token };
-  }
-  if (session.custom) {
-    return {
-      Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
-      'x-af-student-key': session.key
-    };
-  }
-  return {};
-}
-
-function goToLogin() {
-  sessionStorage.setItem('af_last_tab', 'student');
-  window.location.href = '../';
-}
-
-// ── THEME SYNC ────────────────────────────────────────────────────────────────
-function syncTheme() {
-  const dark = localStorage.getItem('af_dark_mode') === '1';
-  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-}
-syncTheme();
-window.addEventListener('storage', e => { if (e.key === 'af_dark_mode') syncTheme(); });
-
-// ── USAGE UI ─────────────────────────────────────────────────────────────────
-function updateUsageUI(remaining) {
-  const pct = (remaining / DAILY_LIMIT) * 100;
-  const bar = $('usageBar');
-  const count = $('usageCount');
-  bar.style.width = pct + '%';
-  if (remaining === 0) {
-    bar.style.background = 'var(--err)';
-    count.style.color = 'var(--err)';
-    count.textContent = '0 left';
-  } else if (remaining <= 1) {
-    bar.style.background = 'var(--amber)';
-    count.style.color = 'var(--amber)';
-    count.textContent = remaining + ' left';
-  } else {
-    bar.style.background = 'var(--ok)';
-    count.style.color = 'var(--ok)';
-    count.textContent = remaining + ' left';
+  } catch (e) {
+    console.error('History load failed:', e);
   }
 }
 
-// ── TYPE / VALIDATE ──────────────────────────────────────────────────────────
-function onType() {
-  const val = $('questionInput').value;
-  const len = val.length;
-  const cc = $('charCount');
-  cc.textContent = len + ' / ' + MAX_CHARS;
-  cc.className = 'char-count' + (len >= MAX_CHARS ? ' over' : '');
-  $('questionInput').className = len >= MAX_CHARS ? 'over' : '';
-  $('askBtn').disabled = val.trim().length === 0 || len >= MAX_CHARS;
-}
+// ── Send message ───────────────────────────────────────────────────────────
+async function sendMessage() {
+  const question = questionEl.value.trim();
+  if (!question || isLoading) return;
+  if (remaining <= 0) { showLimitNotice(); return; }
 
-function onKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); askAI(); }
-}
+  isLoading = true;
+  sendBtn.disabled = true;
+  questionEl.value = '';
+  charHint.textContent = '0 / 500';
+  autoResize();
+  hideWelcome();
 
-function setChip(text) {
-  $('questionInput').value = text;
-  onType();
-  $('questionInput').focus();
-}
-
-// ── SET LOADING ──────────────────────────────────────────────────────────────
-function setLoading(yes) {
-  $('askBtn').disabled = yes;
-  $('questionInput').disabled = yes;
-  if (yes) {
-    hide($('askBtnText'));
-    show($('askBtnSpinner'));
-  } else {
-    show($('askBtnText'));
-    hide($('askBtnSpinner'));
-    onType(); // re-evaluate disabled state
-  }
-}
-
-// ── MAIN ASK ─────────────────────────────────────────────────────────────────
-async function askAI() {
-  const question = $('questionInput').value.trim();
-  if (!question || question.length > MAX_CHARS) return;
-
-  hideVis($('errorBanner'));
-  hideVis($('responseCard'));
-  setLoading(true);
+  renderMessage('user', question, currentMode, true);
+  const thinkingEl = showThinking();
 
   try {
-    const session = getSession();
-    const headers = {
-      'Content-Type': 'application/json',
-      ...getAuthHeader(session)
-    };
+    const data = await apiFetch({ action: 'ask', question, mode: currentMode });
 
-    const res = await fetch(EDGE_URL, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ question })
-    });
+    removeThinking(thinkingEl);
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      if (res.status === 429 || data.limitReached) {
-        showVis($('limitBanner'));
-        updateUsageUI(0);
-        $('inputCard').style.opacity = '.5';
-        $('inputCard').style.pointerEvents = 'none';
+    if (data.error) {
+      if (data.limitReached) {
+        remaining = 0;
+        updateUsage(DAILY_LIMIT, DAILY_LIMIT);
+        showLimitNotice();
       } else {
-        $('errorText').textContent = data.error || 'Something went wrong. Please try again.';
-        showVis($('errorBanner'));
+        showToast(data.error);
       }
       return;
     }
 
-    // Success
-    $('responseText').textContent = data.answer || '';
-    showVis($('responseCard'));
-    $('questionInput').value = '';
-    onType();
-
-    if (typeof data.remaining === 'number') {
-      updateUsageUI(data.remaining);
-      if (data.remaining === 0) {
-        showVis($('limitBanner'));
-        $('inputCard').style.opacity = '.5';
-        $('inputCard').style.pointerEvents = 'none';
-      }
+    renderMessage('assistant', data.answer, currentMode, true);
+    if (typeof data.remaining !== 'undefined') {
+      remaining = data.remaining;
+      updateUsage(data.used, data.limit || DAILY_LIMIT);
     }
-
+    scrollBottom();
   } catch (e) {
-    $('errorText').textContent = 'Network error. Check your connection and try again.';
-    showVis($('errorBanner'));
+    removeThinking(thinkingEl);
+    showToast('Network error. Please try again.');
   } finally {
-    setLoading(false);
+    isLoading = false;
+    sendBtn.disabled = false;
   }
 }
 
-// ── INIT ─────────────────────────────────────────────────────────────────────
-async function init() {
-  const session = getSession();
+// ── Render message ─────────────────────────────────────────────────────────
+function renderMessage(role, content, mode, scroll) {
+  const isUser = role === 'user';
+  const row = document.createElement('div');
+  row.className = `msg-row ${isUser ? 'user' : 'ai'}`;
 
-  if (!session) {
-    $('lockedBox').classList.add('visible');
-    return;
+  const avatar = document.createElement('div');
+  avatar.className = `avatar ${isUser ? 'user' : 'ai'}`;
+  avatar.textContent = isUser ? 'U' : 'AF';
+
+  const right = document.createElement('div');
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = content;
+
+  const meta = document.createElement('div');
+  meta.className = 'msg-meta';
+
+  if (!isUser) {
+    const badge = document.createElement('span');
+    badge.className = `mode-badge ${mode}`;
+    badge.textContent = mode === 'dev39' ? 'DEV39' : 'AF24';
+    meta.appendChild(badge);
+    const label = document.createTextNode('AcademeForge AI');
+    meta.appendChild(label);
+  } else {
+    meta.textContent = 'You';
   }
 
-  show($('mainContent'));
-  $('lockedBox').classList.remove('visible');
+  right.appendChild(bubble);
+  right.appendChild(meta);
+  row.appendChild(avatar);
+  row.appendChild(right);
+  chat.appendChild(row);
 
-  // Fetch current usage from edge function (lightweight ping)
-  try {
-    const headers = {
+  if (scroll) scrollBottom();
+}
+
+// ── Thinking ───────────────────────────────────────────────────────────────
+function showThinking() {
+  const row = document.createElement('div');
+  row.className = 'thinking-row';
+
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar ai';
+  avatar.textContent = 'AF';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'thinking-bubble';
+  bubble.textContent = 'AcademeForge AI is thinking...';
+
+  row.appendChild(avatar);
+  row.appendChild(bubble);
+  chat.appendChild(row);
+  scrollBottom();
+  return row;
+}
+
+function removeThinking(el) {
+  if (el && el.parentNode) el.parentNode.removeChild(el);
+}
+
+// ── API ────────────────────────────────────────────────────────────────────
+async function apiFetch(body) {
+  const res = await fetch(ENDPOINT, {
+    method: 'POST',
+    headers: {
       'Content-Type': 'application/json',
-      ...getAuthHeader(session)
-    };
-    const res = await fetch(EDGE_URL, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ action: 'usage_only' })
-    });
-    const data = await res.json();
-    if (typeof data.remaining === 'number') {
-      updateUsageUI(data.remaining);
-      if (data.remaining === 0) {
-        showVis($('limitBanner'));
-        $('inputCard').style.opacity = '.5';
-        $('inputCard').style.pointerEvents = 'none';
-      }
-    }
-  } catch (e) {
-    // Non-critical — usage bar stays at full, edge fn will enforce limits
-  }
+      'x-af-student-key': AF_KEY,
+    },
+    body: JSON.stringify(body),
+  });
+  return res.json();
 }
 
-document.addEventListener('DOMContentLoaded', init);
-window.addEventListener('storage', e => {
-  if (['af_student_email','af_student_mobile'].includes(e.key)) init();
-});
+// ── Usage display ──────────────────────────────────────────────────────────
+function updateUsage(used, limit) {
+  const rem = Math.max(0, limit - used);
+  remaining = rem;
+  usageLabel.textContent = `${rem} / ${limit} left`;
+  usageBar.style.width = `${Math.max(0, (rem / limit) * 100)}%`;
+  usageBar.style.background = rem <= 1
+    ? '#ef4444'
+    : rem <= 2
+    ? '#f97316'
+    : 'var(--af-accent)';
+  if (rem === 0) showLimitNotice();
+}
+
+// ── UI helpers ─────────────────────────────────────────────────────────────
+function hideWelcome() {
+  if (welcome) welcome.style.display = 'none';
+}
+
+function showLimitNotice() {
+  limitNotice.style.display = 'block';
+  sendBtn.disabled = true;
+  questionEl.disabled = true;
+}
+
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.style.display = 'block';
+  setTimeout(() => { toast.style.display = 'none'; }, 3500);
+}
+
+function scrollBottom() {
+  chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+}
+
+function autoResize() {
+  questionEl.style.height = 'auto';
+  questionEl.style.height = Math.min(questionEl.scrollHeight, 120) + 'px';
+}
 </script>
 </body>
 </html>
