@@ -225,11 +225,12 @@ ul{list-style:none;}
 .action-btn:hover{background:var(--b1);}
 .action-btn.liked{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.25);color:var(--err);}
 
+  /* ── Write post (mirror main app) ── */
 .fab{
   position:absolute;
 
   right:16px;
-  bottom:65px;
+  bottom:50px;
 
   z-index:300;
 
@@ -508,8 +509,8 @@ textarea.compose{-webkit-user-select:text;-moz-user-select:text;user-select:text
     <button class="bnav-btn" onclick="goToTab('home')"><span class="bnav-icon">🏠</span><span class="bnav-label">Home</span></button>
     <button class="bnav-btn" onclick="goToTab('student')"><span class="bnav-icon">🎓</span><span class="bnav-label">Student</span></button>
     <button class="bnav-btn" onclick="goToTab('batches')"><span class="bnav-icon">📚</span><span class="bnav-label">Batches</span></button>
-    <button class="bnav-btn" onclick="goToTab('community')"><span class="bnav-icon">💬</span><span class="bnav-label">Community</span></button>
-    <button class="bnav-btn active"><span class="bnav-icon">⚙️</span><span class="bnav-label">Settings</span></button>
+    <button class="bnav-btn active"><span class="bnav-icon">💬</span><span class="bnav-label">Community</span></button>
+    <button class="bnav-btn" onclick="goToTab('settings')"><span class="bnav-icon">⚙️</span><span class="bnav-label">Settings</span></button>
   </nav>
   
 </div><!-- /shell -->
