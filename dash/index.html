@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+!function(){
+  document.documentElement.setAttribute('data-theme',
+    localStorage.getItem('af_dark_mode')==='1'?'dark':'light');
+}();
+</script>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#4f46e5"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>My Profile · AcademeForge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Sora:wght@700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --p:#4f46e5;--p2:#3730a3;--pl:#818cf8;
+  --acc:#06b6d4;--ok:#22c55e;--err:#ef4444;--warn:#f59e0b;
+  --bg:#eef0fb;--surface:#fff;--card:rgba(255,255,255,0.90);
+  --nav:rgba(255,255,255,0.95);--inp:#f4f5fb;
+  --grp:rgba(79,70,229,0.07);--grph:rgba(79,70,229,0.13);
+  --t1:#0f0e2a;--t2:#4b5563;--tm:#9ca3af;
+  --b1:rgba(79,70,229,0.13);--bc:rgba(79,70,229,0.18);
+  --sh:0 2px 14px rgba(79,70,229,0.09),0 1px 4px rgba(0,0,0,0.05);
+  --she:0 12px 40px rgba(79,70,229,0.15);
+  --shb:0 6px 20px rgba(79,70,229,0.30);
+  --r2:12px;--r3:18px;--r4:24px;--rf:9999px;
+  --fd:'Sora',sans-serif;--fb:'Nunito',sans-serif;
+  --nav-h:64px;--hdr-h:58px;--shell:430px;
+  --dur:180ms;--ease:cubic-bezier(0.22,1,0.36,1);
+  --spring:cubic-bezier(0.34,1.56,0.64,1);
+}
+[data-theme="dark"] {
+  --bg:#0b0a1e;--surface:#100e26;--card:rgba(24,21,52,0.92);
+  --nav:rgba(14,12,34,0.97);--inp:#1a1735;
+  --grp:rgba(129,140,248,0.09);--grph:rgba(129,140,248,0.16);
+  --t1:#ede9ff;--t2:#a09dbf;--tm:#635f83;
+  --b1:rgba(129,140,248,0.13);--bc:rgba(129,140,248,0.20);
+  --sh:0 2px 14px rgba(0,0,0,0.32),0 1px 4px rgba(0,0,0,0.20);
+  --she:0 12px 40px rgba(0,0,0,0.50);
+  --shb:0 6px 20px rgba(79,70,229,0.45);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{font-size:15px;-webkit-text-size-adjust:100%;}
+body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100dvh;display:flex;justify-content:center;transition:background .18s,color .18s;}
+button{font-family:var(--fb);cursor:pointer;border:none;background:none;color:inherit;}
+a{text-decoration:none;color:inherit;}
+input,select,textarea{font-family:var(--fb);}
+html,body,*{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-touch-callout:none;}
+input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
+
+/* SHELL */
+.shell{width:100%;max-width:var(--shell);min-height:100dvh;background:var(--surface);display:flex;flex-direction:column;box-shadow:0 0 0 1px var(--b1),var(--she);transition:background .18s;}
+@media(min-width:700px){
+  body{padding:28px 0 44px;}
+  .shell{border-radius:36px;min-height:calc(100dvh - 72px);max-height:900px;box-shadow:0 0 0 1px var(--bc),0 32px 80px rgba(0,0,0,.20),0 8px 24px rgba(79,70,229,.14);}
+}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:100;height:var(--hdr-h);background:var(--nav);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;transition:background .18s;}
+.hdr-back{width:34px;height:34px;border-radius:10px;background:var(--grp);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-size:18px;transition:transform var(--dur) var(--spring),background var(--dur);}
+.hdr-back:hover{background:var(--grph);}
+.hdr-back:active{transform:scale(.92);}
+.hdr-title{flex:1;font-family:var(--fd);font-size:15px;font-weight:800;color:var(--t1);}
+.hdr-logout{height:32px;padding:0 13px;border-radius:var(--rf);font-size:11.5px;font-weight:800;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.20);color:var(--err);transition:transform var(--dur) var(--spring),background var(--dur);}
+.hdr-logout:hover{background:rgba(239,68,68,.14);}
+.hdr-logout:active{transform:scale(.95);}
+
+/* PAGE */
+.page{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:14px 13px calc(var(--nav-h) + 28px + env(safe-area-inset-bottom,0px));}
+.page::-webkit-scrollbar{width:2px;}
+.page::-webkit-scrollbar-thumb{background:var(--bc);border-radius:99px;}
+
+/* HERO */
+.hero{border-radius:var(--r4);padding:20px;background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);display:flex;align-items:center;gap:14px;margin-bottom:12px;position:relative;overflow:hidden;animation:up .32s var(--ease) both;}
+.hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(79,70,229,.04),rgba(6,182,212,.03));pointer-events:none;}
+.avatar{width:60px;height:60px;border-radius:18px;flex-shrink:0;background:linear-gradient(135deg,var(--p),var(--acc));display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:22px;font-weight:900;color:#fff;box-shadow:0 6px 18px rgba(79,70,229,.30);position:relative;z-index:1;}
+.hero-text{flex:1;min-width:0;position:relative;z-index:1;}
+.hero-welcome{font-size:10.5px;font-weight:800;color:var(--ok);letter-spacing:.07em;text-transform:uppercase;margin-bottom:3px;}
+.hero-name{font-family:var(--fd);font-size:20px;font-weight:900;color:var(--t1);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hero-sub{font-size:12px;color:var(--t2);margin-top:3px;font-weight:600;}
+
+/* CARDS */
+.card{border-radius:var(--r4);background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);overflow:hidden;margin-bottom:12px;}
+.card-head{padding:14px 18px 12px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:10px;}
+.card-head-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--p),var(--acc));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.card-head-title{font-family:var(--fd);font-size:13.5px;font-weight:800;color:var(--t1);}
+.card-head-sub{font-size:11px;color:var(--tm);font-weight:600;margin-top:1px;}
+
+/* DETAIL ROWS */
+.detail-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 18px;border-bottom:1px solid var(--b1);}
+.detail-row:last-child{border-bottom:none;}
+.dr-label{font-size:11px;font-weight:800;color:var(--tm);text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;}
+.dr-val-wrap{display:flex;align-items:center;gap:8px;min-width:0;}
+.dr-val{font-size:13.5px;font-weight:700;color:var(--t1);text-align:right;word-break:break-all;}
+.edit-btn{padding:5px 11px;border-radius:var(--rf);background:rgba(79,70,229,.10);border:1px solid rgba(79,70,229,.20);color:var(--p);font-size:11px;font-weight:800;flex-shrink:0;transition:transform var(--dur) var(--spring),background var(--dur);}
+.edit-btn:hover{background:rgba(79,70,229,.16);}
+.edit-btn:active{transform:scale(.93);}
+
+/* SECTION LABEL */
+.sec-label{font-family:var(--fd);font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--tm);margin:0 2px 8px;}
+
+/* BATCH ITEMS */
+.batch-list{padding:10px;display:flex;flex-direction:column;gap:8px;}
+.batch-item{display:flex;align-items:center;gap:11px;padding:12px;border-radius:var(--r2);background:var(--grp);border:1px solid var(--b1);}
+.batch-icon{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,var(--p),var(--acc));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.batch-text{flex:1;min-width:0;}
+.batch-text strong{display:block;font-size:13px;font-weight:800;color:var(--t1);line-height:1.25;}
+.batch-text small{display:block;font-size:11px;color:var(--tm);margin-top:2px;font-weight:600;}
+.batch-badge{font-size:10px;font-weight:800;padding:4px 9px;border-radius:var(--rf);background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);color:var(--ok);white-space:nowrap;flex-shrink:0;}
+.empty-msg{text-align:center;font-size:13px;color:var(--tm);font-weight:700;padding:18px 12px;}
+.loading-msg{text-align:center;font-size:13px;color:var(--p);font-weight:700;padding:18px 12px;background:rgba(79,70,229,.06);border-radius:var(--r2);}
+
+/* SETTINGS ACCORDION */
+.settings-card{border-radius:var(--r4);background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);overflow:hidden;margin-bottom:12px;}
+.settings-toggle{width:100%;display:flex;align-items:center;gap:12px;padding:15px 16px;text-align:left;transition:background var(--dur);}
+.settings-toggle:hover{background:var(--grp);}
+.settings-icon{width:38px;height:38px;border-radius:var(--r2);background:var(--grp);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.settings-text{flex:1;}
+.settings-text strong{font-size:13px;font-weight:800;color:var(--t1);display:block;}
+.settings-text small{font-size:11px;color:var(--tm);font-weight:600;margin-top:1px;display:block;}
+.settings-chevron{font-size:16px;color:var(--tm);transition:transform .20s var(--ease);}
+.settings-chevron.open{transform:rotate(180deg);}
+.settings-body{padding:0 14px 14px;}
+.del-open-btn{width:100%;border:1px solid rgba(239,68,68,.18);background:rgba(239,68,68,.06);border-radius:var(--r2);padding:13px 14px;display:flex;flex-direction:column;align-items:flex-start;cursor:pointer;text-align:left;transition:transform var(--dur) var(--spring),background var(--dur);}
+.del-open-btn:hover{background:rgba(239,68,68,.11);}
+.del-open-btn:active{transform:scale(.98);}
+.del-open-btn span{color:var(--err);font-size:13px;font-weight:900;}
+.del-open-btn small{margin-top:2px;color:var(--tm);font-size:11px;font-weight:600;}
+
+/* LOGOUT BTN */
+.logout-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:var(--r2);background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.20);color:var(--err);font-weight:800;font-size:15px;margin-bottom:12px;transition:transform var(--dur) var(--spring),background var(--dur);}
+.logout-btn:hover{background:rgba(239,68,68,.14);}
+.logout-btn:active{transform:scale(.98);}
+
+/* CREDIT */
+.credit{text-align:center;font-size:11.5px;color:var(--tm);font-weight:700;padding:6px 0 10px;}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:var(--shell);z-index:999;height:var(--nav-h);background:var(--nav);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);border-top:1px solid var(--b1);display:flex;align-items:center;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px);transition:background .18s;}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:100%;border-radius:var(--r2);padding:7px 4px;position:relative;}
+.bnav-btn::before{content:'';position:absolute;top:7px;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--p);border-radius:99px;transition:width .18s var(--spring);}
+.bnav-btn.active::before{width:24px;}
+.bnav-icon{font-size:20px;line-height:1;transition:transform var(--dur) var(--spring);}
+.bnav-btn.active .bnav-icon{transform:scale(1.10);}
+.bnav-btn:active .bnav-icon{transform:scale(.90);}
+.bnav-label{font-size:10px;font-weight:700;color:var(--tm);transition:color var(--dur);}
+.bnav-btn.active .bnav-label{color:var(--p);}
+
+/* NAME EDIT MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.60);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
+.modal-card{width:100%;max-width:400px;border-radius:22px;background:var(--surface);border:1px solid var(--bc);box-shadow:var(--she);overflow:hidden;animation:modalIn .26s var(--spring) both;}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--b1);}
+.modal-head h4{font-family:var(--fd);font-size:15px;font-weight:900;color:var(--t1);}
+.modal-close{font-size:26px;color:var(--tm);cursor:pointer;line-height:1;}
+.modal-body{padding:16px 18px;display:flex;flex-direction:column;gap:10px;}
+.modal-label{font-size:12px;font-weight:800;color:var(--t1);}
+.modal-input{width:100%;padding:12px 14px;border-radius:var(--r2);background:var(--inp);border:1.5px solid var(--bc);color:var(--t1);font-size:14px;font-weight:700;outline:none;transition:border-color var(--dur),box-shadow var(--dur);}
+.modal-input:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(79,70,229,.12);}
+.modal-msg{font-size:12px;font-weight:700;min-height:14px;}
+.modal-save{width:100%;padding:13px;border-radius:var(--r2);background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;font-weight:900;font-size:14px;box-shadow:var(--shb);transition:transform var(--dur) var(--spring);}
+.modal-save:active{transform:scale(.98);}
+.modal-save:disabled{opacity:.6;cursor:not-allowed;}
+
+/* DELETE MODAL */
+.del-overlay{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(0,0,0,.65);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+.del-card{width:100%;max-width:520px;max-height:92vh;border-radius:22px;background:var(--surface);border:1px solid var(--bc);box-shadow:var(--she);overflow:hidden;display:flex;flex-direction:column;animation:modalIn .26s var(--spring) both;}
+.del-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--b1);flex-shrink:0;}
+.del-alert{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:var(--err);font-weight:900;font-size:18px;flex-shrink:0;}
+.del-head h4{font-family:var(--fd);font-size:14px;font-weight:900;color:var(--t1);margin:0;}
+.del-head p{font-size:11px;color:var(--tm);margin:2px 0 0;}
+.del-scroll{flex:1;overflow-y:auto;padding:14px 16px;}
+.del-policy{margin-bottom:14px;padding:12px 13px;border-radius:var(--r2);background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.18);}
+.del-policy strong{display:block;margin-bottom:6px;color:var(--t1);font-size:12px;}
+.del-policy p{margin:4px 0;font-size:11px;line-height:1.5;color:var(--t2);}
+.del-form{display:flex;flex-direction:column;gap:11px;}
+.del-field{display:flex;flex-direction:column;gap:5px;}
+.del-field label{font-size:12px;font-weight:800;color:var(--t1);}
+.del-field input,.del-field select,.del-field textarea{width:100%;padding:10px 12px;border-radius:10px;background:var(--inp);border:1px solid var(--bc);color:var(--t1);font:inherit;font-size:13px;outline:none;}
+.del-field input:focus,.del-field select:focus,.del-field textarea:focus{border-color:var(--p);}
+.del-field textarea{resize:vertical;min-height:90px;}
+.del-confirm{display:flex;align-items:flex-start;gap:10px;cursor:pointer;}
+.del-confirm span{font-size:11px;line-height:1.5;color:var(--t2);}
+.del-msg{min-height:14px;font-size:12px;font-weight:700;}
+.del-submit{border:none;padding:12px;border-radius:10px;background:linear-gradient(135deg,var(--err),#dc2626);color:#fff;font-weight:900;font-size:14px;cursor:pointer;transition:transform var(--dur) var(--spring);}
+.del-submit:active{transform:scale(.98);}
+.del-submit:disabled{opacity:.6;cursor:not-allowed;}
+.del-cancel{border:1px solid var(--b1);padding:12px;border-radius:10px;background:transparent;color:var(--t1);font-weight:700;font-size:14px;cursor:pointer;}
+
+/* TOAST */
+.toast-wrap{position:fixed;left:50%;bottom:calc(var(--nav-h) + 12px);transform:translateX(-50%);z-index:999999;width:min(92vw,400px);pointer-events:none;}
+.toast{display:flex;align-items:flex-start;gap:10px;background:var(--surface);color:var(--t1);border:1px solid var(--bc);border-radius:14px;padding:11px 13px;box-shadow:0 4px 22px rgba(0,0,0,.14);pointer-events:auto;animation:toastIn .22s var(--ease) both;}
+.toast.ok{border-left:3px solid var(--ok);}
+.toast.info{border-left:3px solid var(--p);}
+.toast.err{border-left:3px solid var(--err);}
+.toast.warn{border-left:3px solid var(--warn);}
+.toast-body p:first-child{font-size:12px;font-weight:800;}
+.toast-body p:last-child{font-size:11px;color:var(--t2);margin-top:1px;}
+.toast-x{font-size:16px;color:var(--tm);cursor:pointer;margin-left:auto;}
+
+/* ANIMATIONS */
+@keyframes up{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+@keyframes modalIn{from{opacity:0;transform:scale(.93);}to{opacity:1;transform:scale(1);}}
+@keyframes toastIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.hidden{display:none!important;}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- HEADER -->
+  <header class="hdr">
+    <button class="hdr-back" onclick="goBack()" title="Go back">←</button>
+    <span class="hdr-title">My Profile</span>
+    <button class="hdr-logout" onclick="doLogout()">Logout</button>
+  </header>
+
+  <!-- PAGE -->
+  <div class="page">
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="avatar" id="avatar">S</div>
+      <div class="hero-text">
+        <div class="hero-welcome">✓ Active Student</div>
+        <div class="hero-name" id="heroName">Loading…</div>
+        <div class="hero-sub" id="heroSub">AcademeForge Learner</div>
+      </div>
+    </div>
+
+    <!-- STUDENT DETAILS -->
+    <div class="card" style="animation:up .34s var(--ease) .04s both;">
+      <div class="card-head">
+        <div class="card-head-icon">👤</div>
+        <div>
+          <div class="card-head-title">Your Details</div>
+          <div class="card-head-sub">Name, email and contact info</div>
+        </div>
+      </div>
+      <div class="detail-row">
+        <span class="dr-label">Name</span>
+        <div class="dr-val-wrap">
+          <span class="dr-val" id="infoName">—</span>
+          <button class="edit-btn" onclick="openNameModal()">✎ Edit</button>
+        </div>
+      </div>
+      <div class="detail-row">
+        <span class="dr-label">Email</span>
+        <span class="dr-val" id="infoEmail">—</span>
+      </div>
+      <div class="detail-row">
+        <span class="dr-label">Phone</span>
+        <span class="dr-val" id="infoPhone">—</span>
+      </div>
+      <div class="detail-row">
+        <span class="dr-label">Student ID</span>
+        <span class="dr-val" id="infoStudentId">—</span>
+      </div>
+    </div>
+
+    <!-- ENROLLED BATCHES -->
+    <div class="sec-label">Enrolled Batches</div>
+    <div class="card" style="animation:up .36s var(--ease) .08s both;">
+      <div class="card-head">
+        <div class="card-head-icon">📚</div>
+        <div>
+          <div class="card-head-title">My Courses</div>
+          <div class="card-head-sub">Your active programs</div>
+        </div>
+      </div>
+      <div class="batch-list" id="batchList">
+        <p class="loading-msg">Loading enrolled batches…</p>
+      </div>
+    </div>
+
+    <!-- ADDITIONAL SETTINGS -->
+    <div class="settings-card" style="animation:up .38s var(--ease) .12s both;">
+      <button class="settings-toggle" onclick="toggleSettings()" id="settingsToggle" aria-expanded="false">
+        <span class="settings-icon">⚙️</span>
+        <span class="settings-text">
+          <strong>Additional Settings</strong>
+          <small>Account safety and sensitive actions</small>
+        </span>
+        <span class="settings-chevron" id="settingsChevron">⌄</span>
+      </button>
+      <div id="settingsBody" class="settings-body hidden">
+        <button class="del-open-btn" onclick="openDeleteModal()">
+          <span>🗑 Delete Account</span>
+          <small>Permanent account removal request</small>
+        </button>
+      </div>
+    </div>
+
+    <!-- LOGOUT -->
+    <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
+
+    <div class="credit">Made with ❤️ in India · Developed by Devraj Kumar</div>
+
+  </div><!-- /page -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bnav">
+    <button class="bnav-btn" onclick="window.location.href='../index.html'">
+      <span class="bnav-icon">🏠</span><span class="bnav-label">Home</span>
+    </button>
+    <button class="bnav-btn active">
+      <span class="bnav-icon">🎓</span><span class="bnav-label">Student</span>
+    </button>
+    <button class="bnav-btn" onclick="window.location.href='../batches/index.html'">
+      <span class="bnav-icon">📚</span><span class="bnav-label">Batches</span>
+    </button>
+    <button class="bnav-btn" onclick="window.location.href='../community/index.html'">
+      <span class="bnav-icon">💬</span><span class="bnav-label">Community</span>
+    </button>
+    <button class="bnav-btn" onclick="window.location.href='../setting/index.html'">
+      <span class="bnav-icon">⚙️</span><span class="bnav-label">Settings</span>
+    </button>
+  </nav>
+
+</div><!-- /shell -->
+
+<!-- NAME EDIT MODAL -->
+<div id="nameModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h4>Edit Your Name</h4>
+      <button class="modal-close" onclick="closeNameModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <label class="modal-label">Full Name</label>
+      <input id="nameInput" class="modal-input" type="text" placeholder="Enter your full name" maxlength="90" autocomplete="name"/>
+      <div id="nameMsg" class="modal-msg"></div>
+      <button id="nameSaveBtn" class="modal-save" onclick="submitNameEdit()">Save Name</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE ACCOUNT MODAL -->
+<div id="deleteModal" class="del-overlay hidden" role="dialog" aria-modal="true">
+  <div class="del-card">
+    <div class="del-head">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="del-alert">!</div>
+        <div>
+          <h4>Account Deletion Request</h4>
+          <p>Secure verification required</p>
+        </div>
+      </div>
+      <button style="font-size:26px;color:var(--tm);cursor:pointer;line-height:1;background:none;border:none;" onclick="closeDeleteModal()">×</button>
+    </div>
+    <div class="del-scroll">
+      <div class="del-policy">
+        <strong>Important account deletion policy</strong>
+        <p>Your account deletion request will be reviewed by our team. If approved, your account will be scheduled for deletion after 90 days.</p>
+        <p>If you log in again before the 90-day period ends, your deletion request may be cancelled automatically.</p>
+      </div>
+      <div class="del-form">
+        <div class="del-field">
+          <label>Full Name</label>
+          <input id="delName" type="text" placeholder="Enter your full name" maxlength="90"/>
+        </div>
+        <div class="del-field">
+          <label>Registered Email</label>
+          <input id="delEmail" type="email" placeholder="Enter registered email" maxlength="140"/>
+        </div>
+        <div class="del-field">
+          <label>Registered Phone Number</label>
+          <input id="delPhone" type="tel" inputmode="numeric" placeholder="Enter registered phone" maxlength="18"/>
+        </div>
+        <div class="del-field">
+          <label>Why do you want to delete?</label>
+          <select id="delReason">
+            <option value="">Select a reason</option>
+            <option>No longer using the platform</option>
+            <option>Created another account</option>
+            <option>Privacy or data concern</option>
+            <option>Course or access issue</option>
+            <option>Technical issue</option>
+            <option>Other reason</option>
+          </select>
+        </div>
+        <div class="del-field">
+          <label>Additional Details</label>
+          <textarea id="delDetails" rows="4" placeholder="Briefly explain your reason (min. 10 characters)." maxlength="1200"></textarea>
+        </div>
+        <label class="del-confirm">
+          <input id="delConfirm" type="checkbox"/>
+          <span>I understand that my account may be deleted after 90 days and this request may be cancelled if I log in before deletion is completed.</span>
+        </label>
+        <div id="delMsg" class="del-msg"></div>
+        <button id="delSubmitBtn" class="del-submit" onclick="submitDeleteRequest()">Submit Deletion Request</button>
+        <button class="del-cancel" onclick="closeDeleteModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+'use strict';
+
+const STUDENT_URL = "https://afooyyydhlwngzssgqih.supabase.co";
+const STUDENT_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb295eXlkaGx3bmd6c3NncWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDQxMjgsImV4cCI6MjA5NDIyMDEyOH0.KG0XO0oP_2MpewHoIwTtbrKg5FkyOYRUtVzLH1MSJiE";
+const studentDb = supabase.createClient(STUDENT_URL, STUDENT_KEY);
+
+const $ = id => document.getElementById(id);
+const esc = t => String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const safe = (v, fb) => (v===null||v===undefined||v==='') ? (fb||'') : v;
+
+/* ── THEME ── */
+function syncTheme() {
+  const isDark = localStorage.getItem('af_dark_mode') === '1';
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+}
+syncTheme();
+window.addEventListener('storage', e => { if (e.key === 'af_dark_mode') syncTheme(); });
+
+/* ── TOAST ── */
+let _tt = null;
+function showToast(msg, type='info', title='') {
+  const w = $('toastWrap'); w.innerHTML = '';
+  if (_tt) { clearTimeout(_tt); _tt = null; }
+  const labels = { ok:'Done', info:'Info', err:'Error', warn:'Notice' };
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.innerHTML = `<div class="toast-body"><p>${title||labels[type]||'Info'}</p><p>${msg}</p></div><span class="toast-x" onclick="this.parentElement.remove()">×</span>`;
+  w.appendChild(el);
+  _tt = setTimeout(() => el && el.remove(), 2800);
+}
+
+/* ── LOAD PROFILE FROM LOCALSTORAGE ── */
+function loadProfile() {
+  const name      = safe(localStorage.getItem('af_student_name'), 'Student');
+  const email     = safe(localStorage.getItem('af_student_email'), '—');
+  const mobile    = safe(localStorage.getItem('af_student_mobile') || localStorage.getItem('af_student_phone'), '—');
+  const studentId = safe(localStorage.getItem('af_student_id'), '—');
+
+  // Avatar initials
+  const initials = name.trim().split(/\s+/).slice(0,2).map(w => w[0].toUpperCase()).join('');
+  $('avatar').textContent = initials || 'S';
+  $('heroName').textContent = name;
+  $('heroSub').textContent = email !== '—' ? email : (mobile !== '—' ? mobile : 'AcademeForge Learner');
+  $('infoName').textContent  = name;
+  $('infoEmail').textContent = email;
+  $('infoPhone').textContent = mobile;
+  $('infoStudentId').textContent = studentId;
+}
+
+/* ── LOAD BATCHES FROM SUPABASE ── */
+async function loadBatches() {
+  const uuid  = localStorage.getItem('af_student_uuid') || '';
+  const email = localStorage.getItem('af_student_email') || '';
+  const box   = $('batchList');
+
+  if (!uuid && !email) {
+    box.innerHTML = '<p class="empty-msg">No session found. Please login again.</p>';
+    return;
+  }
+
+  try {
+    const res = await studentDb.functions.invoke('student-courses-af', { body: { student_id: uuid } });
+    const data = res.data;
+
+    if (!data || !data.ok || !Array.isArray(data.courses) || !data.courses.length) {
+      box.innerHTML = '<p class="empty-msg">No enrolled batches found.<br>Explore the Batches section to enroll.</p>';
+      return;
+    }
+
+    const icons = ['📚','🎥','🎨','💻','💡','🚀','🧩','📝','🔬','🎯'];
+    box.innerHTML = data.courses.map((c, i) => {
+      const title = safe(c.title || c.batch_title || c.course_slug, 'Batch');
+      const slug  = safe(c.short_description || c.course_slug || '', 'AcademeForge Course');
+      const icon  = safe(c.icon, icons[i % icons.length]);
+      return `<div class="batch-item">
+        <div class="batch-icon">${esc(icon)}</div>
+        <div class="batch-text">
+          <strong>${esc(title)}</strong>
+          <small>${esc(slug)}</small>
+        </div>
+        <span class="batch-badge">✓ Active</span>
+      </div>`;
+    }).join('');
+
+  } catch(err) {
+    console.error('loadBatches error:', err);
+    box.innerHTML = '<p class="empty-msg">Could not load batches. Check your connection.</p>';
+  }
+}
+
+/* ── SETTINGS ACCORDION ── */
+function toggleSettings() {
+  const body    = $('settingsBody');
+  const chevron = $('settingsChevron');
+  const toggle  = $('settingsToggle');
+  body.classList.toggle('hidden');
+  const isOpen = !body.classList.contains('hidden');
+  chevron.classList.toggle('open', isOpen);
+  toggle.setAttribute('aria-expanded', String(isOpen));
+}
+
+/* ── NAME EDIT MODAL ── */
+function openNameModal() {
+  $('nameInput').value = localStorage.getItem('af_student_name') || '';
+  $('nameMsg').textContent = ''; $('nameMsg').style.color = '';
+  $('nameModal').classList.remove('hidden');
+  setTimeout(() => $('nameInput').focus(), 80);
+}
+function closeNameModal() { $('nameModal').classList.add('hidden'); }
+
+async function submitNameEdit() {
+  const input   = $('nameInput');
+  const msg     = $('nameMsg');
+  const saveBtn = $('nameSaveBtn');
+  const newName = (input.value || '').trim().replace(/\s+/g, ' ');
+
+  if (!newName || newName.length < 2) {
+    msg.textContent = 'Please enter a valid name (min. 2 characters).';
+    msg.style.color = 'var(--err)'; return;
+  }
+
+  saveBtn.disabled = true;
+  msg.textContent = 'Saving…'; msg.style.color = 'var(--tm)';
+
+  try {
+    const payload = {
+      name:       newName,
+      old_name:   localStorage.getItem('af_student_name')   || '',
+      id:         localStorage.getItem('af_student_uuid')   || '',
+      student_id: localStorage.getItem('af_student_id')     || '',
+      email:      localStorage.getItem('af_student_email')  || '',
+      mobile:     localStorage.getItem('af_student_mobile') || localStorage.getItem('af_student_phone') || ''
+    };
+    const res  = await fetch(STUDENT_URL + '/functions/v1/update-student-name-af', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data.message || 'Name update failed.');
+
+    localStorage.setItem('af_student_name', newName);
+    loadProfile();
+    msg.textContent = '✓ Name updated!'; msg.style.color = 'var(--ok)';
+    showToast('Name updated successfully!', 'ok', 'Done');
+    setTimeout(() => closeNameModal(), 1100);
+  } catch(err) {
+    msg.textContent = err.message || 'Update failed. Try again.';
+    msg.style.color = 'var(--err)';
+  } finally {
+    saveBtn.disabled = false;
+  }
+}
+
+/* ── DELETE ACCOUNT MODAL ── */
+function openDeleteModal() {
+  $('delName').value  = localStorage.getItem('af_student_name')   || '';
+  $('delEmail').value = localStorage.getItem('af_student_email')  || '';
+  $('delPhone').value = localStorage.getItem('af_student_mobile') || localStorage.getItem('af_student_phone') || '';
+  $('delMsg').textContent = ''; $('delMsg').style.color = '';
+  $('deleteModal').classList.remove('hidden');
+}
+function closeDeleteModal() { $('deleteModal').classList.add('hidden'); }
+
+async function submitDeleteRequest() {
+  const submitBtn = $('delSubmitBtn'), msg = $('delMsg');
+  const fullName = ($('delName').value || '').trim();
+  const email    = ($('delEmail').value || '').trim();
+  const phone    = ($('delPhone').value || '').trim();
+  const reason   = ($('delReason').value || '').trim();
+  const details  = ($('delDetails').value || '').trim();
+  const confirmed = $('delConfirm').checked;
+
+  if (!fullName || fullName.length < 2) { msg.textContent = 'Enter your full name.'; msg.style.color = 'var(--err)'; return; }
+  if (!reason)   { msg.textContent = 'Select a deletion reason.'; msg.style.color = 'var(--err)'; return; }
+  if (details.length < 10) { msg.textContent = 'Write at least 10 characters in additional details.'; msg.style.color = 'var(--err)'; return; }
+  if (!email && !phone) { msg.textContent = 'Provide your registered email or phone.'; msg.style.color = 'var(--err)'; return; }
+  if (!confirmed) { msg.textContent = 'Please confirm the deletion policy.'; msg.style.color = 'var(--err)'; return; }
+
+  submitBtn.disabled = true;
+  msg.textContent = 'Submitting…'; msg.style.color = 'var(--tm)';
+
+  try {
+    const res  = await fetch(STUDENT_URL + '/functions/v1/account-delete-request', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        student_id: localStorage.getItem('af_student_id') || '',
+        student_identifier: localStorage.getItem('af_student_uuid') || '',
+        student_name: localStorage.getItem('af_student_name') || '',
+        full_name: fullName, registered_email: email, registered_phone: phone,
+        delete_reason: reason, additional_details: details,
+        page_url: location.href, user_agent: navigator.userAgent,
+        device_id: localStorage.getItem('af_device_id') || ''
+      })
+    });
+    const data = await res.json();
+    if (res.status === 409) { msg.textContent = data.message || 'Deletion request already active.'; msg.style.color = 'var(--warn)'; return; }
+    if (!res.ok || !data.success) throw new Error(data.message || 'Unable to submit request.');
+    msg.textContent = '✓ Deletion request submitted.'; msg.style.color = 'var(--ok)';
+    setTimeout(() => closeDeleteModal(), 1800);
+  } catch(err) {
+    msg.textContent = err?.message || 'Request failed. Try again.';
+    msg.style.color = 'var(--err)';
+  } finally {
+    submitBtn.disabled = false;
+  }
+}
+
+/* ── LOGOUT ── */
+function doLogout() {
+  ['af_student_logged_in','af_student_uuid','af_student_id',
+   'af_student_mobile','af_student_name','af_student_email',
+   'af_session_token','af_student_phone'].forEach(k => localStorage.removeItem(k));
+  showToast('Logged out 👋', 'ok', 'Bye!');
+  setTimeout(() => window.location.href = '../index.html', 800);
+}
+
+/* ── BACK ── */
+function goBack() { window.history.back(); }
+
+/* ── KEYBOARD ── */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeNameModal(); closeDeleteModal(); }
+});
+
+/* ── BLOCK DEVTOOLS ── */
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key.toUpperCase())) || (e.ctrlKey && e.key.toUpperCase() === 'U')) e.preventDefault();
+});
+
+/* ── INIT ── */
+document.addEventListener('DOMContentLoaded', () => {
+  // If not logged in, redirect to student login
+  if (localStorage.getItem('af_student_logged_in') !== 'true') {
+    window.location.href = '../Student/index.html';
+    return;
+  }
+  loadProfile();
+  loadBatches();
+});
+</script>
+</body>
+</html>
