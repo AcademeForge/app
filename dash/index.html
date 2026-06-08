@@ -46,21 +46,89 @@
 }
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html{font-size:15px;-webkit-text-size-adjust:100%;}
-body{font-family:var(--fb);background:var(--bg);color:var(--t1);min-height:100dvh;display:flex;justify-content:center;transition:background .18s,color .18s;}
-button{font-family:var(--fb);cursor:pointer;border:none;background:none;color:inherit;}
-a{text-decoration:none;color:inherit;}
-input,select,textarea{font-family:var(--fb);}
-html,body,*{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-touch-callout:none;}
-input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
-
-/* SHELL */
-.shell{width:100%;max-width:var(--shell);min-height:100dvh;background:var(--surface);display:flex;flex-direction:column;box-shadow:0 0 0 1px var(--b1),var(--she);transition:background .18s;}
-@media(min-width:700px){
-  body{padding:28px 0 44px;}
-  .shell{border-radius:36px;min-height:calc(100dvh - 72px);max-height:900px;box-shadow:0 0 0 1px var(--bc),0 32px 80px rgba(0,0,0,.20),0 8px 24px rgba(79,70,229,.14);}
+html{
+  font-size:15px;
+  -webkit-text-size-adjust:100%;
+  height:100%;
+  height:100dvh;
 }
 
+body{
+  font-family:var(--fb);
+  background:var(--bg);
+  color:var(--t1);
+  height:100%;
+  height:100dvh;
+  display:flex;
+  justify-content:center;
+  overflow:hidden;
+  transition:background .18s,color .18s;
+}
+
+button{
+  font-family:var(--fb);
+  cursor:pointer;
+  border:none;
+  background:none;
+  color:inherit;
+}
+
+a{
+  text-decoration:none;
+  color:inherit;
+}
+
+input,select,textarea{
+  font-family:var(--fb);
+}
+
+html,body,*{
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  user-select:none;
+  -webkit-touch-callout:none;
+}
+
+input,textarea,select{
+  -webkit-user-select:text;
+  -moz-user-select:text;
+  user-select:text;
+}
+
+/* SHELL */
+.shell{
+  width:100%;
+  max-width:var(--shell);
+  height:100%;
+  height:100dvh;
+  background:var(--surface);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  box-shadow:0 0 0 1px var(--b1),var(--she);
+  transition:background .18s;
+}
+
+@media(min-width:700px){
+  body{
+    padding:28px 0 44px;
+    height:auto;
+    min-height:100dvh;
+    overflow-y:auto;
+  }
+
+  .shell{
+    border-radius:36px;
+    height:calc(100dvh - 72px);
+    max-height:900px;
+    overflow:hidden;
+    box-shadow:
+      0 0 0 1px var(--bc),
+      0 32px 80px rgba(0,0,0,.20),
+      0 8px 24px rgba(79,70,229,.14);
+  }
+}
+  
 /* HEADER — logout button removed */
 .hdr{position:sticky;top:0;z-index:100;height:var(--hdr-h);background:var(--nav);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;transition:background .18s;}
 .hdr-back{width:34px;height:34px;border-radius:10px;background:var(--grp);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-size:18px;transition:transform var(--dur) var(--spring),background var(--dur);}
@@ -69,10 +137,25 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
 .hdr-title{flex:1;font-family:var(--fd);font-size:15px;font-weight:800;color:var(--t1);}
 
 /* PAGE */
-.page{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:14px 13px calc(var(--nav-h) + 28px + env(safe-area-inset-bottom,0px));}
-.page::-webkit-scrollbar{width:2px;}
-.page::-webkit-scrollbar-thumb{background:var(--bc);border-radius:99px;}
+.page{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior-y:contain;
+  -webkit-overflow-scrolling:touch;
+  padding:14px 13px calc(var(--nav-h) + 28px + env(safe-area-inset-bottom,0px));
+}
 
+.page::-webkit-scrollbar{
+  width:2px;
+}
+
+.page::-webkit-scrollbar-thumb{
+  background:var(--bc);
+  border-radius:99px;
+}
+  
 /* HERO */
 .hero{border-radius:var(--r4);padding:20px;background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);display:flex;align-items:center;gap:14px;margin-bottom:12px;position:relative;overflow:hidden;animation:up .32s var(--ease) both;}
 .hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(79,70,229,.04),rgba(6,182,212,.03));pointer-events:none;}
