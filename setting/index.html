@@ -86,9 +86,9 @@ a{text-decoration:none;color:inherit;}
   -webkit-overflow-scrolling:touch;
   overscroll-behavior-y:contain;
 
-  /* 120px extra space + safe area */
   padding:10px 10px calc(
-    (var(--nav-h) * 2)
+    var(--nav-h)
+    + 12px
     + env(safe-area-inset-bottom,0px)
   );
 
@@ -104,20 +104,9 @@ a{text-decoration:none;color:inherit;}
   border-radius:99px;
 }
 
-  .page{
-  padding:10px 10px calc(
-    (var(--nav-h) * 2)
-    + 40px
-    + env(safe-area-inset-bottom,0px)
-  );
-}
-
+/* Optional spacer */
 .page-end-space{
-  height:calc(
-    (var(--nav-h) * 2)
-    + 40px
-    + env(safe-area-inset-bottom,0px)
-  );
+  height:5px;
 }
   
 /* ── PROFILE HERO ── */
