@@ -4747,16 +4747,16 @@ body{
 
       <div class="af-topbar-actions">
 
-  <button
-    class="af-streak-pill"
-    onclick="afSwitchView('heatmap')"
-    aria-label="Open learning streak"
-    type="button"
-  >
-    <span class="af-streak-fire" aria-hidden="true">🔥</span>
-    <span id="afHeaderStreakCount">0</span>
-  </button>
-
+ <button
+  class="af-streak-pill"
+  onclick="afOpenHeatmap()"
+  aria-label="Open learning heatmap"
+  type="button"
+>
+  <span class="af-streak-fire" aria-hidden="true">🔥</span>
+  <span id="afHeaderStreakCount">0</span>
+</button>
+        
   <button
     class="af-notif-btn"
     onclick="afSwitchView('notifications')"
@@ -5380,14 +5380,14 @@ body{
             </div>
             <span class="af-accordion-item-arrow" aria-hidden="true">›</span>
           </a>
-          <a class="af-accordion-item" href="#" onclick="afSwitchView('heatmap'); return false;" aria-label="Open Learning Heatmap">
-            <div class="af-accordion-item-icon" aria-hidden="true">🔥</div>
-            <div class="af-accordion-item-text">
-              <div class="af-accordion-item-label">Learning Heatmap</div>
-              <div class="af-accordion-item-sub">Track your daily learning streak</div>
-            </div>
-            <span class="af-accordion-item-arrow" aria-hidden="true">›</span>
-          </a>
+        <a class="af-accordion-item" href="javascript:void(0)" onclick="afOpenHeatmap()" aria-label="Open Learning Heatmap">
+  <div class="af-accordion-item-icon" aria-hidden="true">🔥</div>
+  <div class="af-accordion-item-text">
+    <div class="af-accordion-item-label">Learning Heatmap</div>
+    <div class="af-accordion-item-sub">Track your daily learning streak</div>
+  </div>
+  <span class="af-accordion-item-arrow" aria-hidden="true">›</span>
+</a>
         </div>
       </div>
 
@@ -5536,24 +5536,6 @@ body{
   </div>
 </div><!-- /viewSettings -->
 
-<!-- ══════════════════════════════════════════════════════
-     VIEW: LEARNING HEATMAP
-     ══════════════════════════════════════════════════════ -->
-<div class="af-view" id="viewHeatmap" aria-label="Learning Heatmap">
-  <div class="af-placeholder-section">
-    <div class="af-placeholder-icon">🔥</div>
-    <div class="af-placeholder-title">Learning Heatmap</div>
-    <p class="af-placeholder-sub">
-      Track daily study activity, streaks, consistency and learning progress.
-    </p>
-    <button
-      class="af-placeholder-btn"
-      onclick="afSwitchView('settings')"
-      type="button">
-      Back to Settings
-    </button>
-  </div>
-</div>
 
 <!-- ══════════════════════════════════════════════════════
      VIEW: NOTIFICATIONS
@@ -8462,6 +8444,89 @@ if ("serviceWorker" in navigator) {
     window.location.href = "./offline.html";
   }
 }
+
+    /* ════════════════════════════════════════════════════════════
+   LEARNING HEATMAP — Open separate page + streak sync
+════════════════════════════════════════════════════════════ */
+ 
+const LH_EDGE_URL =
+  "https://afooyyydhlwngzssgqih.supabase.co/functions/v1/learning-activity-af";
+ 
+const LH_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb295eXlkaGx3bmd6c3NncWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDQxMjgsImV4cCI6MjA5NDIyMDEyOH0.KG0XO0oP_2MpewHoIwTtbrKg5FkyOYRUtVzLH1MSJiE";
+ 
+/**
+ * Open the Heatmap sub-page.
+ * Works from both the 🔥 header pill and the Settings accordion link.
+ */
+function afOpenHeatmap() {
+  window.location.href = "./Heatmap/index.html";
+}
+window.afOpenHeatmap = afOpenHeatmap;
+ 
+/**
+ * Silently fetch today's streak from the edge function and
+ * update the 🔥 header badge. Called on every app load.
+ * Uses action:"mark" so the visit itself registers as activity.
+ */
+async function afSyncStreak() {
+  const uuid = localStorage.getItem("af_student_uuid") || "";
+  if (!uuid) return;
+ 
+  try {
+    const res = await fetch(LH_EDGE_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": LH_ANON_KEY,
+        "Authorization": "Bearer " + LH_ANON_KEY
+      },
+      body: JSON.stringify({ action: "mark", studentId: uuid })
+    });
+ 
+    if (!res.ok) return;
+ 
+    const data = await res.json();
+    if (!data || !data.ok) return;
+ 
+    const streak = typeof data.streak === "number" ? data.streak : 0;
+ 
+    /* Save to localStorage so heatmap page can show instantly */
+    localStorage.setItem("af_streak", String(streak));
+ 
+    /* Update header badge */
+    const badge = document.getElementById("afHeaderStreakCount");
+    if (badge) badge.textContent = streak;
+ 
+  } catch (err) {
+    /* Network error — show cached value */
+    const cached = parseInt(localStorage.getItem("af_streak") || "0", 10);
+    const badge  = document.getElementById("afHeaderStreakCount");
+    if (badge) badge.textContent = cached;
+  }
+}
+ 
+/**
+ * Patch afLoadStreak() to also try a live sync when logged in.
+ * This replaces the original afLoadStreak that only reads localStorage.
+ */
+(function patchAfLoadStreak() {
+  const _orig = window.afLoadStreak;
+ 
+  window.afLoadStreak = function () {
+    /* 1. Show cached value immediately (no flash) */
+    if (typeof _orig === "function") _orig();
+ 
+    /* 2. If logged in, silently sync in background */
+    const uuid = localStorage.getItem("af_student_uuid") || "";
+    if (uuid) {
+      /* Slight delay so page renders first */
+      setTimeout(afSyncStreak, 800);
+    }
+  };
+})();
+
+    
   </script>
 
 </body>
