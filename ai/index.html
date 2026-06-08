@@ -9,997 +9,1110 @@
 </script>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<meta name="theme-color" content="#6366f1"/>
-<title>AF Nexus · AI</title>
+<meta name="theme-color" content="#0d0f14"/>
+<title>AcademeForge AI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet"/>
 <style>
+/* ════════════════════════════════════════
+   TOKENS
+════════════════════════════════════════ */
 :root {
-  --p:#6366f1;--p2:#4f46e5;--p3:#4338ca;--pl:#a5b4fc;
-  --acc:#0ea5e9;--acc2:#0284c7;--rose:#f43f5e;--amber:#f59e0b;
-  --ok:#10b981;--err:#ef4444;--dev:#f97316;
-  --bg:#eef0fb;--surface:#ffffff;--card:rgba(255,255,255,.92);
-  --nav:rgba(255,255,255,.94);--inp:#f3f4fd;--grp:rgba(99,102,241,.07);
-  --t1:#0f0e23;--t2:#4b5569;--tm:#9499b7;
-  --b1:rgba(99,102,241,.11);--bc:rgba(99,102,241,.16);--bi:#d4d7f0;
-  --sh:0 2px 16px rgba(99,102,241,.09),0 1px 3px rgba(0,0,0,.05);
-  --she:0 10px 40px rgba(99,102,241,.16),0 2px 8px rgba(0,0,0,.07);
-  --shb:0 4px 18px rgba(99,102,241,.32);
-  --r1:8px;--r2:12px;--r3:18px;--r4:26px;--rf:9999px;
+  --p:#4f8aff;--p2:#3b6fd4;--p3:#2a52a8;
+  --dev:#f97316;--dev2:#ea580c;
+  --ok:#10b981;--err:#ef4444;--amber:#f59e0b;
+  --bg:#0d0f14;--surface:#161921;--surface2:#1e2230;--surface3:#242838;
+  --card:#1a1d28;--border:#2a2f3d;--border2:#353a4d;
+  --inp:#1e2230;--grp:rgba(79,138,255,.07);
+  --t1:#e8eaf0;--t2:#9aa3be;--tm:#5a6280;
+  --sh:0 2px 16px rgba(0,0,0,.4);
+  --she:0 8px 40px rgba(0,0,0,.6);
+  --shb:0 4px 18px rgba(79,138,255,.35);
+  --r1:8px;--r2:12px;--r3:16px;--r4:22px;--rf:9999px;
   --font-display:'Space Grotesk',sans-serif;
   --font-body:'Plus Jakarta Sans',sans-serif;
-  --nav-h:64px;--hdr-h:56px;--shell:430px;
+  --hdr-h:54px;--drawer-w:300px;
   --ease:cubic-bezier(.22,1,.36,1);
   --spring:cubic-bezier(.34,1.56,.64,1);
 }
-[data-theme="dark"]{
-  --bg:#0a0917;--surface:#100e24;--card:rgba(24,21,52,.90);
-  --nav:rgba(16,14,36,.97);--inp:#1a1740;--grp:rgba(165,180,252,.07);
-  --t1:#eceaff;--t2:#9997be;--tm:#5f5d80;
-  --b1:rgba(165,180,252,.11);--bc:rgba(165,180,252,.17);--bi:rgba(165,180,252,.18);
-  --sh:0 2px 16px rgba(0,0,0,.30);--she:0 10px 40px rgba(0,0,0,.48);
-  --shb:0 4px 18px rgba(99,102,241,.44);
+[data-theme="light"]{
+  --bg:#f0f2f8;--surface:#ffffff;--surface2:#f3f5fc;--surface3:#e8eaf5;
+  --card:#ffffff;--border:rgba(79,138,255,.14);--border2:rgba(79,138,255,.22);
+  --inp:#f3f5fc;--grp:rgba(79,138,255,.06);
+  --t1:#0f1123;--t2:#4b5569;--tm:#9499b7;
+  --sh:0 2px 12px rgba(0,0,0,.07);--she:0 8px 32px rgba(0,0,0,.12);
+  --shb:0 4px 18px rgba(79,138,255,.28);
 }
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html{font-size:16px;-webkit-text-size-adjust:100%;}
-body{
-  font-family:var(--font-body);background:var(--bg);color:var(--t1);
-  min-height:100dvh;display:flex;justify-content:center;
-  overflow-x:hidden;transition:background .18s,color .18s;
-}
+html,body{height:100%;overflow:hidden;font-family:var(--font-body);background:var(--bg);color:var(--t1);}
 button{font-family:var(--font-body);cursor:pointer;border:none;background:none;color:inherit;}
 a{text-decoration:none;color:inherit;}
-textarea{font-family:var(--font-body);}
+textarea,input{font-family:var(--font-body);}
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px;}
 
-/* SHELL */
-.shell{
-  width:100%;max-width:var(--shell);min-height:100dvh;
-  background:var(--surface);display:flex;flex-direction:column;
-  position:relative;box-shadow:0 0 0 1px var(--b1),var(--she);
-  overflow:hidden;transition:background .18s;
-}
-@media(min-width:700px){
-  body{padding:32px 0 48px;align-items:flex-start;}
-  .shell{border-radius:40px;min-height:calc(100dvh - 80px);max-height:900px;overflow-y:hidden;}
+/* ════════════════════════════════════════
+   LAYOUT SHELL
+════════════════════════════════════════ */
+#app{
+  display:flex;flex-direction:column;
+  height:100dvh;width:100%;position:relative;
+  background:var(--bg);overflow:hidden;
 }
 
-/* HEADER */
-.hdr{
-  position:sticky;top:0;z-index:200;height:var(--hdr-h);
-  background:var(--nav);
-  backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
-  border-bottom:1px solid var(--b1);
-  display:flex;align-items:center;padding:0 14px;gap:10px;
-  transition:background .18s;flex-shrink:0;
+/* ════════════════════════════════════════
+   OVERLAY (behind drawer)
+════════════════════════════════════════ */
+#overlay{
+  position:fixed;inset:0;z-index:400;
+  background:rgba(0,0,0,.6);
+  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+  opacity:0;visibility:hidden;
+  transition:opacity .25s,visibility .25s;
 }
-.hdr-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
-.hdr-logo{
-  width:36px;height:36px;border-radius:11px;flex-shrink:0;
-  overflow:hidden;display:grid;place-items:center;
-  box-shadow:0 2px 10px rgba(99,102,241,.35);
-  background:linear-gradient(135deg,var(--p),var(--acc));
-}
-.hdr-logo img{width:100%;height:100%;object-fit:cover;border-radius:11px;}
-.hdr-info{min-width:0;}
-.hdr-title{
-  font-family:var(--font-display);font-size:15px;font-weight:800;color:var(--t1);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;
-}
-.hdr-sub{
-  font-size:10.5px;color:var(--p);font-weight:700;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;
-}
-.hdr-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
-.hdr-btn{
-  height:34px;padding:0 13px;border-radius:var(--r2);
-  font-size:12px;font-weight:800;
-  display:flex;align-items:center;gap:5px;
-  transition:transform .15s var(--spring),opacity .12s;white-space:nowrap;
-}
-.hdr-btn:active{transform:scale(.95);}
-.hdr-btn-ghost{background:var(--grp);border:1px solid var(--b1);color:var(--t2);}
-.hdr-icon-btn{
-  width:34px;height:34px;border-radius:var(--r2);
-  background:var(--grp);border:1px solid var(--b1);
-  display:grid;place-items:center;font-size:16px;color:var(--t2);
-  transition:transform .15s var(--spring),background .12s;
-}
-.hdr-icon-btn:active{transform:scale(.93);}
+#overlay.open{opacity:1;visibility:visible;}
 
-/* MODE BAR */
-.modebar{
-  height:46px;padding:0 14px;
-  display:flex;align-items:center;gap:6px;
-  border-bottom:1px solid var(--b1);
-  background:var(--surface);flex-shrink:0;
-  transition:background .18s;
+/* ════════════════════════════════════════
+   LEFT DRAWER
+════════════════════════════════════════ */
+#drawer{
+  position:fixed;top:0;left:0;bottom:0;z-index:500;
+  width:var(--drawer-w);
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  transform:translateX(-100%);
+  transition:transform .28s var(--ease);
+  box-shadow:var(--she);
+  overflow:hidden;
 }
-.mode-pill{
-  height:31px;padding:0 13px;border-radius:var(--rf);
-  font-size:12px;font-weight:700;color:var(--tm);
-  background:transparent;border:1px solid transparent;
-  transition:all .18s var(--ease);
-}
-.mode-pill.active-af{
-  background:linear-gradient(135deg,var(--p),var(--acc));
-  color:#fff;box-shadow:0 2px 10px rgba(99,102,241,.28);border-color:transparent;
-}
-.mode-pill.active-dev{
-  background:linear-gradient(135deg,var(--dev),#ea580c);
-  color:#fff;box-shadow:0 2px 10px rgba(249,115,22,.28);border-color:transparent;
-}
-.mode-pill:not(.active-af):not(.active-dev):hover{background:var(--grp);border-color:var(--b1);color:var(--t2);}
+#drawer.open{transform:translateX(0);}
 
-/* SESSION BANNER */
-.session-banner{
-  margin:10px 12px 0;
-  padding:10px 14px;
-  border-radius:var(--r2);
-  font-size:12.5px;font-weight:700;
+/* Drawer top */
+.dr-top{
+  flex-shrink:0;
+  padding:14px 14px 10px;
+  border-bottom:1px solid var(--border);
+}
+.dr-back{
+  display:flex;align-items:center;gap:7px;
+  padding:7px 10px;border-radius:var(--r2);
+  font-size:12.5px;font-weight:700;color:var(--t2);
+  background:var(--surface2);border:1px solid var(--border);
+  margin-bottom:14px;width:fit-content;
+  transition:background .14s,color .14s;
+}
+.dr-back:hover{background:var(--surface3);color:var(--t1);}
+.dr-back svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+
+.dr-brand{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.dr-brand-logo{
+  width:38px;height:38px;border-radius:11px;flex-shrink:0;
+  overflow:hidden;box-shadow:0 2px 10px rgba(79,138,255,.3);
+  background:linear-gradient(135deg,var(--p),#a855f7);
+  display:grid;place-items:center;font-size:14px;font-weight:800;color:#fff;
+}
+.dr-brand-logo img{width:100%;height:100%;object-fit:cover;border-radius:11px;}
+.dr-brand-text{}
+.dr-brand-name{font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--t1);line-height:1.2;}
+.dr-brand-sub{font-size:10.5px;color:var(--tm);margin-top:1px;font-weight:600;}
+
+/* Model selector */
+.dr-model-row{display:flex;gap:6px;}
+.model-btn{
+  flex:1;padding:8px 6px;border-radius:var(--r2);
+  font-size:12px;font-weight:700;color:var(--t2);
+  background:var(--surface2);border:1.5px solid var(--border);
+  text-align:center;transition:all .15s var(--ease);cursor:pointer;
+}
+.model-btn.active-af{
+  background:rgba(79,138,255,.12);border-color:var(--p);color:var(--p);
+}
+.model-btn.active-dev{
+  background:rgba(249,115,22,.10);border-color:var(--dev);color:var(--dev);
+}
+.model-btn:not(.active-af):not(.active-dev):hover{
+  background:var(--surface3);color:var(--t1);
+}
+
+/* New chat btn */
+.dr-new-btn{
+  width:100%;margin-top:10px;padding:10px 14px;border-radius:var(--r2);
+  font-size:13px;font-weight:700;color:var(--t1);
+  background:var(--surface2);border:1px solid var(--border);
   display:flex;align-items:center;gap:8px;
-  border:1px solid;
-  animation:cardIn .28s var(--ease) both;
+  transition:background .14s,border-color .14s;
 }
-.session-banner.warn{
-  background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.25);color:var(--amber);
-}
-.session-banner.err{
-  background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.22);color:var(--err);
-}
-.session-banner.hidden{display:none;}
+.dr-new-btn:hover{background:var(--surface3);border-color:var(--border2);}
+.dr-new-btn svg{width:15px;height:15px;stroke:var(--p);fill:none;stroke-width:2;stroke-linecap:round;}
 
-/* CHAT AREA */
-.chat-area{
-  flex:1;overflow-y:auto;overflow-x:hidden;
-  padding:12px 12px calc(var(--nav-h) + 76px + env(safe-area-inset-bottom,0px));
-  display:flex;flex-direction:column;gap:10px;
+/* Drawer search */
+.dr-search-wrap{
+  padding:10px 14px 0;flex-shrink:0;
 }
-.chat-area::-webkit-scrollbar{width:3px;}
-.chat-area::-webkit-scrollbar-thumb{background:var(--bc);border-radius:99px;}
+.dr-search{
+  width:100%;padding:8px 12px;border-radius:var(--r2);
+  background:var(--surface2);border:1px solid var(--border);
+  color:var(--t1);font-size:12.5px;outline:none;
+  transition:border-color .14s;
+}
+.dr-search::placeholder{color:var(--tm);}
+.dr-search:focus{border-color:var(--p);}
 
-/* WELCOME */
-.welcome-box{
-  margin:20px auto;max-width:300px;text-align:center;
-  display:flex;flex-direction:column;align-items:center;gap:12px;
-  animation:cardIn .35s var(--ease) both;
+/* Conv list */
+.dr-conv-label{
+  padding:10px 14px 4px;
+  font-size:10px;font-weight:800;color:var(--tm);
+  text-transform:uppercase;letter-spacing:.08em;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
 }
-.welcome-icon{
-  width:64px;height:64px;border-radius:20px;overflow:hidden;
-  box-shadow:0 4px 20px rgba(99,102,241,.3);
+.dr-clear-btn{
+  font-size:11px;font-weight:700;color:var(--err);
+  opacity:.7;transition:opacity .12s;
 }
-.welcome-icon img{width:100%;height:100%;object-fit:cover;}
-.welcome-box h2{font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--t1);}
-.welcome-box p{font-size:13px;color:var(--t2);line-height:1.65;}
-.welcome-tags{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;}
-.wtag{
-  height:28px;padding:0 12px;border-radius:var(--rf);
-  font-size:11.5px;font-weight:700;color:var(--tm);
-  background:var(--grp);border:1px solid var(--b1);
-}
+.dr-clear-btn:hover{opacity:1;}
 
-/* MESSAGE BUBBLES */
-.msg-row{display:flex;gap:9px;animation:cardIn .22s var(--ease) both;}
+#convList{
+  flex:1;overflow-y:auto;
+  padding:0 8px 10px;
+}
+.conv-item{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 10px;border-radius:var(--r2);
+  cursor:pointer;border:1px solid transparent;
+  margin-bottom:2px;min-width:0;
+  transition:background .12s,border-color .12s;
+}
+.conv-item:hover{background:var(--surface2);}
+.conv-item.active{background:var(--surface3);border-color:var(--border);}
+.conv-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.conv-dot.af24{background:var(--p);}
+.conv-dot.dev39{background:var(--dev);}
+.conv-title{
+  flex:1;min-width:0;font-size:12.5px;color:var(--t2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.conv-item.active .conv-title{color:var(--t1);font-weight:600;}
+.conv-del{
+  flex-shrink:0;opacity:0;background:none;border:none;
+  color:var(--tm);padding:3px;border-radius:5px;cursor:pointer;
+  transition:opacity .12s,color .12s;
+}
+.conv-item:hover .conv-del{opacity:1;}
+.conv-del:hover{color:var(--err);}
+.conv-del svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;}
+.conv-empty{
+  padding:24px 12px;text-align:center;
+  font-size:12px;color:var(--tm);line-height:1.6;
+}
+.conv-empty-icon{font-size:28px;margin-bottom:6px;}
+
+/* Drawer footer — usage */
+.dr-footer{
+  flex-shrink:0;border-top:1px solid var(--border);
+  padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));
+  background:var(--surface);
+}
+.dr-usage-title{font-size:11px;font-weight:800;color:var(--tm);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+.usage-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.usage-label{font-size:11.5px;color:var(--t2);font-weight:600;}
+.usage-val{font-size:11px;color:var(--tm);font-family:monospace;font-weight:600;}
+.usage-track{height:5px;background:var(--surface3);border-radius:99px;overflow:hidden;margin-bottom:9px;}
+.usage-fill{height:100%;border-radius:99px;background:var(--p);transition:width .4s var(--ease);}
+.usage-fill.warn{background:var(--amber);}
+.usage-fill.danger{background:var(--err);}
+
+/* ════════════════════════════════════════
+   HEADER — CLEAN
+════════════════════════════════════════ */
+#header{
+  flex-shrink:0;height:var(--hdr-h);
+  display:flex;align-items:center;
+  padding:0 14px;gap:12px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  z-index:100;
+}
+.hdr-menu{
+  width:36px;height:36px;border-radius:var(--r2);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  background:var(--surface2);border:1px solid var(--border);
+  flex-shrink:0;transition:background .14s;
+}
+.hdr-menu:hover{background:var(--surface3);}
+.hdr-menu span{
+  display:block;width:17px;height:1.5px;
+  background:var(--t2);border-radius:99px;
+  transition:all .2s;
+}
+.hdr-center{flex:1;min-width:0;}
+.hdr-title{
+  font-family:var(--font-display);font-size:15px;font-weight:700;
+  color:var(--t1);line-height:1.2;
+}
+.hdr-sub{font-size:10.5px;color:var(--tm);font-weight:600;margin-top:1px;}
+.hdr-badge{
+  flex-shrink:0;padding:4px 10px;border-radius:var(--r2);
+  font-size:11px;font-weight:800;letter-spacing:.02em;
+  font-family:monospace;
+}
+.hdr-badge.af24{background:rgba(79,138,255,.15);color:var(--p);}
+.hdr-badge.dev39{background:rgba(249,115,22,.14);color:var(--dev);}
+
+/* ════════════════════════════════════════
+   CHAT AREA
+════════════════════════════════════════ */
+#chat{
+  flex:1;overflow-y:auto;
+  padding:0 16px 160px;
+  display:flex;flex-direction:column;
+  scroll-behavior:smooth;
+}
+@media(min-width:640px){#chat{padding:0 20% 160px;}}
+
+/* GREETING */
+#greeting{
+  padding:40px 0 28px;
+  animation:fadeUp .5s var(--ease) both;
+}
+.greeting-time{
+  font-size:11px;font-weight:700;color:var(--tm);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;
+}
+.greeting-main{
+  font-family:var(--font-display);
+  font-size:clamp(22px,5vw,30px);
+  font-weight:800;color:var(--t1);
+  line-height:1.25;margin-bottom:6px;
+}
+.greeting-sub{font-size:14px;color:var(--t2);font-weight:500;margin-bottom:20px;}
+.suggestion-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{
+  padding:7px 14px;border-radius:var(--rf);
+  font-size:12.5px;font-weight:600;color:var(--t2);
+  background:var(--surface2);border:1px solid var(--border);
+  cursor:pointer;transition:all .14s var(--ease);
+  white-space:nowrap;
+}
+.chip:hover{background:var(--surface3);border-color:var(--border2);color:var(--t1);}
+
+/* MESSAGES */
+.msg-row{
+  display:flex;gap:10px;
+  padding:4px 0;
+  animation:fadeUp .22s var(--ease) both;
+}
 .msg-row.user{flex-direction:row-reverse;}
+
 .av{
-  width:32px;height:32px;min-width:32px;border-radius:10px;
-  display:grid;place-items:center;font-size:12px;font-weight:800;
-  flex-shrink:0;align-self:flex-start;margin-top:2px;
+  width:30px;height:30px;min-width:30px;
+  border-radius:9px;display:grid;place-items:center;
+  font-size:11px;font-weight:800;flex-shrink:0;
+  align-self:flex-end;margin-bottom:2px;
 }
-.av-ai{background:linear-gradient(135deg,var(--p),var(--acc));color:#fff;}
-.av-ai.dev{background:linear-gradient(135deg,var(--dev),#ea580c);}
-.av-user{background:var(--grp);border:1px solid var(--bc);color:var(--t2);}
+.av-ai{background:linear-gradient(135deg,var(--p),#a855f7);color:#fff;}
+.av-ai.dev{background:linear-gradient(135deg,var(--dev),#dc2626);}
+.av-user{
+  background:var(--surface2);border:1px solid var(--border);
+  color:var(--t2);font-size:10px;
+}
+
+.bubble-wrap{display:flex;flex-direction:column;gap:3px;max-width:78%;}
+.msg-row.user .bubble-wrap{align-items:flex-end;}
+
 .bubble{
-  max-width:82%;padding:11px 14px;border-radius:var(--r2);
-  font-size:13.5px;line-height:1.7;word-break:break-word;
+  padding:10px 14px;border-radius:var(--r3);
+  font-size:14px;line-height:1.7;word-break:break-word;
   white-space:pre-wrap;
 }
 .bubble-ai{
-  background:var(--card);border:1px solid var(--bc);
-  border-top-left-radius:4px;
-  box-shadow:var(--sh);
+  background:var(--surface);border:1px solid var(--border);
+  border-bottom-left-radius:4px;color:var(--t1);
 }
 .bubble-user{
-  background:linear-gradient(135deg,var(--p),var(--p2));
-  color:#fff;border-top-right-radius:4px;
+  background:var(--p);
+  border-bottom-right-radius:4px;color:#fff;
+  box-shadow:0 2px 12px rgba(79,138,255,.3);
 }
-.msg-meta{font-size:10.5px;color:var(--tm);margin-top:3px;font-weight:600;}
-.msg-row.user .msg-meta{text-align:right;}
-.mode-badge{
-  display:inline-block;font-size:10px;font-weight:800;
-  padding:1px 6px;border-radius:5px;margin-right:4px;
+.bubble-user-dev{background:var(--dev);box-shadow:0 2px 12px rgba(249,115,22,.3);}
+
+.msg-meta{font-size:10.5px;color:var(--tm);font-weight:600;}
+.mode-pill-sm{
+  display:inline-block;font-size:9.5px;font-weight:800;
+  padding:1px 6px;border-radius:4px;margin-right:4px;
+  font-family:monospace;letter-spacing:.03em;
 }
-.mode-badge.af24{background:rgba(99,102,241,.12);color:var(--p);}
-.mode-badge.dev39{background:rgba(249,115,22,.12);color:var(--dev);}
+.mode-pill-sm.af24{background:rgba(79,138,255,.14);color:var(--p);}
+.mode-pill-sm.dev39{background:rgba(249,115,22,.12);color:var(--dev);}
 
 /* THINKING */
-.thinking-row{display:flex;gap:9px;}
+.thinking-row{display:flex;gap:10px;padding:4px 0;}
 .thinking-bub{
-  background:var(--card);border:1px solid var(--bc);
-  border-radius:var(--r2);border-top-left-radius:4px;
-  padding:10px 14px;box-shadow:var(--sh);
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r3);border-bottom-left-radius:4px;
+  padding:12px 16px;
 }
-.dots span{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--tm);margin:0 2px;animation:dotBounce 1.2s infinite;}
-.dots span:nth-child(2){animation-delay:.2s;}
-.dots span:nth-child(3){animation-delay:.4s;}
-@keyframes dotBounce{0%,100%{transform:translateY(0);opacity:.5;}50%{transform:translateY(-5px);opacity:1;}}
+.dots{display:flex;gap:5px;align-items:center;}
+.dots span{
+  display:block;width:7px;height:7px;border-radius:50%;
+  background:var(--tm);animation:dotBounce 1.3s ease-in-out infinite;
+}
+.dots span:nth-child(2){animation-delay:.18s;}
+.dots span:nth-child(3){animation-delay:.36s;}
+@keyframes dotBounce{
+  0%,80%,100%{transform:translateY(0);opacity:.4;}
+  40%{transform:translateY(-6px);opacity:1;}
+}
 
-/* INPUT AREA */
-.input-area{
-  position:fixed;
-  bottom:var(--nav-h);
-  left:50%;transform:translateX(-50%);
-  width:100%;max-width:var(--shell);
-  background:var(--nav);
-  backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
-  border-top:1px solid var(--b1);
-  padding:10px 12px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));
-  z-index:150;
+/* ════════════════════════════════════════
+   SESSION BANNER
+════════════════════════════════════════ */
+#sessionBanner{
+  margin:10px 16px 0;
+  padding:10px 14px;border-radius:var(--r2);
+  font-size:12.5px;font-weight:700;
+  display:flex;align-items:center;gap:8px;
+  border:1px solid;flex-shrink:0;
+  animation:fadeUp .25s var(--ease) both;
 }
-.input-wrap{
+#sessionBanner.warn{background:rgba(245,158,11,.09);border-color:rgba(245,158,11,.28);color:var(--amber);}
+#sessionBanner.err{background:rgba(239,68,68,.09);border-color:rgba(239,68,68,.25);color:var(--err);}
+#sessionBanner.hidden{display:none;}
+@media(min-width:640px){#sessionBanner{margin:10px 20% 0;}}
+
+/* ════════════════════════════════════════
+   INPUT AREA — FIXED BOTTOM
+════════════════════════════════════════ */
+#inputArea{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--bg);
+  padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px));
+  z-index:200;
+}
+@media(min-width:640px){#inputArea{padding:10px 20% calc(14px + env(safe-area-inset-bottom,0px));}}
+
+.input-box{
   display:flex;align-items:flex-end;gap:8px;
-  background:var(--inp);border:1.5px solid var(--bc);border-radius:var(--r2);
-  padding:8px 8px 8px 13px;
+  background:var(--surface);border:1.5px solid var(--border2);
+  border-radius:var(--r3);padding:10px 10px 10px 16px;
   transition:border-color .15s,box-shadow .15s;
+  box-shadow:var(--sh);
 }
-.input-wrap:focus-within{border-color:var(--p);box-shadow:0 0 0 3px rgba(99,102,241,.10);}
-.input-wrap.dev-mode:focus-within{border-color:var(--dev);box-shadow:0 0 0 3px rgba(249,115,22,.10);}
+.input-box:focus-within{border-color:var(--p);box-shadow:0 0 0 3px rgba(79,138,255,.10);}
+.input-box.dev:focus-within{border-color:var(--dev);box-shadow:0 0 0 3px rgba(249,115,22,.10);}
+
 #msgInput{
-  flex:1;background:transparent;border:none;outline:none;resize:none;
-  font-size:13.5px;line-height:1.55;color:var(--t1);
-  min-height:36px;max-height:100px;overflow-y:auto;
+  flex:1;background:transparent;border:none;outline:none;
+  resize:none;color:var(--t1);
+  font-size:14px;line-height:1.55;
+  min-height:40px;max-height:120px;overflow-y:auto;
 }
 #msgInput::placeholder{color:var(--tm);}
-#msgInput:disabled{opacity:.5;}
-.send-btn{
-  width:36px;height:36px;border-radius:10px;flex-shrink:0;
-  background:linear-gradient(135deg,var(--p),var(--p3));color:#fff;
-  display:grid;place-items:center;font-size:16px;
-  box-shadow:0 2px 10px rgba(99,102,241,.28);
-  transition:transform .15s var(--spring),opacity .12s;
-}
-.send-btn.dev-send{background:linear-gradient(135deg,var(--dev),#ea580c);box-shadow:0 2px 10px rgba(249,115,22,.28);}
-.send-btn:disabled{opacity:.32;cursor:not-allowed;box-shadow:none;}
-.send-btn:not(:disabled):active{transform:scale(.93);}
-.char-hint{font-size:10px;color:var(--tm);font-weight:700;text-align:right;margin-top:4px;}
-.char-hint.warn{color:var(--err);}
+#msgInput:disabled{opacity:.4;}
 
-/* STATE */
-.state-msg{
-  margin:30px auto;max-width:280px;text-align:center;color:var(--tm);
-  font-size:13.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:12px;
+#sendBtn{
+  width:38px;height:38px;border-radius:10px;flex-shrink:0;
+  display:grid;place-items:center;
+  background:var(--p);color:#fff;
+  box-shadow:var(--shb);
+  transition:transform .15s var(--spring),opacity .12s,background .12s;
 }
-.state-msg .icon{font-size:40px;animation:bob 3s ease-in-out infinite;}
-@keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
-.spinner{width:24px;height:24px;border-radius:50%;border:3px solid var(--b1);border-top-color:var(--p);animation:spin .75s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
+#sendBtn.dev{background:var(--dev);}
+#sendBtn:disabled{opacity:.3;cursor:not-allowed;box-shadow:none;}
+#sendBtn:not(:disabled):active{transform:scale(.92);}
+#sendBtn svg{width:16px;height:16px;fill:currentColor;}
 
-/* LOCKED */
-.locked-box{display:none;place-items:center;min-height:60vh;padding:24px;}
-.locked-box.visible{display:grid;}
+.input-hint{
+  font-size:10.5px;color:var(--tm);font-weight:600;
+  text-align:right;margin-top:5px;
+  display:flex;justify-content:space-between;
+}
+.input-hint .warn{color:var(--err);}
+
+/* ════════════════════════════════════════
+   LOCKED STATE
+════════════════════════════════════════ */
+#lockedBox{
+  flex:1;display:none;align-items:center;justify-content:center;padding:24px;
+}
+#lockedBox.visible{display:flex;}
 .locked-card{
-  width:100%;max-width:300px;background:var(--card);border:1px solid var(--bc);
-  border-radius:var(--r4);padding:30px 22px;text-align:center;box-shadow:var(--sh);
+  max-width:280px;width:100%;text-align:center;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r4);padding:32px 22px;box-shadow:var(--sh);
 }
 .locked-icon{
-  width:56px;height:56px;margin:0 auto 14px;border-radius:var(--r3);
+  width:56px;height:56px;border-radius:16px;margin:0 auto 14px;
   display:grid;place-items:center;font-size:24px;
-  background:rgba(244,63,94,.10);border:1px solid rgba(244,63,94,.20);
+  background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.20);
 }
 .locked-card h2{font-family:var(--font-display);font-size:18px;font-weight:800;color:var(--err);margin-bottom:8px;}
-.locked-card p{font-size:13px;color:var(--t2);line-height:1.65;margin-bottom:20px;}
-.login-btn{
+.locked-card p{font-size:13px;color:var(--t2);line-height:1.65;margin-bottom:22px;}
+.locked-btn{
   width:100%;min-height:44px;border-radius:var(--r2);
   font-size:14px;font-weight:800;color:#fff;
   background:linear-gradient(135deg,var(--p),var(--p3));
   box-shadow:var(--shb);transition:opacity .15s,transform .15s;
 }
-.login-btn:active{transform:scale(.98);}
+.locked-btn:active{transform:scale(.98);}
 
-/* BOTTOM NAV */
-.bnav{
-  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
-  width:100%;max-width:var(--shell);z-index:999;height:var(--nav-h);
-  background:var(--nav);
-  backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
-  border-top:1px solid var(--b1);display:flex;align-items:center;
-  padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px);
-}
-.bnav-btn{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:4px;height:100%;border-radius:var(--r2);padding:8px 4px;position:relative;
-  transition:all .12s var(--ease);
-}
-.bnav-btn::before{
-  content:'';position:absolute;top:7px;left:50%;transform:translateX(-50%);
-  width:0;height:2.5px;background:linear-gradient(90deg,var(--p),var(--acc));
-  border-radius:99px;transition:width .2s var(--spring);
-}
-.bnav-btn.active::before{width:26px;}
-.bnav-icon{font-size:21px;line-height:1;transition:transform .15s var(--spring);}
-.bnav-btn.active .bnav-icon{transform:scale(1.1);}
-.bnav-btn:active .bnav-icon{transform:scale(.88);}
-.bnav-label{font-size:10px;font-weight:700;color:var(--tm);transition:color .12s;}
-.bnav-btn.active .bnav-label{color:var(--p);}
-
-/* MODALS */
-.modal-ov{
-  position:fixed;inset:0;z-index:9000;
-  display:flex;align-items:flex-end;justify-content:center;
-  background:rgba(0,0,0,.48);
-  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-  opacity:0;visibility:hidden;transition:opacity .22s,visibility .22s;
-}
-.modal-ov.open{opacity:1;visibility:visible;}
-.modal-card{
-  width:100%;max-width:var(--shell);background:var(--surface);
-  border-radius:var(--r4) var(--r4) 0 0;
-  border:1px solid var(--bc);border-bottom:none;box-shadow:var(--she);
-  transform:translateY(100%);transition:transform .30s var(--spring);
-  display:flex;flex-direction:column;max-height:90dvh;overflow:hidden;
-}
-.modal-ov.open .modal-card{transform:translateY(0);}
-.modal-drag{width:36px;height:4px;background:var(--bi);border-radius:99px;margin:10px auto 0;}
-.modal-head{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 16px 12px;border-bottom:1px solid var(--b1);flex-shrink:0;
-}
-.modal-head h3{font-family:var(--font-display);font-size:16px;font-weight:800;color:var(--t1);}
-.modal-close{
-  width:30px;height:30px;border-radius:var(--r1);
-  background:var(--grp);display:grid;place-items:center;
-  font-size:18px;color:var(--tm);transition:background .12s;
-}
-.modal-close:hover{background:var(--b1);}
-.modal-body{padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;flex:1;}
-
-/* PROFILE MODAL */
-.profile-avatar{
-  width:72px;height:72px;border-radius:20px;
-  background:linear-gradient(135deg,var(--p),var(--acc));
-  display:grid;place-items:center;font-size:26px;font-weight:800;color:#fff;
-  margin:0 auto 4px;letter-spacing:.03em;
-  box-shadow:0 4px 18px rgba(99,102,241,.35);
-}
-.profile-name{
-  font-family:var(--font-display);font-size:20px;font-weight:800;
-  color:var(--t1);text-align:center;
-}
-.profile-row{
-  display:flex;align-items:center;gap:12px;
-  background:var(--grp);border:1px solid var(--b1);
-  border-radius:var(--r2);padding:12px 14px;
-}
-.profile-row-icon{font-size:18px;flex-shrink:0;}
-.profile-row-content{min-width:0;flex:1;}
-.profile-row-label{font-size:10.5px;color:var(--tm);font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
-.profile-row-val{font-size:13.5px;color:var(--t1);font-weight:600;margin-top:2px;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.stat-card{
-  background:var(--grp);border:1px solid var(--b1);border-radius:var(--r2);
-  padding:12px;text-align:center;
-}
-.stat-val{font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--p);}
-.stat-lbl{font-size:10.5px;color:var(--tm);font-weight:700;margin-top:2px;}
-.usage-bar-wrap{background:var(--grp);border:1px solid var(--b1);border-radius:var(--r2);padding:12px 14px;}
-.usage-bar-label{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px;font-weight:700;color:var(--t2);}
-.usage-bar-track{height:8px;background:var(--b1);border-radius:99px;overflow:hidden;}
-.usage-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--p),var(--acc));transition:width .4s var(--ease);}
-.usage-bar-fill.warn-fill{background:linear-gradient(90deg,var(--amber),#d97706);}
-.usage-bar-fill.err-fill{background:linear-gradient(90deg,var(--err),#dc2626);}
-.session-info{font-size:11px;color:var(--tm);font-weight:600;margin-top:6px;text-align:center;}
-
-/* TOAST */
-.toast-wrap{
-  position:fixed;left:50%;bottom:calc(var(--nav-h) + 14px);
-  transform:translateX(-50%);z-index:99999;
-  width:min(90vw,400px);pointer-events:none;
+/* ════════════════════════════════════════
+   TOAST
+════════════════════════════════════════ */
+#toastWrap{
+  position:fixed;left:50%;bottom:90px;
+  transform:translateX(-50%);z-index:9999;
+  width:min(90vw,360px);pointer-events:none;
 }
 .toast{
-  display:flex;align-items:flex-start;gap:10px;background:var(--surface);color:var(--t1);
-  border:1px solid var(--bc);border-radius:14px;padding:11px 14px;
-  box-shadow:var(--she);animation:toastIn .22s ease;pointer-events:auto;
+  display:flex;align-items:flex-start;gap:10px;
+  background:var(--surface);color:var(--t1);
+  border:1px solid var(--border2);border-radius:12px;
+  padding:10px 14px;box-shadow:var(--she);
+  animation:fadeUp .22s ease;pointer-events:auto;
 }
-.toast-ok{border-left:4px solid var(--ok);}
-.toast-err{border-left:4px solid var(--err);}
-.toast-info{border-left:4px solid var(--p);}
+.toast.ok{border-left:4px solid var(--ok);}
+.toast.err{border-left:4px solid var(--err);}
+.toast.info{border-left:4px solid var(--p);}
 .toast-body{flex:1;}
-.toast-title{font-size:12.5px;font-weight:800;margin-bottom:1px;}
+.toast-title{font-size:12px;font-weight:800;margin-bottom:1px;}
 .toast-msg{font-size:11.5px;color:var(--t2);}
-.toast-x{font-size:16px;color:var(--tm);cursor:pointer;}
-@keyframes toastIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
-@keyframes cardIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.toast-x{font-size:17px;color:var(--tm);cursor:pointer;flex-shrink:0;}
 
+/* ════════════════════════════════════════
+   ANIMATIONS
+════════════════════════════════════════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spinner{width:22px;height:22px;border-radius:50%;border:3px solid var(--surface3);border-top-color:var(--p);animation:spin .7s linear infinite;}
+
+/* ════════════════════════════════════════
+   MISC
+════════════════════════════════════════ */
 .hidden{display:none!important;}
 html,body,*{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-touch-callout:none;}
 textarea,input{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
 </style>
 </head>
 <body>
-<div class="shell" id="shell">
 
-  <!-- HEADER -->
-  <header class="hdr" id="hdr">
-    <div class="hdr-left">
-      <div class="hdr-logo">
+<!-- ════ OVERLAY ════ -->
+<div id="overlay" onclick="closeDrawer()"></div>
+
+<!-- ════ LEFT DRAWER ════ -->
+<div id="drawer">
+  <!-- Top -->
+  <div class="dr-top">
+    <!-- Back -->
+    <button class="dr-back" onclick="window.location.href='/index.html'">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to AcademeForge
+    </button>
+    <!-- Brand -->
+    <div class="dr-brand">
+      <div class="dr-brand-logo">
         <img src="../IMG/AF LOGO 2.jpeg" alt="AF" onerror="this.style.display='none';this.parentElement.textContent='AF'"/>
       </div>
-      <div class="hdr-info">
-        <div class="hdr-title">AcademeForge AI</div>
-        <div class="hdr-sub">✦ Free Version</div>
+      <div class="dr-brand-text">
+        <div class="dr-brand-name">AcademeForge AI</div>
+        <div class="dr-brand-sub">YOUR MENTOR</div>
       </div>
     </div>
-    <div class="hdr-right hidden" id="hdrActions">
-      <button class="hdr-btn hdr-btn-ghost" id="btnNewChat" onclick="aiNewChat()">
-        <span>✍</span><span>New</span>
-      </button>
-      <button class="hdr-btn hdr-btn-ghost" id="btnProfile" onclick="aiOpenProfile()">
-        <span>👤</span><span>Profile</span>
-      </button>
+    <!-- Model selector -->
+    <div class="dr-model-row" id="drModelRow">
+      <button class="model-btn active-af" id="drBtnAF" onclick="setMode('af24')">AF 2.4</button>
+      <button class="model-btn" id="drBtnDev" onclick="setMode('dev39')">Dev 3.9 Pro</button>
     </div>
-  </header>
-
-  <!-- MODE BAR -->
-  <div class="modebar hidden" id="modeBar">
-    <button class="mode-pill active-af" id="pillAF" onclick="aiSetMode('af24')">🎓 AF 2.4</button>
-    <button class="mode-pill" id="pillDev" onclick="aiSetMode('dev39')">🔥 Dev 3.9</button>
+    <!-- New Chat -->
+    <button class="dr-new-btn" onclick="newChat()">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Chat
+    </button>
   </div>
 
+  <!-- Search -->
+  <div class="dr-search-wrap">
+    <input class="dr-search" id="convSearch" placeholder="Search conversations…" oninput="filterConvs()" type="search"/>
+  </div>
+
+  <!-- Conv label -->
+  <div class="dr-conv-label">
+    <span>Conversations</span>
+    <button class="dr-clear-btn" onclick="clearAllConvs()">Clear all</button>
+  </div>
+
+  <!-- Conv list -->
+  <div id="convList">
+    <div class="conv-empty">
+      <div class="conv-empty-icon">💬</div>
+      No conversations yet.<br>Start a new chat.
+    </div>
+  </div>
+
+  <!-- Footer: Usage -->
+  <div class="dr-footer">
+    <div class="dr-usage-title">AI Usage Today</div>
+    <!-- Requests -->
+    <div class="usage-row">
+      <span class="usage-label">Requests</span>
+      <span class="usage-val" id="drReqVal">— / 5</span>
+    </div>
+    <div class="usage-track">
+      <div class="usage-fill" id="drReqBar" style="width:0%"></div>
+    </div>
+    <!-- Tokens -->
+    <div class="usage-row">
+      <span class="usage-label">Tokens</span>
+      <span class="usage-val" id="drTokVal">— / 15k</span>
+    </div>
+    <div class="usage-track">
+      <div class="usage-fill" id="drTokBar" style="width:0%"></div>
+    </div>
+    <!-- Session info -->
+    <div style="font-size:10.5px;color:var(--tm);font-weight:600;margin-top:4px;" id="drSessInfo">4 sessions/day · 6h cooldown</div>
+  </div>
+</div>
+
+<!-- ════ MAIN APP ════ -->
+<div id="app">
+
+  <!-- HEADER: CLEAN -->
+  <header id="header">
+    <button class="hdr-menu" onclick="openDrawer()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="hdr-center">
+      <div class="hdr-title">AcademeForge AI</div>
+      <div class="hdr-sub" id="hdrSub">AF 2.4 · Student Mentor</div>
+    </div>
+    <div class="hdr-badge af24" id="hdrBadge">AF24</div>
+  </header>
+
   <!-- SESSION BANNER -->
-  <div class="session-banner hidden" id="sessionBanner"></div>
+  <div id="sessionBanner" class="hidden"></div>
 
   <!-- LOCKED -->
-  <div class="locked-box" id="lockedBox">
+  <div id="lockedBox">
     <div class="locked-card">
       <div class="locked-icon">🔒</div>
       <h2>AI Locked</h2>
-      <p>Login with your Student ID to access AcademeForge AI and get personalized mentoring.</p>
-      <button class="login-btn" onclick="goToLogin()">Login to continue</button>
+      <p>Login with your Student ID to access AcademeForge AI and get personalised mentoring.</p>
+      <button class="locked-btn" onclick="goToLogin()">Login to continue</button>
     </div>
   </div>
 
-  <!-- CHAT AREA -->
-  <div class="chat-area hidden" id="chatArea">
-    <div class="welcome-box" id="welcomeBox">
-      <div class="welcome-icon">
-        <img src="../IMG/AF LOGO 2.jpeg" alt="AF" onerror="this.outerHTML='<div style=\'width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#6366f1,#0ea5e9);display:grid;place-items:center;font-size:26px;font-weight:800;color:#fff;\'>AF</div>'"/>
-      </div>
-      <h2>AcademeForge AI</h2>
-      <p>Your personal mentor for learning, building, and growing your career.</p>
-      <div class="welcome-tags">
-        <span class="wtag">Coding</span>
-        <span class="wtag">AI Skills</span>
-        <span class="wtag">Career</span>
-        <span class="wtag">Projects</span>
-        <span class="wtag">Design</span>
-      </div>
+  <!-- CHAT -->
+  <div id="chat" class="hidden">
+    <!-- Greeting -->
+    <div id="greeting">
+      <div class="greeting-time" id="greetingTime"></div>
+      <div class="greeting-main" id="greetingMain"></div>
+      <div class="greeting-sub" id="greetingSub"></div>
+      <div class="suggestion-chips" id="chips"></div>
     </div>
+    <!-- Messages -->
     <div id="msgList"></div>
   </div>
 
   <!-- INPUT AREA -->
-  <div class="input-area hidden" id="inputArea">
-    <div class="input-wrap" id="inputWrap">
-      <textarea id="msgInput" rows="1" placeholder="Ask AF 2.4…" oninput="aiTyping()"></textarea>
-      <button class="send-btn" id="sendBtn" onclick="aiSend()" disabled>↑</button>
+  <div id="inputArea" class="hidden">
+    <div class="input-box" id="inputBox">
+      <textarea id="msgInput" rows="1" placeholder="Ask AF 2.4 anything…"
+        oninput="onTyping()" onkeydown="onKey(event)"></textarea>
+      <button id="sendBtn" onclick="doSend()" disabled>
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
     </div>
-    <div class="char-hint" id="charHint">0 / 500</div>
-  </div>
-
-  <!-- BOTTOM NAV -->
-  <nav class="bnav">
-    <button class="bnav-btn" onclick="window.location.href='/index.html'">
-      <span class="bnav-icon">🏠</span><span class="bnav-label">Home</span>
-    </button>
-    <button class="bnav-btn" onclick="window.location.href='/student/index.html'">
-      <span class="bnav-icon">🎓</span><span class="bnav-label">Student</span>
-    </button>
-    <button class="bnav-btn active">
-      <span class="bnav-icon">🤖</span><span class="bnav-label">AI</span>
-    </button>
-    <button class="bnav-btn" onclick="window.location.href='/community/index.html'">
-      <span class="bnav-icon">💬</span><span class="bnav-label">Community</span>
-    </button>
-    <button class="bnav-btn" onclick="window.location.href='/setting/index.html'">
-      <span class="bnav-icon">⚙️</span><span class="bnav-label">Settings</span>
-    </button>
-  </nav>
-</div>
-
-<div class="toast-wrap" id="toastWrap"></div>
-
-<!-- PROFILE MODAL -->
-<div class="modal-ov" id="profileModal" onclick="aiCloseProfile()">
-  <div class="modal-card" onclick="event.stopPropagation()">
-    <div class="modal-drag"></div>
-    <div class="modal-head">
-      <h3>My Profile</h3>
-      <button class="modal-close" onclick="aiCloseProfile()">×</button>
-    </div>
-    <div class="modal-body" id="profileBody">
-      <div class="state-msg"><div class="spinner"></div></div>
+    <div class="input-hint">
+      <span>Shift+Enter for new line</span>
+      <span id="charHint">0 / 800</span>
     </div>
   </div>
-</div>
+
+</div><!-- /#app -->
+
+<div id="toastWrap"></div>
 
 <script>
-/* ── SUPABASE ── */
+/* ═══════════════════════════════════
+   CONFIG
+═══════════════════════════════════ */
 const SUPABASE_URL = "https://afooyyydhlwngzssgqih.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb295eXlkaGx3bmd6c3NncWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDQxMjgsImV4cCI6MjA5NDIyMDEyOH0.KG0XO0oP_2MpewHoIwTtbrKg5FkyOYRUtVzLH1MSJiE";
 const EDGE_URL     = SUPABASE_URL + "/functions/v1/af-ask-ai";
 
-/* ── SESSION LIMITS ── */
 const TOTAL_TOKEN_LIMIT   = 15000;
-const SESSION_TOKEN_LIMIT = Math.floor(TOTAL_TOKEN_LIMIT / 4); // 3750 per session
-const TOTAL_REQ_LIMIT     = 20; // total daily requests
-const SESSION_REQ_LIMIT   = 5;  // per session
-const SESSION_COOLDOWN_H  = 6;  // hours between sessions
+const SESSION_TOKEN_LIMIT = 3750;   // 15000 / 4
+const TOTAL_REQ_LIMIT     = 20;
+const SESSION_REQ_LIMIT   = 5;
+const SESSION_COOLDOWN_H  = 6;
 
-/* ── HELPERS ── */
-const $       = id => document.getElementById(id);
-const show    = id => $(id) && $(id).classList.remove('hidden');
-const hide    = id => $(id) && $(id).classList.add('hidden');
-const isLoggedIn = () => !!(localStorage.getItem('af_student_email') || localStorage.getItem('af_student_mobile'));
-const sKey    = () => localStorage.getItem('af_student_email') || localStorage.getItem('af_student_mobile') || '';
-const sName   = () => localStorage.getItem('af_student_name') || 'Student';
-const sMobile = () => localStorage.getItem('af_student_mobile') || '';
-const sEmail  = () => localStorage.getItem('af_student_email') || '';
-function initials(n){return String(n||'AF').trim().split(/\s+/).slice(0,2).map(v=>v.charAt(0).toUpperCase()).join('');}
+/* ═══════════════════════════════════
+   HELPERS
+═══════════════════════════════════ */
+const $    = id => document.getElementById(id);
+const show = id => $(id) && $(id).classList.remove('hidden');
+const hide = id => $(id) && $(id).classList.add('hidden');
+
+const isLoggedIn = () => !!(ls('af_student_email') || ls('af_student_mobile'));
+const sKey    = () => ls('af_student_email') || ls('af_student_mobile') || '';
+const sName   = () => ls('af_student_name') || 'Student';
+const sMobile = () => ls('af_student_mobile') || '';
+const sEmail  = () => ls('af_student_email') || '';
+const ls      = k => localStorage.getItem(k);
+
+function initials(n){return String(n||'AF').trim().split(/\s+/).slice(0,2).map(v=>v[0].toUpperCase()).join('');}
 function esc(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function timeAgo(v){
-  if(!v) return '';
-  try{
-    const d=Math.floor((Date.now()-new Date(v).getTime())/1000);
-    if(d<60) return 'just now';
-    if(d<3600) return Math.floor(d/60)+'m ago';
-    if(d<86400) return Math.floor(d/3600)+'h ago';
-    return new Date(v).toLocaleDateString();
-  }catch(e){return '';}
-}
 
-/* ── THEME ── */
-function syncTheme(){document.documentElement.setAttribute('data-theme',localStorage.getItem('af_dark_mode')==='1'?'dark':'light');}
+/* ═══════════════════════════════════
+   THEME
+═══════════════════════════════════ */
+function syncTheme(){document.documentElement.setAttribute('data-theme',ls('af_dark_mode')==='1'?'dark':'light');}
 syncTheme();
 window.addEventListener('storage',e=>{if(e.key==='af_dark_mode') syncTheme();});
 
-/* ── TOAST ── */
+/* ═══════════════════════════════════
+   TOAST
+═══════════════════════════════════ */
 let _tTimer=null;
-function showToast(msg,type='info',title=''){
+function toast(msg,type='info',title=''){
   const w=$('toastWrap'); w.innerHTML='';
   if(_tTimer){clearTimeout(_tTimer);_tTimer=null;}
   const labels={ok:'Done',err:'Error',info:'Notice'};
   const d=document.createElement('div');
-  d.className='toast toast-'+type;
+  d.className='toast '+type;
   d.innerHTML=`<div class="toast-body"><div class="toast-title">${title||labels[type]||'Info'}</div><div class="toast-msg">${msg}</div></div><span class="toast-x" onclick="this.parentElement.remove()">×</span>`;
   w.appendChild(d);
-  _tTimer=setTimeout(()=>{d.style.animation='toastIn .22s ease reverse';setTimeout(()=>d.remove(),220);},3200);
+  _tTimer=setTimeout(()=>{d.style.animation='fadeUp .22s ease reverse';setTimeout(()=>d.remove(),220);},3200);
 }
 
-/* ── NAV ── */
-function goToLogin(){sessionStorage.setItem('af_last_tab','student');window.location.href='../';}
-
-/* ── STATE ── */
-let _mode = 'af24';
-let _messages = []; // [{role,content,mode,time}]
-let _loading = false;
-let _curConvId = null;
-let _usageData = null; // cached from server
-
-/* ── SESSION STATE (stored per student in localStorage) ── */
-function getSessionKey(){ return 'af_ai_session_' + btoa(sKey()).replace(/=/g,''); }
-function getSession(){
-  try{
-    const raw = localStorage.getItem(getSessionKey());
-    if(!raw) return newSession();
-    return JSON.parse(raw);
-  }catch(e){ return newSession(); }
+/* ═══════════════════════════════════
+   DRAWER
+═══════════════════════════════════ */
+function openDrawer(){
+  $('drawer').classList.add('open');
+  $('overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  loadConvList();
+  updateUsageBar();
 }
-function newSession(){
-  return {
-    sessionStart: null,
-    sessionTokens: 0,
-    sessionReqs: 0,
-    totalTokens: 0,
-    totalReqs: 0,
-    dayReset: new Date().toISOString().split('T')[0]
-  };
+function closeDrawer(){
+  $('drawer').classList.remove('open');
+  $('overlay').classList.remove('open');
+  document.body.style.overflow='';
 }
-function saveSession(s){ try{localStorage.setItem(getSessionKey(), JSON.stringify(s));}catch(e){} }
-function resetDayIfNeeded(s){
-  const today = new Date().toISOString().split('T')[0];
-  if(s.dayReset !== today){
-    s.totalTokens = 0; s.totalReqs = 0;
-    s.sessionTokens = 0; s.sessionReqs = 0;
-    s.sessionStart = null; s.dayReset = today;
+
+/* ═══════════════════════════════════
+   STATE
+═══════════════════════════════════ */
+let _mode='af24';
+let _convId=null;
+let _convs=[];
+let _loading=false;
+let _filteredConvs=[];
+
+/* ═══════════════════════════════════
+   SESSION (localStorage per student)
+═══════════════════════════════════ */
+function sesKey(){return 'af_ai_ses_'+btoa(sKey()).replace(/=/g,'');}
+function getSes(){
+  try{const r=ls(sesKey());return r?JSON.parse(r):freshSes();}catch{return freshSes();}
+}
+function freshSes(){
+  return{start:null,sTok:0,sReq:0,totTok:0,totReq:0,day:today()};
+}
+function today(){return new Date().toISOString().split('T')[0];}
+function saveSes(s){try{localStorage.setItem(sesKey(),JSON.stringify(s));}catch{}}
+function dayReset(s){
+  if(s.day!==today()){Object.assign(s,{start:null,sTok:0,sReq:0,totTok:0,totReq:0,day:today()});}
+  return s;
+}
+function cdMs(s){
+  if(!s.start) return 0;
+  return Math.max(0,SESSION_COOLDOWN_H*3600000-(Date.now()-new Date(s.start).getTime()));
+}
+function fmtCd(ms){
+  const h=Math.floor(ms/3600000),m=Math.ceil((ms%3600000)/60000);
+  return h>0?`${h}h ${m}m`:`${m}m`;
+}
+function sesOk(s){
+  // In active session?
+  if(s.start&&cdMs(s)>0&&s.sTok<SESSION_TOKEN_LIMIT&&s.sReq<SESSION_REQ_LIMIT) return {ok:true};
+  // Can start new?
+  if(s.totTok>=TOTAL_TOKEN_LIMIT) return{ok:false,why:'total_tokens'};
+  if(s.totReq>=TOTAL_REQ_LIMIT)   return{ok:false,why:'total_reqs'};
+  const cd=cdMs(s);
+  if(cd>0) return{ok:false,why:'cooldown',ms:cd};
+  return{ok:true,new:true};
+}
+function startSes(s){s.start=new Date().toISOString();s.sTok=0;s.sReq=0;return s;}
+
+/* ═══════════════════════════════════
+   USAGE BAR (drawer footer)
+═══════════════════════════════════ */
+function updateUsageBar(){
+  const s=dayReset(getSes());
+  const reqLeft=Math.max(0,SESSION_REQ_LIMIT-s.sReq);
+  const reqUsed=s.sReq;
+  const tokUsed=s.totTok;
+  const tokK=(tokUsed/1000).toFixed(1);
+  const reqPct=Math.min(100,(reqUsed/SESSION_REQ_LIMIT)*100);
+  const tokPct=Math.min(100,(tokUsed/TOTAL_TOKEN_LIMIT)*100);
+  $('drReqVal').textContent=`${reqLeft} / ${SESSION_REQ_LIMIT}`;
+  $('drTokVal').textContent=`${tokK}k / 15k`;
+  $('drReqBar').style.width=reqPct+'%';
+  $('drTokBar').style.width=tokPct+'%';
+  $('drReqBar').className='usage-fill'+(reqPct>=80?' danger':reqPct>=60?' warn':'');
+  $('drTokBar').className='usage-fill'+(tokPct>=80?' danger':tokPct>=60?' warn':'');
+  const cd=cdMs(s);
+  $('drSessInfo').textContent=cd>0?`Next session in ${fmtCd(cd)}`:`4 sessions/day · 6h cooldown`;
+}
+
+/* ═══════════════════════════════════
+   MODE
+═══════════════════════════════════ */
+function setMode(m){
+  _mode=m;
+  $('drBtnAF').className ='model-btn'+(m==='af24'?' active-af':'');
+  $('drBtnDev').className='model-btn'+(m==='dev39'?' active-dev':'');
+  $('hdrSub').textContent=m==='dev39'?'Dev 3.9 · Founder Mode':'AF 2.4 · Student Mentor';
+  $('hdrBadge').textContent=m==='dev39'?'DEV39':'AF24';
+  $('hdrBadge').className='hdr-badge '+(m==='dev39'?'dev39':'af24');
+  $('inputBox').className='input-box'+(m==='dev39'?' dev':'');
+  $('sendBtn').className='send-btn'+(m==='dev39'?' dev':'');  // keep id, update class only via #sendBtn rule
+  $('sendBtn').className=(m==='dev39'?'dev':'');  // just toggle class
+  // Fix: use explicit id styling
+  const sb=$('sendBtn');
+  sb.style.background=m==='dev39'?'var(--dev)':'var(--p)';
+  $('msgInput').placeholder=m==='dev39'?'Ask Dev 3.9 anything…':'Ask AF 2.4 anything…';
+}
+
+/* ═══════════════════════════════════
+   GREETING
+═══════════════════════════════════ */
+function renderGreeting(){
+  const h=new Date().getHours();
+  const name=sName().split(' ')[0];
+  let timeLabel,emoji,main,sub;
+  if(h>=5&&h<12){
+    timeLabel='Good Morning';emoji='☀️';
+    main=`Good Morning ${name} ${emoji}`;
+    sub='Ready to learn something new today?';
+  }else if(h>=12&&h<17){
+    timeLabel='Good Afternoon';emoji='🚀';
+    main=`Welcome back ${name} ${emoji}`;
+    sub='What are we building today?';
+  }else if(h>=17&&h<21){
+    timeLabel='Good Evening';emoji='🌆';
+    main=`Evening session ${name} ${emoji}`;
+    sub='Let\'s make progress on your goals.';
+  }else{
+    timeLabel='Late Night';emoji='🌙';
+    main=`Late night session ${emoji}`;
+    sub='Let\'s make it count.';
   }
-  return s;
+  $('greetingTime').textContent=timeLabel;
+  $('greetingMain').textContent=main;
+  $('greetingSub').textContent=sub;
+
+  const suggestions=_mode==='dev39'
+    ?['Build a startup','Freelancing strategy','Product roadmap','Find co-founder','Launch MVP']
+    :['Learn Python','Build a portfolio','Freelancing tips','AI tools for students','Career advice','React basics','System design'];
+
+  $('chips').innerHTML=suggestions.map(s=>`<button class="chip" onclick="chipClick('${s}')">${s}</button>`).join('');
 }
 
-/* Session cooldown: returns ms left, or 0 if can start */
-function sessionCooldownMs(s){
-  if(!s.sessionStart) return 0;
-  const elapsed = Date.now() - new Date(s.sessionStart).getTime();
-  const cooldown = SESSION_COOLDOWN_H * 3600 * 1000;
-  return Math.max(0, cooldown - elapsed);
-}
-function canStartSession(s){
-  if(s.totalTokens >= TOTAL_TOKEN_LIMIT) return {ok:false,reason:'total_tokens'};
-  if(s.totalReqs >= TOTAL_REQ_LIMIT) return {ok:false,reason:'total_reqs'};
-  const cd = sessionCooldownMs(s);
-  if(cd > 0) return {ok:false,reason:'cooldown',ms:cd};
-  return {ok:true};
-}
-function canSendInSession(s){
-  if(s.sessionTokens >= SESSION_TOKEN_LIMIT) return false;
-  if(s.sessionReqs >= SESSION_REQ_LIMIT) return false;
-  return true;
-}
-function startSession(s){
-  s.sessionStart = new Date().toISOString();
-  s.sessionTokens = 0; s.sessionReqs = 0;
-  return s;
-}
-function formatCooldown(ms){
-  const h = Math.floor(ms/3600000);
-  const m = Math.ceil((ms%3600000)/60000);
-  if(h>0) return `${h}h ${m}m`;
-  return `${m}m`;
+function chipClick(text){
+  $('msgInput').value=text;
+  onTyping();
+  $('msgInput').focus();
 }
 
-/* ── EDGE CALL ── */
+/* ═══════════════════════════════════
+   BANNER
+═══════════════════════════════════ */
+function updateBanner(s){
+  const el=$('sessionBanner');
+  const cd=cdMs(s);
+  const done=s.totTok>=TOTAL_TOKEN_LIMIT||s.totReq>=TOTAL_REQ_LIMIT;
+  if(done){
+    el.className='err';el.innerHTML='🚫 Daily limit reached. Come back tomorrow!';
+    el.style.display='flex';disableInput();return;
+  }
+  if(cd>0||(s.sTok>=SESSION_TOKEN_LIMIT||s.sReq>=SESSION_REQ_LIMIT)){
+    const remaining=cd>0?fmtCd(cd):`${SESSION_COOLDOWN_H}h`;
+    el.className='warn';el.innerHTML=`⏳ Session limit reached. Next session in <strong>${remaining}</strong>`;
+    el.style.display='flex';disableInput();
+    if(cd>0) setTimeout(()=>{let s2=dayReset(getSes());updateBanner(s2);enableInput();},cd+1000);
+    return;
+  }
+  el.style.display='none';enableInput();
+}
+function disableInput(){if($('msgInput')){$('msgInput').disabled=true;$('sendBtn').disabled=true;}}
+function enableInput(){if($('msgInput')){$('msgInput').disabled=false;}}
+
+/* ═══════════════════════════════════
+   EDGE CALL
+═══════════════════════════════════ */
 async function edgeCall(payload){
   try{
-    if(!navigator.onLine) return {ok:false,error:'No internet connection.'};
-    const key = sKey();
-    const res = await fetch(EDGE_URL, {
+    if(!navigator.onLine) return{error:'No internet.'};
+    const r=await fetch(EDGE_URL,{
       method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-af-student-key': key
-      },
-      body: JSON.stringify({...payload, student_key: key, student_name: sName()})
+      headers:{'Content-Type':'application/json','x-af-student-key':sKey()},
+      body:JSON.stringify({...payload,student_key:sKey(),student_name:sName()})
     });
-    const data = await res.json();
-    return data;
-  }catch(e){ return {ok:false,error:e.message||'Request failed.'}; }
+    return await r.json();
+  }catch(e){return{error:e.message};}
 }
 
-/* ── BANNER ── */
-function updateBanner(s){
-  const el = $('sessionBanner');
-  if(!el) return;
-  const cd = sessionCooldownMs(s);
-  const totalDone = s.totalTokens >= TOTAL_TOKEN_LIMIT || s.totalReqs >= TOTAL_REQ_LIMIT;
-
-  if(totalDone){
-    el.className = 'session-banner err';
-    el.innerHTML = '🚫 Daily limit reached. Come back tomorrow!';
-    show('sessionBanner');
-    $('msgInput') && ($('msgInput').disabled = true);
-    $('sendBtn') && ($('sendBtn').disabled = true);
+/* ═══════════════════════════════════
+   CONVERSATIONS
+═══════════════════════════════════ */
+async function loadConvList(){
+  const res=await edgeCall({action:'list_conversations'});
+  _convs=res&&res.conversations?res.conversations:[];
+  _filteredConvs=[..._convs];
+  renderConvList();
+}
+function filterConvs(){
+  const q=$('convSearch').value.toLowerCase().trim();
+  _filteredConvs=q?_convs.filter(c=>c.title.toLowerCase().includes(q)):[..._convs];
+  renderConvList();
+}
+function renderConvList(){
+  const box=$('convList');
+  if(!_filteredConvs.length){
+    box.innerHTML='<div class="conv-empty"><div class="conv-empty-icon">💬</div>No conversations yet.<br>Start a new chat.</div>';
     return;
   }
-  if(cd > 0){
-    el.className = 'session-banner warn';
-    el.innerHTML = `⏳ Free session limit reached. Next session in <strong>${formatCooldown(cd)}</strong>`;
-    show('sessionBanner');
-    $('msgInput') && ($('msgInput').disabled = true);
-    $('sendBtn') && ($('sendBtn').disabled = true);
-    // auto-refresh when cooldown expires
-    setTimeout(()=>{ let s2=getSession(); s2=resetDayIfNeeded(s2); updateBanner(s2); enableInput(); }, cd+1000);
-    return;
-  }
-  if(s.sessionTokens >= SESSION_TOKEN_LIMIT || s.sessionReqs >= SESSION_REQ_LIMIT){
-    // session just ended — need cooldown
-    el.className = 'session-banner warn';
-    el.innerHTML = `⏳ Session tokens used up. Next session in <strong>${SESSION_COOLDOWN_H}h</strong>`;
-    show('sessionBanner');
-    $('msgInput') && ($('msgInput').disabled = true);
-    $('sendBtn') && ($('sendBtn').disabled = true);
-    return;
-  }
-  // all good
-  el.classList.add('hidden');
-  enableInput();
+  box.innerHTML='';
+  _filteredConvs.forEach(c=>{
+    const item=document.createElement('div');
+    item.className='conv-item'+(c.id===_convId?' active':'');
+    item.innerHTML=`
+      <div class="conv-dot ${c.mode}"></div>
+      <div class="conv-title">${esc(c.title)}</div>
+      <button class="conv-del" onclick="delConv(event,'${c.id}')" title="Delete">
+        <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+      </button>`;
+    item.onclick=()=>openConv(c);
+    box.appendChild(item);
+  });
 }
-function enableInput(){
-  if(!$('msgInput')) return;
-  let s = getSession(); s = resetDayIfNeeded(s);
-  const ok = canStartSession(s).ok || (s.sessionStart && canSendInSession(s));
-  $('msgInput').disabled = false;
-}
-
-/* ── INIT ── */
-async function init(){
-  if(!isLoggedIn()){
-    hide('chatArea'); hide('modeBar'); hide('inputArea'); hide('hdrActions');
-    $('lockedBox').classList.add('visible');
-    return;
-  }
-  show('chatArea'); show('modeBar'); show('inputArea'); show('hdrActions');
-  $('lockedBox').classList.remove('visible');
-  aiSetMode('af24');
-
-  let s = getSession(); s = resetDayIfNeeded(s);
-  updateBanner(s);
-
-  // Load existing conversation if any
-  if(_curConvId){
-    await aiLoadConv(_curConvId);
-  } else {
-    renderWelcome();
+async function openConv(c){
+  _convId=c.id;setMode(c.mode);
+  clearChat();showGreeting(false);
+  renderConvList();closeDrawer();
+  const ph=addThinking();
+  const res=await edgeCall({action:'load_conversation',conversation_id:c.id});
+  removeEl(ph);
+  if(res&&res.messages&&res.messages.length){
+    res.messages.forEach(m=>addMsg(m.role,m.content,m.mode||_mode,false));
+    scrollBot();
   }
 }
-
-/* ── MODE ── */
-function aiSetMode(m){
-  _mode = m;
-  $('pillAF').className = 'mode-pill' + (m==='af24' ? ' active-af' : '');
-  $('pillDev').className = 'mode-pill' + (m==='dev39' ? ' active-dev' : '');
-  $('inputWrap').className = 'input-wrap' + (m==='dev39'?' dev-mode':'');
-  $('sendBtn').className = 'send-btn' + (m==='dev39'?' dev-send':'');
-  $('msgInput').placeholder = m==='dev39' ? 'Dev 3.9 — what are you building?' : 'Ask AF 2.4…';
+async function delConv(e,id){
+  e.stopPropagation();
+  _convs=_convs.filter(c=>c.id!==id);
+  _filteredConvs=_filteredConvs.filter(c=>c.id!==id);
+  if(_convId===id){_convId=null;clearChat();showGreeting(true);}
+  renderConvList();
+  await edgeCall({action:'delete_conversation',conversation_id:id});
+}
+async function clearAllConvs(){
+  if(!confirm('Delete all conversations?')) return;
+  _convs=[];_filteredConvs=[];_convId=null;
+  renderConvList();clearChat();showGreeting(true);
+  await edgeCall({action:'delete_all_conversations'});
+}
+function newChat(){
+  _convId=null;clearChat();showGreeting(true);closeDrawer();
+  toast('New chat started','info','✦');
 }
 
-/* ── NEW CHAT ── */
-function aiNewChat(){
-  _messages = []; _curConvId = null;
-  $('msgList').innerHTML = '';
-  renderWelcome();
-  showToast('New chat started','info','✦');
+/* ═══════════════════════════════════
+   CHAT RENDER
+═══════════════════════════════════ */
+function clearChat(){$('msgList').innerHTML='';}
+function showGreeting(yes){$('greeting').style.display=yes?'':'none';}
+
+function addMsg(role,content,mode,scroll){
+  const isUser=role==='user';
+  const row=document.createElement('div');
+  row.className='msg-row '+(isUser?'user':'ai');
+
+  const av=document.createElement('div');
+  if(isUser){av.className='av av-user';av.textContent=initials(sName());}
+  else{av.className='av av-ai'+(mode==='dev39'?' dev':'');av.textContent=mode==='dev39'?'🔥':'🎓';}
+
+  const wrap=document.createElement('div');
+  wrap.className='bubble-wrap';
+
+  const bub=document.createElement('div');
+  if(isUser){
+    bub.className='bubble bubble-user'+(mode==='dev39'?' bubble-user-dev':'');
+  }else{
+    bub.className='bubble bubble-ai';
+  }
+  bub.textContent=content;
+
+  const meta=document.createElement('div');
+  meta.className='msg-meta';
+  if(!isUser){
+    meta.innerHTML=`<span class="mode-pill-sm ${mode}">${mode==='dev39'?'DEV 3.9':'AF 2.4'}</span>AcademeForge AI`;
+  }else{
+    meta.textContent=sName();
+  }
+
+  wrap.appendChild(bub);wrap.appendChild(meta);
+  row.appendChild(av);row.appendChild(wrap);
+  $('msgList').appendChild(row);
+  if(scroll) scrollBot();
+  return row;
 }
 
-/* ── WELCOME ── */
-function renderWelcome(){
-  const wb = $('welcomeBox');
-  if(wb) wb.style.display = '';
+function addThinking(){
+  const row=document.createElement('div');
+  row.className='thinking-row';
+  const av=document.createElement('div');
+  av.className='av av-ai'+(_mode==='dev39'?' dev':'');
+  av.textContent=_mode==='dev39'?'🔥':'🎓';
+  const bub=document.createElement('div');
+  bub.className='thinking-bub';
+  bub.innerHTML='<div class="dots"><span></span><span></span><span></span></div>';
+  row.appendChild(av);row.appendChild(bub);
+  $('msgList').appendChild(row);
+  scrollBot();
+  return row;
 }
-function hideWelcome(){
-  const wb = $('welcomeBox');
-  if(wb) wb.style.display = 'none';
-}
+function removeEl(el){if(el&&el.parentNode) el.parentNode.removeChild(el);}
+function scrollBot(){$('chat').scrollTo({top:$('chat').scrollHeight,behavior:'smooth'});}
 
-/* ── LOAD CONV ── */
-async function aiLoadConv(convId){
-  hideWelcome();
-  const box = $('msgList'); box.innerHTML = '<div class="state-msg"><div class="spinner"></div></div>';
-  const res = await edgeCall({action:'load_conversation',conversation_id:convId});
-  box.innerHTML = '';
-  if(!res || !res.messages || !res.messages.length){renderWelcome();return;}
-  res.messages.forEach(m=>renderMessage(m.role,m.content,m.mode||_mode,false));
-  scrollBottom();
-}
-
-/* ── TYPING ── */
-function aiTyping(){
-  const v = $('msgInput').value;
-  const l = v.length;
-  const over = l > 500;
-  $('charHint').textContent = l + ' / 500';
-  $('charHint').className = 'char-hint' + (over ? ' warn' : '');
-  $('sendBtn').disabled = over || l === 0 || _loading;
+/* ═══════════════════════════════════
+   INPUT
+═══════════════════════════════════ */
+function onTyping(){
+  const v=$('msgInput').value,l=v.length,over=l>800;
+  $('charHint').textContent=l+' / 800';
+  $('charHint').className=over?'warn':'';
+  $('sendBtn').disabled=over||l===0||_loading;
   autoResize();
 }
-
+function onKey(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();doSend();}
+}
 function autoResize(){
-  const el = $('msgInput');
-  if(!el) return;
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+  const el=$('msgInput');
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,120)+'px';
 }
 
-/* ── SEND ── */
-async function aiSend(){
-  const content = $('msgInput').value.trim();
-  if(!content || _loading) return;
+/* ═══════════════════════════════════
+   SEND
+═══════════════════════════════════ */
+async function doSend(){
+  const content=$('msgInput').value.trim();
+  if(!content||_loading) return;
 
-  let s = getSession(); s = resetDayIfNeeded(s);
-
-  // Check / start session
-  const check = canStartSession(s);
-  if(!s.sessionStart || !canSendInSession(s)){
-    if(!check.ok && check.reason === 'cooldown'){
-      showToast('Session cooldown active. Wait '+formatCooldown(check.ms),'err','⏳');
-      return;
-    }
-    if(!check.ok && (check.reason==='total_tokens'||check.reason==='total_reqs')){
-      showToast('Daily limit reached. Come back tomorrow!','err','🚫');
-      return;
-    }
-    // Start new session
-    s = startSession(s);
-    saveSession(s);
+  let s=dayReset(getSes());
+  const chk=sesOk(s);
+  if(!chk.ok){
+    if(chk.why==='cooldown'){toast(`Session cooldown. Wait ${fmtCd(chk.ms)}`,'err','⏳');return;}
+    toast('Daily limit reached. Come back tomorrow!','err','🚫');return;
   }
+  if(chk.new) s=startSes(s);
+  saveSes(s);
 
-  if(!canSendInSession(s)){
-    updateBanner(s);
-    return;
-  }
-
-  _loading = true;
-  $('sendBtn').disabled = true;
-  $('msgInput').value = '';
-  $('charHint').textContent = '0 / 500';
+  _loading=true;
+  $('sendBtn').disabled=true;
+  $('msgInput').value='';
+  $('charHint').textContent='0 / 800';
   autoResize();
-  hideWelcome();
+  showGreeting(false);
 
-  renderMessage('user', content, _mode, true);
-  const thinkEl = showThinking();
+  addMsg('user',content,_mode,true);
+  const ph=addThinking();
 
   try{
-    const payload = {action:'ask', question:content, mode:_mode};
-    if(_curConvId) payload.conversation_id = _curConvId;
+    const payload={action:'ask',question:content,mode:_mode};
+    if(_convId) payload.conversation_id=_convId;
+    const res=await edgeCall(payload);
+    removeEl(ph);
 
-    const res = await edgeCall(payload);
-    removeThinking(thinkEl);
-
-    if(!res || res.error){
-      if(res && res.limitReached){
-        s.totalTokens = TOTAL_TOKEN_LIMIT;
-        saveSession(s); updateBanner(s);
-      } else {
-        showToast((res && res.error)||'Request failed.','err','Error');
-        renderMessage('assistant','Sorry, I ran into an error. Please try again.',_mode,true);
+    if(!res||res.error){
+      if(res&&res.limitReached){
+        s=dayReset(getSes());s.totTok=TOTAL_TOKEN_LIMIT;saveSes(s);updateBanner(s);
+      }else{
+        toast((res&&res.error)||'Request failed','err','Error');
+        addMsg('assistant','Sorry, something went wrong. Please try again.',_mode,true);
       }
       return;
     }
 
-    // Update session stats
-    const tokensUsed = res.tokensThisCall || Math.ceil((content.length + (res.answer||'').length) / 4);
-    s.sessionTokens = (s.sessionTokens||0) + tokensUsed;
-    s.totalTokens   = (s.totalTokens||0) + tokensUsed;
-    s.sessionReqs   = (s.sessionReqs||0) + 1;
-    s.totalReqs     = (s.totalReqs||0) + 1;
-    saveSession(s);
+    const toks=res.tokensThisCall||Math.ceil((content.length+(res.answer||'').length)/4);
+    s=dayReset(getSes());
+    s.sTok=(s.sTok||0)+toks;s.totTok=(s.totTok||0)+toks;
+    s.sReq=(s.sReq||0)+1;s.totReq=(s.totReq||0)+1;
+    saveSes(s);
 
-    if(res.conversation_id) _curConvId = res.conversation_id;
-    renderMessage('assistant', res.answer, _mode, true);
-    updateBanner(s);
-    scrollBottom();
+    if(res.conversation_id){
+      const isNew=!_convId;
+      _convId=res.conversation_id;
+      if(isNew){
+        const nc={id:_convId,title:res.conversation_title||'New Chat',mode:_mode,updated_at:new Date().toISOString()};
+        _convs.unshift(nc);_filteredConvs.unshift(nc);
+      } else {
+        const idx=_convs.findIndex(c=>c.id===_convId);
+        if(idx>0){_convs.unshift(_convs.splice(idx,1)[0]);_filteredConvs=[..._convs];}
+        if(res.conversation_title){const c=_convs.find(c=>c.id===_convId);if(c) c.title=res.conversation_title;}
+      }
+    }
 
-    // Cache usage for profile
-    _usageData = {
-      sessionTokens: s.sessionTokens,
-      totalTokens: s.totalTokens,
-      sessionReqs: s.sessionReqs,
-      totalReqs: s.totalReqs,
-      sessionTokenLimit: SESSION_TOKEN_LIMIT,
-      totalTokenLimit: TOTAL_TOKEN_LIMIT,
-    };
-
+    addMsg('assistant',res.answer,_mode,true);
+    updateBanner(s);updateUsageBar();
   }catch(e){
-    removeThinking(thinkEl);
-    showToast('Network error. Please try again.','err','Error');
+    removeEl(ph);toast('Network error. Try again.','err','Error');
   }finally{
-    _loading = false;
-    const s2 = getSession();
-    if(canSendInSession(s2) && canStartSession(s2).ok){
-      $('sendBtn').disabled = false;
+    _loading=false;
+    const s2=dayReset(getSes());
+    const ok2=sesOk(s2);
+    if(ok2.ok||(s2.sTok<SESSION_TOKEN_LIMIT&&s2.sReq<SESSION_REQ_LIMIT)){
+      $('sendBtn').disabled=false;
     }
   }
 }
 
-/* ── RENDER MESSAGE ── */
-function renderMessage(role, content, mode, doScroll){
-  const isUser = role === 'user';
-  const row = document.createElement('div');
-  row.className = 'msg-row ' + (isUser ? 'user' : 'ai');
-  row.style.animationDelay = '0s';
+/* ═══════════════════════════════════
+   INIT
+═══════════════════════════════════ */
+function goToLogin(){sessionStorage.setItem('af_last_tab','student');window.location.href='../';}
 
-  const av = document.createElement('div');
-  if(isUser){
-    av.className = 'av av-user';
-    av.textContent = initials(sName());
-  } else {
-    av.className = 'av av-ai' + (mode==='dev39'?' dev':'');
-    av.textContent = mode==='dev39'?'🔥':'🎓';
+function init(){
+  if(!isLoggedIn()){
+    $('lockedBox').classList.add('visible');
+    hide('chat');hide('inputArea');
+    return;
   }
-
-  const right = document.createElement('div');
-  right.style.minWidth='0';right.style.flex='1';
-
-  const bub = document.createElement('div');
-  bub.className = 'bubble ' + (isUser ? 'bubble-user' : 'bubble-ai');
-  bub.textContent = content;
-
-  const meta = document.createElement('div');
-  meta.className = 'msg-meta';
-  if(!isUser){
-    const badge = `<span class="mode-badge ${mode}">${mode==='dev39'?'DEV 3.9':'AF 2.4'}</span>`;
-    meta.innerHTML = badge + 'AcademeForge AI · just now';
-  } else {
-    meta.textContent = sName() + ' · just now';
-  }
-
-  right.appendChild(bub);
-  right.appendChild(meta);
-  row.appendChild(av);
-  row.appendChild(right);
-  $('msgList').appendChild(row);
-  if(doScroll) scrollBottom();
+  $('lockedBox').classList.remove('visible');
+  show('chat');show('inputArea');
+  setMode('af24');
+  renderGreeting();
+  showGreeting(true);
+  const s=dayReset(getSes());
+  updateBanner(s);
+  updateUsageBar();
 }
 
-/* ── THINKING ── */
-function showThinking(){
-  const row = document.createElement('div');
-  row.className = 'thinking-row';
-  const av = document.createElement('div');
-  av.className = 'av av-ai' + (_mode==='dev39'?' dev':'');
-  av.textContent = _mode==='dev39'?'🔥':'🎓';
-  const bub = document.createElement('div');
-  bub.className = 'thinking-bub';
-  bub.innerHTML = '<div class="dots"><span></span><span></span><span></span></div>';
-  row.appendChild(av); row.appendChild(bub);
-  $('msgList').appendChild(row);
-  scrollBottom();
-  return row;
-}
-function removeThinking(el){if(el?.parentNode) el.parentNode.removeChild(el);}
-
-/* ── SCROLL ── */
-function scrollBottom(){
-  const ca = $('chatArea');
-  if(ca) ca.scrollTo({top:ca.scrollHeight,behavior:'smooth'});
-}
-
-/* ── PROFILE ── */
-function aiOpenProfile(){
-  const modal = $('profileModal');
-  modal.classList.add('open');
-  renderProfileBody();
-}
-function aiCloseProfile(){
-  $('profileModal').classList.remove('open');
-}
-function renderProfileBody(){
-  const s = resetDayIfNeeded(getSession());
-  const body = $('profileBody');
-  const name = sName(), mobile = sMobile(), email = sEmail();
-  const totalTok = s.totalTokens || 0;
-  const totalReq = s.totalReqs || 0;
-  const sessTok = s.sessionTokens || 0;
-  const sessReq = s.sessionReqs || 0;
-  const tokPct = Math.min(100, Math.round((totalTok/TOTAL_TOKEN_LIMIT)*100));
-  const sessTokenPct = Math.min(100, Math.round((sessTok/SESSION_TOKEN_LIMIT)*100));
-  const fillClass = tokPct>=90?'err-fill':tokPct>=70?'warn-fill':'';
-  const cd = sessionCooldownMs(s);
-  const sessInfo = cd>0 ? `Next session in ${formatCooldown(cd)}` : (s.sessionStart ? 'Session active' : 'No session started yet');
-
-  body.innerHTML = `
-    <div style="text-align:center;padding-bottom:4px;">
-      <div class="profile-avatar">${initials(name)}</div>
-      <div class="profile-name">${esc(name)}</div>
-    </div>
-    ${mobile?`<div class="profile-row"><span class="profile-row-icon">📱</span><div class="profile-row-content"><div class="profile-row-label">Mobile</div><div class="profile-row-val">${esc(mobile)}</div></div></div>`:''}
-    ${email?`<div class="profile-row"><span class="profile-row-icon">✉️</span><div class="profile-row-content"><div class="profile-row-label">Email</div><div class="profile-row-val">${esc(email)}</div></div></div>`:''}
-    <div class="profile-row"><span class="profile-row-icon">🤖</span><div class="profile-row-content"><div class="profile-row-label">Mode</div><div class="profile-row-val">${_mode==='dev39'?'Dev 3.9 Pro':'AF 2.4 Student Mentor'}</div></div></div>
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-val">${TOTAL_REQ_LIMIT-totalReq<0?0:TOTAL_REQ_LIMIT-totalReq}</div><div class="stat-lbl">Requests Left</div></div>
-      <div class="stat-card"><div class="stat-val">${SESSION_REQ_LIMIT-sessReq<0?0:SESSION_REQ_LIMIT-sessReq}</div><div class="stat-lbl">This Session</div></div>
-    </div>
-    <div class="usage-bar-wrap">
-      <div class="usage-bar-label"><span>Daily Token Usage</span><span>${totalTok.toLocaleString()} / ${TOTAL_TOKEN_LIMIT.toLocaleString()}</span></div>
-      <div class="usage-bar-track"><div class="usage-bar-fill ${fillClass}" style="width:${tokPct}%"></div></div>
-    </div>
-    <div class="usage-bar-wrap">
-      <div class="usage-bar-label"><span>Session Tokens</span><span>${sessTok.toLocaleString()} / ${SESSION_TOKEN_LIMIT.toLocaleString()}</span></div>
-      <div class="usage-bar-track"><div class="usage-bar-fill" style="width:${sessTokenPct}%"></div></div>
-      <div class="session-info">${sessInfo} · 4 sessions/day · 6h cooldown</div>
-    </div>
-  `;
-}
-
-/* ── KEYBOARD ── */
+/* Keyboard */
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape' && $('profileModal').classList.contains('open')) aiCloseProfile();
-  if(e.key==='Enter' && !e.shiftKey && document.activeElement===$('msgInput')){
-    e.preventDefault(); aiSend();
-  }
+  if(e.key==='Escape') closeDrawer();
 });
 
-/* ── BOOT ── */
-document.addEventListener('DOMContentLoaded', init);
+/* Boot */
+document.addEventListener('DOMContentLoaded',init);
 window.addEventListener('storage',e=>{
   if(['af_student_email','af_student_mobile','af_student_name'].includes(e.key)) init();
 });
