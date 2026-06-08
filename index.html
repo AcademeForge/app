@@ -4702,7 +4702,23 @@ body{
     html.af-preload .af-view{
   display:none !important;
 }
-    
+    /* Notification dot badge on bell */
+.af-notif-btn { position: relative; }
+ 
+.af-notif-dot {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--af-danger);
+  border: 2px solid var(--bg-shell);
+  animation: afDotPulse 2s ease-in-out infinite;
+}
+ 
+@keyframes afDotPulse {
+  0%,100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.3); opacity: 0.7; }
+}
   </style>
 </head>
 
@@ -4757,14 +4773,16 @@ body{
   <span id="afHeaderStreakCount">0</span>
 </button>
         
-  <button
-    class="af-notif-btn"
-    onclick="afSwitchView('notifications')"
-    aria-label="Open notifications"
-    type="button"
-  >
-    🔔
-  </button>
+<button
+  class="af-notif-btn"
+  onclick="afOpenNotifications()"
+  aria-label="Open notifications"
+  type="button"
+  id="afNotifBellBtn"
+>
+  🔔
+  <span class="af-notif-dot" id="afNotifDot" style="display:none;"></span>
+</button>
 
 </div>
     </header>
@@ -5415,7 +5433,7 @@ body{
     <!-- Notifications -->
 <div class="af-accordion-group" role="listitem">
   <a class="af-accordion-trigger"
-     href="../Notify/index.html"
+     href="/Notify/index.html"
      aria-label="Open Notifications">
 
     <div class="af-accordion-group-icon" aria-hidden="true">🔔</div>
@@ -5537,24 +5555,6 @@ body{
 </div><!-- /viewSettings -->
 
 
-<!-- ══════════════════════════════════════════════════════
-     VIEW: NOTIFICATIONS
-     ══════════════════════════════════════════════════════ -->
-<div class="af-view" id="viewNotifications" aria-label="Notifications">
-  <div class="af-placeholder-section">
-    <div class="af-placeholder-icon">🔔</div>
-    <div class="af-placeholder-title">Notifications</div>
-    <p class="af-placeholder-sub">
-      Batch updates, lecture alerts, announcements and important notices.
-    </p>
-    <button
-      class="af-placeholder-btn"
-      onclick="afSwitchView('settings')"
-      type="button">
-      Back to Settings
-    </button>
-  </div>
-</div>
 
 <!-- ══════════════════════════════════════════════════════
      VIEW: CONTACT US
@@ -8526,7 +8526,90 @@ async function afSyncStreak() {
   };
 })();
 
-    
+    /* ════════════════════════════════════════════════════
+   NOTIFICATIONS — open page + unread dot
+════════════════════════════════════════════════════ */
+ 
+const NF_EDGE_URL =
+  "https://nltmolhlwgsrxadknzzq.supabase.co/functions/v1/app-notifications-af";
+ 
+const NF_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sdG1vbGhsd2dzcnhhZGtuenpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MDMyMzksImV4cCI6MjA5NDE3OTIzOX0.HEvMlpp6XFbD9MuQhxFwsNpfvzfev3ISkJbA93SvMXc";
+ 
+/**
+ * Open notifications sub-page.
+ */
+function afOpenNotifications() {
+  /* mark as seen */
+  afClearNotifDot();
+  window.location.href = "./Notify/index.html";
+}
+window.afOpenNotifications = afOpenNotifications;
+ 
+/**
+ * Show the red dot on the bell if there are unseen notifications.
+ */
+function afShowNotifDot() {
+  const dot = document.getElementById("afNotifDot");
+  if (dot) dot.style.display = "block";
+}
+ 
+function afClearNotifDot() {
+  const dot = document.getElementById("afNotifDot");
+  if (dot) dot.style.display = "none";
+  /* save timestamp of last seen so we don't re-show on refresh */
+  localStorage.setItem("af_notif_last_seen", Date.now().toString());
+}
+ 
+/**
+ * Silently check if there are new notifications since last visit.
+ * Shows the red dot on the bell if yes.
+ */
+async function afCheckNewNotifications() {
+  const lastSeen = parseInt(localStorage.getItem("af_notif_last_seen") || "0", 10);
+ 
+  try {
+    /* Use cached data first so we don't block page load */
+    const cached = JSON.parse(localStorage.getItem("af_notif_cache") || "null");
+    if (Array.isArray(cached) && cached.length > 0) {
+      const newest = new Date(cached[0].created_at).getTime();
+      if (newest > lastSeen) afShowNotifDot();
+    }
+ 
+    /* Then fetch live */
+    const res = await fetch(NF_EDGE_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": NF_ANON_KEY,
+        "Authorization": "Bearer " + NF_ANON_KEY
+      },
+      body: JSON.stringify({ action: "list" })
+    });
+ 
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data || !data.ok || !Array.isArray(data.notifications)) return;
+ 
+    /* Update cache */
+    try { localStorage.setItem("af_notif_cache", JSON.stringify(data.notifications)); } catch (_) {}
+ 
+    /* Show dot if latest notification is newer than last seen */
+    if (data.notifications.length > 0) {
+      const newest = new Date(data.notifications[0].created_at).getTime();
+      if (newest > lastSeen) {
+        afShowNotifDot();
+      }
+    }
+ 
+  } catch (err) {
+    /* Silent — notification dot is non-critical */
+    console.warn("Notif check failed:", err.message);
+  }
+}
+ 
+/* ── AUTO-RUN on page load (after a short delay) ── */
+setTimeout(afCheckNewNotifications, 1200);
   </script>
 
 </body>
