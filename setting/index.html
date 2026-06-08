@@ -438,9 +438,7 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
 
   <!-- HEADER -->
   <header class="hdr">
-    <button class="hdr-back" onclick="goBack()" aria-label="Back">‹</button>
     <span class="hdr-title">Settings</span>
-    <span class="hdr-version">v06.07.19</span>
   </header>
 
   <!-- PAGE -->
@@ -490,6 +488,19 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
           <span class="row-arrow">›</span>
         </div>
       </a>
+      
+ <!-- Learning Heatmap -->
+      <a class="row-link" href="./Heatmap/index.html" style="animation-delay:.14s">
+        <div class="row-icon">🔥</div>
+        <div class="row-text">
+          <div class="row-title">Learning Heatmap</div>
+          <div class="row-sub">Track your daily learning streak</div>
+        </div>
+        <div class="row-end">
+          <span class="row-badge" id="streakBadge">0🔥</span>
+          <span class="row-arrow">›</span>
+        </div>
+      </a>
 
       <!-- Notifications — direct link -->
       <a class="row-link" href="/Notify/index.html" style="animation-delay:.10s">
@@ -500,19 +511,6 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
         </div>
         <div class="row-end">
           <span class="row-badge new" id="notifBadge" style="display:none;">New</span>
-          <span class="row-arrow">›</span>
-        </div>
-      </a>
-
-      <!-- Learning Heatmap -->
-      <a class="row-link" href="./Heatmap/index.html" style="animation-delay:.14s">
-        <div class="row-icon">🔥</div>
-        <div class="row-text">
-          <div class="row-title">Learning Heatmap</div>
-          <div class="row-sub">Track your daily learning streak</div>
-        </div>
-        <div class="row-end">
-          <span class="row-badge" id="streakBadge">0🔥</span>
           <span class="row-arrow">›</span>
         </div>
       </a>
@@ -569,6 +567,16 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
         <div class="row-text">
           <div class="row-title">Certificate Verification</div>
           <div class="row-sub">Verify official AF certificates</div>
+        </div>
+        <div class="row-end"><span class="row-arrow">›</span></div>
+      </a>
+
+      <!-- About Us — direct link -->
+      <a class="row-link" href="/About/" style="animation-delay:.18s">
+        <div class="row-icon">ℹ️</div>
+        <div class="row-text">
+          <div class="row-title">About AcademeForge</div>
+          <div class="row-sub">Our story, mission and team</div>
         </div>
         <div class="row-end"><span class="row-arrow">›</span></div>
       </a>
@@ -636,16 +644,6 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
           </a>
         </div>
       </div>
-
-      <!-- About Us — direct link -->
-      <a class="row-link" href="/About/" style="animation-delay:.18s">
-        <div class="row-icon">ℹ️</div>
-        <div class="row-text">
-          <div class="row-title">About AcademeForge</div>
-          <div class="row-sub">Our story, mission and team</div>
-        </div>
-        <div class="row-end"><span class="row-arrow">›</span></div>
-      </a>
 
       <!-- Language accordion -->
       <div class="acc" id="accLang" style="animation-delay:.22s">
