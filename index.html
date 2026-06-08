@@ -1,2724 +1,758 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  
-  <script>
-(function () {
-
-  document.documentElement.classList.add("af-preload");
-  
-  if (localStorage.getItem("af_dark_mode") === "1") {
-    document.documentElement.setAttribute("data-theme", "dark");
-  } else {
-    document.documentElement.setAttribute("data-theme", "light");
-  }
-
-  if (sessionStorage.getItem("af_splash_shown")) {
-    document.documentElement.classList.add("no-splash");
-  }
+<script>
+(function(){
+  if(localStorage.getItem('af_dark_mode')==='1')
+    document.documentElement.setAttribute('data-theme','dark');
+  else
+    document.documentElement.setAttribute('data-theme','light');
+  if(sessionStorage.getItem('af_splash_shown'))
+    document.documentElement.classList.add('no-splash');
 })();
 </script>
-
-<meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#4f46e5" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>AcademeForge</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-
-  <style>
-    /* ─── CSS CUSTOM PROPERTIES ─────────────────────────────────── */
-    :root {
-      --af-primary:        #4f46e5;
-      --af-primary-dark:   #3730a3;
-      --af-primary-light:  #818cf8;
-      --af-accent:         #06b6d4;
-      --af-accent2:        #f59e0b;
-      --af-danger:         #ef4444;
-      --af-success:        #22c55e;
-
-      --bg-base:           #f0f2ff;
-      --bg-shell:          #ffffff;
-      --bg-card:           rgba(255,255,255,0.72);
-      --bg-card-solid:     #ffffff;
-      --bg-nav:            rgba(255,255,255,0.88);
-      --bg-header:         rgba(255,255,255,0.92);
-      --bg-overlay:        rgba(0,0,0,0.45);
-      --bg-input:          #f4f5fb;
-      --bg-group:          rgba(79,70,229,0.06);
-      --bg-group-hover:    rgba(79,70,229,0.10);
-      --bg-accordion:      rgba(79,70,229,0.04);
-
-      --text-primary:      #0f0e2a;
-      --text-secondary:    #4b5563;
-      --text-muted:        #9ca3af;
-      --text-on-primary:   #ffffff;
-      --text-link:         #4f46e5;
-
-      --border-subtle:     rgba(79,70,229,0.12);
-      --border-card:       rgba(79,70,229,0.15);
-      --border-input:      #d1d5db;
-
-      --shadow-card:       0 4px 24px rgba(79,70,229,0.10), 0 1px 4px rgba(0,0,0,0.06);
-      --shadow-nav:        0 -4px 24px rgba(79,70,229,0.10);
-      --shadow-btn:        0 4px 16px rgba(79,70,229,0.28);
-      --shadow-elevated:   0 12px 40px rgba(79,70,229,0.18);
-
-      --glass-blur:        16px;
-      --glass-sat:         180%;
-
-      --r-sm:    8px;
-      --r-md:    14px;
-      --r-lg:    20px;
-      --r-xl:    28px;
-      --r-full:  9999px;
-
-      --gap-xs:  6px;
-      --gap-sm:  10px;
-      --gap-md:  16px;
-      --gap-lg:  24px;
-      --gap-xl:  32px;
-
-      --font-display: 'Sora', sans-serif;
-      --font-body:    'Nunito', sans-serif;
-
-      --ease-spring: cubic-bezier(0.34,1.56,0.64,1);
-      --ease-out:    cubic-bezier(0.22,1,0.36,1);
-      --dur-fast:    160ms;
-      --dur-med:     280ms;
-      --dur-slow:    440ms;
-
-      --nav-h: 66px;
-      --header-h: 64px;
-
-      --shell-max: 430px;
-    }
-
-    [data-theme="dark"] {
-      --bg-base:           #0c0b1d;
-      --bg-shell:          #120f2a;
-      --bg-card:           rgba(30,27,60,0.80);
-      --bg-card-solid:     #1e1b3c;
-      --bg-nav:            rgba(18,15,42,0.95);
-      --bg-header:         rgba(18,15,42,0.96);
-      --bg-overlay:        rgba(0,0,0,0.65);
-      --bg-input:          #1e1b3c;
-      --bg-group:          rgba(129,140,248,0.08);
-      --bg-group-hover:    rgba(129,140,248,0.14);
-      --bg-accordion:      rgba(129,140,248,0.05);
-
-      --text-primary:      #f0eeff;
-      --text-secondary:    #a5a3c2;
-      --text-muted:        #6b6a8a;
-      --text-on-primary:   #ffffff;
-      --text-link:         #818cf8;
-
-      --border-subtle:     rgba(129,140,248,0.12);
-      --border-card:       rgba(129,140,248,0.18);
-      --border-input:      rgba(129,140,248,0.20);
-
-      --shadow-card:       0 4px 24px rgba(0,0,0,0.32), 0 1px 4px rgba(0,0,0,0.20);
-      --shadow-nav:        0 -4px 24px rgba(0,0,0,0.40);
-      --shadow-btn:        0 4px 16px rgba(79,70,229,0.40);
-      --shadow-elevated:   0 12px 40px rgba(0,0,0,0.50);
-    }
-
-    /* ─── RESET ──────────────────────────────────────────────────── */
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html {
-      font-size: 16px;
-      scroll-behavior: smooth;
-      -webkit-text-size-adjust: 100%;
-    }
-
-    body {
-      font-family: var(--font-body);
-      background: var(--bg-base);
-      color: var(--text-primary);
-      min-height: 100dvh;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      transition: background var(--dur-med) var(--ease-out),
-                  color var(--dur-med) var(--ease-out);
-      overflow-x: hidden;
-    }
-
-    button {
-      font-family: var(--font-body);
-      cursor: pointer;
-      border: none;
-      background: none;
-      color: inherit;
-    }
-
-    a { text-decoration: none; color: inherit; }
-    img { display: block; max-width: 100%; }
-    ul { list-style: none; }
-
-    /* ─── APP SHELL ──────────────────────────────────────────────── */
-    .af-shell {
-      width: 100%;
-      max-width: var(--shell-max);
-      min-height: 100dvh;
-      background: var(--bg-shell);
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      box-shadow: 0 0 0 1px var(--border-subtle), var(--shadow-elevated);
-      transition: background var(--dur-med) var(--ease-out);
-    }
-
-    @media (min-width: 480px) {
-      body { background: var(--bg-base); padding: 0; align-items: center; }
-      .af-shell { min-height: 100dvh; border-radius: 0; }
-    }
-
-    @media (min-width: 860px) {
-      body { align-items: flex-start; padding: 0; }
-      .af-shell {
-        min-height: 100dvh;
-        border-radius: 0;
-        box-shadow: var(--shadow-elevated);
-      }
-    }
-
-    @media (min-width: 700px) {
-      body {
-        padding: 32px 0 48px;
-        align-items: flex-start;
-      }
-
-      .af-shell {
-        border-radius: 40px;
-        min-height: calc(100dvh - 80px);
-        max-height: 900px;
-        overflow-y: auto;
-
-        box-shadow:
-          0 0 0 1px var(--border-card),
-          0 32px 80px rgba(0,0,0,0.22),
-          0 8px 24px rgba(79,70,229,0.15);
-      }
-
-      .af-bottom-nav {
-        max-width: var(--shell-max);
-      }
-    }
-
-    /* ─── GLASS UTILITY ──────────────────────────────────────────── */
-    .glass {
-      background: var(--bg-card);
-      backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
-      border: 1px solid var(--border-card);
-    }
-
-    /* ─── SPLASH SCREEN ─────────────────────────────────────────── */
-
-html.no-splash #afSplash{
-  display:none !important;
-}
-
-#afSplash{
-  position:fixed;
-  inset:0;
-  z-index:9999;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  background:
-    radial-gradient(circle at 28% 18%, rgba(255,59,48,.28), transparent 30%),
-    radial-gradient(circle at 75% 70%, rgba(248,199,92,.20), transparent 35%),
-    radial-gradient(circle at 50% 50%, rgba(255,149,0,.10), transparent 42%),
-    linear-gradient(135deg, #12050a 0%, #1a0f05 45%, #08060f 100%);
-  transition:
-    opacity .5s ease,
-    visibility .5s ease;
-}
-
-#afSplash.hidden{
-  opacity:0;
-  visibility:hidden;
-  pointer-events:none;
-}
-
-.splash-logo-ring{
-  width:88px;
-  height:88px;
-  overflow:hidden;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:24px;
-  box-shadow:
-    0 0 20px rgba(255,59,48,.65),
-    0 0 40px rgba(248,199,92,.45),
-    0 0 80px rgba(255,149,0,.20);
-}
-
-.splash-logo-ring img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  transform:scale(1.2);
-}
-
-.splash-title{
-  margin:4px 0 0;
-  font-family:var(--font-display);
-  font-size:22px;
-  font-weight:900;
-  color:#fff3b3;
-  letter-spacing:-.02em;
-  text-shadow:
-    0 0 8px rgba(255,59,48,.55),
-    0 0 18px rgba(248,199,92,.35);
-}
-
-.splash-sub{
-  margin:-2px 0 0;
-  font-size:11px;
-  font-weight:700;
-  letter-spacing:.5px;
-  text-transform:uppercase;
-  color:rgba(255,247,214,.88);
-  text-shadow:0 0 6px rgba(255,59,48,.25);
-}
-
-.splash-loader{
-  width:90px;
-  height:4px;
-  margin-top:12px;
-  border-radius:999px;
-  background:rgba(255,255,255,.08);
-  overflow:hidden;
-}
-
-.splash-loader-bar{
-  height:100%;
-  width:0;
-  border-radius:999px;
-  background:linear-gradient(
-    90deg,
-    #ff3b30,
-    #ff8c00,
-    #f8c75c,
-    #fff1a8
-  );
-  box-shadow:
-    0 0 12px rgba(255,59,48,.8),
-    0 0 24px rgba(248,199,92,.5);
-  animation:splashLoad 1.2s cubic-bezier(.22,.61,.36,1) forwards;
-}
-
-@keyframes splashLoad{
-  from{
-    width:0;
-  }
-  to{
-    width:100%;
-  }
-}
-
-    /* ─── HEADER / TOPBAR ────────────────────────────────────────── */
-    .af-topbar {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      height: var(--header-h);
-      background: var(--bg-header);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border-bottom: 1px solid var(--border-subtle);
-      display: flex;
-      align-items: center;
-      padding: 0 var(--gap-md);
-      gap: var(--gap-sm);
-      transition: background var(--dur-med) var(--ease-out);
-    }
-
-    .af-topbar-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex: 1;
-      min-width: 0;
-    }
-
-    .af-brand-logo {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      object-fit: cover;
-      background: linear-gradient(135deg, var(--af-primary), var(--af-accent));
-      flex-shrink: 0;
-    }
-
-    .af-brand-logo-fallback {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, var(--af-primary), var(--af-accent));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--font-display);
-      font-weight: 800;
-      font-size: 18px;
-      color: white;
-      flex-shrink: 0;
-    }
-
-    .af-brand-text { min-width: 0; }
-
-    .af-brand-name {
-      font-family: var(--font-display);
-      font-size: 15px;
-      font-weight: 800;
-      color: var(--text-primary);
-      line-height: 1.1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .af-brand-tagline {
-      font-size: 10px;
-      color: var(--text-muted);
-      font-weight: 500;
-      line-height: 1;
-      margin-top: 2px;
-    }
-
-    .af-topbar-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-
-    .af-streak-pill {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding: 6px 12px 6px 8px;
-      background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(239,68,68,0.10));
-      border: 1px solid rgba(245,158,11,0.25);
-      border-radius: var(--r-full);
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--af-accent2);
-      cursor: pointer;
-      transition: transform var(--dur-fast) var(--ease-spring), background var(--dur-fast);
-    }
-
-    .af-streak-pill:hover { transform: scale(1.05); background: rgba(245,158,11,0.22); }
-    .af-streak-pill:active { transform: scale(0.96); }
-    .af-streak-fire { font-size: 16px; }
-
-    .af-notif-btn {
-      width: 38px;
-      height: 38px;
-      border-radius: var(--r-md);
-      background: var(--bg-group);
-      border: 1px solid var(--border-subtle);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      position: relative;
-      transition: transform var(--dur-fast) var(--ease-spring), background var(--dur-fast);
-    }
-
-    .af-notif-btn:hover { transform: scale(1.08); background: var(--bg-group-hover); }
-    .af-notif-btn:active { transform: scale(0.94); }
-
-    /* ─── PAGE CONTAINER ─────────────────────────────────────────── */
-    .af-page {
-      flex: 1;
-      overflow-y: auto;
-      overflow-x: hidden;
-      padding-bottom: calc(var(--nav-h) + 40px + env(safe-area-inset-bottom, 0px));
-    }
-
-    /* HOME PAGE */
-    .af-home { display: flex; flex-direction: column; gap: 0; }
-
-    .af-banner-slider {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16/7;
-      overflow: hidden;
-      background: linear-gradient(135deg, var(--af-primary) 0%, var(--af-accent) 100%);
-    }
-
-    .af-banner-slide {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      transition: opacity 0.6s var(--ease-out);
-    }
-
-    .af-banner-slide.active { opacity: 1; }
-
-    .af-banner-slide img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .af-banner-fallback {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      color: white;
-      font-family: var(--font-display);
-    }
-
-    .af-banner-fallback h3 { font-size: 18px; font-weight: 800; }
-    .af-banner-fallback p { font-size: 13px; opacity: 0.8; }
-
-    .af-banner-dots {
-      position: absolute;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 6px;
-    }
-
-    .af-banner-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 99px;
-      background: rgba(255,255,255,0.45);
-      border: none;
-      cursor: pointer;
-      transition: width 0.3s, background 0.3s;
-    }
-
-    .af-banner-dot.active {
-      width: 20px;
-      background: #ffffff;
-    }
-
-    .af-ticker {
-      background: linear-gradient(90deg, var(--af-primary), var(--af-primary-dark));
-      color: white;
-      font-size: 12px;
-      font-weight: 600;
-      overflow: hidden;
-      white-space: nowrap;
-      padding: 8px 0;
-    }
-
-    .af-ticker-track {
-      display: inline-block;
-      animation: ticker 20s linear infinite;
-    }
-
-    .af-ticker-track span { padding: 0 40px; }
-
-    @keyframes ticker {
-      0%   { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
-
-    .af-home-body {
-      padding: var(--gap-md) var(--gap-md) 0;
-      display: flex;
-      flex-direction: column;
-      gap: var(--gap-md);
-    }
-
-    .af-section-label {
-      font-family: var(--font-display);
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 2px;
-    }
-
-    .af-quick-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .af-quick-card {
-      position: relative;
-      overflow: hidden;
-      min-height: 112px;
-      border-radius: 24px;
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 10px;
-      background: var(--bg-card);
-      border: 1px solid var(--border-card);
-      box-shadow: 0 4px 16px rgba(0,0,0,.05), 0 1px 3px rgba(0,0,0,.04);
-      transition: transform .25s ease, box-shadow .25s ease;
-    }
-
-    .af-quick-card:hover { transform: translateY(-2px); }
-    .af-quick-card:active { transform: scale(.98); }
-
-    .af-quick-card::before {
-      content: "";
-      position: absolute;
-      width: 90px;
-      height: 90px;
-      right: -20px;
-      bottom: -20px;
-      border-radius: 50%;
-      background: rgba(79,70,229,.08);
-    }
-
-    .af-quick-card:nth-child(2)::before { background: rgba(16,185,129,.10); }
-
-    .af-quick-icon {
-      width: 46px;
-      height: 46px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      background: linear-gradient(135deg, #4f46e5, #6366f1);
-      color: #fff;
-      flex-shrink: 0;
-    }
-
-    .af-quick-card:nth-child(2) .af-quick-icon {
-      background: linear-gradient(135deg, #d1fae5, #bbf7d0);
-      color: #5b21b6;
-    }
-
-    .af-quick-title {
-      font-family: var(--font-display);
-      font-size: 16px;
-      font-weight: 800;
-      line-height: 1.15;
-      color: var(--text-primary);
-      text-align: left;
-    }
-
-    .af-quick-sub {
-      font-size: 13px;
-      font-weight: 600;
-      line-height: 1.45;
-      color: var(--text-secondary);
-      text-align: left;
-      max-width: 95%;
-    }
-
-    .af-wide-card {
-      border-radius: var(--r-lg);
-      padding: 18px 16px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      cursor: pointer;
-      box-shadow: var(--shadow-card);
-      transition: transform var(--dur-fast) var(--ease-spring), box-shadow var(--dur-fast);
-    }
-
-    .af-wide-card:hover  { transform: translateY(-2px); box-shadow: var(--shadow-elevated); }
-    .af-wide-card:active { transform: scale(0.98); }
-
-    .af-wide-icon {
-      font-size: 28px;
-      width: 52px;
-      height: 52px;
-      border-radius: var(--r-md);
-      background: linear-gradient(135deg, var(--af-primary), var(--af-accent));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .af-wide-text { flex: 1; min-width: 0; }
-
-    .af-wide-title {
-      font-family: var(--font-display);
-      font-size: 15px;
-      font-weight: 800;
-      color: var(--text-primary);
-    }
-
-    .af-wide-sub {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-top: 2px;
-    }
-
-    .af-wide-arrow {
-      font-size: 20px;
-      color: var(--text-muted);
-      font-weight: 700;
-    }
-
-    .af-feature-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--gap-sm);
-    }
-
-    .af-feature-tile {
-      border-radius: var(--r-md);
-      padding: 14px 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      text-align: center;
-      cursor: pointer;
-      box-shadow: var(--shadow-card);
-      transition: transform var(--dur-fast) var(--ease-spring);
-    }
-
-    .af-feature-tile:hover  { transform: translateY(-2px); }
-    .af-feature-tile:active { transform: scale(0.95); }
-
-    .af-feature-tile-icon {
-      font-size: 24px;
-      width: 44px;
-      height: 44px;
-      border-radius: var(--r-sm);
-      background: var(--bg-group);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .af-feature-tile-label {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-primary);
-      line-height: 1.3;
-    }
-
-    .af-credit {
-      text-align: center;
-      padding: 20px var(--gap-md);
-      font-size: 12px;
-      color: var(--text-muted);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .af-credit strong { color: var(--text-secondary); font-weight: 700; }
-
-    /* ─── BOTTOM NAVIGATION ──────────────────────────────────────── */
-    .af-bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: var(--shell-max);
-      z-index: 999;
-      height: var(--nav-h);
-      background: var(--bg-nav);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border-top: 1px solid var(--border-subtle);
-      box-shadow: var(--shadow-nav);
-      display: flex;
-      align-items: center;
-      padding: 0 4px;
-      padding-bottom: env(safe-area-inset-bottom, 0px);
-    }
-
-    .af-nav-btn {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      height: 100%;
-      border-radius: var(--r-md);
-      padding: 8px 4px;
-      transition: all var(--dur-fast) var(--ease-out);
-      position: relative;
-    }
-
-    .af-nav-btn::before {
-      content: '';
-      position: absolute;
-      top: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 3px;
-      background: var(--af-primary);
-      border-radius: 99px;
-      transition: width var(--dur-med) var(--ease-spring);
-    }
-
-    .af-nav-btn.active::before { width: 28px; }
-
-    .af-nav-icon {
-      font-size: 22px;
-      transition: transform var(--dur-fast) var(--ease-spring);
-      line-height: 1;
-    }
-
-    .af-nav-btn.active .af-nav-icon { transform: scale(1.15); }
-    .af-nav-btn:active .af-nav-icon { transform: scale(0.9); }
-
-    .af-nav-label {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--text-muted);
-      transition: color var(--dur-fast);
-    }
-
-    .af-nav-btn.active .af-nav-label { color: var(--af-primary); }
-
-    /* ─── PAGE TRANSITIONS ───────────────────────────────────────── */
-    .af-view {
-      display: none;
-      animation: pageIn 0.3s var(--ease-out) both;
-    }
-
-    .af-view.active { display: flex; flex-direction: column; }
-
-    @keyframes pageIn {
-      from { opacity: 0; transform: translateY(12px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ─── SETTINGS PAGE ──────────────────────────────────────────── */
-    .af-settings-page {
-      padding: var(--gap-md);
-      display: flex;
-      flex-direction: column;
-      gap: var(--gap-md);
-    }
-
-    .af-settings-profile {
-      border-radius: var(--r-xl);
-      padding: 20px;
-      display: flex;
-      align-items: center;
-      gap: var(--gap-md);
-      box-shadow: var(--shadow-card);
-      cursor: pointer;
-      transition: transform var(--dur-fast) var(--ease-spring);
-    }
-
-    .af-settings-profile:hover { transform: scale(1.01); }
-    .af-settings-profile:active { transform: scale(0.99); }
-
-    .af-settings-avatar {
-      width: 56px;
-      height: 56px;
-      border-radius: var(--r-lg);
-      background: linear-gradient(135deg, var(--af-primary), var(--af-accent));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 26px;
-      flex-shrink: 0;
-    }
-
-    .af-settings-profile-text { flex: 1; min-width: 0; }
-
-    .af-settings-profile-name {
-      font-family: var(--font-display);
-      font-size: 17px;
-      font-weight: 800;
-      color: var(--text-primary);
-    }
-
-    .af-settings-profile-sub {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    .af-settings-profile-arrow {
-      font-size: 18px;
-      color: var(--text-muted);
-    }
-
-    .af-settings-site-link {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 18px;
-      border-radius: var(--r-lg);
-      background: linear-gradient(135deg, rgba(79,70,229,0.12), rgba(6,182,212,0.08));
-      border: 1px solid var(--border-card);
-      font-weight: 700;
-      font-size: 14px;
-      color: var(--text-primary);
-      cursor: pointer;
-      transition: transform var(--dur-fast) var(--ease-spring);
-      text-decoration: none;
-    }
-
-    .af-settings-site-link:hover { transform: scale(1.01); }
-    .af-settings-site-link:active { transform: scale(0.99); }
-
-    .af-settings-night-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 18px;
-      border-radius: var(--r-lg);
-      box-shadow: var(--shadow-card);
-    }
-
-    .af-settings-night-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .af-settings-night-icon {
-      font-size: 20px;
-      width: 38px;
-      height: 38px;
-      border-radius: var(--r-sm);
-      background: var(--bg-group);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .af-settings-night-text { font-size: 15px; font-weight: 600; color: var(--text-primary); }
-
-    .af-toggle {
-      position: relative;
-      width: 48px;
-      height: 26px;
-      flex-shrink: 0;
-    }
-
-    .af-toggle input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-      position: absolute;
-    }
-
-    .af-toggle-track {
-      position: absolute;
-      inset: 0;
-      border-radius: 99px;
-      background: var(--border-input);
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    .af-toggle input:checked + .af-toggle-track { background: var(--af-primary); }
-
-    .af-toggle-track::after {
-      content: '';
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: white;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      transition: transform 0.3s var(--ease-spring);
-    }
-
-    .af-toggle input:checked + .af-toggle-track::after { transform: translateX(22px); }
-
-    /* ─── ACCORDION GROUPS ───────────────────────────────────────── */
-    .af-accordion-groups {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .af-accordion-group {
-      border-radius: var(--r-lg);
-      background: var(--bg-card);
-      border: 1px solid var(--border-card);
-      box-shadow: var(--shadow-card);
-      overflow: hidden;
-      transition: box-shadow var(--dur-fast);
-    }
-
-    .af-accordion-group.open { box-shadow: var(--shadow-elevated); }
-
-    .af-accordion-trigger {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 15px 16px;
-      background: transparent;
-      cursor: pointer;
-      border: none;
-      text-align: left;
-      transition: background var(--dur-fast);
-    }
-
-    .af-accordion-trigger:hover { background: var(--bg-group-hover); }
-    .af-accordion-trigger:active { background: var(--bg-group); }
-
-    .af-accordion-group-icon {
-      font-size: 19px;
-      width: 38px;
-      height: 38px;
-      border-radius: var(--r-sm);
-      background: var(--bg-group);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: background var(--dur-fast);
-    }
-
-    .af-accordion-group.open .af-accordion-group-icon {
-      background: linear-gradient(135deg, var(--af-primary), var(--af-accent));
-    }
-
-    .af-accordion-group-label {
-      flex: 1;
-      font-family: var(--font-display);
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .af-accordion-count {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-muted);
-      background: var(--bg-group);
-      padding: 3px 8px;
-      border-radius: 99px;
-    }
-
-    .af-accordion-chevron {
-      font-size: 14px;
-      color: var(--text-muted);
-      transition: transform var(--dur-med) var(--ease-spring);
-      margin-left: 4px;
-    }
-
-    .af-accordion-group.open .af-accordion-chevron { transform: rotate(180deg); }
-
-    .af-accordion-body {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height var(--dur-slow) var(--ease-out);
-    }
-
-    .af-accordion-group.open .af-accordion-body { max-height: 600px; }
-
-    .af-accordion-divider {
-      height: 1px;
-      background: var(--border-subtle);
-      margin: 0 16px;
-    }
-
-    .af-accordion-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 16px 14px 20px;
-      cursor: pointer;
-      background: transparent;
-      border: none;
-      width: 100%;
-      text-align: left;
-      transition: background var(--dur-fast);
-      border-bottom: 1px solid var(--border-subtle);
-      text-decoration: none;
-    }
-
-    .af-accordion-item:last-child { border-bottom: none; }
-    .af-accordion-item:hover { background: var(--bg-accordion); }
-    .af-accordion-item:active { background: var(--bg-group); }
-
-    .af-accordion-item-icon {
-      font-size: 17px;
-      width: 32px;
-      height: 32px;
-      border-radius: var(--r-sm);
-      background: var(--bg-group);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .af-accordion-item-text { flex: 1; min-width: 0; }
-
-    .af-accordion-item-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .af-accordion-item-sub {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 1px;
-    }
-
-    .af-accordion-item-badge {
-      font-size: 10px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 99px;
-      background: linear-gradient(135deg, var(--af-primary), var(--af-accent));
-      color: white;
-      white-space: nowrap;
-    }
-
-    .af-accordion-item-arrow {
-      font-size: 14px;
-      color: var(--text-muted);
-    }
-
-    .af-settings-logout-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-      padding: 14px;
-      border-radius: var(--r-lg);
-      background: rgba(239,68,68,0.08);
-      border: 1px solid rgba(239,68,68,0.20);
-      color: var(--af-danger);
-      font-weight: 700;
-      font-size: 15px;
-      cursor: pointer;
-      transition: background var(--dur-fast), transform var(--dur-fast) var(--ease-spring);
-    }
-
-    .af-settings-logout-btn:hover { background: rgba(239,68,68,0.14); }
-    .af-settings-logout-btn:active { transform: scale(0.98); }
-
-    .af-settings-version {
-      text-align: center;
-      font-size: 12px;
-      color: var(--text-muted);
-      padding: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    /* ─── COMING SOON MODAL ──────────────────────────────────────── */
-    .af-modal-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 900;
-      background: var(--bg-overlay);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity var(--dur-med) var(--ease-out), visibility var(--dur-med);
-    }
-
-    .af-modal-overlay.open { opacity: 1; visibility: visible; }
-
-    .af-modal-sheet {
-      width: 100%;
-      max-width: var(--shell-max);
-      background: var(--bg-card-solid);
-      border-radius: var(--r-xl) var(--r-xl) 0 0;
-      padding: 28px 24px calc(28px + env(safe-area-inset-bottom, 0px));
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 14px;
-      text-align: center;
-      transform: translateY(100%);
-      transition: transform var(--dur-slow) var(--ease-spring);
-    }
-
-    .af-modal-overlay.open .af-modal-sheet { transform: translateY(0); }
-
-    .af-modal-drag {
-      width: 36px;
-      height: 4px;
-      background: var(--border-input);
-      border-radius: 99px;
-      margin-bottom: 6px;
-    }
-
-    .af-modal-icon { font-size: 44px; }
-    .af-modal-title { font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--text-primary); }
-    .af-modal-message { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
-
-    .af-modal-ok {
-      width: 100%;
-      max-width: 280px;
-      padding: 14px;
-      border-radius: var(--r-lg);
-      background: linear-gradient(135deg, var(--af-primary), var(--af-primary-dark));
-      color: white;
-      font-weight: 700;
-      font-size: 15px;
-      cursor: pointer;
-      box-shadow: var(--shadow-btn);
-      transition: transform var(--dur-fast) var(--ease-spring), opacity var(--dur-fast);
-      margin-top: 4px;
-    }
-
-    .af-modal-ok:hover { opacity: 0.92; }
-    .af-modal-ok:active { transform: scale(0.97); }
-
-    /* ─── PLACEHOLDER SECTIONS ───────────────────────────────────── */
-    .af-placeholder-section {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      padding: var(--gap-xl) var(--gap-md);
-      flex: 1;
-      text-align: center;
-      min-height: 400px;
-    }
-
-    .af-placeholder-icon {
-      font-size: 56px;
-      animation: floatBob 3s ease-in-out infinite;
-    }
-
-    .af-placeholder-title {
-      font-family: var(--font-display);
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--text-primary);
-    }
-
-    .af-placeholder-sub {
-      font-size: 14px;
-      color: var(--text-secondary);
-      max-width: 280px;
-      line-height: 1.6;
-    }
-
-    .af-placeholder-btn {
-      padding: 12px 28px;
-      border-radius: var(--r-lg);
-      background: linear-gradient(135deg, var(--af-primary), var(--af-primary-dark));
-      color: white;
-      font-weight: 700;
-      font-size: 14px;
-      cursor: pointer;
-      box-shadow: var(--shadow-btn);
-      transition: transform var(--dur-fast) var(--ease-spring);
-    }
-
-    .af-placeholder-btn:hover { transform: scale(1.03); }
-    .af-placeholder-btn:active { transform: scale(0.97); }
-
-    @keyframes floatBob {
-      0%, 100% { transform: translateY(0); }
-      50%       { transform: translateY(-10px); }
-    }
-
-    /* ─── STAGGER ANIMATIONS ─────────────────────────────────────── */
-    .af-stagger > * { animation: staggerIn 0.4s var(--ease-out) both; }
-    .af-stagger > *:nth-child(1) { animation-delay: 0.04s; }
-    .af-stagger > *:nth-child(2) { animation-delay: 0.08s; }
-    .af-stagger > *:nth-child(3) { animation-delay: 0.12s; }
-    .af-stagger > *:nth-child(4) { animation-delay: 0.16s; }
-    .af-stagger > *:nth-child(5) { animation-delay: 0.20s; }
-    .af-stagger > *:nth-child(6) { animation-delay: 0.24s; }
-    .af-stagger > *:nth-child(7) { animation-delay: 0.28s; }
-    .af-stagger > *:nth-child(8) { animation-delay: 0.32s; }
-
-    @keyframes staggerIn {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ─── SCROLLBAR ──────────────────────────────────────────────── */
-    .af-page::-webkit-scrollbar { width: 3px; }
-    .af-page::-webkit-scrollbar-thumb { background: var(--border-card); border-radius: 99px; }
-    .af-page::-webkit-scrollbar-track { background: transparent; }
-
-    /* ─── TOAST SYSTEM (single unified system) ───────────────────── */
-    /*
-     * FIX: Removed dead #afToast and #afToast.show CSS entirely.
-     * Only af-toast-wrap / af-toast classes remain — these power afShowToast().
-     */
-    .af-toast-wrap {
-      position: fixed;
-      left: 50%;
-      bottom: calc(var(--nav-h) + 18px);
-      transform: translateX(-50%);
-      z-index: 999999;
-      width: min(92vw, 420px);
-      pointer-events: none;
-    }
-
-    .af-toast {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      background: var(--bg-card-solid);
-      color: var(--text-primary);
-      border: 1px solid var(--border-card);
-      border-radius: 18px;
-      padding: 14px 16px;
-      box-shadow: var(--shadow-elevated);
-      backdrop-filter: blur(18px);
-      animation: afToastIn .25s ease;
-      pointer-events: auto;
-    }
-
-    .af-toast-warning  { border-left: 4px solid #f59e0b; }
-    .af-toast-error    { border-left: 4px solid #ef4444; }
-    .af-toast-success  { border-left: 4px solid #22c55e; }
-    .af-toast-info     { border-left: 4px solid #3b82f6; }
-
-    .af-toast-title {
-      font-size: 14px;
-      font-weight: 700;
-      margin: 0 0 2px;
-    }
-
-    .af-toast-msg {
-      font-size: 13px;
-      margin: 0;
-      line-height: 1.4;
-    }
-
-    .af-toast-close {
-      margin-left: auto;
-      background: none;
-      border: none;
-      color: inherit;
-      cursor: pointer;
-      font-size: 18px;
-    }
-
-    @keyframes afToastIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes afToastOut {
-      from { opacity: 1; transform: translateY(0); }
-      to   { opacity: 0; transform: translateY(20px); }
-    }
-
-    /* ─── RESPONSIVE TWEAKS ──────────────────────────────────────── */
-    @media (max-width: 360px) {
-      .af-feature-grid { grid-template-columns: repeat(3, 1fr); }
-      .af-quick-row { grid-template-columns: 1fr 1fr; }
-      .af-quick-title { font-size: 12px; }
-      .af-quick-sub { font-size: 10px; }
-    }
-
-/* copy paste STOP
- ─────────────────────────────────────────── */
-    html,
-body,
-* {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
-  -webkit-touch-callout: none;
-}
-   /* PULL
- ─────────────────────────────────────────── */ 
-  /* =========================================
-   AF PREMIUM PULL TO REFRESH
-========================================= */
-
-#afPullLoader {
-  position: fixed;
-  top: -90px;
-  left: 50%;
-  transform: translateX(-50%);
-
-  width: 56px;
-  height: 56px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 50%;
-
-  background: rgba(255,255,255,.85);
-
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-
-  border: 1px solid rgba(255,255,255,.6);
-
-  box-shadow:
-    0 10px 30px rgba(15,23,42,.12),
-    0 4px 12px rgba(15,23,42,.08);
-
-  z-index: 99999;
-
-  opacity: 0;
-
-  transition:
-    top .25s ease,
-    opacity .25s ease,
-    transform .25s ease;
-}
-
-[data-theme="dark"] #afPullLoader {
-  background: rgba(15,23,42,.85);
-
-  border: 1px solid rgba(255,255,255,.08);
-
-  box-shadow:
-    0 10px 30px rgba(0,0,0,.35),
-    0 0 20px rgba(99,102,241,.15);
-}
-
-#afPullLoader.show {
-  top: 14px;
-  opacity: 1;
-}
-
-#afPullLoader.ready {
-  transform: translateX(-50%) scale(1.08);
-}
-
-.af-pull-spinner {
-  width: 26px;
-  height: 26px;
-
-  border-radius: 50%;
-
-  border: 3px solid rgba(99,102,241,.18);
-  border-top-color: var(--af-primary);
-
-  transition: transform .2s ease;
-}
-
-#afPullLoader.spin .af-pull-spinner {
-  animation: afPremiumSpin .8s linear infinite;
-}
-
-@keyframes afPremiumSpin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-    /* =========================================================
-   AF PERFORMANCE + DARK MODE FIX PACK
-   PASTE AT VERY END OF CSS
-========================================================= */
-
-/* Faster global transitions */
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#4f46e5"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>AcademeForge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Sora:wght@700;800;900&display=swap" rel="stylesheet"/>
+<style>
+/* ─── CSS VARIABLES ─────────────────────────────────────── */
 :root{
-  --dur-fast: 120ms !important;
-  --dur-med: 160ms !important;
-  --dur-slow: 240ms !important;
-
-  --glass-blur: 8px !important;
+  --p:#4f46e5;--p2:#3730a3;--pl:#818cf8;
+  --acc:#06b6d4;--acc2:#f59e0b;
+  --err:#ef4444;--ok:#22c55e;
+  --bg:#f0f2ff;--shell:#fff;
+  --card:rgba(255,255,255,.72);--card-s:#fff;
+  --nav:rgba(255,255,255,.92);--hdr:rgba(255,255,255,.95);
+  --inp:#f4f5fb;--grp:rgba(79,70,229,.06);--grph:rgba(79,70,229,.10);
+  --t1:#0f0e2a;--t2:#4b5563;--tm:#9ca3af;
+  --b1:rgba(79,70,229,.12);--bc:rgba(79,70,229,.15);
+  --sh:0 2px 10px rgba(79,70,229,.08),0 1px 3px rgba(0,0,0,.04);
+  --she:0 8px 32px rgba(79,70,229,.14);
+  --shb:0 4px 16px rgba(79,70,229,.28);
+  --fd:'Sora',sans-serif;--fb:'Nunito',sans-serif;
+  --nav-h:66px;--hdr-h:64px;--shell-max:430px;
+  --r1:8px;--r2:14px;--r3:20px;--r4:28px;--rf:9999px;
 }
-
-/* Prevent white flash */
-html,
-body{
-  background: var(--bg-base) !important;
-}
-
-/* Faster theme switching */
-html,
-body,
-.af-shell,
-.af-topbar,
-.af-bottom-nav,
-.af-page,
-.af-view,
-.af-settings-page,
-.af-settings-profile,
-.af-accordion-group,
-.af-wide-card,
-.af-feature-tile,
-.af-quick-card,
-.af-settings-night-row,
-.af-modal-sheet,
-.af-card,
-.af-glass,
-.glass{
-  transition:
-    background-color .16s linear,
-    color .16s linear,
-    border-color .16s linear !important;
-}
-
-
-
-/* Reduce GPU load */
-.glass,
-.af-topbar,
-.af-bottom-nav,
-.af-settings-profile,
-.af-accordion-group,
-.af-wide-card,
-.af-feature-tile,
-.af-quick-card,
-.af-modal-sheet{
-  backdrop-filter: blur(8px) saturate(120%) !important;
-  -webkit-backdrop-filter: blur(8px) saturate(120%) !important;
-}
-
-/* Faster page animations */
-.af-view{
-  animation-duration: .18s !important;
-}
-
-/* Faster stagger animations */
-.af-stagger > *{
-  animation-duration: .22s !important;
-}
-
-/* Faster accordion */
-.af-accordion-body{
-  transition: max-height .18s ease !important;
-}
-
-/* Faster splash hide */
-#afSplash{
-  transition:
-    opacity .25s ease,
-    visibility .25s ease !important;
-}
-
-/* Faster buttons */
-.af-nav-btn,
-.af-notif-btn,
-.af-streak-pill,
-.af-feature-tile,
-.af-wide-card,
-.af-quick-card,
-.af-settings-profile,
-.af-settings-site-link,
-.af-settings-logout-btn{
-  transition:
-    transform .12s ease,
-    background-color .12s ease !important;
-}
-
-/* Reduce shadow rendering cost */
-.af-shell,
-.af-quick-card,
-.af-wide-card,
-.af-feature-tile,
-.af-settings-profile,
-.af-accordion-group{
-  box-shadow:
-    0 2px 10px rgba(0,0,0,.08) !important;
-}
-
-/* Smooth scrolling performance */
-html{
-  scroll-behavior:auto !important;
-}
-
-/* Mobile rendering optimization */
-body{
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-
-
-/* Faster dark mode paint */
 [data-theme="dark"]{
-  color-scheme: dark;
+  --bg:#0c0b1d;--shell:#120f2a;
+  --card:rgba(30,27,60,.80);--card-s:#1e1b3c;
+  --nav:rgba(18,15,42,.96);--hdr:rgba(18,15,42,.97);
+  --inp:#1e1b3c;--grp:rgba(129,140,248,.08);--grph:rgba(129,140,248,.14);
+  --t1:#f0eeff;--t2:#a5a3c2;--tm:#6b6a8a;
+  --b1:rgba(129,140,248,.12);--bc:rgba(129,140,248,.18);
+  --sh:0 2px 10px rgba(0,0,0,.28);--she:0 8px 32px rgba(0,0,0,.40);
+  --shb:0 4px 16px rgba(79,70,229,.40);
 }
 
-[data-theme="light"]{
-  color-scheme: light;
+/* ─── RESET ─────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{font-size:16px;-webkit-text-size-adjust:100%;scroll-behavior:auto;color-scheme:light;}
+[data-theme="dark"]{color-scheme:dark;}
+body{
+  font-family:var(--fb);background:var(--bg);color:var(--t1);
+  min-height:100dvh;display:flex;justify-content:center;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+button{font-family:var(--fb);cursor:pointer;border:none;background:none;color:inherit;}
+a{text-decoration:none;color:inherit;}
+img{display:block;max-width:100%;}
+ul{list-style:none;}
+html,body,*{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-touch-callout:none;}
+
+/* ─── SPLASH ─────────────────────────────────────────────── */
+html.no-splash #afSplash{display:none!important;}
+#afSplash{
+  position:fixed;inset:0;z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  background:linear-gradient(135deg,#12050a 0%,#1a0f05 45%,#08060f 100%);
+  transition:opacity .4s ease,visibility .4s ease;
+}
+#afSplash.hidden{opacity:0;visibility:hidden;pointer-events:none;}
+.sp-ring{
+  width:88px;height:88px;border-radius:24px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 20px rgba(255,59,48,.6),0 0 40px rgba(248,199,92,.4);
+}
+.sp-ring img{width:100%;height:100%;object-fit:cover;}
+.sp-title{font-family:var(--fd);font-size:22px;font-weight:900;color:#fff3b3;letter-spacing:-.02em;}
+.sp-sub{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,247,214,.85);}
+.sp-bar-wrap{width:90px;height:4px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-top:12px;}
+.sp-bar{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#ff3b30,#ff8c00,#f8c75c,#fff1a8);animation:splashLoad 1.2s cubic-bezier(.22,.61,.36,1) forwards;}
+@keyframes splashLoad{to{width:100%;}}
+
+/* ─── SHELL ──────────────────────────────────────────────── */
+.af-shell{
+  width:100%;max-width:var(--shell-max);min-height:100dvh;
+  background:var(--shell);
+  display:flex;flex-direction:column;
+  box-shadow:0 0 0 1px var(--b1),var(--she);
+  overflow:hidden;position:relative;
+}
+@media(min-width:700px){
+  body{padding:32px 0 48px;}
+  .af-shell{border-radius:40px;min-height:calc(100dvh - 80px);max-height:900px;overflow-y:auto;}
 }
 
-    html.af-preload .af-view{
-  display:none !important;
+/* ─── TOPBAR ─────────────────────────────────────────────── */
+.af-topbar{
+  position:sticky;top:0;z-index:100;height:var(--hdr-h);
+  background:var(--hdr);
+  backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  border-bottom:1px solid var(--b1);
+  display:flex;align-items:center;padding:0 16px;gap:10px;
 }
-    /* Notification dot badge on bell */
-.af-notif-btn { position: relative; }
- 
-.af-notif-dot {
-  position: absolute;
-  top: 6px; right: 6px;
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--af-danger);
-  border: 2px solid var(--bg-shell);
-  animation: afDotPulse 2s ease-in-out infinite;
+.af-brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
+.af-brand-logo{width:40px;height:40px;border-radius:12px;object-fit:cover;flex-shrink:0;}
+.af-brand-logo-fb{
+  width:40px;height:40px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--p),var(--acc));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fd);font-weight:800;font-size:18px;color:#fff;
 }
- 
-@keyframes afDotPulse {
-  0%,100% { transform: scale(1); opacity: 1; }
-  50%      { transform: scale(1.3); opacity: 0.7; }
+.af-brand-name{font-family:var(--fd);font-size:15px;font-weight:800;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.af-brand-tag{font-size:10px;color:var(--tm);font-weight:500;margin-top:1px;}
+.af-topbar-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+
+/* streak pill */
+.af-streak{
+  display:flex;align-items:center;gap:4px;
+  padding:6px 12px 6px 8px;
+  background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(239,68,68,.10));
+  border:1px solid rgba(245,158,11,.25);border-radius:var(--rf);
+  font-size:13px;font-weight:700;color:var(--acc2);cursor:pointer;
 }
-  </style>
+.af-streak:active{opacity:.8;}
+
+/* notif button */
+.af-notif{
+  width:38px;height:38px;border-radius:var(--r2);
+  background:var(--grp);border:1px solid var(--b1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;position:relative;cursor:pointer;
+}
+.af-notif:active{opacity:.8;}
+.af-notif-dot{
+  position:absolute;top:6px;right:6px;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--err);border:2px solid var(--shell);display:none;
+}
+
+/* ─── PAGE AREA ──────────────────────────────────────────── */
+.af-page{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-h) + 40px + env(safe-area-inset-bottom,0px));}
+.af-page::-webkit-scrollbar{width:3px;}
+.af-page::-webkit-scrollbar-thumb{background:var(--bc);border-radius:99px;}
+
+/* ─── BANNER SLIDER ──────────────────────────────────────── */
+.af-banner{position:relative;width:100%;aspect-ratio:16/7;overflow:hidden;background:linear-gradient(135deg,var(--p),var(--acc));}
+.af-slide{position:absolute;inset:0;opacity:0;transition:opacity .5s ease;}
+.af-slide.active{opacity:1;}
+.af-slide img{width:100%;height:100%;object-fit:cover;}
+.af-slide-fb{
+  width:100%;height:100%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:8px;color:#fff;
+  font-family:var(--fd);
+}
+.af-slide-fb h3{font-size:18px;font-weight:800;}
+.af-slide-fb p{font-size:13px;opacity:.8;}
+.af-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;}
+.af-dot{width:6px;height:6px;border-radius:99px;background:rgba(255,255,255,.45);border:none;cursor:pointer;transition:width .3s,background .3s;}
+.af-dot.active{width:20px;background:#fff;}
+
+/* ─── TICKER ─────────────────────────────────────────────── */
+.af-ticker{
+  background:linear-gradient(90deg,var(--p),var(--p2));
+  color:#fff;font-size:12px;font-weight:600;
+  overflow:hidden;white-space:nowrap;padding:8px 0;
+}
+.af-ticker-track{display:inline-block;animation:ticker 20s linear infinite;}
+.af-ticker-track span{padding:0 40px;}
+@keyframes ticker{to{transform:translateX(-50%);}}
+
+/* ─── HOME BODY ──────────────────────────────────────────── */
+.af-body{padding:16px;display:flex;flex-direction:column;gap:16px;}
+.af-sec-label{font-family:var(--fd);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin-bottom:4px;}
+
+/* quick row */
+.af-quick-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.af-quick-card{
+  position:relative;overflow:hidden;min-height:112px;border-radius:24px;
+  padding:14px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;
+  background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);cursor:pointer;
+}
+.af-quick-card:active{opacity:.85;}
+.af-quick-icon{
+  width:46px;height:46px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;font-size:24px;
+  background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;flex-shrink:0;
+}
+.af-quick-card:nth-child(2) .af-quick-icon{background:linear-gradient(135deg,#d1fae5,#bbf7d0);}
+.af-quick-title{font-family:var(--fd);font-size:14px;font-weight:800;color:var(--t1);line-height:1.15;}
+.af-quick-sub{font-size:12px;font-weight:600;color:var(--t2);line-height:1.4;}
+
+/* wide card */
+.af-wide-card{
+  border-radius:var(--r3);padding:16px;
+  display:flex;align-items:center;gap:14px;cursor:pointer;
+  background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);
+}
+.af-wide-card:active{opacity:.85;}
+.af-wide-icon{
+  font-size:28px;width:52px;height:52px;border-radius:var(--r2);
+  background:linear-gradient(135deg,var(--p),var(--acc));
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.af-wide-text{flex:1;min-width:0;}
+.af-wide-title{font-family:var(--fd);font-size:15px;font-weight:800;color:var(--t1);}
+.af-wide-sub{font-size:12px;color:var(--t2);margin-top:2px;}
+.af-wide-arr{font-size:20px;color:var(--tm);font-weight:700;}
+
+/* feature grid */
+.af-feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.af-feat-tile{
+  border-radius:var(--r2);padding:14px 10px;
+  display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;cursor:pointer;
+  background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);
+}
+.af-feat-tile:active{opacity:.8;}
+.af-feat-icon{
+  font-size:22px;width:44px;height:44px;border-radius:var(--r1);
+  background:var(--grp);display:flex;align-items:center;justify-content:center;
+}
+.af-feat-label{font-size:11px;font-weight:700;color:var(--t1);line-height:1.3;}
+
+/* credit */
+.af-credit{text-align:center;padding:16px;font-size:12px;color:var(--tm);}
+.af-credit strong{color:var(--t2);font-weight:700;}
+
+/* ─── BOTTOM NAV ─────────────────────────────────────────── */
+.af-bnav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:var(--shell-max);z-index:999;height:var(--nav-h);
+  background:var(--nav);
+  backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  border-top:1px solid var(--b1);
+  display:flex;align-items:center;padding:0 4px;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.af-nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;height:100%;border-radius:var(--r2);padding:8px 4px;
+  position:relative;
+}
+.af-nav-btn::before{
+  content:'';position:absolute;top:8px;left:50%;transform:translateX(-50%);
+  width:0;height:3px;background:var(--p);border-radius:99px;transition:width .15s ease;
+}
+.af-nav-btn.active::before{width:26px;}
+.af-nav-icon{font-size:22px;line-height:1;}
+.af-nav-btn.active .af-nav-icon{transform:scale(1.1);}
+.af-nav-label{font-size:10px;font-weight:700;color:var(--tm);}
+.af-nav-btn.active .af-nav-label{color:var(--p);}
+
+/* ─── PULL TO REFRESH ────────────────────────────────────── */
+#afPullLoader{
+  position:fixed;top:-90px;left:50%;transform:translateX(-50%);
+  width:52px;height:52px;border-radius:50%;
+  background:rgba(255,255,255,.88);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,.5);
+  box-shadow:0 8px 24px rgba(15,23,42,.12);
+  z-index:99999;opacity:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:top .22s ease,opacity .22s ease;
+}
+[data-theme="dark"] #afPullLoader{background:rgba(18,15,42,.88);border-color:rgba(255,255,255,.08);}
+#afPullLoader.show{top:14px;opacity:1;}
+#afPullLoader.ready{transform:translateX(-50%) scale(1.06);}
+.af-pull-spin{
+  width:24px;height:24px;border-radius:50%;
+  border:3px solid rgba(99,102,241,.18);border-top-color:var(--p);
+}
+#afPullLoader.spin .af-pull-spin{animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ─── TOAST ──────────────────────────────────────────────── */
+.af-toast-wrap{
+  position:fixed;left:50%;bottom:calc(var(--nav-h) + 18px);transform:translateX(-50%);
+  z-index:999999;width:min(92vw,420px);pointer-events:none;
+}
+.af-toast{
+  display:flex;align-items:flex-start;gap:12px;
+  background:var(--card-s);color:var(--t1);
+  border:1px solid var(--bc);border-radius:16px;
+  padding:12px 14px;box-shadow:var(--she);pointer-events:auto;
+}
+.af-toast-warn{border-left:4px solid var(--acc2);}
+.af-toast-err{border-left:4px solid var(--err);}
+.af-toast-ok{border-left:4px solid var(--ok);}
+.af-toast-info{border-left:4px solid var(--p);}
+.af-toast-title{font-size:13px;font-weight:700;margin:0 0 2px;}
+.af-toast-msg{font-size:12px;margin:0;line-height:1.4;}
+.af-toast-x{margin-left:auto;font-size:18px;cursor:pointer;color:var(--tm);}
+
+/* ─── GLASS UTIL ─────────────────────────────────────────── */
+.glass{
+  backdrop-filter:blur(8px) saturate(120%);-webkit-backdrop-filter:blur(8px) saturate(120%);
+}
+</style>
 </head>
-
 <body>
 
- <!-- SPLASH SCREEN -->
-<div id="afSplash" role="status" aria-label="Loading AcademeForge">
-  <div class="splash-logo-ring">
-    <img
-      src="/IMG/AF LOGO 1.jpeg"
-      alt=""
-      onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-    />
-    <span class="splash-logo-letter" style="display:none;">AF</span>
+<!-- SPLASH -->
+<div id="afSplash">
+  <div class="sp-ring">
+    <img src="/IMG/AF LOGO 1.jpeg" alt="AF"
+      onerror="this.style.display='none'"/>
   </div>
-
-  <h1 class="splash-title">AcademeForge</h1>
-  <p class="splash-sub">Learning Beyond The Classroom</p>
-
-  <div class="splash-loader">
-    <div class="splash-loader-bar"></div>
-  </div>
+  <h1 class="sp-title">AcademeForge</h1>
+  <p class="sp-sub">Learning Beyond The Classroom</p>
+  <div class="sp-bar-wrap"><div class="sp-bar"></div></div>
 </div>
-  <!-- APP SHELL -->
-  <div class="af-shell" id="afShell">
 
-    <!-- TOPBAR -->
-    <header class="af-topbar" role="banner">
-      <div class="af-topbar-brand">
-        <img
-          src="/IMG/AF LOGO 1.jpeg"
-          alt="AcademeForge"
-          class="af-brand-logo"
-          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-        />
-        <div class="af-brand-logo-fallback" style="display:none;" aria-hidden="true">AF</div>
-        <div class="af-brand-text">
-          <div class="af-brand-name">AcademeForge</div>
-          <div class="af-brand-tagline">Learning Beyond the Classroom</div>
+<!-- SHELL -->
+<div class="af-shell" id="afShell">
+
+  <!-- TOPBAR -->
+  <header class="af-topbar">
+    <div class="af-brand">
+      <img src="/IMG/AF LOGO 1.jpeg" alt="AF" class="af-brand-logo"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
+      <div class="af-brand-logo-fb" style="display:none;" aria-hidden="true">AF</div>
+      <div>
+        <div class="af-brand-name">AcademeForge</div>
+        <div class="af-brand-tag">Learning Beyond the Classroom</div>
+      </div>
+    </div>
+    <div class="af-topbar-actions">
+      <button class="af-streak" onclick="window.location.href='/Heatmap/index.html'" type="button" aria-label="Learning streak">
+        <span style="font-size:16px;">🔥</span>
+        <span id="afStreakCount">0</span>
+      </button>
+      <button class="af-notif" onclick="goToNotif()" type="button" id="afNotifBtn" aria-label="Notifications">
+        🔔
+        <span class="af-notif-dot" id="afNotifDot"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- PAGE -->
+  <div class="af-page" id="afPage">
+
+    <!-- BANNER SLIDER -->
+    <div class="af-banner" id="afBanner">
+      <div class="af-slide active" id="slide0">
+        <img src="/IMG/banner1.png" alt="Banner 1"
+          onerror="this.parentElement.innerHTML=afBannerFb(1,'🚀','Welcome to AcademeForge','Your learning journey starts here')"/>
+      </div>
+      <div class="af-slide" id="slide1">
+        <img src="/IMG/banner2.png" alt="Banner 2"
+          onerror="this.parentElement.innerHTML=afBannerFb(2,'📚','Explore Batches &amp; Courses','Practical learning for real skills')"/>
+      </div>
+      <div class="af-slide" id="slide2">
+        <img src="/IMG/Banner3.png" alt="Banner 3"
+          onerror="this.parentElement.innerHTML=afBannerFb(3,'🏆','AF Test Arena','Compete, rank and grow nationally')"/>
+      </div>
+      <div class="af-dots" aria-hidden="true">
+        <button class="af-dot active" onclick="goToSlide(0)" type="button"></button>
+        <button class="af-dot" onclick="goToSlide(1)" type="button"></button>
+        <button class="af-dot" onclick="goToSlide(2)" type="button"></button>
+      </div>
+    </div>
+
+    <!-- TICKER -->
+    <div class="af-ticker">
+      <div class="af-ticker-track">
+        <span>🔔 Beta version — Contents of AF Nexus are being updated...</span>
+        <span>🔔 Beta version — Contents of AF Nexus are being updated...</span>
+        <span>🔔 Beta version — Contents of AF Nexus are being updated...</span>
+        <span>🔔 Beta version — Contents of AF Nexus are being updated...</span>
+      </div>
+    </div>
+
+    <!-- HOME BODY -->
+    <div class="af-body">
+
+      <!-- QUICK ACCESS -->
+      <div>
+        <div class="af-sec-label">Quick Access</div>
+        <div class="af-quick-row">
+          <button class="af-quick-card glass" onclick="window.location.href='/Student/index.html'" type="button">
+            <div class="af-quick-icon">🎓</div>
+            <div class="af-quick-title">Student Login</div>
+            <div class="af-quick-sub">Access your course dashboard.</div>
+          </button>
+          <button class="af-quick-card glass" onclick="window.location.href='/dash/index.html'" type="button" id="homeProfileCard">
+            <div class="af-quick-icon" id="homeProfileIcon">👤</div>
+            <div class="af-quick-title" id="homeProfileName">Hi, Student</div>
+            <div class="af-quick-sub" id="homeProfileSub">Login to view profile</div>
+          </button>
         </div>
       </div>
 
-      <div class="af-topbar-actions">
-
- <button
-  class="af-streak-pill"
-  onclick="afOpenHeatmap()"
-  aria-label="Open learning heatmap"
-  type="button"
->
-  <span class="af-streak-fire" aria-hidden="true">🔥</span>
-  <span id="afHeaderStreakCount">0</span>
-</button>
-        
-<button
-  class="af-notif-btn"
-  onclick="afOpenNotifications()"
-  aria-label="Open notifications"
-  type="button"
-  id="afNotifBellBtn"
->
-  🔔
-  <span class="af-notif-dot" id="afNotifDot" style="display:none;"></span>
-</button>
-
-</div>
-    </header>
-
-    <!-- SCROLLABLE PAGE AREA -->
-    <div class="af-page" id="afPage" role="main">
-
-      <!-- VIEW: HOME -->
-      <div class="af-view af-home" id="viewHome" aria-label="Home">
-
-        <div class="af-banner-slider" role="region" aria-label="Featured banners">
-          <div class="af-banner-slide active" id="slide0">
-            <img src="/IMG/banner1.png" alt="AcademeForge Banner 1"
-              onerror="this.parentElement.innerHTML=afBannerFallback(1,'🚀','Welcome to AcademeForge','Your learning journey starts here')" />
+      <!-- FEATURED -->
+      <div>
+        <div class="af-sec-label">Featured</div>
+        <button class="af-wide-card glass" onclick="window.location.href='/T/index.html'" type="button">
+          <div class="af-wide-icon">🧪</div>
+          <div class="af-wide-text">
+            <div class="af-wide-title">AF Test Arena</div>
+            <div class="af-wide-sub">Attempt quizzes and see your national ranking.</div>
           </div>
-          <div class="af-banner-slide" id="slide1">
-            <img src="/IMG/banner2.png" alt="AcademeForge Banner 2"
-              onerror="this.parentElement.innerHTML=afBannerFallback(2,'📚','Explore Batches &amp; Courses','Practical learning for real skills')" />
-          </div>
-          <div class="af-banner-slide" id="slide2">
-            <img src="/IMG/Banner3.png" alt="AcademeForge Banner 3"
-              onerror="this.parentElement.innerHTML=afBannerFallback(3,'🏆','AF Test Arena','Compete, rank and grow nationally')" />
-          </div>
-          <div class="af-banner-dots" aria-hidden="true">
-            <button class="af-banner-dot active" onclick="afGoToSlide(0)" aria-label="Banner 1" type="button"></button>
-            <button class="af-banner-dot" onclick="afGoToSlide(1)" aria-label="Banner 2" type="button"></button>
-            <button class="af-banner-dot" onclick="afGoToSlide(2)" aria-label="Banner 3" type="button"></button>
-          </div>
+          <div class="af-wide-arr">›</div>
+        </button>
+      </div>
+
+      <!-- LEARNING TOOLS -->
+      <div>
+        <div class="af-sec-label">Learning Tools</div>
+        <div class="af-feat-grid">
+          <button class="af-feat-tile glass" onclick="window.location.href='/Notes/'" type="button">
+            <div class="af-feat-icon">📝</div>
+            <div class="af-feat-label">Notes 9–10</div>
+          </button>
+          <button class="af-feat-tile glass" onclick="window.location.href='/SM/'" type="button">
+            <div class="af-feat-icon">🧩</div>
+            <div class="af-feat-label">Sudoku Master</div>
+          </button>
+          <button class="af-feat-tile glass" onclick="window.location.href='/T/'" type="button">
+            <div class="af-feat-icon">📖</div>
+            <div class="af-feat-label">Test Review</div>
+          </button>
         </div>
+      </div>
 
-        <div class="af-ticker" role="marquee" aria-live="off" aria-label="Announcement ticker">
-          <div class="af-ticker-track" id="afTickerTrack">
-            <span>🔔 This is Beta version — Contents of AF Nexus are being updated...</span>
-            <span>🔔 This is Beta version — Contents of AF Nexus are being updated...</span>
-            <span>🔔 This is Beta version — Contents of AF Nexus are being updated...</span>
-            <span>🔔 This is Beta version — Contents of AF Nexus are being updated...</span>
-          </div>
-        </div>
+      <div class="af-credit">
+        <strong>Developed by Devraj Kumar</strong><br>
+        <span>Made with ❤️ in India</span>
+      </div>
 
-        <div class="af-home-body">
+    </div><!-- /af-body -->
+  </div><!-- /af-page -->
 
-          <div>
-            <div class="af-section-label">Quick Access</div>
-            <div class="af-quick-row af-stagger">
-              <button
-                class="af-quick-card glass"
-                onclick="window.location.href='/Student/index.html'"
-                type="button"
-                aria-label="Student Login"
-              >
-                <div class="af-quick-icon">🎓</div>
-                <div class="af-quick-title">Student Login</div>
-                <div class="af-quick-sub">Access your course dashboard.</div>
-              </button>
-            <button
-  class="af-quick-card glass"
-  onclick="window.location.href='/dash/index.html"
-  type="button"
-  aria-label="My Profile"
-  id="homeProfileCard"
+  <!-- BOTTOM NAV -->
+  <nav class="af-bnav">
+    <button class="af-nav-btn active" type="button" aria-label="Home">
+      <span class="af-nav-icon">🏠</span><span class="af-nav-label">Home</span>
+    </button>
+    <button class="af-nav-btn" onclick="window.location.href='/student/index.html'" type="button" aria-label="Student">
+      <span class="af-nav-icon">🎓</span><span class="af-nav-label">Student</span>
+    </button>
+    <button class="af-nav-btn" onclick="window.location.href='/batches/index.html'" type="button" aria-label="Batches">
+      <span class="af-nav-icon">📚</span><span class="af-nav-label">Batches</span>
+    </button>
+    <button class="af-nav-btn" onclick="window.location.href='/community/index.html'" type="button" aria-label="Community">
+      <span class="af-nav-icon">💬</span><span class="af-nav-label">Community</span>
+    </button>
+    <button class="af-nav-btn" onclick="window.location.href='/setting/index.html'" type="button" aria-label="Settings">
+      <span class="af-nav-icon">⚙️</span><span class="af-nav-label">Settings</span>
+    </button>
+  </nav>
 
-  <div class="af-quick-icon" id="homeProfileIcon">👤</div>
-  <div class="af-quick-title" id="homeProfileName">Hi, Student</div>
-  <div class="af-quick-sub" id="homeProfileSub">Login to view profile</div>
-</button>
-            </div>
-          </div>
+</div><!-- /af-shell -->
 
-          <div>
-            <div class="af-section-label">Featured</div>
-            <button
-              class="af-wide-card glass"
-              onclick="window.location.href='../T/index.html'"
-              type="button"
-              aria-label="Open AF Test Arena"
-            >
-              <div class="af-wide-icon">🧪</div>
-              <div class="af-wide-text">
-                <div class="af-wide-title">AF Test Arena</div>
-                <div class="af-wide-sub">Attempt quizzes and see your national ranking.</div>
-              </div>
-              <div class="af-wide-arrow">›</div>
-            </button>
-          </div>
+<!-- PULL LOADER -->
+<div id="afPullLoader"><div class="af-pull-spin"></div></div>
 
-          <div>
-            <div class="af-section-label">Learning Tools</div>
-            <div class="af-feature-grid af-stagger">
+<!-- TOAST -->
+<div class="af-toast-wrap" id="afToastWrap"></div>
 
-              <button
-                class="af-feature-tile glass"
-                onclick="window.location.href='/Notes/'"
-                type="button"
-                aria-label="Revision Notes"
-              >
-                <div class="af-feature-tile-icon">📝</div>
-                <div class="af-feature-tile-label">Notes 9-10</div>
-              </button>
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-              <button
-                class="af-feature-tile glass"
-                onclick="window.location.href='/SM/'"
-                type="button"
-                aria-label="Sudoku Master"
-              >
-                <div class="af-feature-tile-icon">🧩</div>
-                <div class="af-feature-tile-label">Sudoku Master</div>
-              </button>
+<script>
+'use strict';
 
-              <button
-                class="af-feature-tile glass"
-                onclick="window.location.href='/T/'"
-                type="button"
-                aria-label="Latest Test Review"
-              >
-                <div class="af-feature-tile-icon">📖</div>
-                <div class="af-feature-tile-label">Test Review</div>
-              </button>
+/* ── SUPABASE ────────────────────────────────────────────── */
+const STUDENT_URL = "https://afooyyydhlwngzssgqih.supabase.co";
+const STUDENT_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb295eXlkaGx3bmd6c3NncWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDQxMjgsImV4cCI6MjA5NDIyMDEyOH0.KG0XO0oP_2MpewHoIwTtbrKg5FkyOYRUtVzLH1MSJiE";
+const LH_EDGE = STUDENT_URL + "/functions/v1/learning-activity";
+const NF_EDGE = STUDENT_URL + "/functions/v1/app-notifications-af";
 
-            </div>
-          </div>
+/* ── HELPERS ─────────────────────────────────────────────── */
+const $ = id => document.getElementById(id);
 
-          <div class="af-credit">
-            <strong>Developed by Devraj Kumar</strong>
-            <span>Made with ❤️ in India</span>
-          </div>
+/* ── THEME ───────────────────────────────────────────────── */
+function applyTheme(dark) {
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  localStorage.setItem('af_dark_mode', dark ? '1' : '0');
+}
+// Already applied inline; keep in sync if storage changes from another tab
+window.addEventListener('storage', e => {
+  if (e.key === 'af_dark_mode') applyTheme(e.newValue === '1');
+  if (['af_student_name','af_student_phone','af_student_mobile'].includes(e.key)) loadStudentState();
+  if (e.key === 'af_streak') updateStreakBadge(parseInt(e.newValue || '0'));
+});
 
-        </div>
-      </div><!-- /viewHome -->
-
-
-    <!-- BOTTOM NAVIGATION -->
-    <nav class="af-bottom-nav" aria-label="Primary navigation">
-      <button class="af-nav-btn"        id="navHome"      onclick="afSwitchView('home')"      type="button" aria-label="Home">      <span class="af-nav-icon" aria-hidden="true">🏠</span><span class="af-nav-label">Home</span></button>
-      <button class="af-nav-btn"        id="navStudent"   onclick="window.location.href='/student/index.html'"   type="button" aria-label="Student">   <span class="af-nav-icon" aria-hidden="true">🎓</span><span class="af-nav-label">Student</span></button>
-      <button class="af-nav-btn"        id="navBatches"   onclick="window.location.href='/batches/index.html'"   type="button" aria-label="Batches">   <span class="af-nav-icon" aria-hidden="true">📚</span><span class="af-nav-label">Batches</span></button>
-      <button class="af-nav-btn"        id="navCommunity" onclick="window.location.href='/community/index.html'"  type="button" aria-label="Community"><span class="af-nav-icon" aria-hidden="true">💬</span><span class="af-nav-label">Community</span></button>
-      <button class="af-nav-btn"        id="navSettings"  onclick="window.location.href='/setting/index.html'"  type="button" aria-label="Settings">  <span class="af-nav-icon" aria-hidden="true">⚙️</span><span class="af-nav-label">Settings</span></button>
-    </nav>
-
-  </div><!-- /af-shell -->
-
-  <!-- Coming Soon Modal -->
-  <div class="af-modal-overlay" id="comingSoonOverlay" onclick="afCloseModal()">
-    <div class="af-modal-sheet" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="comingSoonTitle">
-      <div class="af-modal-drag" aria-hidden="true"></div>
-      <div class="af-modal-icon" aria-hidden="true">🚧</div>
-      <h3 class="af-modal-title" id="comingSoonTitle">Coming Soon</h3>
-      <p class="af-modal-message" id="comingSoonMessage">This feature will be available soon. Stay tuned!</p>
-      <button class="af-modal-ok" onclick="afCloseModal()" type="button">Okay, Got It</button>
-    </div>
-  </div>
-  
-<div id="afPullLoader">
-  <div class="af-pull-spinner"></div>
-</div>
-  
-  <!-- JAVASCRIPT -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
-  <script>
-    /* ─── SUPABASE CLIENTS ──────────────────────────────────────── */
-    const SUPABASE_URL      = "https://nltmolhlwgsrxadknzzq.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sdG1vbGhsd2dzcnhhZGtuenpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MDMyMzksImV4cCI6MjA5NDE3OTIzOX0.HEvMlpp6XFbD9MuQhxFwsNpfvzfev3ISkJbA93SvMXc";
-    const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    const STUDENT_SUPABASE_URL      = "https://afooyyydhlwngzssgqih.supabase.co";
-    const STUDENT_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb295eXlkaGx3bmd6c3NncWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDQxMjgsImV4cCI6MjA5NDIyMDEyOH0.KG0XO0oP_2MpewHoIwTtbrKg5FkyOYRUtVzLH1MSJiE";
-    const studentDb = supabase.createClient(STUDENT_SUPABASE_URL, STUDENT_SUPABASE_ANON_KEY);
-
-    const websiteLink = "https://academeforge.in";
-
-    /* ─────────────────────────────────────────────────────────────
-       SECTION 1: THEME / DARK MODE
-    ─────────────────────────────────────────────────────────────── */
-    function afApplyTheme(isDark) {
-      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-      const toggle = document.getElementById('nightModeToggle');
-      if (toggle) toggle.checked = isDark;
-      localStorage.setItem('af_dark_mode', isDark ? '1' : '0');
-    }
-
-    function afToggleDarkMode(checked) {
-      afApplyTheme(checked);
-      afShowToast(checked ? '🌙 Night mode on' : '☀️ Night mode off', 'info', 'Theme');
-    }
-
-    function afInitTheme() {
-      const saved = localStorage.getItem('af_dark_mode');
-      afApplyTheme(saved === '1');
-    }
-
-    /* ─────────────────────────────────────────────────────────────
-   SECTION 2: SPLASH SCREEN
-────────────────────────────────────────────────────────────── */
-
-function afHideSplash() {
-  const splash = document.getElementById("afSplash");
-
-  if (!splash) return;
-
-  if (sessionStorage.getItem("af_splash_shown")) {
-    splash.remove();
-    return;
-  }
-
-  sessionStorage.setItem("af_splash_shown", "1");
-
+/* ── SPLASH ──────────────────────────────────────────────── */
+function hideSplash() {
+  const s = $('afSplash');
+  if (!s) return;
+  if (sessionStorage.getItem('af_splash_shown')) { s.remove(); return; }
+  sessionStorage.setItem('af_splash_shown', '1');
   setTimeout(() => {
-    splash.classList.add("hidden");
-
-    setTimeout(() => {
-      splash.remove();
-    }, 500);
-
+    s.classList.add('hidden');
+    setTimeout(() => s.remove(), 400);
   }, 1200);
 }
-    /* ─────────────────────────────────────────────────────────────
-       SECTION 3: BOTTOM NAV VIEW SWITCHING
-    ─────────────────────────────────────────────────────────────── */
-    const AF_VIEWS = {
-      home:      { view: 'viewHome',      nav: 'navHome'      },
-      student:   { view: 'viewStudent',   nav: 'navStudent'   },
-      batches:   { view: 'viewBatches',   nav: 'navBatches'   },
-      community: { view: 'viewCommunity', nav: 'navCommunity' },
-      settings:  { view: 'viewSettings',  nav: 'navSettings'  },
-    };
 
-    let afCurrentView = 'home';
-
-    function afSwitchView(viewKey) {
-      if (!AF_VIEWS[viewKey]) return;
-      const prevConf = AF_VIEWS[afCurrentView];
-      const prevView = document.getElementById(prevConf.view);
-      const prevNav  = document.getElementById(prevConf.nav);
-      if (prevView) prevView.classList.remove('active');
-      if (prevNav)  prevNav.classList.remove('active');
-      const conf    = AF_VIEWS[viewKey];
-      const newView = document.getElementById(conf.view);
-      const newNav  = document.getElementById(conf.nav);
-      if (newView) newView.classList.add('active');
-      if (newNav)  newNav.classList.add('active');
-      afCurrentView = viewKey;
-      const page = document.getElementById('afPage');
-      if (page) page.scrollTop = 0;
-     sessionStorage.setItem('af_last_tab', viewKey);
-    }
-
-    function afRestoreLastTab() {
-      const lastTab = sessionStorage.getItem('af_last_tab') || 'home';
-      if (AF_VIEWS[lastTab]) afSwitchView(lastTab);
-    }
-
- /* ─── SWIPE NAVIGATION ───────────────────────────────────────── */
-
-const AF_VIEW_ORDER = [
-  "home",
-  "student",
-  "batches",
-  "community",
-  "settings"
-];
-
-let afTouchStartX = 0;
-let afTouchStartY = 0;
-let afTouchStartTime = 0;
-
-const afPage = document.getElementById("afPage");
-
-if (afPage) {
-  afPage.addEventListener(
-    "touchstart",
-    function (e) {
-      afTouchStartX = e.changedTouches[0].clientX;
-      afTouchStartY = e.changedTouches[0].clientY;
-      afTouchStartTime = Date.now();
-    },
-    { passive: true }
-  );
-
-  afPage.addEventListener(
-    "touchend",
-    function (e) {
-      afHandleSwipe(e);
-    },
-    { passive: true }
-  );
+/* ── STUDENT STATE ───────────────────────────────────────── */
+function loadStudentState() {
+  const name   = localStorage.getItem('af_student_name')   || '';
+  const mobile = localStorage.getItem('af_student_mobile') || localStorage.getItem('af_student_phone') || '';
+  const loggedIn = !!(name && mobile);
+  const nameEl = $('homeProfileName');
+  const subEl  = $('homeProfileSub');
+  if (nameEl) nameEl.textContent = loggedIn ? 'Hi, ' + name.split(' ')[0] : 'Hi, Student';
+  if (subEl)  subEl.textContent  = loggedIn ? mobile : 'Login to view profile';
 }
 
-function afHandleSwipe(e) {
-  const touch = e.changedTouches[0];
-
-  const diffX = touch.clientX - afTouchStartX;
-  const diffY = touch.clientY - afTouchStartY;
-
-  const elapsed = Date.now() - afTouchStartTime;
-
-  /* Ignore vertical scrolling */
-  if (Math.abs(diffY) > Math.abs(diffX)) return;
-
-  /* Ignore tiny accidental movement */
-  if (Math.abs(diffX) < 90) return;
-
-  /* Ignore slow drags */
-  if (elapsed > 650) return;
-
-  /* Ignore sliders and tickers */
-  if (
-    e.target.closest(".af-banner-slider") ||
-    e.target.closest(".af-ticker")
-  ) {
-    return;
-  }
-
-  const currentIndex = AF_VIEW_ORDER.indexOf(afCurrentView);
-
-  if (currentIndex === -1) return;
-
-  /* Swipe Left */
-  if (
-    diffX < 0 &&
-    currentIndex < AF_VIEW_ORDER.length - 1
-  ) {
-    afSwitchView(AF_VIEW_ORDER[currentIndex + 1]);
-  }
-
-  /* Swipe Right */
-  if (
-    diffX > 0 &&
-    currentIndex > 0
-  ) {
-    afSwitchView(AF_VIEW_ORDER[currentIndex - 1]);
-  }
+/* ── STREAK ──────────────────────────────────────────────── */
+function updateStreakBadge(n) {
+  const el = $('afStreakCount');
+  if (el) el.textContent = n;
 }
 
-    /* ─────────────────────────────────────────────────────────────
-       SECTION 4: BANNER SLIDER
-    ─────────────────────────────────────────────────────────────── */
-    let afBannerIndex = 0;
-    let afBannerTimer = null;
-    const AF_SLIDE_MS = 4000;
-
-    function afGoToSlide(idx) {
-      const slides = document.querySelectorAll('.af-banner-slide');
-      const dots   = document.querySelectorAll('.af-banner-dot');
-      if (!slides.length) return;
-      slides[afBannerIndex].classList.remove('active');
-      if (dots[afBannerIndex]) dots[afBannerIndex].classList.remove('active');
-      afBannerIndex = (idx + slides.length) % slides.length;
-      slides[afBannerIndex].classList.add('active');
-      if (dots[afBannerIndex]) dots[afBannerIndex].classList.add('active');
-    }
-
-    function afStartBannerAuto() {
-      afBannerTimer = setInterval(function () { afGoToSlide(afBannerIndex + 1); }, AF_SLIDE_MS);
-    }
-
-    function afStopBannerAuto() {
-      if (afBannerTimer) clearInterval(afBannerTimer);
-    }
-
-    function afBannerFallback(n, emoji, title, sub) {
-      const colours = [
-        'linear-gradient(135deg,#4f46e5,#06b6d4)',
-        'linear-gradient(135deg,#7c3aed,#4f46e5)',
-        'linear-gradient(135deg,#0f172a,#312e81)',
-      ];
-      const bg = colours[(n - 1) % colours.length];
-      return '<div class="af-banner-fallback" style="background:' + bg + '">'
-        + '<span style="font-size:44px;">' + emoji + '</span>'
-        + '<h3>' + title + '</h3>'
-        + '<p>' + sub + '</p>'
-        + '</div>';
-    }
-
-    window.afBannerFallback = afBannerFallback;
-    window.afGoToSlide      = afGoToSlide;
-
-    /* ─────────────────────────────────────────────────────────────
-       SECTION 5: ACCORDION GROUPS
-    ─────────────────────────────────────────────────────────────── */
-    function afToggleAccordion(triggerBtn) {
-      const group = triggerBtn.closest('.af-accordion-group');
-      if (!group) return;
-      const isOpen = group.classList.contains('open');
-      document.querySelectorAll('.af-accordion-group.open').forEach(function (g) {
-        if (g !== group) {
-          g.classList.remove('open');
-          const t = g.querySelector('.af-accordion-trigger');
-          if (t) t.setAttribute('aria-expanded', 'false');
-        }
-      });
-      group.classList.toggle('open', !isOpen);
-      triggerBtn.setAttribute('aria-expanded', String(!isOpen));
-    }
-
-    /* ─────────────────────────────────────────────────────────────
-       SECTION 6: STREAK DISPLAY
-    ─────────────────────────────────────────────────────────────── */
-    function afLoadStreak() {
-      const streak = parseInt(localStorage.getItem('af_streak') || '0', 10);
-      const el = document.getElementById('afHeaderStreakCount');
-      if (el) el.textContent = streak;
-    }
-
-    /* ─────────────────────────────────────────────────────────────
-       SECTION 7: STUDENT AUTH STATE
-    ─────────────────────────────────────────────────────────────── */
-    function afLoadStudentState() {
-      const name       = localStorage.getItem('af_student_name')  || '';
-      const phone      = localStorage.getItem('af_student_phone') || '';
-      const isLoggedIn = !!(name && phone);
-      const homeName   = document.getElementById('homeProfileName');
-      const homeSub    = document.getElementById('homeProfileSub');
-      if (homeName) homeName.textContent = isLoggedIn ? 'Hi, ' + name.split(' ')[0] : 'Hi, Student';
-      if (homeSub)  homeSub.textContent  = isLoggedIn ? phone : 'Login to view profile';
-      const settingsName = document.getElementById('settingsProfileName');
-      if (settingsName) settingsName.textContent = isLoggedIn ? 'Hi, ' + name : 'Hi, Student';
-      const lang      = localStorage.getItem('af_language') || 'English';
-      const langBadge = document.getElementById('currentLangBadge');
-      if (langBadge) langBadge.textContent = lang;
-    }
-
-    /* ─────────────────────────────────────────────────────────────
-       SECTION 8: LOGOUT
-     
-    ─────────────────────────────────────────────────────────────── */
- function afLogout() {
-  try {
-    if (typeof logoutStudentaf === "function") {
-      logoutStudentaf();
-    }
-
-    afShowToast(
-      "👋 You have been logged out.",
-      "info",
-      "Logged Out"
-    );
-
-    if (typeof afLoadStudentState === "function") {
-      afLoadStudentState();
-    }
-
-    if (typeof afSwitchView === "function") {
-      afSwitchView("home");
-    }
-  } catch (err) {
-    console.error("Logout failed:", err);
-
-    afShowToast(
-      "Unable to logout right now.",
-      "error",
-      "Logout Failed"
-    );
-  }
-}
-
-    /* ─────────────────────────────────────────────────────────────
-       SECTION 9: TOAST NOTIFICATION — SINGLE UNIFIED SYSTEM
-       ─────────────────────────────────────────────────────────────
-    
-    ─────────────────────────────────────────────────────────────── */
-    var _afToastTimer = null;
-
-    function afEnsureToastContainer() {
-      var wrap = document.getElementById('afToastWrap');
-      if (!wrap) {
-        wrap = document.createElement('div');
-        wrap.id        = 'afToastWrap';
-        wrap.className = 'af-toast-wrap';
-        document.body.appendChild(wrap);
-      }
-      return wrap;
-    }
-
-    function afShowToast(message, type, title, duration) {
-      type     = type     || 'info';
-      duration = duration || 2800;
-
-      var icons  = { success: '✓', error: '!', warning: '!', info: 'i' };
-      var titles = { success: 'Success', error: 'Something went wrong', warning: 'Notice', info: 'Info' };
-
-      var wrap = afEnsureToastContainer();
-
-      wrap.innerHTML = '';
-      if (_afToastTimer) { clearTimeout(_afToastTimer); _afToastTimer = null; }
-
-      var displayTitle = title || titles[type] || 'Info';
-
-      var toast = document.createElement('div');
-      toast.className = 'af-toast af-toast-' + type;
-      toast.innerHTML =
-        '<div class="af-toast-content">'
-          + '<p class="af-toast-title">' + displayTitle + '</p>'
-          + '<p class="af-toast-msg">'   + message      + '</p>'
-        + '</div>'
-        + '<button class="af-toast-close" type="button" aria-label="Close">\u00d7</button>';
-
-      wrap.appendChild(toast);
-
-      function closeToast() {
-        toast.style.animation = 'afToastOut 0.22s ease forwards';
-        setTimeout(function () { if (toast && toast.parentNode) toast.parentNode.removeChild(toast); }, 220);
-      }
-
-      var closeBtn = toast.querySelector('.af-toast-close');
-      if (closeBtn) closeBtn.addEventListener('click', closeToast);
-
-      _afToastTimer = setTimeout(closeToast, duration);
-    }
-
-    window.afShowToast = afShowToast;
-
-    /* ─────────────────────────────────────────────────────────────
-       SECTION 10: COMING SOON MODAL
-    ─────────────────────────────────────────────────────────────── */
-    function afShowComingSoon(title, msg) {
-      title = title || 'Coming Soon';
-      msg   = msg   || 'This feature will be available soon. Stay tuned!';
-      document.getElementById('comingSoonTitle').textContent   = title;
-      document.getElementById('comingSoonMessage').textContent = msg;
-      document.getElementById('comingSoonOverlay').classList.add('open');
-    }
-
-    function afCloseModal() {
-      document.getElementById('comingSoonOverlay').classList.remove('open');
-    }
-
-    window.afShowComingSoon = afShowComingSoon;
-    window.afCloseModal     = afCloseModal;
-
-   /* ─────────────────────────────────────────────────────────────
-   VIEW SWITCHING SYSTEM
-────────────────────────────────────────────────────────────── */
-
-function afSwitchView(viewName) {
-
-  // Sabhi views hide karo
-  document.querySelectorAll('.af-view').forEach(view => {
-    view.style.display = 'none';
-  });
-
-  // Target view id banao
-  const targetId =
-    'view' + viewName.charAt(0).toUpperCase() + viewName.slice(1);
-
-  const targetView = document.getElementById(targetId);
-
-  if (targetView) {
-    targetView.style.display = 'block';
-    window.scrollTo(0, 0);
-  } else {
-    console.error('View not found:', targetId);
-  }
-}
-
-window.afSwitchView = afSwitchView;
-    /* ─────────────────────────────────────────────────────────────
-       SECTION 12: KEYBOARD & ACCESSIBILITY
-    ─────────────────────────────────────────────────────────────── */
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') afCloseModal();
-    });
-
-    /* ─────────────────────────────────────────────────────────────
-       SECTION 13: TICKER INIT
-    ─────────────────────────────────────────────────────────────── */
-    function afInitTicker() {
-      /* Ticker animation is CSS-driven; no JS manipulation required. */
-    }
-
-    /* ─────────────────────────────────────────────────────────────
-       SECTION 14: LANGUAGE BADGE
-    ─────────────────────────────────────────────────────────────── */
-    const AF_LANG_NAMES = {
-      en: 'English', hi: 'हिन्दी', bho: 'भोजपुरी', bn: 'বাংলা',
-      mr: 'मराठी',  te: 'తెలుగు',  ta: 'தமிழ்',   gu: 'ગુજરાતી',
-      ur: 'اردو',  kn: 'ಕನ್ನಡ',
-    };
-
-    function afUpdateLangBadge() {
-      var code  = localStorage.getItem('af_lang_code') || 'en';
-      var name  = AF_LANG_NAMES[code] || 'English';
-      var badge = document.getElementById('currentLangBadge');
-      if (badge) badge.textContent = name;
-    }
-
-    /* ─────────────────────────────────────────────────────────────
-       SECTION 15: INIT
-    ─────────────────────────────────────────────────────────────── */
-  function afInit() {
-
-  afInitTheme();
-
-  /* restore tab BEFORE page becomes visible */
-  afRestoreLastTab();
-
-  /* remove preload lock */
-  document.documentElement.classList.remove("af-preload");
-
-  afHideSplash();
-
-  afLoadStudentState();
-  afLoadStreak();
-  afUpdateLangBadge();
-  afStartBannerAuto();
-  afInitTicker();
-
-  var isDark =
-    document.documentElement.getAttribute('data-theme') === 'dark';
-
-  var toggle =
-    document.getElementById('nightModeToggle');
-
-  if (toggle) {
-    toggle.checked = isDark;
-  }
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', afInit);
-} else {
-  afInit();
-}
-    /* ─────────────────────────────────────────────────────────────
-       SECTION 16: GLOBAL EXPORTS
-    ─────────────────────────────────────────────────────────────── */
-    window.afSwitchView      = afSwitchView;
-    window.afToggleAccordion = afToggleAccordion;
-    window.afToggleDarkMode  = afToggleDarkMode;
-    window.afLogout          = afLogout;
-    window.afShowToast       = afShowToast;
-
- /* ─────────────────────────────────────────────────────────────
-       SECTION 19: COPY PASTE STOP
-    ─────────────────────────────────────────────────────────────── */
-    document.addEventListener("contextmenu", function (e) {
-  e.preventDefault();
-});
-
-document.addEventListener("selectstart", function (e) {
-  e.preventDefault();
-});
-
-document.addEventListener("copy", function (e) {
-  e.preventDefault();
-});
-
-document.addEventListener("cut", function (e) {
-  e.preventDefault();
-});
-
-document.addEventListener("dragstart", function (e) {
-  e.preventDefault();
-});
-    document.addEventListener("keydown", function (e) {
-  if (
-    e.key === "F12" ||
-    (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(e.key.toUpperCase())) ||
-    (e.ctrlKey && e.key.toUpperCase() === "U")
-  ) {
-    e.preventDefault();
-  }
-});
-
-    /* ─────────────────────────────────────────────────────────────
- SECTION 20 :  PULL TO REFRESH
-───────────────────────────────────────────────────────────── */
-
-/* =========================================
-   AF PREMIUM PULL TO REFRESH
-   PART 1
-========================================= */
-
-let afPullStartY = 0;
-let afPullDistance = 0;
-let afPullReady = false;
-
-const AF_PULL_SHOW_DISTANCE = 80;
-const AF_PULL_REFRESH_DISTANCE = 170;
-
-function afEnsurePullLoader() {
-  let loader = document.getElementById("afPullLoader");
-
-  if (!loader) {
-    loader = document.createElement("div");
-    loader.id = "afPullLoader";
-
-    loader.innerHTML = `
-      <div class="af-pull-spinner"></div>
-    `;
-
-    document.body.appendChild(loader);
-  }
-
-  return loader;
-}
-
-const afPullLoader = afEnsurePullLoader();
-    /* =========================================
-   AF PREMIUM PULL TO REFRESH
-   PART 2
-========================================= */
-
-if (afPage) {
-
-  afPage.addEventListener(
-    "touchstart",
-    function (e) {
-
-      if (afPage.scrollTop > 0) return;
-
-      afPullStartY = e.touches[0].clientY;
-      afPullDistance = 0;
-      afPullReady = false;
-    },
-    { passive: true }
-  );
-
-  afPage.addEventListener(
-    "touchmove",
-    function (e) {
-
-      if (afPage.scrollTop > 0) return;
-
-      afPullDistance =
-        e.touches[0].clientY - afPullStartY;
-
-      if (afPullDistance < AF_PULL_SHOW_DISTANCE) {
-        afPullLoader.classList.remove("show");
-        afPullLoader.classList.remove("ready");
-        return;
-      }
-
-      afPullLoader.classList.add("show");
-
-      if (afPullDistance >= AF_PULL_REFRESH_DISTANCE) {
-        afPullReady = true;
-        afPullLoader.classList.add("ready");
-      } else {
-        afPullReady = false;
-        afPullLoader.classList.remove("ready");
-      }
-    },
-    { passive: true }
-  );
-
-  afPage.addEventListener(
-    "touchend",
-    function () {
-
-      if (!afPullReady) {
-        afPullLoader.classList.remove("show");
-        afPullLoader.classList.remove("ready");
-        return;
-      }
-
-      afPullLoader.classList.add("spin");
-
-      localStorage.setItem(
-        "af_last_tab",
-        afCurrentView
-      );
-
-      setTimeout(function () {
-        location.reload();
-      }, 500);
-    },
-    { passive: true }
-  );
-}
-
-
-/* ════════════════════════════════════
-   AUTO SYNC + PATCHES
-════════════════════════════════════ */
-
-
-var _afOriginalSwitchView = window.afSwitchView;
-window.afSwitchView = function(viewKey) {
-  if (viewKey === 'dashboard' && typeof AF_VIEWS !== 'undefined' && !AF_VIEWS['dashboard']) {
-    AF_VIEWS['dashboard'] = { view: 'viewDashboard', nav: null };
-  }
-
-
-var _afOrigSaveSession = window.saveStudentSessionaf;
-window.saveStudentSessionaf = function(student, sessionToken, deviceId) {
-  if (typeof _afOrigSaveSession === 'function') _afOrigSaveSession(student, sessionToken, deviceId);
-  if (student && student.name) afDashSyncCards(student.name);
-};
-
-var _afOrigLogout = window.afLogout;
-window.afLogout = function() {
-  if (typeof _afOrigLogout === 'function') _afOrigLogout();
-  afDashSyncCards('');
-  if (typeof afCurrentView !== 'undefined' && afCurrentView === 'dashboard') {
-    if (typeof afSwitchView === 'function') afSwitchView('home');
-  }
-};
-
-   /* ════════════════════════════════════
-  Service WORKER SW.js
-════════════════════════════════════ */
-
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", async () => {
-    try {
-      const registration =
-        await navigator.serviceWorker.register("/sw.js/");
-
-      console.log(
-        "AcademeForge Service Worker Registered",
-        registration
-      );
-    } catch (err) {
-      console.error(
-        "AcademeForge Service Worker Error",
-        err
-      );
-    }
-  });
-}
-
- /* ════════════════════════════════════
- OFFLINE PAGE 
-════════════════════════════════════ */
-    function openExternal(url) {
-
-  if (!navigator.onLine) {
-    window.location.href = "/offline/";
-    return;
-  }
-
-  try {
-    window.location.href = url;
-  } catch (err) {
-    window.location.href = "./offline.html";
-  }
-}
-
-    /* ════════════════════════════════════════════════════════════
-   LEARNING HEATMAP — Open separate page + streak sync
-════════════════════════════════════════════════════════════ */
- 
-const LH_EDGE_URL =
-  "https://afooyyydhlwngzssgqih.supabase.co/functions/v1/learning-activity";
- 
-const LH_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb295eXlkaGx3bmd6c3NncWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDQxMjgsImV4cCI6MjA5NDIyMDEyOH0.KG0XO0oP_2MpewHoIwTtbrKg5FkyOYRUtVzLH1MSJiE";
- 
-/**
- * Open the Heatmap sub-page.
- * Works from both the 🔥 header pill and the Settings accordion link.
- */
-function afOpenHeatmap() {
-  window.location.href = "./Heatmap/index.html";
-}
-window.afOpenHeatmap = afOpenHeatmap;
- 
-/**
- * Silently fetch today's streak from the edge function and
- * update the 🔥 header badge. Called on every app load.
- * Uses action:"mark" so the visit itself registers as activity.
- */
-async function afSyncStreak() {
-  const uuid = localStorage.getItem("af_student_uuid") || "";
+async function syncStreak() {
+  // Show cached immediately
+  const cached = parseInt(localStorage.getItem('af_streak') || '0');
+  updateStreakBadge(cached);
+
+  const uuid = localStorage.getItem('af_student_uuid') || '';
   if (!uuid) return;
- 
   try {
-    const res = await fetch(LH_EDGE_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": LH_ANON_KEY,
-        "Authorization": "Bearer " + LH_ANON_KEY
-      },
-      body: JSON.stringify({ action: "mark", studentId: uuid })
+    const res = await fetch(LH_EDGE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': STUDENT_KEY, 'Authorization': 'Bearer ' + STUDENT_KEY },
+      body: JSON.stringify({ action: 'mark', studentId: uuid })
     });
- 
     if (!res.ok) return;
- 
     const data = await res.json();
     if (!data || !data.ok) return;
- 
-    const streak = typeof data.streak === "number" ? data.streak : 0;
- 
-    /* Save to localStorage so heatmap page can show instantly */
-    localStorage.setItem("af_streak", String(streak));
- 
-    /* Update header badge */
-    const badge = document.getElementById("afHeaderStreakCount");
-    if (badge) badge.textContent = streak;
- 
-  } catch (err) {
-    /* Network error — show cached value */
-    const cached = parseInt(localStorage.getItem("af_streak") || "0", 10);
-    const badge  = document.getElementById("afHeaderStreakCount");
-    if (badge) badge.textContent = cached;
-  }
+    const streak = Number(data.streak || 0);
+    localStorage.setItem('af_streak', String(streak));
+    updateStreakBadge(streak);
+  } catch (_) {}
 }
- 
-/**
- * Patch afLoadStreak() to also try a live sync when logged in.
- * This replaces the original afLoadStreak that only reads localStorage.
- */
-(function patchAfLoadStreak() {
-  const _orig = window.afLoadStreak;
- 
-  window.afLoadStreak = function () {
-    /* 1. Show cached value immediately (no flash) */
-    if (typeof _orig === "function") _orig();
- 
-    /* 2. If logged in, silently sync in background */
-    const uuid = localStorage.getItem("af_student_uuid") || "";
-    if (uuid) {
-      /* Slight delay so page renders first */
-      setTimeout(afSyncStreak, 800);
-    }
-  };
-})();
 
-   /* Auto-clear heatmap badge when session is gone */
-(function () {
-
-  async function afRefreshHeatmapBadge() {
-    const uuid = localStorage.getItem("af_student_uuid") || "";
-    const badge = document.getElementById("afHeaderStreakCount");
-
-    if (!badge) return;
-
-    /* Logout */
-    if (!uuid) {
-      localStorage.removeItem("af_streak");
-      badge.textContent = "0";
-      return;
-    }
-
-    /* Show cached value instantly */
-    badge.textContent = localStorage.getItem("af_streak") || "0";
-
-    /* Login / active session → fetch latest streak */
-    try {
-      const res = await fetch(LH_EDGE_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": LH_ANON_KEY,
-          "Authorization": "Bearer " + LH_ANON_KEY
-        },
-        body: JSON.stringify({
-          action: "mark",
-          studentId: uuid
-        })
-      });
-
-      if (!res.ok) return;
-
-      const data = await res.json();
-      if (!data || !data.ok) return;
-
-      const streak = Number(data.streak || 0);
-
-      localStorage.setItem("af_streak", String(streak));
-      badge.textContent = streak;
-
-    } catch (e) {}
-  }
-
-  /* Run immediately */
-  afRefreshHeatmapBadge();
-
-  /* Run whenever localStorage changes */
-  window.addEventListener("storage", afRefreshHeatmapBadge);
-
-  /* Detect login/logout automatically */
-  setInterval(afRefreshHeatmapBadge, 3000);
-
-})();
-    /* ════════════════════════════════════════════════════
-   NOTIFICATIONS — open page + unread dot
-════════════════════════════════════════════════════ */
- 
-const NF_EDGE_URL =
-  "https://afooyyydhlwngzssgqih.supabase.co/functions/v1/app-notifications-af";
- 
- 
-/**
- * Open notifications sub-page.
- */
-function afOpenNotifications() {
-  /* mark as seen */
-  afClearNotifDot();
-  window.location.href = "./Notify/index.html";
+/* ── NOTIFICATIONS ───────────────────────────────────────── */
+function goToNotif() {
+  localStorage.setItem('af_notif_last_seen', Date.now().toString());
+  const dot = $('afNotifDot');
+  if (dot) dot.style.display = 'none';
+  window.location.href = '/Notify/index.html';
 }
-window.afOpenNotifications = afOpenNotifications;
- 
-/**
- * Show the red dot on the bell if there are unseen notifications.
- */
-function afShowNotifDot() {
-  const dot = document.getElementById("afNotifDot");
-  if (dot) dot.style.display = "block";
-}
- 
-function afClearNotifDot() {
-  const dot = document.getElementById("afNotifDot");
-  if (dot) dot.style.display = "none";
-  /* save timestamp of last seen so we don't re-show on refresh */
-  localStorage.setItem("af_notif_last_seen", Date.now().toString());
-}
- 
-/**
- * Silently check if there are new notifications since last visit.
- * Shows the red dot on the bell if yes.
- */
-async function afCheckNewNotifications() {
-  const lastSeen = parseInt(localStorage.getItem("af_notif_last_seen") || "0", 10);
- 
+window.goToNotif = goToNotif;
+
+async function checkNotifs() {
+  const lastSeen = parseInt(localStorage.getItem('af_notif_last_seen') || '0');
+  const dot = $('afNotifDot');
+  if (!dot) return;
+
+  // Check cache first (instant)
   try {
-    /* Use cached data first so we don't block page load */
-    const cached = JSON.parse(localStorage.getItem("af_notif_cache") || "null");
+    const cached = JSON.parse(localStorage.getItem('af_notif_cache') || 'null');
     if (Array.isArray(cached) && cached.length > 0) {
       const newest = new Date(cached[0].created_at).getTime();
-      if (newest > lastSeen) afShowNotifDot();
+      if (newest > lastSeen) dot.style.display = 'block';
     }
- 
-    /* Then fetch live */
-    const res = await fetch(NF_EDGE_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": NF_ANON_KEY,
-        "Authorization": "Bearer " + NF_ANON_KEY
-      },
-      body: JSON.stringify({ action: "list" })
+  } catch (_) {}
+
+  // Then fetch live
+  try {
+    const res = await fetch(NF_EDGE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': STUDENT_KEY, 'Authorization': 'Bearer ' + STUDENT_KEY },
+      body: JSON.stringify({ action: 'list' })
     });
- 
     if (!res.ok) return;
     const data = await res.json();
     if (!data || !data.ok || !Array.isArray(data.notifications)) return;
- 
-    /* Update cache */
-    try { localStorage.setItem("af_notif_cache", JSON.stringify(data.notifications)); } catch (_) {}
- 
-    /* Show dot if latest notification is newer than last seen */
+    try { localStorage.setItem('af_notif_cache', JSON.stringify(data.notifications)); } catch (_) {}
     if (data.notifications.length > 0) {
       const newest = new Date(data.notifications[0].created_at).getTime();
-      if (newest > lastSeen) {
-        afShowNotifDot();
-      }
+      if (newest > lastSeen) dot.style.display = 'block';
+      else dot.style.display = 'none';
     }
- 
-  } catch (err) {
-    /* Silent — notification dot is non-critical */
-    console.warn("Notif check failed:", err.message);
-  }
+  } catch (_) {}
 }
- 
-/* ── AUTO-RUN on page load (after a short delay) ── */
-setTimeout(afCheckNewNotifications, 1200);
-  </script>
 
+/* ── BANNER SLIDER ───────────────────────────────────────── */
+let _slideIdx = 0, _slideTimer = null;
+
+function goToSlide(idx) {
+  const slides = document.querySelectorAll('.af-slide');
+  const dots   = document.querySelectorAll('.af-dot');
+  if (!slides.length) return;
+  slides[_slideIdx].classList.remove('active');
+  if (dots[_slideIdx]) dots[_slideIdx].classList.remove('active');
+  _slideIdx = (idx + slides.length) % slides.length;
+  slides[_slideIdx].classList.add('active');
+  if (dots[_slideIdx]) dots[_slideIdx].classList.add('active');
+}
+window.goToSlide = goToSlide;
+
+function afBannerFb(n, emoji, title, sub) {
+  const bgs = ['linear-gradient(135deg,#4f46e5,#06b6d4)','linear-gradient(135deg,#7c3aed,#4f46e5)','linear-gradient(135deg,#0f172a,#312e81)'];
+  return '<div class="af-slide-fb" style="background:' + bgs[(n-1)%3] + '">'
+    + '<span style="font-size:44px">' + emoji + '</span>'
+    + '<h3>' + title + '</h3><p>' + sub + '</p></div>';
+}
+window.afBannerFb = afBannerFb;
+
+/* Banner swipe */
+(function() {
+  const banner = document.getElementById('afBanner');
+  if (!banner) return;
+  let sx = 0;
+  banner.addEventListener('touchstart', e => { sx = e.changedTouches[0].clientX; }, { passive: true });
+  banner.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - sx;
+    if (Math.abs(dx) < 40) return;
+    clearInterval(_slideTimer);
+    goToSlide(dx < 0 ? _slideIdx + 1 : _slideIdx - 1);
+    startBanner();
+  }, { passive: true });
+})();
+
+function startBanner() {
+  if (_slideTimer) clearInterval(_slideTimer);
+  _slideTimer = setInterval(() => goToSlide(_slideIdx + 1), 4000);
+}
+
+/* ── PULL TO REFRESH ─────────────────────────────────────── */
+(function() {
+  const page = $('afPage');
+  const loader = $('afPullLoader');
+  if (!page || !loader) return;
+
+  const SHOW_DIST = 80, REFRESH_DIST = 170;
+  let startY = 0, dist = 0, ready = false;
+
+  page.addEventListener('touchstart', e => {
+    if (page.scrollTop > 0) return;
+    startY = e.touches[0].clientY;
+    dist = 0; ready = false;
+  }, { passive: true });
+
+  page.addEventListener('touchmove', e => {
+    if (page.scrollTop > 0) return;
+    dist = e.touches[0].clientY - startY;
+    if (dist < SHOW_DIST) { loader.classList.remove('show','ready'); return; }
+    loader.classList.add('show');
+    ready = dist >= REFRESH_DIST;
+    loader.classList.toggle('ready', ready);
+  }, { passive: true });
+
+  page.addEventListener('touchend', () => {
+    if (!ready) { loader.classList.remove('show','ready'); return; }
+    loader.classList.add('spin');
+    setTimeout(() => location.reload(), 500);
+  }, { passive: true });
+})();
+
+/* ── PAGE SWIPE (nav) ────────────────────────────────────── */
+(function() {
+  const page = $('afPage');
+  if (!page) return;
+  const PAGES = [
+    '/',
+    '/student/index.html',
+    '/batches/index.html',
+    '/community/index.html',
+    '/setting/index.html'
+  ];
+  let sx = 0, sy = 0, st = 0;
+
+  page.addEventListener('touchstart', e => {
+    sx = e.changedTouches[0].clientX;
+    sy = e.changedTouches[0].clientY;
+    st = Date.now();
+  }, { passive: true });
+
+  page.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+    const dt = Date.now() - st;
+    if (Math.abs(dy) > Math.abs(dx)) return;
+    if (Math.abs(dx) < 90 || dt > 600) return;
+    if (e.target.closest('.af-banner') || e.target.closest('.af-ticker')) return;
+    // Home is index 0
+    if (dx < 0) window.location.href = PAGES[1]; // swipe left → student
+    // swipe right from home → nothing (already first)
+  }, { passive: true });
+})();
+
+/* ── TOAST ───────────────────────────────────────────────── */
+let _tTimer = null;
+function afShowToast(message, type, title, duration) {
+  type     = type     || 'info';
+  duration = duration || 2800;
+  const icons  = { ok: 'Done', err: 'Error', warn: 'Notice', info: 'Info' };
+  const wrap = $('afToastWrap');
+  wrap.innerHTML = '';
+  if (_tTimer) { clearTimeout(_tTimer); _tTimer = null; }
+  const t = document.createElement('div');
+  t.className = 'af-toast af-toast-' + type;
+  t.innerHTML = '<div><p class="af-toast-title">' + (title || icons[type] || 'Info') + '</p><p class="af-toast-msg">' + message + '</p></div>'
+    + '<button class="af-toast-x" onclick="this.parentElement.remove()">×</button>';
+  wrap.appendChild(t);
+  _tTimer = setTimeout(() => t && t.remove(), duration);
+}
+window.afShowToast = afShowToast;
+
+/* ── PREVENT DEVTOOLS ────────────────────────────────────── */
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.addEventListener('copy',        e => e.preventDefault());
+document.addEventListener('cut',         e => e.preventDefault());
+document.addEventListener('dragstart',   e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  if (e.key === 'F12' ||
+      (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key.toUpperCase())) ||
+      (e.ctrlKey && e.key.toUpperCase() === 'U'))
+    e.preventDefault();
+});
+
+/* ── SERVICE WORKER ──────────────────────────────────────── */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js/').catch(() => {});
+  });
+}
+
+/* ── OFFLINE REDIRECT HELPER ─────────────────────────────── */
+function openExternal(url) {
+  if (!navigator.onLine) { window.location.href = '/offline/'; return; }
+  window.location.href = url;
+}
+window.openExternal = openExternal;
+
+/* ── INIT ────────────────────────────────────────────────── */
+function init() {
+  hideSplash();
+  loadStudentState();
+  startBanner();
+
+  // Streak: show cached instantly, then sync in background
+  updateStreakBadge(parseInt(localStorage.getItem('af_streak') || '0'));
+  setTimeout(syncStreak, 800);
+
+  // Notifications: check after a short delay
+  setTimeout(checkNotifs, 1200);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
 </body>
 </html>
