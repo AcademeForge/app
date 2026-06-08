@@ -8526,22 +8526,51 @@ async function afSyncStreak() {
   };
 })();
 
-    /* Auto-clear heatmap badge when session is gone */
+   /* Auto-clear heatmap badge when session is gone */
 (function () {
 
-  function afRefreshHeatmapBadge() {
+  async function afRefreshHeatmapBadge() {
     const uuid = localStorage.getItem("af_student_uuid") || "";
     const badge = document.getElementById("afHeaderStreakCount");
 
     if (!badge) return;
 
+    /* Logout */
     if (!uuid) {
       localStorage.removeItem("af_streak");
       badge.textContent = "0";
       return;
     }
 
+    /* Show cached value instantly */
     badge.textContent = localStorage.getItem("af_streak") || "0";
+
+    /* Login / active session → fetch latest streak */
+    try {
+      const res = await fetch(LH_EDGE_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": LH_ANON_KEY,
+          "Authorization": "Bearer " + LH_ANON_KEY
+        },
+        body: JSON.stringify({
+          action: "mark",
+          studentId: uuid
+        })
+      });
+
+      if (!res.ok) return;
+
+      const data = await res.json();
+      if (!data || !data.ok) return;
+
+      const streak = Number(data.streak || 0);
+
+      localStorage.setItem("af_streak", String(streak));
+      badge.textContent = streak;
+
+    } catch (e) {}
   }
 
   /* Run immediately */
@@ -8550,8 +8579,8 @@ async function afSyncStreak() {
   /* Run whenever localStorage changes */
   window.addEventListener("storage", afRefreshHeatmapBadge);
 
-  /* Check every second in same tab */
-  setInterval(afRefreshHeatmapBadge, 1000);
+  /* Detect login/logout automatically */
+  setInterval(afRefreshHeatmapBadge, 3000);
 
 })();
     /* ════════════════════════════════════════════════════
