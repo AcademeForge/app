@@ -584,7 +584,7 @@ img { display: block; max-width: 100%; }
   <!-- ── TOPBAR ── -->
   <header class="af-topbar">
     <div class="af-topbar-left">
-      <button class="af-back-btn" onclick="nfGoBack()" aria-label="Go back" type="button">←</button>
+    
       <img
         src="../IMG/AF LOGO 1.jpeg" alt="AcademeForge" class="af-brand-logo"
         onerror="this.style.display='none'"
@@ -599,10 +599,7 @@ img { display: block; max-width: 100%; }
         class="af-icon-btn" id="nfRefreshTopBtn"
         onclick="nfLoad(true)" aria-label="Refresh notifications" type="button"
       >↻</button>
-      <button
-        class="af-icon-btn" id="nfThemeBtn"
-        onclick="nfToggleTheme()" aria-label="Toggle dark mode" type="button"
-      >🌙</button>
+        <button class="af-back-btn" onclick="nfGoBack()" aria-label="Go back" type="button">←</button>
     </div>
   </header>
 
@@ -704,19 +701,6 @@ const NF_ICONS = {
 /* ═══════════════════════════════════════════════════
    DARK MODE
 ═══════════════════════════════════════════════════ */
-function nfIsDark() {
-  return document.documentElement.getAttribute("data-theme") === "dark";
-}
-function nfApplyTheme(dark) {
-  document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
-  localStorage.setItem("af_dark_mode", dark ? "1" : "0");
-  const btn = document.getElementById("nfThemeBtn");
-  if (btn) btn.textContent = dark ? "☀️" : "🌙";
-}
-function nfToggleTheme() { nfApplyTheme(!nfIsDark()); }
-
-/* set icon on load */
-document.getElementById("nfThemeBtn").textContent = nfIsDark() ? "☀️" : "🌙";
 
 /* ═══════════════════════════════════════════════════
    NAVIGATION
