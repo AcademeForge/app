@@ -599,7 +599,10 @@ async function loadCourses(force) {
       // Show cache bar
       const ts = cacheTimestamp(COURSES_KEY);
       const mins = Math.round((Date.now()-ts)/60000);
-      $('cacheMsg').textContent = 'Courses cached' + (mins>0 ? ' '+mins+'m ago' : '');
+    $('cacheMsg').textContent =
+  mins > 0
+    ? `Last updated ${mins}m ago`
+    : 'Updated just now';
       $('cacheBar').classList.remove('hidden');
       return;
     }
