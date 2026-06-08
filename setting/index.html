@@ -1,98 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- instant theme, zero flash -->
 <script>
 !function(){
-  var t=localStorage.getItem('af_dark_mode');
-  document.documentElement.setAttribute('data-theme',t==='1'?'dark':'light');
+  document.documentElement.setAttribute('data-theme',
+    localStorage.getItem('af_dark_mode')==='1'?'dark':'light');
 }();
 </script>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<meta name="theme-color" id="themeColorMeta" content="#4f46e5"/>
 <title>Settings · AcademeForge</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Sora:wght@700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Sora:wght@700;800;900&display=swap" rel="stylesheet"/>
 <style>
-/* ══════════════════════════════════════════
-   TOKENS — mirrors main app exactly
-══════════════════════════════════════════ */
+/* ── TOKENS ── */
 :root{
-  --p:#4f46e5; --p2:#3730a3; --pl:#818cf8;
-  --acc:#06b6d4; --ok:#22c55e; --err:#ef4444; --warn:#f59e0b;
-
-  --bg:#f0f2ff;
-  --shell:#fff;
-  --card:rgba(255,255,255,.82);
-  --nav:rgba(255,255,255,.92);
-  --inp:#f4f5fb;
-  --grp:rgba(79,70,229,.06);
-  --grph:rgba(79,70,229,.11);
-
-  --t1:#0f0e2a; --t2:#4b5563; --tm:#9ca3af; --ton:#fff;
-  --b1:rgba(79,70,229,.12); --bc:rgba(79,70,229,.15); --bi:#d1d5db;
-
-  --sh: 0 2px 12px rgba(79,70,229,.08), 0 1px 3px rgba(0,0,0,.05);
-  --she:0 12px 40px rgba(79,70,229,.15);
-  --shb:0 4px 16px rgba(79,70,229,.28);
-
-  --r1:8px; --r2:14px; --r3:20px; --r4:28px; --rf:9999px;
-  --fd:'Sora',sans-serif;
-  --fb:'Nunito',sans-serif;
-
-  --nav-h:66px; --hdr-h:58px;
-  --shell-w:430px;
-  --ease:cubic-bezier(.22,1,.36,1);
-  --spring:cubic-bezier(.34,1.56,.64,1);
-  --dur:140ms;
+  --p:#4f46e5;--p2:#3730a3;--pl:#818cf8;
+  --acc:#06b6d4;--ok:#22c55e;--err:#ef4444;
+  --bg:#f0f2ff;--surface:#fff;--card:rgba(255,255,255,.9);
+  --nav:rgba(255,255,255,.95);--inp:#f4f5fb;
+  --grp:rgba(79,70,229,.06);--grph:rgba(79,70,229,.10);
+  --t1:#0f0e2a;--t2:#4b5563;--tm:#9ca3af;
+  --b1:rgba(79,70,229,.12);--bc:rgba(79,70,229,.15);--bi:#d1d5db;
+  --sh:0 1px 6px rgba(79,70,229,.08);
+  --r1:8px;--r2:12px;--r3:16px;--r4:24px;--rf:9999px;
+  --fd:'Sora',sans-serif;--fb:'Nunito',sans-serif;
+  --nav-h:60px;--hdr-h:52px;
+  --shell:430px;
 }
 [data-theme="dark"]{
-  --bg:#0c0b1d; --shell:#120f2a;
-  --card:rgba(30,27,60,.82);
-  --nav:rgba(18,15,42,.96);
-  --inp:#1e1b3c;
-  --grp:rgba(129,140,248,.08);
-  --grph:rgba(129,140,248,.14);
-  --t1:#f0eeff; --t2:#a5a3c2; --tm:#6b6a8a;
-  --b1:rgba(129,140,248,.12); --bc:rgba(129,140,248,.18); --bi:rgba(129,140,248,.20);
-  --sh:0 2px 12px rgba(0,0,0,.28); --she:0 12px 40px rgba(0,0,0,.45);
-  --shb:0 4px 16px rgba(79,70,229,.40);
+  --bg:#0c0b1d;--surface:#120f2a;--card:rgba(30,27,60,.9);
+  --nav:rgba(18,15,42,.98);--inp:#1e1b3c;
+  --grp:rgba(129,140,248,.08);--grph:rgba(129,140,248,.14);
+  --t1:#f0eeff;--t2:#a5a3c2;--tm:#6b6a8a;
+  --b1:rgba(129,140,248,.12);--bc:rgba(129,140,248,.18);--bi:rgba(129,140,248,.20);
+  --sh:0 1px 6px rgba(0,0,0,.25);
 }
 
 /* ── RESET ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html{font-size:16px;-webkit-text-size-adjust:100%;color-scheme:light;}
-[data-theme="dark"]{color-scheme:dark;}
+html{font-size:15px;-webkit-text-size-adjust:100%;}
+/* NO transition on html/body — prevents dark mode lag */
 body{
   font-family:var(--fb);
   background:var(--bg);
   color:var(--t1);
   min-height:100dvh;
   display:flex;justify-content:center;
-  transition:background var(--dur) linear, color var(--dur) linear;
   overflow-x:hidden;
-  /* GPU layer for smooth scrolling */
-  -webkit-overflow-scrolling:touch;
 }
 button{font-family:var(--fb);cursor:pointer;border:none;background:none;color:inherit;}
 a{text-decoration:none;color:inherit;}
 
-/* ── SHELL ── */
+/* ── SHELL — matches community page exactly ── */
 .shell{
-  width:100%;max-width:var(--shell-w);
+  width:100%;max-width:var(--shell);
   min-height:100dvh;
-  background:var(--shell);
+  background:var(--surface);
   display:flex;flex-direction:column;
   position:relative;
-  box-shadow:0 0 0 1px var(--b1),var(--she);
-  transition:background var(--dur) linear;
-  contain:layout style;
+  box-shadow:0 0 0 1px var(--b1);
 }
 @media(min-width:700px){
-  body{padding:32px 0 48px;}
-  .shell{border-radius:40px;min-height:calc(100dvh - 80px);max-height:900px;overflow:hidden;}
+  body{padding:24px 0 40px;}
+  .shell{border-radius:32px;min-height:calc(100dvh - 64px);max-height:880px;overflow:hidden;}
 }
 
 /* ── HEADER ── */
@@ -100,352 +72,309 @@ a{text-decoration:none;color:inherit;}
   position:sticky;top:0;z-index:100;
   height:var(--hdr-h);
   background:var(--nav);
-  backdrop-filter:blur(16px) saturate(160%);
-  -webkit-backdrop-filter:blur(16px) saturate(160%);
   border-bottom:1px solid var(--b1);
   display:flex;align-items:center;padding:0 14px;gap:10px;
-  will-change:backdrop-filter;
-  transition:background var(--dur) linear;
+  flex-shrink:0;
 }
-.hdr-back{
-  width:34px;height:34px;border-radius:var(--r1);
-  background:var(--grp);border:1px solid var(--b1);
-  display:flex;align-items:center;justify-content:center;
-  font-size:19px;color:var(--t2);flex-shrink:0;
-  transition:transform var(--dur) var(--spring),background var(--dur);
-}
-.hdr-back:active{transform:scale(.92);}
-.hdr-title{
-  font-family:var(--fd);font-size:16px;font-weight:900;
-  color:var(--t1);flex:1;
-}
-.hdr-version{
-  font-size:10px;color:var(--tm);font-weight:700;
-  background:var(--grp);border:1px solid var(--b1);
-  padding:3px 8px;border-radius:var(--rf);
-}
+.hdr-title{font-family:var(--fd);font-size:15px;font-weight:800;color:var(--t1);flex:1;}
 
 /* ── SCROLL AREA ── */
 .page{
-  flex:1;overflow-y:auto;overflow-x:hidden;
-  padding:14px 12px calc(var(--nav-h) + 32px + env(safe-area-inset-bottom,0px));
-  /* hardware-accelerated scroll */
+  flex:1;
+  overflow-y:auto;
+  overflow-x:hidden;
   -webkit-overflow-scrolling:touch;
   overscroll-behavior-y:contain;
-}
-.page::-webkit-scrollbar{width:2px;}
-.page::-webkit-scrollbar-thumb{background:var(--bc);border-radius:99px;}
 
+  /* 120px extra space + safe area */
+  padding:10px 10px calc(
+    (var(--nav-h) * 2)
+    + env(safe-area-inset-bottom,0px)
+  );
+
+  min-height:0;
+}
+
+.page::-webkit-scrollbar{
+  width:2px;
+}
+
+.page::-webkit-scrollbar-thumb{
+  background:var(--bc);
+  border-radius:99px;
+}
+
+  .page{
+  padding:10px 10px calc(
+    (var(--nav-h) * 2)
+    + 40px
+    + env(safe-area-inset-bottom,0px)
+  );
+}
+
+.page-end-space{
+  height:calc(
+    (var(--nav-h) * 2)
+    + 40px
+    + env(safe-area-inset-bottom,0px)
+  );
+}
+  
 /* ── PROFILE HERO ── */
 .profile-hero{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 14px;
   border-radius:var(--r3);
-  padding:18px 16px;
-  display:flex;align-items:center;gap:14px;
   background:var(--card);
   border:1px solid var(--bc);
   box-shadow:var(--sh);
-  cursor:pointer;
-  margin-bottom:10px;
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
-  transition:transform var(--dur) var(--ease), box-shadow var(--dur);
-  /* CSS animation on load */
-  animation:slideUp .25s var(--ease) both;
+  cursor:pointer;margin-bottom:8px;
 }
-.profile-hero:active{transform:scale(.985);}
-.profile-hero:hover{box-shadow:var(--she);}
+.profile-hero:active{opacity:.8;}
 .p-avatar{
-  width:52px;height:52px;border-radius:16px;flex-shrink:0;
+  width:44px;height:44px;border-radius:14px;flex-shrink:0;
   background:linear-gradient(135deg,var(--p),var(--acc));
   display:flex;align-items:center;justify-content:center;
-  font-family:var(--fd);font-size:20px;font-weight:900;color:#fff;
+  font-family:var(--fd);font-size:16px;font-weight:900;color:#fff;
 }
 .p-info{flex:1;min-width:0;}
-.p-name{font-family:var(--fd);font-size:16px;font-weight:900;color:var(--t1);
+.p-name{font-family:var(--fd);font-size:14px;font-weight:800;color:var(--t1);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.p-sub{font-size:11.5px;color:var(--tm);margin-top:2px;font-weight:600;}
-.p-arrow{font-size:20px;color:var(--tm);}
+.p-sub{font-size:11px;color:var(--tm);margin-top:1px;font-weight:600;}
+.p-arrow{font-size:16px;color:var(--tm);flex-shrink:0;}
 
 /* ── SITE LINK ── */
 .site-link{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:13px 16px;border-radius:var(--r3);
-  background:linear-gradient(135deg,rgba(79,70,229,.10),rgba(6,182,212,.07));
+  display:flex;align-items:center;gap:10px;
+  padding:11px 14px;
+  border-radius:var(--r3);
+  background:linear-gradient(135deg,rgba(79,70,229,.08),rgba(6,182,212,.05));
   border:1px solid var(--bc);
-  font-weight:800;font-size:13.5px;color:var(--t1);
-  cursor:pointer;margin-bottom:10px;
-  transition:transform var(--dur) var(--ease);
-  animation:slideUp .25s .04s var(--ease) both;
+  font-size:13px;font-weight:700;color:var(--t1);
+  cursor:pointer;margin-bottom:8px;
+  text-decoration:none;
 }
-.site-link:active{transform:scale(.985);}
+.site-link:active{opacity:.8;}
+.site-link-icon{font-size:15px;}
+.site-link-text{flex:1;}
+.site-link-arr{font-size:14px;color:var(--tm);}
 
 /* ── DARK MODE ROW ── */
 .dm-row{
   display:flex;align-items:center;justify-content:space-between;
-  padding:14px 16px;border-radius:var(--r3);
+  padding:11px 14px;
+  border-radius:var(--r3);
   background:var(--card);border:1px solid var(--bc);
-  box-shadow:var(--sh);margin-bottom:10px;
-  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-  animation:slideUp .25s .08s var(--ease) both;
+  box-shadow:var(--sh);margin-bottom:8px;
 }
-.dm-left{display:flex;align-items:center;gap:12px;}
-.dm-icon{
-  width:36px;height:36px;border-radius:var(--r1);
-  background:var(--grp);display:flex;align-items:center;justify-content:center;
-  font-size:18px;
-}
-.dm-label{font-size:14px;font-weight:700;color:var(--t1);}
+.dm-left{display:flex;align-items:center;gap:10px;}
+.dm-icon{font-size:16px;width:32px;height:32px;border-radius:var(--r1);
+  background:var(--grp);display:flex;align-items:center;justify-content:center;}
+.dm-label{font-size:13px;font-weight:700;color:var(--t1);}
 
-/* toggle */
-.tog{position:relative;width:46px;height:26px;flex-shrink:0;}
+/* toggle — no transition on bg, just the knob moves */
+.tog{position:relative;width:42px;height:24px;flex-shrink:0;}
 .tog input{opacity:0;width:0;height:0;position:absolute;}
 .tog-track{
   position:absolute;inset:0;border-radius:99px;
   background:var(--bi);cursor:pointer;
-  transition:background .22s;
 }
-.tog input:checked + .tog-track{background:var(--p);}
+.tog input:checked+.tog-track{background:var(--p);}
 .tog-track::after{
   content:'';position:absolute;top:3px;left:3px;
-  width:20px;height:20px;border-radius:50%;
-  background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.18);
-  transition:transform .22s var(--spring);
+  width:18px;height:18px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.15);
+  transition:transform .15s ease;
 }
-.tog input:checked + .tog-track::after{transform:translateX(20px);}
+.tog input:checked+.tog-track::after{transform:translateX(18px);}
 
 /* ── SECTION LABEL ── */
 .sec-label{
   font-size:10px;font-weight:800;text-transform:uppercase;
-  letter-spacing:.09em;color:var(--tm);
-  padding:8px 4px 4px;
+  letter-spacing:.08em;color:var(--tm);
+  padding:10px 4px 4px;
 }
 
-/* ── SETTINGS GROUPS ── */
-.grp-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
-
-/* Direct link row (no accordion) */
-.row-link{
-  display:flex;align-items:center;gap:12px;
-  padding:14px 16px;border-radius:var(--r3);
+/* ── ROW (all rows same height, left-aligned) ── */
+.row{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;
+  border-radius:var(--r2);
   background:var(--card);border:1px solid var(--bc);
-  box-shadow:var(--sh);cursor:pointer;
-  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-  transition:transform var(--dur) var(--ease),background var(--dur);
+  box-shadow:var(--sh);
+  cursor:pointer;
   text-decoration:none;color:inherit;
-  animation:slideUp .25s var(--ease) both;
+  /* NO transitions — they cause repaint lag */
 }
-.row-link:active{transform:scale(.985);background:var(--grph);}
+.row:active{background:var(--grph);}
+.row+.row{margin-top:2px;}
+.row-group{display:flex;flex-direction:column;gap:2px;margin-bottom:8px;}
 .row-icon{
-  width:38px;height:38px;border-radius:12px;flex-shrink:0;
+  width:32px;height:32px;border-radius:var(--r1);flex-shrink:0;
   background:var(--grp);border:1px solid var(--b1);
   display:flex;align-items:center;justify-content:center;
-  font-size:18px;
-  transition:background var(--dur);
+  font-size:15px;
 }
-.row-link:active .row-icon{background:var(--grph);}
-.row-text{flex:1;min-width:0;}
-.row-title{font-size:14px;font-weight:700;color:var(--t1);}
-.row-sub{font-size:11.5px;color:var(--tm);margin-top:1px;font-weight:600;}
-.row-end{display:flex;align-items:center;gap:6px;flex-shrink:0;}
-.row-badge{
-  font-size:10px;font-weight:800;padding:3px 8px;
-  border-radius:var(--rf);
-  background:linear-gradient(135deg,var(--p),var(--acc));
-  color:#fff;white-space:nowrap;
+.row-text{flex:1;min-width:0;text-align:left;}
+.row-title{font-size:13px;font-weight:700;color:var(--t1);text-align:left;display:block;}
+.row-sub{font-size:10.5px;color:var(--tm);margin-top:1px;font-weight:600;display:block;text-align:left;}
+.row-end{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.badge{
+  font-size:9.5px;font-weight:800;padding:2px 7px;
+  border-radius:var(--rf);white-space:nowrap;
+  background:linear-gradient(135deg,var(--p),var(--acc));color:#fff;
 }
-.row-badge.new{background:linear-gradient(135deg,var(--ok),#16a34a);}
-.row-arrow{font-size:16px;color:var(--tm);}
+.badge.green{background:linear-gradient(135deg,var(--ok),#16a34a);}
+.badge.plain{background:var(--grp);border:1px solid var(--b1);color:var(--t2);}
+.row-arr{font-size:14px;color:var(--tm);}
 
-/* Accordion */
-.acc{
-  border-radius:var(--r3);
+/* ── ACCORDION ── */
+.acc-group{
+  border-radius:var(--r2);
   background:var(--card);border:1px solid var(--bc);
   box-shadow:var(--sh);overflow:hidden;
-  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-  animation:slideUp .25s var(--ease) both;
-  transition:box-shadow var(--dur);
+  margin-bottom:8px;
 }
-.acc.open{box-shadow:var(--she);}
 .acc-trigger{
-  width:100%;display:flex;align-items:center;gap:12px;
-  padding:14px 16px;cursor:pointer;
-  transition:background var(--dur);
+  width:100%;display:flex;align-items:center;gap:10px;
+  padding:10px 12px;cursor:pointer;
+  text-align:left;
 }
 .acc-trigger:active{background:var(--grph);}
-.acc-chev{
-  font-size:13px;color:var(--tm);margin-left:2px;flex-shrink:0;
-  transition:transform .2s var(--spring);
-}
-.acc.open .acc-chev{transform:rotate(180deg);}
-.acc-body{
-  max-height:0;overflow:hidden;
-  transition:max-height .2s var(--ease);
-}
-.acc.open .acc-body{max-height:500px;}
-.acc-divider{height:1px;background:var(--b1);margin:0 14px;}
+.acc-chev{font-size:11px;color:var(--tm);margin-left:auto;flex-shrink:0;
+  transition:transform .15s ease;}
+.acc-group.open .acc-chev{transform:rotate(180deg);}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .15s ease;}
+.acc-group.open .acc-body{max-height:400px;}
+.acc-divider{height:1px;background:var(--b1);}
 .acc-item{
   display:flex;align-items:center;gap:10px;
-  padding:12px 16px 12px 18px;
-  cursor:pointer;border-bottom:1px solid var(--b1);
-  transition:background var(--dur);
-  text-decoration:none;color:inherit;
+  padding:9px 12px 9px 16px;
+  border-bottom:1px solid var(--b1);
+  cursor:pointer;text-decoration:none;color:inherit;
 }
 .acc-item:last-child{border-bottom:none;}
 .acc-item:active{background:var(--grph);}
 .acc-item-icon{
-  width:30px;height:30px;border-radius:var(--r1);
+  width:28px;height:28px;border-radius:var(--r1);
   background:var(--grp);display:flex;align-items:center;
-  justify-content:center;font-size:15px;flex-shrink:0;
+  justify-content:center;font-size:13px;flex-shrink:0;
 }
-.acc-item-text{flex:1;min-width:0;}
-.acc-item-label{font-size:13.5px;font-weight:700;color:var(--t1);}
-.acc-item-sub{font-size:11px;color:var(--tm);margin-top:1px;font-weight:600;}
+.acc-item-text{flex:1;min-width:0;text-align:left;}
+.acc-item-label{font-size:12.5px;font-weight:700;color:var(--t1);display:block;text-align:left;}
+.acc-item-sub{font-size:10px;color:var(--tm);margin-top:1px;font-weight:600;display:block;text-align:left;}
 
 /* ── LOGOUT ── */
 .logout-btn{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  width:100%;padding:14px;border-radius:var(--r3);
-  background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.20);
-  color:var(--err);font-weight:800;font-size:14px;
+  display:flex;align-items:center;gap:8px;
+  width:100%;padding:11px 14px;border-radius:var(--r2);
+  background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);
+  color:var(--err);font-weight:800;font-size:13px;
   cursor:pointer;margin-bottom:8px;
-  transition:background var(--dur),transform var(--dur) var(--spring);
-  animation:slideUp .25s var(--ease) both;
+  text-align:left;
 }
-.logout-btn:hover{background:rgba(239,68,68,.14);}
-.logout-btn:active{transform:scale(.98);}
+.logout-btn:active{background:rgba(239,68,68,.15);}
 
 /* ── VERSION ── */
-.version{
-  text-align:center;font-size:11.5px;color:var(--tm);
-  padding:10px 0 4px;font-weight:600;
-}
+.version{text-align:center;font-size:11px;color:var(--tm);padding:8px 0 4px;font-weight:600;}
 .version b{color:var(--t2);font-weight:800;}
 
 /* ── BOTTOM NAV ── */
 .bnav{
   position:fixed;bottom:0;left:50%;transform:translateX(-50%);
-  width:100%;max-width:var(--shell-w);z-index:999;
+  width:100%;max-width:var(--shell);z-index:999;
   height:var(--nav-h);
   background:var(--nav);
-  backdrop-filter:blur(16px) saturate(160%);
-  -webkit-backdrop-filter:blur(16px) saturate(160%);
   border-top:1px solid var(--b1);
   display:flex;align-items:center;padding:0 4px;
   padding-bottom:env(safe-area-inset-bottom,0px);
-  will-change:backdrop-filter;
 }
 .bnav-btn{
   flex:1;display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:3px;height:100%;
-  border-radius:var(--r2);padding:8px 4px;
+  border-radius:var(--r2);padding:6px 4px;
   position:relative;
-  transition:opacity var(--dur);
 }
 .bnav-btn::before{
-  content:'';position:absolute;top:8px;left:50%;transform:translateX(-50%);
-  width:0;height:3px;background:var(--p);border-radius:99px;
-  transition:width .18s var(--spring);
+  content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);
+  width:0;height:2px;background:var(--p);border-radius:99px;
+  transition:width .15s ease;
 }
-.bnav-btn.active::before{width:26px;}
-.bnav-icon{font-size:22px;line-height:1;transition:transform .12s var(--spring);}
-.bnav-btn.active .bnav-icon{transform:scale(1.1);}
-.bnav-btn:active .bnav-icon{transform:scale(.9);}
-.bnav-label{font-size:10px;font-weight:700;color:var(--tm);transition:color var(--dur);}
+.bnav-btn.active::before{width:24px;}
+.bnav-icon{font-size:20px;line-height:1;}
+.bnav-btn.active .bnav-icon{transform:scale(1.08);}
+.bnav-label{font-size:10px;font-weight:700;color:var(--tm);}
 .bnav-btn.active .bnav-label{color:var(--p);}
 
 /* ── TOAST ── */
 .toast-wrap{
-  position:fixed;left:50%;bottom:calc(var(--nav-h) + 14px);
+  position:fixed;left:50%;bottom:calc(var(--nav-h) + 12px);
   transform:translateX(-50%);z-index:99999;
-  width:min(90vw,400px);pointer-events:none;
+  width:min(90vw,380px);pointer-events:none;
 }
 .toast{
   display:flex;align-items:flex-start;gap:10px;
-  background:var(--shell);color:var(--t1);
-  border:1px solid var(--bc);border-radius:16px;
-  padding:11px 13px;box-shadow:var(--she);
-  animation:toastIn .2s var(--ease);pointer-events:auto;
+  background:var(--surface);color:var(--t1);
+  border:1px solid var(--bc);border-radius:12px;
+  padding:10px 12px;box-shadow:0 4px 20px rgba(0,0,0,.12);
+  pointer-events:auto;
 }
-.toast-ok{border-left:4px solid var(--ok);}
-.toast-info{border-left:4px solid var(--p);}
-.toast-err{border-left:4px solid var(--err);}
-.toast-body p:first-child{font-size:13px;font-weight:800;}
-.toast-body p:last-child{font-size:11.5px;color:var(--t2);margin-top:1px;}
-.toast-x{font-size:17px;color:var(--tm);cursor:pointer;margin-left:auto;}
-@keyframes toastIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.toast-ok{border-left:3px solid var(--ok);}
+.toast-info{border-left:3px solid var(--p);}
+.toast-err{border-left:3px solid var(--err);}
+.toast-body p:first-child{font-size:12px;font-weight:800;}
+.toast-body p:last-child{font-size:11px;color:var(--t2);margin-top:1px;}
+.toast-x{font-size:16px;color:var(--tm);cursor:pointer;margin-left:auto;}
 
 /* ── CONFIRM SHEET ── */
 .sheet-ov{
   position:fixed;inset:0;z-index:8000;
   display:flex;align-items:flex-end;justify-content:center;
-  background:rgba(0,0,0,.45);
-  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  background:rgba(0,0,0,.4);
   opacity:0;visibility:hidden;
-  transition:opacity .18s,visibility .18s;
 }
 .sheet-ov.open{opacity:1;visibility:visible;}
 .sheet{
-  width:100%;max-width:var(--shell-w);
-  background:var(--shell);
-  border-radius:28px 28px 0 0;
-  padding:10px 14px calc(20px + env(safe-area-inset-bottom,0px));
-  border:1px solid var(--bc);box-shadow:var(--she);
+  width:100%;max-width:var(--shell);
+  background:var(--surface);
+  border-radius:24px 24px 0 0;
+  padding:10px 14px calc(18px + env(safe-area-inset-bottom,0px));
+  border:1px solid var(--bc);
   transform:translateY(100%);
-  transition:transform .22s var(--spring);
+  transition:transform .2s ease;
 }
 .sheet-ov.open .sheet{transform:translateY(0);}
-.sheet-drag{width:36px;height:4px;background:var(--bi);border-radius:99px;margin:0 auto 14px;}
-.sheet-title{font-family:var(--fd);font-size:16px;font-weight:900;color:var(--t1);margin-bottom:6px;}
-.sheet-sub{font-size:13px;color:var(--t2);line-height:1.55;margin-bottom:18px;}
+.sheet-drag{width:32px;height:4px;background:var(--bi);border-radius:99px;margin:0 auto 12px;}
+.sheet-title{font-family:var(--fd);font-size:15px;font-weight:900;color:var(--t1);margin-bottom:5px;}
+.sheet-sub{font-size:12.5px;color:var(--t2);line-height:1.5;margin-bottom:14px;}
 .sheet-btn{
-  width:100%;padding:14px;border-radius:var(--r2);
-  font-size:14px;font-weight:800;margin-bottom:8px;
-  transition:transform var(--dur) var(--spring),opacity var(--dur);
+  width:100%;padding:12px;border-radius:var(--r2);
+  font-size:13.5px;font-weight:800;margin-bottom:7px;
+  text-align:center;
 }
-.sheet-btn:active{transform:scale(.98);}
-.sheet-btn-danger{
-  background:linear-gradient(135deg,var(--err),#dc2626);
-  color:#fff;box-shadow:0 4px 14px rgba(239,68,68,.3);
-}
-.sheet-btn-ghost{
-  background:var(--grp);border:1px solid var(--bc);color:var(--t2);
-}
+.sheet-btn:active{opacity:.85;}
+.sheet-btn-danger{background:linear-gradient(135deg,var(--err),#dc2626);color:#fff;}
+.sheet-btn-ghost{background:var(--grp);border:1px solid var(--bc);color:var(--t2);}
 
-/* ── ANIMATIONS ── */
-@keyframes slideUp{
-  from{opacity:0;transform:translateY(14px);}
-  to{opacity:1;transform:translateY(0);}
-}
-/* stagger via nth-child on grp-wrap children */
-.grp-wrap > *:nth-child(1){animation-delay:.06s;}
-.grp-wrap > *:nth-child(2){animation-delay:.10s;}
-.grp-wrap > *:nth-child(3){animation-delay:.14s;}
-.grp-wrap > *:nth-child(4){animation-delay:.18s;}
-.grp-wrap > *:nth-child(5){animation-delay:.22s;}
-.grp-wrap > *:nth-child(6){animation-delay:.26s;}
-.grp-wrap > *:nth-child(7){animation-delay:.30s;}
-
-/* ── PERF: no user select outside inputs ── */
+/* ── NO USER SELECT OUTSIDE INPUTS ── */
 html,body,*{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-touch-callout:none;}
 input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
-
-/* ── NO DEV TOOLS ── */
 </style>
 </head>
 <body>
-
 <div class="shell">
 
   <!-- HEADER -->
   <header class="hdr">
-    <span class="hdr-title">Settings</span>
+    <span class="hdr-title">Settings ⚙️</span>
+    <span id="verLabel" style="font-size:10px;color:var(--tm);font-weight:700;">v06.07.19</span>
   </header>
 
   <!-- PAGE -->
   <div class="page" id="page">
 
-    <!-- PROFILE CARD -->
-    <div class="profile-hero" onclick="goToDashboard()" role="button" tabindex="0">
+    <!-- PROFILE -->
+    <div class="profile-hero" onclick="goToDashboard()" role="button">
       <div class="p-avatar" id="pAvatar">S</div>
       <div class="p-info">
         <div class="p-name" id="pName">Hi, Student</div>
@@ -454,10 +383,11 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
       <span class="p-arrow">›</span>
     </div>
 
-    <!-- WEBSITE LINK -->
+    <!-- WEBSITE -->
     <a class="site-link" href="https://academeforge.in" target="_blank" rel="noopener">
-      <span>🌐 Official Website ✨</span>
-      <span>›</span>
+      <span class="site-link-icon">🌐</span>
+      <span class="site-link-text">Official Website</span>
+      <span class="site-link-arr">›</span>
     </a>
 
     <!-- DARK MODE -->
@@ -472,247 +402,230 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
       </label>
     </div>
 
-    <!-- SECTION: TOOLS & EXPLORE -->
-    <div class="sec-label">Tools & Explore</div>
-    <div class="grp-wrap">
+    <!-- SECTION: TOOLS -->
+    <div class="sec-label">Tools</div>
+    <div class="row-group">
 
-      <!-- Tests — direct link -->
-      <a class="row-link" href="/T/" style="animation-delay:.06s">
+      <a class="row" href="/T/" style="border-radius:var(--r2) var(--r2) 0 0;">
         <div class="row-icon">🧪</div>
         <div class="row-text">
-          <div class="row-title">AF Test Arena</div>
-          <div class="row-sub">Quizzes, rankings &amp; practice</div>
+          <span class="row-title">AF Test Arena</span>
+          <span class="row-sub">Quizzes, rankings &amp; practice</span>
         </div>
-        <div class="row-end">
-          <span class="row-badge new">New</span>
-          <span class="row-arrow">›</span>
-        </div>
+        <div class="row-end"><span class="badge green">New</span><span class="row-arr">›</span></div>
       </a>
-      
- <!-- Learning Heatmap -->
-      <a class="row-link" href="./Heatmap/index.html" style="animation-delay:.14s">
+
+      <a class="row" href="./Heatmap/index.html" style="border-radius:0;">
         <div class="row-icon">🔥</div>
         <div class="row-text">
-          <div class="row-title">Learning Heatmap</div>
-          <div class="row-sub">Track your daily learning streak</div>
+          <span class="row-title">Learning Heatmap</span>
+          <span class="row-sub">Track your daily learning streak</span>
         </div>
-        <div class="row-end">
-          <span class="row-badge" id="streakBadge">0🔥</span>
-          <span class="row-arrow">›</span>
-        </div>
+        <div class="row-end"><span class="badge plain" id="streakBadge">0🔥</span><span class="row-arr">›</span></div>
       </a>
 
-      <!-- Notifications — direct link -->
-      <a class="row-link" href="/Notify/index.html" style="animation-delay:.10s">
+      <a class="row" href="/Notify/index.html" style="border-radius:0;">
         <div class="row-icon">🔔</div>
         <div class="row-text">
-          <div class="row-title">Notifications</div>
-          <div class="row-sub">Updates and announcements</div>
+          <span class="row-title">Notifications</span>
+          <span class="row-sub">Updates and announcements</span>
         </div>
-        <div class="row-end">
-          <span class="row-badge new" id="notifBadge" style="display:none;">New</span>
-          <span class="row-arrow">›</span>
-        </div>
+        <div class="row-end"><span class="badge green" id="notifBadge" style="display:none">New</span><span class="row-arr">›</span></div>
       </a>
 
-      <!-- Learning Tools accordion -->
-      <div class="acc" id="accTools" style="animation-delay:.18s">
-        <button class="acc-trigger" onclick="toggleAcc('accTools')" type="button">
-          <div class="row-icon">📚</div>
-          <div class="row-text">
-            <div class="row-title">Learning Tools</div>
-            <div class="row-sub">Notes, puzzles and more</div>
-          </div>
-          <span style="font-size:11px;color:var(--tm);font-weight:700;margin-left:auto;margin-right:4px;">3</span>
-          <span class="acc-chev">⌄</span>
-        </button>
-        <div class="acc-body">
-          <div class="acc-divider"></div>
-          <a class="acc-item" href="/Notes/">
-            <div class="acc-item-icon">📝</div>
-            <div class="acc-item-text">
-              <div class="acc-item-label">Revision Notes</div>
-              <div class="acc-item-sub">Chapter-wise notes for class 9–10</div>
-            </div>
-            <span class="row-arrow">›</span>
-          </a>
-          <a class="acc-item" href="/SM/">
-            <div class="acc-item-icon">🧩</div>
-            <div class="acc-item-text">
-              <div class="acc-item-label">Sudoku Master</div>
-              <div class="acc-item-sub">Brain training puzzle game</div>
-            </div>
-            <span class="row-arrow">›</span>
-          </a>
-          <a class="acc-item" href="/T/">
-            <div class="acc-item-icon">📖</div>
-            <div class="acc-item-text">
-              <div class="acc-item-label">Test Review</div>
-              <div class="acc-item-sub">Review your latest test results</div>
-            </div>
-            <span class="row-arrow">›</span>
-          </a>
+      <a class="row" href="/Notes/" style="border-radius:0;">
+        <div class="row-icon">📝</div>
+        <div class="row-text">
+          <span class="row-title">Revision Notes</span>
+          <span class="row-sub">Chapter-wise notes for class 9–10</span>
         </div>
+        <div class="row-end"><span class="row-arr">›</span></div>
+      </a>
+
+      <a class="row" href="/T/" style="border-radius:0 0 var(--r2) var(--r2);">
+        <div class="row-icon">📖</div>
+        <div class="row-text">
+          <span class="row-title">Test Review</span>
+          <span class="row-sub">Review your latest test results</span>
+        </div>
+        <div class="row-end"><span class="row-arr">›</span></div>
+      </a>
+
+    </div>
+
+    <!-- SECTION: GAMES -->
+    <div class="sec-label">Games</div>
+    <div class="acc-group" id="accGames">
+      <button class="acc-trigger" onclick="toggleAcc('accGames')" type="button">
+        <div class="row-icon">🎮</div>
+        <div class="row-text">
+          <span class="row-title">Brain Games</span>
+          <span class="row-sub">Fun &amp; learning games</span>
+        </div>
+        <span style="font-size:10.5px;color:var(--tm);font-weight:700;margin-left:auto;padding-right:4px;">1</span>
+        <span class="acc-chev">⌄</span>
+      </button>
+      <div class="acc-body">
+        <div class="acc-divider"></div>
+        <a class="acc-item" href="/SM/">
+          <div class="acc-item-icon">🧩</div>
+          <div class="acc-item-text">
+            <span class="acc-item-label">Sudoku Master</span>
+            <span class="acc-item-sub">Brain training puzzle game</span>
+          </div>
+          <span class="row-arr">›</span>
+        </a>
       </div>
+    </div>
 
-    </div><!-- /grp-wrap tools -->
-
-    <!-- SECTION: ACCOUNT -->
+    <!-- SECTION: ACCOUNT & SUPPORT -->
     <div class="sec-label">Account &amp; Support</div>
-    <div class="grp-wrap">
 
-      <!-- Certificate Verification -->
-      <a class="row-link" href="/v/" style="animation-delay:.06s">
+    <div class="row-group">
+      <a class="row" href="/v/" style="border-radius:var(--r2) var(--r2) 0 0;">
         <div class="row-icon">🎖️</div>
         <div class="row-text">
-          <div class="row-title">Certificate Verification</div>
-          <div class="row-sub">Verify official AF certificates</div>
+          <span class="row-title">Certificate Verification</span>
+          <span class="row-sub">Verify official AF certificates</span>
         </div>
-        <div class="row-end"><span class="row-arrow">›</span></div>
+        <div class="row-end"><span class="row-arr">›</span></div>
       </a>
-
-      <!-- About Us — direct link -->
-      <a class="row-link" href="/About/" style="animation-delay:.18s">
+      <a class="row" href="/About/" style="border-radius:0 0 var(--r2) var(--r2);">
         <div class="row-icon">ℹ️</div>
         <div class="row-text">
-          <div class="row-title">About AcademeForge</div>
-          <div class="row-sub">Our story, mission and team</div>
+          <span class="row-title">About AcademeForge</span>
+          <span class="row-sub">Our story, mission and team</span>
         </div>
-        <div class="row-end"><span class="row-arrow">›</span></div>
+        <div class="row-end"><span class="row-arr">›</span></div>
       </a>
+    </div>
 
-      <!-- Support accordion -->
-      <div class="acc" id="accSupport" style="animation-delay:.10s">
-        <button class="acc-trigger" onclick="toggleAcc('accSupport')" type="button">
-          <div class="row-icon">☎️</div>
-          <div class="row-text">
-            <div class="row-title">Support</div>
-            <div class="row-sub">Contact us or track requests</div>
-          </div>
-          <span style="font-size:11px;color:var(--tm);font-weight:700;margin-left:auto;margin-right:4px;">2</span>
-          <span class="acc-chev">⌄</span>
-        </button>
-        <div class="acc-body">
-          <div class="acc-divider"></div>
-          <a class="acc-item" href="../" onclick="nav('contact');return false;">
-            <div class="acc-item-icon">☎️</div>
-            <div class="acc-item-text">
-              <div class="acc-item-label">Contact Us</div>
-              <div class="acc-item-sub">Submit a support request</div>
-            </div>
-            <span class="row-arrow">›</span>
-          </a>
-          <a class="acc-item" href="../" onclick="nav('contactStatus');return false;">
-            <div class="acc-item-icon">📞</div>
-            <div class="acc-item-text">
-              <div class="acc-item-label">Request Status</div>
-              <div class="acc-item-sub">Track your contact requests</div>
-            </div>
-            <span class="row-badge">Track</span>
-          </a>
+    <!-- Support accordion -->
+    <div class="acc-group" id="accSupport" style="margin-bottom:8px;">
+      <button class="acc-trigger" onclick="toggleAcc('accSupport')" type="button">
+        <div class="row-icon">☎️</div>
+        <div class="row-text">
+          <span class="row-title">Support</span>
+          <span class="row-sub">Contact us or track requests</span>
         </div>
-      </div>
-
-      <!-- Bug Center accordion -->
-      <div class="acc" id="accBug" style="animation-delay:.14s">
-        <button class="acc-trigger" onclick="toggleAcc('accBug')" type="button">
-          <div class="row-icon">🐞</div>
-          <div class="row-text">
-            <div class="row-title">Bug Center</div>
-            <div class="row-sub">Report issues and track fixes</div>
+        <span style="font-size:10.5px;color:var(--tm);font-weight:700;margin-left:auto;padding-right:4px;">2</span>
+        <span class="acc-chev">⌄</span>
+      </button>
+      <div class="acc-body">
+        <div class="acc-divider"></div>
+        <a class="acc-item" href="../" onclick="nav('contact');return false;">
+          <div class="acc-item-icon">☎️</div>
+          <div class="acc-item-text">
+            <span class="acc-item-label">Contact Us</span>
+            <span class="acc-item-sub">Submit a support request</span>
           </div>
-          <span style="font-size:11px;color:var(--tm);font-weight:700;margin-left:auto;margin-right:4px;">2</span>
-          <span class="acc-chev">⌄</span>
-        </button>
-        <div class="acc-body">
-          <div class="acc-divider"></div>
-          <a class="acc-item" href="../" onclick="nav('bugReport');return false;">
-            <div class="acc-item-icon">🐞</div>
-            <div class="acc-item-text">
-              <div class="acc-item-label">Report a Bug</div>
-              <div class="acc-item-sub">Tell us what went wrong</div>
-            </div>
-            <span class="row-arrow">›</span>
-          </a>
-          <a class="acc-item" href="../" onclick="nav('bugStatus');return false;">
-            <div class="acc-item-icon">📌</div>
-            <div class="acc-item-text">
-              <div class="acc-item-label">Bug Report Status</div>
-              <div class="acc-item-sub">Track your reported bugs</div>
-            </div>
-            <span class="row-badge">Track</span>
-          </a>
-        </div>
-      </div>
-
-      <!-- Language accordion -->
-      <div class="acc" id="accLang" style="animation-delay:.22s">
-        <button class="acc-trigger" onclick="toggleAcc('accLang')" type="button">
-          <div class="row-icon">🌐</div>
-          <div class="row-text">
-            <div class="row-title">Language</div>
-            <div class="row-sub">Change app language</div>
+          <span class="row-arr">›</span>
+        </a>
+        <a class="acc-item" href="../" onclick="nav('contactStatus');return false;">
+          <div class="acc-item-icon">📞</div>
+          <div class="acc-item-text">
+            <span class="acc-item-label">Request Status</span>
+            <span class="acc-item-sub">Track your contact requests</span>
           </div>
-          <span style="font-size:11px;color:var(--tm);font-weight:700;margin-left:auto;margin-right:4px;" id="langBadge">English</span>
-          <span class="acc-chev">⌄</span>
-        </button>
-        <div class="acc-body">
-          <div class="acc-divider"></div>
-          <a class="acc-item" href="../" onclick="nav('language');return false;">
-            <div class="acc-item-icon">🌐</div>
-            <div class="acc-item-text">
-              <div class="acc-item-label">Change Language</div>
-              <div class="acc-item-sub">English, Hindi, Bhojpuri &amp; more</div>
-            </div>
-            <span class="row-arrow">›</span>
-          </a>
-        </div>
+          <span class="badge plain">Track</span>
+        </a>
       </div>
+    </div>
 
-    </div><!-- /grp-wrap account -->
+    <!-- Bug Center accordion -->
+    <div class="acc-group" id="accBug" style="margin-bottom:8px;">
+      <button class="acc-trigger" onclick="toggleAcc('accBug')" type="button">
+        <div class="row-icon">🐞</div>
+        <div class="row-text">
+          <span class="row-title">Bug Center</span>
+          <span class="row-sub">Report issues and track fixes</span>
+        </div>
+        <span style="font-size:10.5px;color:var(--tm);font-weight:700;margin-left:auto;padding-right:4px;">2</span>
+        <span class="acc-chev">⌄</span>
+      </button>
+      <div class="acc-body">
+        <div class="acc-divider"></div>
+        <a class="acc-item" href="../" onclick="nav('bugReport');return false;">
+          <div class="acc-item-icon">🐞</div>
+          <div class="acc-item-text">
+            <span class="acc-item-label">Report a Bug</span>
+            <span class="acc-item-sub">Tell us what went wrong</span>
+          </div>
+          <span class="row-arr">›</span>
+        </a>
+        <a class="acc-item" href="../" onclick="nav('bugStatus');return false;">
+          <div class="acc-item-icon">📌</div>
+          <div class="acc-item-text">
+            <span class="acc-item-label">Bug Report Status</span>
+            <span class="acc-item-sub">Track your reported bugs</span>
+          </div>
+          <span class="badge plain">Track</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Language accordion -->
+    <div class="acc-group" id="accLang" style="margin-bottom:8px;">
+      <button class="acc-trigger" onclick="toggleAcc('accLang')" type="button">
+        <div class="row-icon">🌐</div>
+        <div class="row-text">
+          <span class="row-title">Language</span>
+          <span class="row-sub">Change app language</span>
+        </div>
+        <span style="font-size:10.5px;color:var(--tm);font-weight:700;margin-left:auto;padding-right:4px;" id="langBadge">English</span>
+        <span class="acc-chev">⌄</span>
+      </button>
+      <div class="acc-body">
+        <div class="acc-divider"></div>
+        <a class="acc-item" href="../" onclick="nav('language');return false;">
+          <div class="acc-item-icon">🌐</div>
+          <div class="acc-item-text">
+            <span class="acc-item-label">Change Language</span>
+            <span class="acc-item-sub">English, Hindi, Bhojpuri &amp; more</span>
+          </div>
+          <span class="row-arr">›</span>
+        </a>
+      </div>
+    </div>
 
     <!-- LOGOUT -->
     <button class="logout-btn" onclick="openLogoutSheet()" type="button">
-      <span>↩</span><span>Logout</span>
+      <span>↩</span><span>Log Out</span>
     </button>
 
-    <!-- VERSION -->
-    <div class="version">
-      <b>App Version 06.07.19</b><br>
-      Made with ❤️ in India · AcademeForge
-    </div>
+   <div class="version">
+  <b>App Version 06.07.19</b><br>
+  Made with ❤️ in India · AcademeForge
+</div>
 
+<div class="page-end-space"></div>
   </div><!-- /page -->
 
   <!-- BOTTOM NAV -->
-<nav class="bnav">
-  <button class="bnav-btn" onclick="window.location.href='/index.html'">
-    <span class="bnav-icon">🏠</span><span class="bnav-label">Home</span>
-  </button>
-
-  <button class="bnav-btn" onclick="window.location.href='/student/index.html'">
-    <span class="bnav-icon">🎓</span><span class="bnav-label">Student</span>
-  </button>
-
-  <button class="bnav-btn" onclick="window.location.href='/batches/index.html'">
-    <span class="bnav-icon">📚</span><span class="bnav-label">Batches</span>
-  </button>
-
-  <button class="bnav-btn" onclick="window.location.href='/community/index.html'">
-    <span class="bnav-icon">💬</span><span class="bnav-label">Community</span>
-  </button>
-
-  <button class="bnav-btn active">
-    <span class="bnav-icon">⚙️</span><span class="bnav-label">Settings</span>
-  </button>
-</nav>
+  <nav class="bnav">
+    <button class="bnav-btn" onclick="window.location.href='/index.html'">
+      <span class="bnav-icon">🏠</span><span class="bnav-label">Home</span>
+    </button>
+    <button class="bnav-btn" onclick="window.location.href='/student/index.html'">
+      <span class="bnav-icon">🎓</span><span class="bnav-label">Student</span>
+    </button>
+    <button class="bnav-btn" onclick="window.location.href='/batches/index.html'">
+      <span class="bnav-icon">📚</span><span class="bnav-label">Batches</span>
+    </button>
+    <button class="bnav-btn" onclick="window.location.href='/community/index.html'">
+      <span class="bnav-icon">💬</span><span class="bnav-label">Community</span>
+    </button>
+    <button class="bnav-btn active">
+      <span class="bnav-icon">⚙️</span><span class="bnav-label">Settings</span>
+    </button>
+  </nav>
 
 </div><!-- /shell -->
 
 <!-- TOAST -->
 <div class="toast-wrap" id="toastWrap"></div>
 
-<!-- LOGOUT CONFIRM SHEET -->
+<!-- LOGOUT SHEET -->
 <div class="sheet-ov" id="logoutSheet" onclick="closeLogoutSheet()">
   <div class="sheet" onclick="event.stopPropagation()">
     <div class="sheet-drag"></div>
@@ -724,14 +637,12 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
 </div>
 
 <script>
-/* ══════════════════════════════════════
-   PERF: everything runs synchronously,
-   no heavy libs, no layout thrash.
-══════════════════════════════════════ */
-
-/* ── THEME (already applied inline above) ── */
-function syncTheme(){
-  const dark = localStorage.getItem('af_dark_mode')==='1';
+/* ── THEME
+   KEY FIX: apply class changes directly, NO CSS transition on color properties
+   This is the #1 cause of dark mode lag — we kill it by patching the theme instantly
+── */
+function applyTheme(dark){
+  // Set attribute immediately (synchronous, no transition)
   document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
   const tog = document.getElementById('dmToggle');
   if(tog) tog.checked = dark;
@@ -741,42 +652,37 @@ function syncTheme(){
 
 function toggleDark(on){
   localStorage.setItem('af_dark_mode', on ? '1' : '0');
-  document.documentElement.setAttribute('data-theme', on ? 'dark' : 'light');
-  const icon = document.getElementById('dmIcon');
-  if(icon) icon.textContent = on ? '☀️' : '🌙';
+  applyTheme(on);
   showToast(on ? 'Night mode on 🌙' : 'Light mode on ☀️', 'info');
 }
 
 /* ── PROFILE ── */
 function loadProfile(){
-  const name  = localStorage.getItem('af_student_name')  || '';
+  const name  = localStorage.getItem('af_student_name') || '';
   const phone = localStorage.getItem('af_student_mobile') || localStorage.getItem('af_student_phone') || '';
-  const loggedIn = !!(name && phone);
+  const loggedIn = !!(name || phone);
 
-  const el   = document.getElementById('pName');
-  const av   = document.getElementById('pAvatar');
-  if(el) el.textContent = loggedIn ? 'Hi, ' + name : 'Hi, Student';
-  if(av){
-    const initials = loggedIn
-      ? name.trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join('')
+  const nameEl = document.getElementById('pName');
+  const avEl   = document.getElementById('pAvatar');
+  if(nameEl) nameEl.textContent = loggedIn ? 'Hi, ' + name : 'Hi, Student';
+  if(avEl){
+    avEl.textContent = loggedIn
+      ? name.trim().split(/\s+/).slice(0,2).map(w=>w[0]?.toUpperCase()||'').join('') || 'S'
       : 'S';
-    av.textContent = initials;
   }
 
-  // streak badge
   const streak = localStorage.getItem('af_streak') || '0';
   const sb = document.getElementById('streakBadge');
   if(sb) sb.textContent = streak + '🔥';
 
-  // language badge
-  const langs = {en:'English',hi:'हिन्दी',bho:'भोजपुरी',bn:'বাংলা',mr:'मराठी',te:'తెలుగు',ta:'தமிழ்',gu:'ગુજરાতી'};
-  const code  = localStorage.getItem('af_lang_code') || 'en';
+  const langs = {en:'English',hi:'हिन्दी',bho:'भोजपुरी',bn:'বাংলা',mr:'मराठी',te:'తెలుగు',ta:'தமிழ்',gu:'ગુજરાતી'};
+  const code = localStorage.getItem('af_lang_code') || 'en';
   const lb = document.getElementById('langBadge');
   if(lb) lb.textContent = langs[code] || 'English';
 
-  // notif badge — show if unseen
-  const lastSeen = parseInt(localStorage.getItem('af_notif_last_seen') || '0', 10);
+  // notif badge
   try{
+    const lastSeen = parseInt(localStorage.getItem('af_notif_last_seen') || '0', 10);
     const cached = JSON.parse(localStorage.getItem('af_notif_cache') || 'null');
     if(Array.isArray(cached) && cached.length > 0){
       const newest = new Date(cached[0].created_at).getTime();
@@ -787,105 +693,76 @@ function loadProfile(){
 }
 
 /* ── NAVIGATION ── */
-function goBack(){
-  const prev = sessionStorage.getItem('af_last_tab') || 'home';
-  sessionStorage.setItem('af_last_tab', 'settings');
-  window.location.href = '../';
-}
-
-function goToTab(tab){
-  sessionStorage.setItem('af_last_tab', tab);
-  if(tab === 'community'){
-    window.location.href = '../community/';
-    return;
-  }
-  window.location.href = '../';
-}
-
 function goToDashboard(){
-  const name  = localStorage.getItem('af_student_name')  || '';
+  const name  = localStorage.getItem('af_student_name') || '';
   const phone = localStorage.getItem('af_student_mobile') || '';
   if(!name && !phone){
     sessionStorage.setItem('af_last_tab','student');
-    window.location.href='../';
-    return;
+    window.location.href='../';return;
   }
   sessionStorage.setItem('af_last_tab','dashboard');
   window.location.href='../';
 }
 
-// navigate back to main app at a specific view
 function nav(viewName){
   sessionStorage.setItem('af_pending_view', viewName);
   sessionStorage.setItem('af_last_tab', viewName);
   window.location.href = '../';
 }
 
-/* ── ACCORDION ── */
+/* ── ACCORDION — no CSS transition on height: causes repaint ── */
 function toggleAcc(id){
   const el = document.getElementById(id);
   if(!el) return;
-  // close all others first
-  document.querySelectorAll('.acc.open').forEach(a=>{ if(a.id!==id) a.classList.remove('open'); });
+  // close others
+  document.querySelectorAll('.acc-group.open').forEach(a=>{ if(a.id!==id) a.classList.remove('open'); });
   el.classList.toggle('open');
 }
 
 /* ── LOGOUT ── */
 function openLogoutSheet(){
   document.getElementById('logoutSheet').classList.add('open');
-  document.body.style.overflow='hidden';
 }
 function closeLogoutSheet(){
   document.getElementById('logoutSheet').classList.remove('open');
-  document.body.style.overflow='';
 }
 function doLogout(){
-  // clear session
   ['af_student_logged_in','af_student_uuid','af_student_id',
    'af_student_mobile','af_student_name','af_student_email',
    'af_session_token','af_student_phone'].forEach(k=>localStorage.removeItem(k));
   closeLogoutSheet();
-  showToast('Logged out successfully 👋','ok');
+  showToast('Logged out 👋','ok');
   loadProfile();
-  // brief delay then go home
   setTimeout(()=>{ sessionStorage.setItem('af_last_tab','home'); window.location.href='../'; }, 900);
 }
 
 /* ── TOAST ── */
-let _tt=null;
-function showToast(msg, type='info', title=''){
+let _tt = null;
+function showToast(msg, type='info'){
   const wrap = document.getElementById('toastWrap');
   wrap.innerHTML='';
   if(_tt){ clearTimeout(_tt); _tt=null; }
   const labels = {ok:'Done',info:'Info',err:'Error'};
   const d = document.createElement('div');
   d.className = 'toast toast-'+type;
-  d.innerHTML = `<div class="toast-body"><p>${title||labels[type]||'Info'}</p><p>${msg}</p></div><span class="toast-x" onclick="this.parentElement.remove()">×</span>`;
+  d.innerHTML = `<div class="toast-body"><p>${labels[type]||'Info'}</p><p>${msg}</p></div><span class="toast-x" onclick="this.parentElement.remove()">×</span>`;
   wrap.appendChild(d);
-  _tt = setTimeout(()=>{ d.style.animation='toastIn .2s var(--ease) reverse'; setTimeout(()=>d.remove(),200); }, 2600);
+  _tt = setTimeout(()=>d.remove(), 2600);
 }
-
-/* ── DISABLE DEV TOOLS ── */
-document.addEventListener('contextmenu', e=>e.preventDefault());
-document.addEventListener('selectstart', e=>e.preventDefault());
-document.addEventListener('copy', e=>e.preventDefault());
-document.addEventListener('keydown', e=>{
-  if(e.key==='F12'||(e.ctrlKey&&e.shiftKey&&['I','J','C'].includes(e.key.toUpperCase()))||(e.ctrlKey&&e.key.toUpperCase()==='U')) e.preventDefault();
-});
 
 /* ── KEYBOARD ESC ── */
 document.addEventListener('keydown', e=>{
-  if(e.key==='Escape' && document.getElementById('logoutSheet').classList.contains('open')) closeLogoutSheet();
+  if(e.key==='Escape') closeLogoutSheet();
 });
 
-/* ── THEME STORAGE SYNC ── */
+/* ── STORAGE SYNC (for cross-tab theme) ── */
 window.addEventListener('storage', e=>{
-  if(e.key==='af_dark_mode') syncTheme();
+  if(e.key==='af_dark_mode') applyTheme(e.newValue==='1');
   if(['af_student_name','af_student_mobile','af_student_phone','af_streak'].includes(e.key)) loadProfile();
 });
 
 /* ── INIT ── */
-syncTheme();
+applyTheme(localStorage.getItem('af_dark_mode')==='1');
 loadProfile();
 </script>
 </body>
