@@ -15,7 +15,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Sora:wght@700;800;900&display=swap" rel="stylesheet"/>
 <style>
-/* ── TOKENS ── */
 :root{
   --p:#4f46e5;--p2:#3730a3;--pl:#818cf8;
   --acc:#06b6d4;--ok:#22c55e;--err:#ef4444;--warn:#f59e0b;
@@ -29,8 +28,7 @@
   --shb:0 4px 16px rgba(79,70,229,.28);
   --r1:8px;--r2:12px;--r3:16px;--r4:24px;--rf:9999px;
   --fd:'Sora',sans-serif;--fb:'Nunito',sans-serif;
-  --nav-h:60px;--hdr-h:52px;
-  --shell:430px;
+  --nav-h:60px;--hdr-h:52px;--shell:430px;
 }
 [data-theme="dark"]{
   --bg:#0c0b1d;--surface:#120f2a;--card:rgba(30,27,60,.88);
@@ -41,256 +39,92 @@
   --sh:0 2px 12px rgba(0,0,0,.28);--she:0 12px 40px rgba(0,0,0,.45);
   --shb:0 4px 16px rgba(79,70,229,.40);
 }
-
-/* ── RESET ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html{font-size:15px;-webkit-text-size-adjust:100%;height:100%;height:100dvh;}
-body{
-  font-family:var(--fb);background:var(--bg);color:var(--t1);
-  height:100%;height:100dvh;
-  display:flex;justify-content:center;overflow:hidden;
-}
+body{font-family:var(--fb);background:var(--bg);color:var(--t1);height:100%;height:100dvh;display:flex;justify-content:center;overflow:hidden;}
 button{font-family:var(--fb);cursor:pointer;border:none;background:none;color:inherit;}
 a{text-decoration:none;color:inherit;}
-
-/* ── SHELL ── */
-.shell{
-  width:100%;max-width:var(--shell);
-  height:100%;height:100dvh;
-  background:var(--surface);
-  display:flex;flex-direction:column;
-  position:relative;overflow:hidden;
-  box-shadow:0 0 0 1px var(--b1);
-}
-@media(min-width:700px){
-  body{padding:24px 0 40px;height:auto;min-height:100dvh;overflow-y:auto;}
-  .shell{border-radius:32px;height:calc(100dvh - 64px);max-height:880px;}
-}
-
-/* ── HEADER ── */
-.hdr{
-  position:sticky;top:0;z-index:100;height:var(--hdr-h);
-  background:var(--nav);border-bottom:1px solid var(--b1);
-  display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;
-}
+.shell{width:100%;max-width:var(--shell);height:100%;height:100dvh;background:var(--surface);display:flex;flex-direction:column;position:relative;overflow:hidden;box-shadow:0 0 0 1px var(--b1);}
+@media(min-width:700px){body{padding:24px 0 40px;height:auto;min-height:100dvh;overflow-y:auto;}.shell{border-radius:32px;height:calc(100dvh - 64px);max-height:880px;}}
+.hdr{position:sticky;top:0;z-index:100;height:var(--hdr-h);background:var(--nav);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;}
 .hdr-title{font-family:var(--fd);font-size:15px;font-weight:800;color:var(--t1);flex:1;}
-.hdr-count{font-size:10px;color:var(--tm);font-weight:700;
-  background:var(--grp);border:1px solid var(--b1);
-  padding:3px 8px;border-radius:var(--rf);}
-
-/* ── SCROLL AREA ── */
-.page{
-  flex:1;overflow-y:scroll;overflow-x:hidden;
-  -webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;
-  padding:12px 12px calc(var(--nav-h) + 20px + env(safe-area-inset-bottom,0px));
-  min-height:0;
-  -webkit-transform:translateZ(0);transform:translateZ(0);
-}
+.hdr-count{font-size:10px;color:var(--tm);font-weight:700;background:var(--grp);border:1px solid var(--b1);padding:3px 8px;border-radius:var(--rf);}
+.hdr-refresh{width:30px;height:30px;border-radius:var(--r1);background:var(--grp);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;color:var(--t2);}
+.hdr-refresh:active{opacity:.7;}
+.page{flex:1;overflow-y:scroll;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;padding:12px 12px calc(var(--nav-h) + 20px + env(safe-area-inset-bottom,0px));min-height:0;-webkit-transform:translateZ(0);transform:translateZ(0);}
 .page::-webkit-scrollbar{width:2px;}
 .page::-webkit-scrollbar-thumb{background:var(--bc);border-radius:99px;}
-
-/* ── SEARCH BOX ── */
-.search-box{
-  display:flex;align-items:center;gap:10px;
-  height:44px;padding:0 14px;
-  border-radius:var(--r3);
-  background:var(--card);border:1px solid var(--bc);
-  box-shadow:var(--sh);margin-bottom:12px;
-}
-.search-box:focus-within{border-color:var(--p);box-shadow:0 0 0 3px rgba(79,70,229,.10),var(--sh);}
+.search-box{display:flex;align-items:center;gap:10px;height:44px;padding:0 14px;border-radius:var(--r3);background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);margin-bottom:12px;}
+.search-box:focus-within{border-color:var(--p);}
 .search-box span{font-size:16px;}
-.search-box input{
-  width:100%;border:none;outline:none;background:transparent;
-  color:var(--t1);font-size:13px;font-weight:700;font-family:var(--fb);
-}
+.search-box input{width:100%;border:none;outline:none;background:transparent;color:var(--t1);font-size:13px;font-weight:700;font-family:var(--fb);}
 .search-box input::placeholder{color:var(--tm);font-weight:600;}
-
-/* ── BATCH GRID ── */
 .batch-grid{display:flex;flex-direction:column;gap:12px;}
-
-/* ── BATCH CARD ── */
-.batch-card{
-  overflow:hidden;border-radius:20px;
-  background:var(--card);border:1px solid var(--bc);
-  box-shadow:var(--sh);
-  position:relative;
-}
+.batch-card{overflow:hidden;border-radius:20px;background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);position:relative;}
 .batch-card.enrolled{border-color:rgba(34,197,94,.35);}
-
-/* shimmer while image loads */
-.batch-img-wrap{position:relative;cursor:pointer;}
+.batch-img-wrap{position:relative;cursor:pointer;background:var(--grp);aspect-ratio:16/8;}
 .batch-img{width:100%;aspect-ratio:16/8;object-fit:cover;display:block;}
-.batch-loader{
-  position:absolute;inset:0;margin:auto;
-  width:36px;height:36px;border-radius:50%;
-  border:3px solid rgba(79,70,229,.15);border-top-color:var(--p);
-  animation:spin .8s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg);}}
-
 .batch-body{padding:14px;}
-
 .batch-meta{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;}
-.batch-cat{
-  display:inline-flex;align-items:center;
-  padding:4px 9px;border-radius:var(--rf);
-  background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.18);
-  color:var(--warn);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;
-}
-.batch-lang{
-  padding:4px 10px;border-radius:var(--rf);
-  background:var(--grp);border:1px solid var(--b1);
-  color:var(--t2);font-size:10px;font-weight:800;
-}
-.batch-title{
-  font-family:var(--fd);font-size:16px;font-weight:900;
-  line-height:1.25;color:var(--t1);cursor:pointer;margin-bottom:6px;
-}
+.batch-cat{display:inline-flex;align-items:center;padding:4px 9px;border-radius:var(--rf);background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.18);color:var(--warn);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;}
+.batch-lang{padding:4px 10px;border-radius:var(--rf);background:var(--grp);border:1px solid var(--b1);color:var(--t2);font-size:10px;font-weight:800;}
+.batch-title{font-family:var(--fd);font-size:16px;font-weight:900;line-height:1.25;color:var(--t1);cursor:pointer;margin-bottom:6px;}
 .batch-sub{font-size:12.5px;color:var(--t2);line-height:1.6;margin-bottom:8px;}
-
 .batch-status{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--t2);margin-bottom:8px;}
 .batch-dot{width:8px;height:8px;border-radius:50%;background:var(--err);flex-shrink:0;}
 .batch-dot.ok{background:var(--ok);}
-.enrolled-tag{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:5px 10px;border-radius:var(--rf);
-  background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.22);
-  color:var(--ok);font-size:11px;font-weight:800;margin-bottom:8px;
-}
-
+.enrolled-tag{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:var(--rf);background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.22);color:var(--ok);font-size:11px;font-weight:800;margin-bottom:8px;}
 .batch-price-row{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-top:2px;}
-.price-left{}
 .price-line{display:flex;align-items:center;gap:6px;}
 .price-line strong{font-size:20px;font-weight:900;color:var(--t1);}
 .price-line del{color:var(--tm);font-size:13px;}
 .price-off{color:var(--ok);font-size:11.5px;font-weight:900;margin-top:1px;}
 .batch-btns{display:flex;align-items:center;gap:8px;}
-.buy-btn{
-  padding:10px 16px;border-radius:var(--r2);
-  font-size:12.5px;font-weight:900;color:#fff;
-  background:linear-gradient(135deg,var(--p),var(--p2));
-  box-shadow:var(--shb);min-width:110px;text-align:center;
-  position:relative;overflow:hidden;
-}
-.buy-btn::before{
-  content:'';position:absolute;top:0;left:-120%;width:70%;height:100%;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);
-  transition:.6s;
-}
-.buy-btn:hover::before{left:140%;}
+.buy-btn{padding:10px 16px;border-radius:var(--r2);font-size:12.5px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--p),var(--p2));box-shadow:var(--shb);min-width:110px;text-align:center;}
 .buy-btn:active{transform:scale(.97);}
 .buy-btn.enrolled-btn{background:var(--ok);box-shadow:none;cursor:default;}
-.arrow-btn{
-  width:42px;height:42px;border-radius:var(--r2);
-  background:var(--grp);border:1px solid var(--b1);
-  font-size:20px;font-weight:800;color:var(--t1);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
+.arrow-btn{width:42px;height:42px;border-radius:var(--r2);background:var(--grp);border:1px solid var(--b1);font-size:20px;font-weight:800;color:var(--t1);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .arrow-btn:active{transform:scale(.95);}
-
-/* ── DETAIL PAGE ── */
+/* DETAIL */
 .detail-wrap{display:none;flex-direction:column;gap:0;}
 .detail-wrap.active{display:flex;}
-.back-btn{
-  display:flex;align-items:center;gap:6px;
-  padding:8px 12px;border-radius:var(--r2);
-  background:var(--grp);border:1px solid var(--b1);
-  color:var(--p);font-size:12.5px;font-weight:800;
-  margin-bottom:12px;align-self:flex-start;
-}
+.back-btn{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:var(--r2);background:var(--grp);border:1px solid var(--b1);color:var(--p);font-size:12.5px;font-weight:800;margin-bottom:12px;align-self:flex-start;}
 .back-btn:active{transform:scale(.96);}
-
-.detail-card{
-  border-radius:20px;overflow:hidden;
-  background:var(--card);border:1px solid var(--bc);
-  box-shadow:var(--sh);margin-bottom:12px;
-}
-.detail-img{width:100%;aspect-ratio:16/8;object-fit:cover;display:block;}
+.detail-card{border-radius:20px;overflow:hidden;background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);margin-bottom:12px;}
+.detail-img{width:100%;aspect-ratio:16/8;object-fit:cover;display:block;background:var(--grp);}
 .detail-body{padding:16px;}
 .detail-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;}
-.detail-head h2{
-  font-family:var(--fd);font-size:18px;font-weight:900;
-  line-height:1.2;color:var(--t1);flex:1;
-}
+.detail-head h2{font-family:var(--fd);font-size:18px;font-weight:900;line-height:1.2;color:var(--t1);flex:1;}
 .detail-desc{font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:12px;}
 .detail-price-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
 .detail-price-row strong{font-size:24px;font-weight:900;color:var(--t1);}
 .detail-price-row del{color:var(--tm);font-size:13px;}
 .detail-price-row span{color:var(--ok);font-size:12px;font-weight:900;}
-.detail-buy-btn{
-  width:100%;padding:13px;border-radius:var(--r2);
-  font-size:14px;font-weight:900;color:#fff;
-  background:linear-gradient(135deg,var(--p),var(--p2));
-  box-shadow:var(--shb);text-align:center;
-  position:relative;overflow:hidden;
-}
+.detail-buy-btn{width:100%;padding:13px;border-radius:var(--r2);font-size:14px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--p),var(--p2));box-shadow:var(--shb);text-align:center;}
 .detail-buy-btn.enrolled-btn{background:var(--ok);cursor:default;}
 .detail-buy-btn:active{transform:scale(.98);}
-
-/* INFO BOX */
-.info-box{
-  border-radius:var(--r3);
-  background:var(--card);border:1px solid var(--bc);
-  box-shadow:var(--sh);padding:14px 16px;
-  margin-bottom:10px;position:relative;overflow:hidden;
-}
-.info-box::before{
-  content:'';position:absolute;top:0;left:0;
-  width:3px;height:100%;border-radius:99px;
-  background:linear-gradient(180deg,var(--p),var(--acc));
-}
-.info-box h3{
-  font-family:var(--fd);font-size:14px;font-weight:900;
-  color:var(--t1);margin-bottom:8px;padding-left:10px;
-}
+.info-box{border-radius:var(--r3);background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);padding:14px 16px;margin-bottom:10px;position:relative;overflow:hidden;}
+.info-box::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;border-radius:99px;background:linear-gradient(180deg,var(--p),var(--acc));}
+.info-box h3{font-family:var(--fd);font-size:14px;font-weight:900;color:var(--t1);margin-bottom:8px;padding-left:10px;}
 .info-box p,.info-box li{font-size:12.5px;color:var(--t2);line-height:1.7;padding-left:10px;}
 .info-box ul{padding-left:26px;}
 .info-box li{list-style:disc;}
-
-/* ── EMPTY / LOADING STATES ── */
-.state-msg{
-  text-align:center;padding:32px 16px;
-  font-size:13px;color:var(--tm);font-weight:600;
-}
-
-/* ── BOTTOM NAV ── */
-.bnav{
-  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
-  width:100%;max-width:var(--shell);z-index:999;
-  height:var(--nav-h);background:var(--nav);
-  border-top:1px solid var(--b1);
-  display:flex;align-items:center;padding:0 4px;
-  padding-bottom:env(safe-area-inset-bottom,0px);
-}
-.bnav-btn{
-  flex:1;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:3px;height:100%;
-  border-radius:var(--r2);padding:6px 4px;position:relative;
-}
-.bnav-btn::before{
-  content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);
-  width:0;height:2px;background:var(--p);border-radius:99px;
-  transition:width .15s ease;
-}
+.state-msg{text-align:center;padding:32px 16px;font-size:13px;color:var(--tm);font-weight:600;}
+/* CACHE BADGE */
+.cache-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;background:rgba(79,70,229,.05);border-bottom:1px solid var(--b1);font-size:11px;color:var(--tm);font-weight:600;}
+.cache-bar span{opacity:.7;}
+/* NAV */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:var(--shell);z-index:999;height:var(--nav-h);background:var(--nav);border-top:1px solid var(--b1);display:flex;align-items:center;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px);}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:100%;border-radius:var(--r2);padding:6px 4px;position:relative;}
+.bnav-btn::before{content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--p);border-radius:99px;transition:width .15s ease;}
 .bnav-btn.active::before{width:24px;}
 .bnav-icon{font-size:20px;line-height:1;}
 .bnav-btn.active .bnav-icon{transform:scale(1.08);}
 .bnav-label{font-size:10px;font-weight:700;color:var(--tm);}
 .bnav-btn.active .bnav-label{color:var(--p);}
-
-/* ── TOAST ── */
-.toast-wrap{
-  position:fixed;left:50%;bottom:calc(var(--nav-h) + 12px);
-  transform:translateX(-50%);z-index:99999;
-  width:min(90vw,380px);pointer-events:none;
-}
-.toast{
-  display:flex;align-items:flex-start;gap:10px;
-  background:var(--surface);color:var(--t1);
-  border:1px solid var(--bc);border-radius:12px;
-  padding:10px 12px;box-shadow:0 4px 20px rgba(0,0,0,.12);
-  pointer-events:auto;
-}
+/* TOAST */
+.toast-wrap{position:fixed;left:50%;bottom:calc(var(--nav-h) + 12px);transform:translateX(-50%);z-index:99999;width:min(90vw,380px);pointer-events:none;}
+.toast{display:flex;align-items:flex-start;gap:10px;background:var(--surface);color:var(--t1);border:1px solid var(--bc);border-radius:12px;padding:10px 12px;box-shadow:0 4px 20px rgba(0,0,0,.12);pointer-events:auto;}
 .toast-ok{border-left:3px solid var(--ok);}
 .toast-info{border-left:3px solid var(--p);}
 .toast-err{border-left:3px solid var(--err);}
@@ -298,8 +132,6 @@ a{text-decoration:none;color:inherit;}
 .toast-body p:first-child{font-size:12px;font-weight:800;}
 .toast-body p:last-child{font-size:11px;color:var(--t2);margin-top:1px;}
 .toast-x{font-size:16px;color:var(--tm);cursor:pointer;margin-left:auto;}
-
-/* ── NO USER SELECT ── */
 html,body,*{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-touch-callout:none;}
 input{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
 </style>
@@ -307,13 +139,18 @@ input{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
 <body>
 <div class="shell">
 
-  <!-- HEADER -->
   <header class="hdr">
     <span class="hdr-title">Batches 📚</span>
     <span class="hdr-count" id="batchCountLabel">5 available</span>
+    <button class="hdr-refresh" onclick="forceRefresh()" title="Refresh batches">↻</button>
   </header>
 
-  <!-- PAGE -->
+  <!-- small cache status bar -->
+  <div class="cache-bar" id="cacheBar" style="display:none;">
+    <span id="cacheTime">Loaded from cache</span>
+    <span>Pull down to refresh</span>
+  </div>
+
   <div class="page" id="page">
 
     <!-- LIST VIEW -->
@@ -322,18 +159,14 @@ input{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
         <span>🔍</span>
         <input id="searchInput" type="text" placeholder="Search batches…" oninput="filterBatches()"/>
       </div>
-      <div class="batch-grid" id="batchGrid">
-        <div class="state-msg">Loading batches…</div>
-      </div>
+      <div class="batch-grid" id="batchGrid"></div>
     </div>
 
     <!-- DETAIL VIEW -->
     <div class="detail-wrap" id="detailView">
       <button class="back-btn" onclick="showList()">← Back to Batches</button>
-
       <div class="detail-card">
-        <img id="detailImg" src="" alt="" class="detail-img"
-          onerror="this.style.background='linear-gradient(135deg,#4f46e5,#06b6d4)';this.src=''"/>
+        <img id="detailImg" src="" alt="" class="detail-img"/>
         <div class="detail-body">
           <div class="detail-head">
             <h2 id="detailTitle">Batch</h2>
@@ -349,129 +182,72 @@ input{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
           <button class="detail-buy-btn" id="detailBuyBtn" onclick="buySelected()">Buy Now</button>
         </div>
       </div>
-
-      <div class="info-box">
-        <h3>📌 What you will learn</h3>
-        <ul id="detailLearn"></ul>
-      </div>
-      <div class="info-box">
-        <h3>🏫 Batch Facilities</h3>
-        <ul id="detailFacilities"></ul>
-      </div>
-      <div class="info-box">
-        <h3>🧾 Batch Details</h3>
-        <p id="detailFull"></p>
-      </div>
+      <div class="info-box"><h3>📌 What you will learn</h3><ul id="detailLearn"></ul></div>
+      <div class="info-box"><h3>🏫 Batch Facilities</h3><ul id="detailFacilities"></ul></div>
+      <div class="info-box"><h3>🧾 Batch Details</h3><p id="detailFull"></p></div>
     </div>
 
-  </div><!-- /page -->
+  </div>
 
-  <!-- BOTTOM NAV -->
   <nav class="bnav">
-    <button class="bnav-btn" onclick="window.location.href='/index.html'">
-      <span class="bnav-icon">🏠</span><span class="bnav-label">Home</span>
-    </button>
-    <button class="bnav-btn" onclick="window.location.href='/student/index.html'">
-      <span class="bnav-icon">🎓</span><span class="bnav-label">Student</span>
-    </button>
-    <button class="bnav-btn active">
-      <span class="bnav-icon">📚</span><span class="bnav-label">Batches</span>
-    </button>
-    <button class="bnav-btn" onclick="window.location.href='/community/index.html'">
-      <span class="bnav-icon">💬</span><span class="bnav-label">Community</span>
-    </button>
-    <button class="bnav-btn" onclick="window.location.href='/setting/index.html'">
-      <span class="bnav-icon">⚙️</span><span class="bnav-label">Settings</span>
-    </button>
+    <button class="bnav-btn" onclick="window.location.href='/index.html'"><span class="bnav-icon">🏠</span><span class="bnav-label">Home</span></button>
+    <button class="bnav-btn" onclick="window.location.href='/student/index.html'"><span class="bnav-icon">🎓</span><span class="bnav-label">Student</span></button>
+    <button class="bnav-btn active"><span class="bnav-icon">📚</span><span class="bnav-label">Batches</span></button>
+    <button class="bnav-btn" onclick="window.location.href='/community/index.html'"><span class="bnav-icon">💬</span><span class="bnav-label">Community</span></button>
+    <button class="bnav-btn" onclick="window.location.href='/setting/index.html'"><span class="bnav-icon">⚙️</span><span class="bnav-label">Settings</span></button>
   </nav>
 
-</div><!-- /shell -->
+</div>
 
-<!-- TOAST -->
 <div class="toast-wrap" id="toastWrap"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<!--
+  Razorpay loaded ONLY when user clicks Buy — not on page load.
+  This eliminates all the v2-entry-* network requests you saw in DevTools.
+-->
+
 <script>
-/* ── CONFIG ── */
-const STUDENT_URL = "https://afooyyydhlwngzssgqih.supabase.co";
-const STUDENT_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb295eXlkaGx3bmd6c3NncWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDQxMjgsImV4cCI6MjA5NDIyMDEyOH0.KG0XO0oP_2MpewHoIwTtbrKg5FkyOYRUtVzLH1MSJiE";
-const studentDb = supabase.createClient(STUDENT_URL, STUDENT_KEY);
+'use strict';
 
-const RAZORPAY_KEY_ID = "rzp_test_SpO0DdKfoz5wRu";
-const BATCH_PRICE     = 49;
-const BATCH_OLD_PRICE = 99;
-const BATCH_DISCOUNT  = Math.round(((BATCH_OLD_PRICE - BATCH_PRICE) / BATCH_OLD_PRICE) * 100);
+/* ─── CONFIG ─────────────────────────────────────────────── */
+const STUDENT_URL    = "https://afooyyydhlwngzssgqih.supabase.co";
+const STUDENT_KEY    = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb295eXlkaGx3bmd6c3NncWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDQxMjgsImV4cCI6MjA5NDIyMDEyOH0.KG0XO0oP_2MpewHoIwTtbrKg5FkyOYRUtVzLH1MSJiE";
+const RAZORPAY_KEY   = "rzp_test_SpO0DdKfoz5wRu";
+const BATCH_PRICE    = 49;
+const BATCH_OLD      = 99;
+const DISCOUNT       = Math.round(((BATCH_OLD - BATCH_PRICE) / BATCH_OLD) * 100);
 
-/* ── BATCH DATA ── */
+/* Cache TTL: 30 minutes. Enrolled status cached for same session. */
+const CACHE_KEY      = 'af_batches_cache_v1';
+const ENROLLED_KEY   = 'af_enrolled_cache_v1';
+const CACHE_TTL_MS   = 30 * 60 * 1000; // 30 min
+
+/* ─── BATCH DATA (static — no network needed) ──────────────── */
 const COURSE_IDS = {
-  "ai-prompt-engineering": "0e6d4d11-0afc-4070-bbf2-23950cc71da0",
-  "ai-coding":             "ad0b6211-f5d1-4d31-982f-386f286778bf",
+  "video-editing":         "4cdd5351-b370-4d07-8841-b4024a0bcb27",
   "graphic-design":        "483ed390-1923-4198-a003-0ff46ec8dba9",
+  "ai-coding":             "ad0b6211-f5d1-4d31-982f-386f286778bf",
   "freelancing":           "7fd5fc14-1ce8-46f8-9cbb-5fab1abb5cd9",
-  "video-editing":         "4cdd5351-b370-4d07-8841-b4024a0bcb27"
+  "ai-prompt-engineering": "0e6d4d11-0afc-4070-bbf2-23950cc71da0"
 };
 
 const BATCHES = [
-  {
-    id:"video-editing", courseSlug:"video-editing", courseId:COURSE_IDS["video-editing"],
-    image:"/IMG/Course 1.jpeg", category:"Target", language:"HINGLISH",
-    title:"Video & Media Editing Mastery",
-    subtitle:"Learn editing, storytelling, reels, shorts, and professional content creation.",
-    status:"Beta Mode", price:BATCH_PRICE, oldPrice:BATCH_OLD_PRICE,
-    details:"A practical batch for learners who want to build strong video editing skills for reels, shorts, YouTube content, social media creatives, and professional digital projects.",
-    learn:["Timeline editing and clean workflow","Reels, shorts, and social media video structure","Transitions, captions, audio sync, and color correction","Content planning and storytelling basics","Project-based editing practice"],
-    facilities:["Chapter-wise learning","Lecture and notes support","Practice-based tasks","Future certificate support","Batch access after successful purchase"]
-  },
-  {
-    id:"graphic-design", courseSlug:"graphic-design", courseId:COURSE_IDS["graphic-design"],
-    image:"/IMG/Course 2.jpeg", category:"Target", language:"HINGLISH",
-    title:"Creative & Graphic Design Mastery",
-    subtitle:"Design posters, thumbnails, banners, brand creatives, and visual content.",
-    status:"Beta Mode", price:BATCH_PRICE, oldPrice:BATCH_OLD_PRICE,
-    details:"A creative batch focused on design fundamentals, social media creatives, thumbnails, posters, brand layouts, typography, and portfolio-ready visual design practice.",
-    learn:["Design principles and layout basics","Poster, banner, and thumbnail design","Typography, color balance, and spacing","Brand-style social media creatives","Portfolio-focused design practice"],
-    facilities:["Design practice tasks","Creative assignments","Notes for quick revision","Portfolio guidance","Future project review"]
-  },
-  {
-    id:"ai-coding", courseSlug:"ai-coding", courseId:COURSE_IDS["ai-coding"],
-    image:"/IMG/Course 3.jpeg", category:"Target", language:"HINGLISH",
-    title:"AI Coding & Logic Foundation",
-    subtitle:"Build coding logic, AI basics, prompts, and beginner-friendly programming thinking.",
-    status:"Beta Mode", price:BATCH_PRICE, oldPrice:BATCH_OLD_PRICE,
-    details:"A beginner-friendly batch designed to build programming thinking, logic, AI-assisted coding workflow, problem solving, and project structure from the ground level.",
-    learn:["Logic building and problem solving","Programming basics for beginners","AI-assisted coding workflow","Prompt thinking for coding tasks","Mini project planning and structure"],
-    facilities:["Beginner-friendly explanations","Practice questions","Chapter-wise notes","Mini project ideas","Future coding dashboard support"]
-  },
-  {
-    id:"freelancing", courseSlug:"freelancing", courseId:COURSE_IDS["freelancing"],
-    image:"/IMG/Course 4.jpeg", category:"Target", language:"HINGLISH",
-    title:"Freelancing & Monetization Roadmap",
-    subtitle:"Understand digital earning, freelancing basics, client work, and skill monetization.",
-    status:"Beta Mode", price:BATCH_PRICE, oldPrice:BATCH_OLD_PRICE,
-    details:"A practical batch for students who want to understand freelancing basics, profile building, client communication, service packaging, pricing, and online earning discipline.",
-    learn:["Freelancing basics and service selection","Profile and portfolio building","Client communication fundamentals","Pricing and delivery discipline","Online earning mindset and roadmap"],
-    facilities:["Freelancing roadmap","Profile guidance","Notes and examples","Practical task ideas","Future mentorship support"]
-  },
-  {
-    id:"ai-prompt-engineering", courseSlug:"ai-prompt-engineering", courseId:COURSE_IDS["ai-prompt-engineering"],
-    image:"/IMG/Course 5.jpeg", category:"Target", language:"HINGLISH",
-    title:"AI & Prompt Engineering",
-    subtitle:"Master AI tools, prompt structure, productivity workflows, and practical automation thinking.",
-    status:"Beta Mode", price:BATCH_PRICE, oldPrice:BATCH_OLD_PRICE,
-    details:"A modern AI-focused batch covering prompt engineering, AI tool usage, structured prompting, productivity workflows, content generation, research support, and practical AI implementation.",
-    learn:["Prompt engineering fundamentals","AI tools for study, content, and productivity","Structured prompts for better output","Research, writing, and automation workflows","Practical AI use cases for real projects"],
-    facilities:["Prompt templates and examples","Practice-based AI tasks","Chapter-wise notes","Real workflow demonstrations","Future AI project support"]
-  }
+  {id:"video-editing",courseSlug:"video-editing",courseId:COURSE_IDS["video-editing"],image:"/IMG/Course 1.jpeg",category:"Target",language:"HINGLISH",title:"Video & Media Editing Mastery",subtitle:"Learn editing, storytelling, reels, shorts, and professional content creation.",status:"Beta Mode",price:BATCH_PRICE,oldPrice:BATCH_OLD,details:"A practical batch for learners who want to build strong video editing skills for reels, shorts, YouTube content, social media creatives, and professional digital projects.",learn:["Timeline editing and clean workflow","Reels, shorts, and social media video structure","Transitions, captions, audio sync, and color correction","Content planning and storytelling basics","Project-based editing practice"],facilities:["Chapter-wise learning","Lecture and notes support","Practice-based tasks","Future certificate support","Batch access after successful purchase"]},
+  {id:"graphic-design",courseSlug:"graphic-design",courseId:COURSE_IDS["graphic-design"],image:"/IMG/Course 2.jpeg",category:"Target",language:"HINGLISH",title:"Creative & Graphic Design Mastery",subtitle:"Design posters, thumbnails, banners, brand creatives, and visual content.",status:"Beta Mode",price:BATCH_PRICE,oldPrice:BATCH_OLD,details:"A creative batch focused on design fundamentals, social media creatives, thumbnails, posters, brand layouts, typography, and portfolio-ready visual design practice.",learn:["Design principles and layout basics","Poster, banner, and thumbnail design","Typography, color balance, and spacing","Brand-style social media creatives","Portfolio-focused design practice"],facilities:["Design practice tasks","Creative assignments","Notes for quick revision","Portfolio guidance","Future project review"]},
+  {id:"ai-coding",courseSlug:"ai-coding",courseId:COURSE_IDS["ai-coding"],image:"/IMG/Course 3.jpeg",category:"Target",language:"HINGLISH",title:"AI Coding & Logic Foundation",subtitle:"Build coding logic, AI basics, prompts, and beginner-friendly programming thinking.",status:"Beta Mode",price:BATCH_PRICE,oldPrice:BATCH_OLD,details:"A beginner-friendly batch designed to build programming thinking, logic, AI-assisted coding workflow, problem solving, and project structure from the ground level.",learn:["Logic building and problem solving","Programming basics for beginners","AI-assisted coding workflow","Prompt thinking for coding tasks","Mini project planning and structure"],facilities:["Beginner-friendly explanations","Practice questions","Chapter-wise notes","Mini project ideas","Future coding dashboard support"]},
+  {id:"freelancing",courseSlug:"freelancing",courseId:COURSE_IDS["freelancing"],image:"/IMG/Course 4.jpeg",category:"Target",language:"HINGLISH",title:"Freelancing & Monetization Roadmap",subtitle:"Understand digital earning, freelancing basics, client work, and skill monetization.",status:"Beta Mode",price:BATCH_PRICE,oldPrice:BATCH_OLD,details:"A practical batch for students who want to understand freelancing basics, profile building, client communication, service packaging, pricing, and online earning discipline.",learn:["Freelancing basics and service selection","Profile and portfolio building","Client communication fundamentals","Pricing and delivery discipline","Online earning mindset and roadmap"],facilities:["Freelancing roadmap","Profile guidance","Notes and examples","Practical task ideas","Future mentorship support"]},
+  {id:"ai-prompt-engineering",courseSlug:"ai-prompt-engineering",courseId:COURSE_IDS["ai-prompt-engineering"],image:"/IMG/Course 5.jpeg",category:"Target",language:"HINGLISH",title:"AI & Prompt Engineering",subtitle:"Master AI tools, prompt structure, productivity workflows, and practical automation thinking.",status:"Beta Mode",price:BATCH_PRICE,oldPrice:BATCH_OLD,details:"A modern AI-focused batch covering prompt engineering, AI tool usage, structured prompting, productivity workflows, content generation, research support, and practical AI implementation.",learn:["Prompt engineering fundamentals","AI tools for study, content, and productivity","Structured prompts for better output","Research, writing, and automation workflows","Practical AI use cases for real projects"],facilities:["Prompt templates and examples","Practice-based AI tasks","Chapter-wise notes","Real workflow demonstrations","Future AI project support"]}
 ];
 
-/* ── STATE ── */
+/* ─── STATE ─────────────────────────────────────────────── */
 let enrolledSlugs = [];
 let selectedBatch = null;
+let razorpayLoaded = false;
 
-/* ── HELPERS ── */
-function $id(id){ return document.getElementById(id); }
-function esc(t){ return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+/* ─── HELPERS ────────────────────────────────────────────── */
+const $id = id => document.getElementById(id);
+const esc  = t  => String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
 function getStudent(){
   return {
     id:         localStorage.getItem('af_student_uuid')   || '',
@@ -483,65 +259,115 @@ function getStudent(){
 }
 function isEnrolled(slug){ return enrolledSlugs.includes(slug); }
 
-/* ── THEME ── */
-function syncTheme(){
-  document.documentElement.setAttribute('data-theme',
-    localStorage.getItem('af_dark_mode')==='1'?'dark':'light');
-}
-syncTheme();
-window.addEventListener('storage', e=>{ if(e.key==='af_dark_mode') syncTheme(); });
+/* ─── THEME ──────────────────────────────────────────────── */
+window.addEventListener('storage', e => {
+  if (e.key === 'af_dark_mode')
+    document.documentElement.setAttribute('data-theme', e.newValue==='1'?'dark':'light');
+});
 
-/* ── TOAST ── */
+/* ─── TOAST ──────────────────────────────────────────────── */
 let _tt = null;
 function showToast(msg, type='info', title=''){
-  const w = $id('toastWrap'); w.innerHTML='';
-  if(_tt){ clearTimeout(_tt); _tt=null; }
-  const labels={ok:'Done',info:'Info',err:'Error',warn:'Notice'};
-  const d=document.createElement('div');
-  d.className='toast toast-'+type;
-  d.innerHTML=`<div class="toast-body"><p>${title||labels[type]||'Info'}</p><p>${msg}</p></div><span class="toast-x" onclick="this.parentElement.remove()">×</span>`;
+  const w = $id('toastWrap'); w.innerHTML = '';
+  if(_tt){ clearTimeout(_tt); _tt = null; }
+  const labels = {ok:'Done',info:'Info',err:'Error',warn:'Notice'};
+  const d = document.createElement('div');
+  d.className = 'toast toast-'+type;
+  d.innerHTML = `<div class="toast-body"><p>${title||labels[type]||'Info'}</p><p>${msg}</p></div><span class="toast-x" onclick="this.parentElement.remove()">×</span>`;
   w.appendChild(d);
-  _tt=setTimeout(()=>d.remove(),2600);
+  _tt = setTimeout(() => d.remove(), 2600);
 }
 
-/* ── EDGE CALL ── */
-async function edgeCall(fn, payload){
-  try{
-    if(!navigator.onLine) return {ok:false,message:'No internet connection.'};
-    const {data,error} = await studentDb.functions.invoke(fn,{body:payload||{}});
-    if(error) return {ok:false,message:error.message||'Request failed.'};
-    return data||{ok:false,message:'Empty response.'};
-  }catch(e){ return {ok:false,message:e.message||'Request failed.'}; }
+/* ─── CACHE HELPERS ──────────────────────────────────────── */
+function cacheGet(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    // Check TTL
+    if (Date.now() - obj.ts > CACHE_TTL_MS) return null;
+    return obj.data;
+  } catch(_){ return null; }
 }
 
-/* ── LOAD ENROLLED ── */
-async function loadEnrolled(){
-  enrolledSlugs=[];
+function cacheSet(key, data) {
+  try { localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch(_){}
+}
+
+function cacheClear(key) {
+  try { localStorage.removeItem(key); } catch(_){}
+}
+
+function showCacheBar(ts) {
+  const bar = $id('cacheBar');
+  const timeEl = $id('cacheTime');
+  if (!bar || !timeEl || !ts) return;
+  const mins = Math.round((Date.now() - ts) / 60000);
+  timeEl.textContent = mins < 1 ? 'Just loaded' : `Cached ${mins}m ago`;
+  bar.style.display = 'flex';
+}
+
+/* ─── SUPABASE (lazy — only imported when needed) ───────── */
+let _sbClient = null;
+function getSb() {
+  if (_sbClient) return _sbClient;
+  // supabase-js is NOT pre-loaded. We import it lazily only when a network call is needed.
+  // For the initial render this is never called because BATCHES is static.
+  // It's only needed for: loadEnrolled() and grantAccess().
+  if (typeof supabase !== 'undefined') {
+    _sbClient = supabase.createClient(STUDENT_URL, STUDENT_KEY);
+  }
+  return _sbClient;
+}
+
+async function edgeCall(fn, payload) {
+  try {
+    if (!navigator.onLine) return { ok:false, message:'No internet connection.' };
+    const sb = getSb();
+    if (!sb) return { ok:false, message:'SDK not ready.' };
+    const { data, error } = await sb.functions.invoke(fn, { body: payload||{} });
+    if (error) return { ok:false, message: error.message||'Request failed.' };
+    return data || { ok:false, message:'Empty response.' };
+  } catch(e) { return { ok:false, message: e.message||'Request failed.' }; }
+}
+
+/* ─── LOAD ENROLLED (with cache) ─────────────────────────── */
+async function loadEnrolled() {
+  enrolledSlugs = [];
+
+  // 1. Try cache first (same session)
+  const cached = cacheGet(ENROLLED_KEY);
+  if (cached && Array.isArray(cached)) {
+    enrolledSlugs = cached;
+    return; // ← no network call if cache is fresh
+  }
+
+  // 2. Only fetch if logged in
   const s = getStudent();
-  if(!s.id) return;
-  try{
-    const res = await edgeCall('batch-enrolled-af',{student_id:s.id});
-    if(!res||!res.ok) return;
-    const ids = Array.isArray(res.course_ids)?res.course_ids:[];
-    enrolledSlugs = BATCHES.filter(b=>ids.includes(b.courseId)).map(b=>b.courseSlug);
-  }catch(e){}
+  if (!s.id) return;
+
+  try {
+    const res = await edgeCall('batch-enrolled-af', { student_id: s.id });
+    if (!res || !res.ok) return;
+    const ids = Array.isArray(res.course_ids) ? res.course_ids : [];
+    enrolledSlugs = BATCHES.filter(b => ids.includes(b.courseId)).map(b => b.courseSlug);
+    cacheSet(ENROLLED_KEY, enrolledSlugs);
+  } catch(_) {}
 }
 
-/* ── RENDER LIST ── */
-function renderBatches(list){
-  const grid = $id('batchGrid');
+/* ─── RENDER ─────────────────────────────────────────────── */
+function renderBatches(list) {
+  const grid  = $id('batchGrid');
   const label = $id('batchCountLabel');
-  if(label) label.textContent = list.length+' available';
-  if(!list.length){ grid.innerHTML='<div class="state-msg">No batches found.</div>'; return; }
+  if (label) label.textContent = list.length + ' available';
+  if (!list.length) { grid.innerHTML = '<div class="state-msg">No batches found.</div>'; return; }
 
-  grid.innerHTML = list.map(b=>{
+  grid.innerHTML = list.map(b => {
     const enrolled = isEnrolled(b.courseSlug);
     return `<div class="batch-card${enrolled?' enrolled':''}">
       <div class="batch-img-wrap" onclick="openDetail('${b.id}')">
-        <span class="batch-loader" id="loader-${b.id}"></span>
-        <img class="batch-img" src="${b.image}" alt="${esc(b.title)}" loading="lazy"
-          onload="document.getElementById('loader-${b.id}').style.display='none'"
-          onerror="document.getElementById('loader-${b.id}').style.display='none'"/>
+        <img class="batch-img" src="${esc(b.image)}" alt="${esc(b.title)}" loading="lazy"
+          onerror="this.style.background='linear-gradient(135deg,#4f46e5,#06b6d4)';this.src=''"/>
       </div>
       <div class="batch-body">
         <div class="batch-meta">
@@ -552,23 +378,20 @@ function renderBatches(list){
         <div class="batch-sub">${esc(b.subtitle)}</div>
         <div class="batch-status">
           <span class="batch-dot${enrolled?' ok':''}"></span>
-          <span>${enrolled?'Enrolled':b.status}</span>
+          <span>${enrolled?'Enrolled':esc(b.status)}</span>
           <span>|</span>
           <span>${enrolled?'Access active':'Test Payment'}</span>
         </div>
         ${enrolled?'<div class="enrolled-tag">✓ Already Enrolled</div>':''}
         <div class="batch-price-row">
-          <div class="price-left">
-            <div class="price-line">
-              <strong>₹${b.price}</strong>
-              <del>₹${b.oldPrice}</del>
-            </div>
-            <div class="price-off">${BATCH_DISCOUNT}% OFF</div>
+          <div>
+            <div class="price-line"><strong>₹${b.price}</strong><del>₹${b.oldPrice}</del></div>
+            <div class="price-off">${DISCOUNT}% OFF</div>
           </div>
           <div class="batch-btns">
             ${enrolled
-              ?`<button class="buy-btn enrolled-btn" disabled>Enrolled ✓</button>`
-              :`<button class="buy-btn" onclick="buyDirect('${b.id}',this)">Buy Now</button>`
+              ? `<button class="buy-btn enrolled-btn" disabled>Enrolled ✓</button>`
+              : `<button class="buy-btn" onclick="buyDirect('${b.id}',this)">Buy Now</button>`
             }
             <button class="arrow-btn" onclick="openDetail('${b.id}')">›</button>
           </div>
@@ -578,148 +401,212 @@ function renderBatches(list){
   }).join('');
 }
 
-/* ── FILTER ── */
-function filterBatches(){
-  const q = ($id('searchInput').value||'').trim().toLowerCase();
-  if(!q){ renderBatches(BATCHES); return; }
-  renderBatches(BATCHES.filter(b=>
-    b.title.toLowerCase().includes(q)||
-    b.subtitle.toLowerCase().includes(q)||
+/* ─── FILTER ─────────────────────────────────────────────── */
+function filterBatches() {
+  const q = ($id('searchInput').value || '').trim().toLowerCase();
+  if (!q) { renderBatches(BATCHES); return; }
+  renderBatches(BATCHES.filter(b =>
+    b.title.toLowerCase().includes(q) ||
+    b.subtitle.toLowerCase().includes(q) ||
     b.courseSlug.toLowerCase().includes(q)
   ));
 }
 
-/* ── SHOW LIST / DETAIL ── */
-function showList(){
-  $id('listView').style.display='block';
+/* ─── SHOW LIST / DETAIL ─────────────────────────────────── */
+function showList() {
+  $id('listView').style.display = 'block';
   $id('detailView').classList.remove('active');
-  $id('page').scrollTop=0;
+  $id('page').scrollTop = 0;
 }
 
-function openDetail(id){
-  const b = BATCHES.find(x=>x.id===id);
-  if(!b) return;
+function openDetail(id) {
+  const b = BATCHES.find(x => x.id === id);
+  if (!b) return;
   selectedBatch = b;
   const enrolled = isEnrolled(b.courseSlug);
 
-  $id('detailImg').src       = b.image;
-  $id('detailTitle').textContent  = b.title;
-  $id('detailLang').textContent   = b.language;
-  $id('detailCat').textContent    = b.category;
-  $id('detailDesc').textContent   = b.subtitle;
-  $id('detailPrice').textContent  = '₹'+b.price;
-  $id('detailOldPrice').textContent='₹'+b.oldPrice;
-  $id('detailOff').textContent    = BATCH_DISCOUNT+'% OFF';
-  $id('detailFull').textContent   = b.details;
-  $id('detailLearn').innerHTML    = b.learn.map(i=>`<li>${esc(i)}</li>`).join('');
-  $id('detailFacilities').innerHTML=b.facilities.map(i=>`<li>${esc(i)}</li>`).join('');
+  $id('detailImg').src                   = b.image;
+  $id('detailTitle').textContent         = b.title;
+  $id('detailLang').textContent          = b.language;
+  $id('detailCat').textContent           = b.category;
+  $id('detailDesc').textContent          = b.subtitle;
+  $id('detailPrice').textContent         = '₹' + b.price;
+  $id('detailOldPrice').textContent      = '₹' + b.oldPrice;
+  $id('detailOff').textContent           = DISCOUNT + '% OFF';
+  $id('detailFull').textContent          = b.details;
+  $id('detailLearn').innerHTML           = b.learn.map(i => `<li>${esc(i)}</li>`).join('');
+  $id('detailFacilities').innerHTML      = b.facilities.map(i => `<li>${esc(i)}</li>`).join('');
 
-  const btn=$id('detailBuyBtn');
-  if(enrolled){
-    btn.textContent='Already Enrolled ✓';btn.disabled=true;btn.classList.add('enrolled-btn');
-  }else{
-    btn.textContent='Buy Now';btn.disabled=false;btn.classList.remove('enrolled-btn');
+  const btn = $id('detailBuyBtn');
+  if (enrolled) {
+    btn.textContent = 'Already Enrolled ✓'; btn.disabled = true; btn.classList.add('enrolled-btn');
+  } else {
+    btn.textContent = 'Buy Now'; btn.disabled = false; btn.classList.remove('enrolled-btn');
   }
 
-  $id('listView').style.display='none';
+  $id('listView').style.display = 'none';
   $id('detailView').classList.add('active');
-  $id('page').scrollTop=0;
+  $id('page').scrollTop = 0;
 }
 
-/* ── BUY ── */
-function buyDirect(id, btn){
-  const b=BATCHES.find(x=>x.id===id);
-  if(!b) return;
-  if(isEnrolled(b.courseSlug)){ showToast('You already have access to this batch.','ok','Enrolled'); return; }
-  selectedBatch=b;
+/* ─── LOAD RAZORPAY ON DEMAND ────────────────────────────── */
+function loadRazorpay() {
+  return new Promise((resolve, reject) => {
+    if (razorpayLoaded && typeof Razorpay !== 'undefined') { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    s.onload  = () => { razorpayLoaded = true; resolve(); };
+    s.onerror = () => reject(new Error('Razorpay script failed to load.'));
+    document.head.appendChild(s);
+  });
+}
+
+/* ─── LOAD SUPABASE SDK ON DEMAND ────────────────────────── */
+function loadSupabaseSDK() {
+  return new Promise((resolve, reject) => {
+    if (typeof supabase !== 'undefined') { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    s.onload  = resolve;
+    s.onerror = () => reject(new Error('Supabase SDK failed to load.'));
+    document.head.appendChild(s);
+  });
+}
+
+/* ─── BUY ────────────────────────────────────────────────── */
+function buyDirect(id, btn) {
+  const b = BATCHES.find(x => x.id === id);
+  if (!b) return;
+  if (isEnrolled(b.courseSlug)) { showToast('You already have access to this batch.','ok','Enrolled'); return; }
+  selectedBatch = b;
   startPayment(b, btn);
 }
 
-function buySelected(){
-  if(!selectedBatch) return;
-  if(isEnrolled(selectedBatch.courseSlug)){ showToast('You already have access.','ok','Enrolled'); return; }
+function buySelected() {
+  if (!selectedBatch) return;
+  if (isEnrolled(selectedBatch.courseSlug)) { showToast('You already have access.','ok','Enrolled'); return; }
   startPayment(selectedBatch, $id('detailBuyBtn'));
 }
 
-async function startPayment(batch, btn){
+async function startPayment(batch, btn) {
   const s = getStudent();
-  if(!s.id){ showToast('Please login first to purchase a batch.','warn','Login Required'); return; }
-  if(!batch.courseId){ showToast('Course ID missing.','err','Error'); return; }
-  if(typeof Razorpay==='undefined'){ showToast('Payment script not loaded.','err','Error'); return; }
+  if (!s.id) { showToast('Please login first to purchase a batch.','warn','Login Required'); return; }
+  if (!batch.courseId) { showToast('Course ID missing.','err','Error'); return; }
 
-  if(btn){ btn.disabled=true; btn.textContent='Checking…'; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Loading…'; }
 
-  try{
-    // verify course exists
-    const check = await edgeCall('batch-course-check-af',{course_id:batch.courseId,course_slug:batch.courseSlug});
-    if(!check||!check.ok) throw new Error(check?.message||'Course verification failed.');
+  try {
+    // Load Razorpay + Supabase only NOW (lazy)
+    await loadSupabaseSDK();
+    await loadRazorpay();
 
-    if(btn) btn.textContent='Opening Payment…';
+    if (btn) btn.textContent = 'Checking…';
+    const check = await edgeCall('batch-course-check-af', { course_id:batch.courseId, course_slug:batch.courseSlug });
+    if (!check || !check.ok) throw new Error(check?.message || 'Course verification failed.');
 
-    const options={
-      key:RAZORPAY_KEY_ID, amount:batch.price*100, currency:'INR',
-      name:'AcademeForge', description:batch.title, image:'',
-      prefill:{name:s.name,email:s.email,contact:s.mobile},
-      notes:{student_uuid:s.id,student_id:s.student_id,course_id:batch.courseId,course_slug:batch.courseSlug,batch_title:batch.title},
-      method:{upi:true,card:true,netbanking:true,wallet:true,paylater:false,emi:false},
-      theme:{color:'#4f46e5'},
-      handler: async function(response){
-        try{
-          if(btn) btn.textContent='Adding Access…';
-          await grantAccess(batch,response);
+    if (btn) btn.textContent = 'Opening Payment…';
+
+    const options = {
+      key: RAZORPAY_KEY, amount: batch.price * 100, currency: 'INR',
+      name: 'AcademeForge', description: batch.title, image: '',
+      prefill: { name:s.name, email:s.email, contact:s.mobile },
+      notes: { student_uuid:s.id, student_id:s.student_id, course_id:batch.courseId, course_slug:batch.courseSlug, batch_title:batch.title },
+      method: { upi:true, card:true, netbanking:true, wallet:true, paylater:false, emi:false },
+      theme: { color:'#4f46e5' },
+      handler: async function(response) {
+        try {
+          if (btn) btn.textContent = 'Adding Access…';
+          await grantAccess(batch, response);
+          cacheClear(ENROLLED_KEY); // invalidate enrolled cache after purchase
           await loadEnrolled();
           showToast('Batch access added successfully!','ok','Payment Successful');
           renderBatches(BATCHES);
           showList();
-        }catch(err){
-          showToast(err.message||'Payment done but access failed.','err','Access Error');
-          if(btn){ btn.disabled=false; btn.textContent='Buy Now'; }
+        } catch(err) {
+          showToast(err.message || 'Payment done but access failed.','err','Access Error');
+          if (btn) { btn.disabled = false; btn.textContent = 'Buy Now'; }
         }
       },
-      modal:{
-        ondismiss:function(){
-          if(btn){ btn.disabled=false; btn.textContent='Buy Now'; }
+      modal: {
+        ondismiss: function() {
+          if (btn) { btn.disabled = false; btn.textContent = 'Buy Now'; }
           showToast('Payment cancelled.','warn','Cancelled');
         }
       }
     };
-    const rzp=new Razorpay(options);
-    rzp.on('payment.failed',function(r){
-      const msg=r?.error?.description||'Payment failed.';
-      showToast(msg,'err','Payment Failed');
-      if(btn){ btn.disabled=false; btn.textContent='Buy Now'; }
+    const rzp = new Razorpay(options);
+    rzp.on('payment.failed', function(r) {
+      showToast(r?.error?.description || 'Payment failed.','err','Payment Failed');
+      if (btn) { btn.disabled = false; btn.textContent = 'Buy Now'; }
     });
     rzp.open();
-  }catch(err){
-    showToast(err.message||'Something went wrong.','err','Error');
-    if(btn){ btn.disabled=false; btn.textContent='Buy Now'; }
+  } catch(err) {
+    showToast(err.message || 'Something went wrong.','err','Error');
+    if (btn) { btn.disabled = false; btn.textContent = 'Buy Now'; }
   }
 }
 
-async function grantAccess(batch, paymentResponse){
-  const s=getStudent();
-  if(!s.id) throw new Error('Student session not found.');
-  const res = await edgeCall('batch-grant-access-af',{
+async function grantAccess(batch, paymentResponse) {
+  const s = getStudent();
+  if (!s.id) throw new Error('Student session not found.');
+  const res = await edgeCall('batch-grant-access-af', {
     student_uuid:s.id, student_id:s.student_id, student_name:s.name,
     mobile:s.mobile, email:s.email,
     course_id:batch.courseId, course_slug:batch.courseSlug, batch_id:batch.id, batch_title:batch.title,
     amount:batch.price, currency:'INR',
-    razorpay_payment_id:paymentResponse.razorpay_payment_id||'',
-    razorpay_order_id:paymentResponse.razorpay_order_id||'',
-    razorpay_signature:paymentResponse.razorpay_signature||''
+    razorpay_payment_id: paymentResponse.razorpay_payment_id || '',
+    razorpay_order_id:   paymentResponse.razorpay_order_id   || '',
+    razorpay_signature:  paymentResponse.razorpay_signature  || ''
   });
-  if(!res||!res.ok) throw new Error(res?.message||'Access update failed.');
+  if (!res || !res.ok) throw new Error(res?.message || 'Access update failed.');
   return true;
 }
 
-/* ── INIT ── */
-async function init(){
-  $id('batchGrid').innerHTML='<div class="state-msg">Loading…</div>';
-  await loadEnrolled();
-  renderBatches(BATCHES);
+/* ─── FORCE REFRESH (manual button) ─────────────────────── */
+function forceRefresh() {
+  cacheClear(CACHE_KEY);
+  cacheClear(ENROLLED_KEY);
+  showToast('Refreshing…','info','↻');
+  init(true);
 }
 
-document.addEventListener('DOMContentLoaded', init);
+/* ─── INIT ───────────────────────────────────────────────── */
+async function init(force) {
+  // STEP 1: Render BATCHES immediately from static data (zero network)
+  // Always show content right away — no loading spinner needed since data is static.
+  renderBatches(BATCHES);
+
+  // STEP 2: Check enrolled cache
+  const cachedEnrolled = cacheGet(ENROLLED_KEY);
+  if (cachedEnrolled && !force) {
+    enrolledSlugs = cachedEnrolled;
+    renderBatches(BATCHES); // re-render with enrolled state
+    // Show cache bar
+    try {
+      const raw = localStorage.getItem(ENROLLED_KEY);
+      if (raw) { const obj = JSON.parse(raw); showCacheBar(obj.ts); }
+    } catch(_){}
+    return; // ← done, no network at all
+  }
+
+  // STEP 3: Fetch enrolled from network only if not cached / force refresh
+  const s = getStudent();
+  if (s.id) {
+    // Load supabase SDK lazily (only now)
+    try {
+      await loadSupabaseSDK();
+      await loadEnrolled();
+      renderBatches(BATCHES); // re-render with fresh enrolled state
+    } catch(_) {
+      // silently fail — static batches already visible
+    }
+  }
+  // Hide cache bar since data is fresh
+  const bar = $id('cacheBar');
+  if (bar) bar.style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', () => init(false));
 </script>
 </body>
 </html>
