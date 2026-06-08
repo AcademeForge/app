@@ -42,13 +42,14 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html{font-size:15px;-webkit-text-size-adjust:100%;}
 /* NO transition on html/body — prevents dark mode lag */
+html{height:100%;height:100dvh;}
 body{
   font-family:var(--fb);
   background:var(--bg);
   color:var(--t1);
-  min-height:100dvh;
+  height:100%;height:100dvh;
   display:flex;justify-content:center;
-  overflow-x:hidden;
+  overflow:hidden;
 }
 button{font-family:var(--fb);cursor:pointer;border:none;background:none;color:inherit;}
 a{text-decoration:none;color:inherit;}
@@ -56,15 +57,16 @@ a{text-decoration:none;color:inherit;}
 /* ── SHELL — matches community page exactly ── */
 .shell{
   width:100%;max-width:var(--shell);
-  min-height:100dvh;
+  height:100%;height:100dvh;
   background:var(--surface);
   display:flex;flex-direction:column;
   position:relative;
   box-shadow:0 0 0 1px var(--b1);
+  overflow:hidden;
 }
 @media(min-width:700px){
-  body{padding:24px 0 40px;}
-  .shell{border-radius:32px;min-height:calc(100dvh - 64px);max-height:880px;overflow:hidden;}
+  body{padding:24px 0 40px;height:auto;min-height:100dvh;overflow-y:auto;}
+  .shell{border-radius:32px;height:calc(100dvh - 64px);max-height:880px;}
 }
 
 /* ── HEADER ── */
@@ -81,34 +83,21 @@ a{text-decoration:none;color:inherit;}
 /* ── SCROLL AREA ── */
 .page{
   flex:1;
-  overflow-y:auto;
+  overflow-y:scroll;
   overflow-x:hidden;
   -webkit-overflow-scrolling:touch;
   overscroll-behavior-y:contain;
-
-  padding:10px 10px calc(
-    var(--nav-h)
-    + 12px
-    + env(safe-area-inset-bottom,0px)
-  );
-
+  padding:10px 10px calc(var(--nav-h) + 24px + env(safe-area-inset-bottom,0px));
   min-height:0;
+  /* GPU layer — critical for WebView/APK scroll */
+  -webkit-transform:translateZ(0);
+  transform:translateZ(0);
 }
+.page::-webkit-scrollbar{width:2px;}
+.page::-webkit-scrollbar-thumb{background:var(--bc);border-radius:99px;}
+/* end-of-page breathing room */
+.page-end-space{height:8px;}
 
-.page::-webkit-scrollbar{
-  width:2px;
-}
-
-.page::-webkit-scrollbar-thumb{
-  background:var(--bc);
-  border-radius:99px;
-}
-
-/* Optional spacer */
-.page-end-space{
-  height:5px;
-}
-  
 /* ── PROFILE HERO ── */
 .profile-hero{
   display:flex;align-items:center;gap:12px;
@@ -431,6 +420,15 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
         <div class="row-end"><span class="row-arr">›</span></div>
       </a>
 
+      <a class="row" href="/T/" style="border-radius:0 0 var(--r2) var(--r2);">
+        <div class="row-icon">📖</div>
+        <div class="row-text">
+          <span class="row-title">Test Review</span>
+          <span class="row-sub">Review your latest test results</span>
+        </div>
+        <div class="row-end"><span class="row-arr">›</span></div>
+      </a>
+
     </div>
 
     <!-- SECTION: GAMES -->
@@ -573,12 +571,11 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
       <span>↩</span><span>Log Out</span>
     </button>
 
-   <div class="version">
-  <b>App Version 06.07.19</b><br>
-  Made with ❤️ in India · AcademeForge
-</div>
-
-<div class="page-end-space"></div>
+    <div class="version">
+      <b>App Version 06.07.19</b><br>
+      Made with ❤️ in India · AcademeForge
+    </div>
+    <div class="page-end-space"></div>
   </div><!-- /page -->
 
   <!-- BOTTOM NAV -->
