@@ -89,7 +89,7 @@ html.no-splash #afSplash{display:none!important;}
 .sp-bar{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#ff3b30,#ff8c00,#f8c75c,#fff1a8);animation:splashLoad 1.2s cubic-bezier(.22,.61,.36,1) forwards;}
 @keyframes splashLoad{to{width:100%;}}
 
-/* ─── SHELL — matches settings page exactly ─────────────── */
+/* ─── SHELL ─────────────────────────────────────────────── */
 .af-shell{
   width:100%;max-width:var(--shell-max);
   height:100%;height:100dvh;
@@ -150,7 +150,7 @@ html.no-splash #afSplash{display:none!important;}
   background:var(--err);border:2px solid var(--shell);display:none;
 }
 
-/* ─── PAGE AREA — same scroll as settings ────────────────── */
+/* ─── PAGE AREA ──────────────────────────────────────────── */
 .af-page{
   flex:1;
   overflow-y:scroll;
@@ -203,18 +203,32 @@ html.no-splash #afSplash{display:none!important;}
 }
 .af-quick-card:active{opacity:.87;}
 
-/* Both cards same indigo-to-violet gradient */
-.af-quick-card{
+/* ── LOGGED-OUT: LEFT card — warm amber/saffron ── */
+.af-quick-card.qc-login{
+  background:linear-gradient(145deg,#f59e0b 0%,#f97316 55%,#ef4444 100%);
+  border-color:rgba(249,115,22,.45);
+  box-shadow:0 4px 16px rgba(249,115,22,.30);
+}
+
+/* ── LOGGED-OUT: RIGHT card — emerald/teal ── */
+.af-quick-card.qc-profile-guest{
+  background:linear-gradient(145deg,#059669 0%,#10b981 55%,#34d399 100%);
+  border-color:rgba(16,185,129,.45);
+  box-shadow:0 4px 16px rgba(16,185,129,.28);
+}
+
+/* ── LOGGED-IN: LEFT card — indigo ── */
+.af-quick-card.qc-courses{
   background:linear-gradient(145deg,#4f46e5 0%,#6366f1 55%,#818cf8 100%);
   border-color:rgba(99,102,241,.55);
   box-shadow:0 4px 16px rgba(79,70,229,.28);
 }
 
-/* Teal override for right (profile) card when logged in */
-.af-quick-card.profile-loggedin{
-  background:linear-gradient(145deg,#0891b2 0%,#06b6d4 55%,#22d3ee 100%);
-  border-color:rgba(6,182,212,.5);
-  box-shadow:0 4px 16px rgba(6,182,212,.22);
+/* ── LOGGED-IN: RIGHT card — rose/pink ── */
+.af-quick-card.qc-profile-in{
+  background:linear-gradient(145deg,#db2777 0%,#ec4899 55%,#f472b6 100%);
+  border-color:rgba(236,72,153,.45);
+  box-shadow:0 4px 16px rgba(236,72,153,.28);
 }
 
 .af-quick-icon{
@@ -223,10 +237,10 @@ html.no-splash #afSplash{display:none!important;}
   background:rgba(255,255,255,.22);border:1.5px solid rgba(255,255,255,.25);
 }
 .af-quick-title{font-family:var(--fd);font-size:13.5px;font-weight:800;color:#fff;line-height:1.15;}
-.af-quick-sub{font-size:11px;font-weight:600;color:rgba(255,255,255,.82);line-height:1.35;}
+.af-quick-sub{font-size:11px;font-weight:600;color:rgba(255,255,255,.85);line-height:1.35;}
 .af-quick-greeting{
-  font-family:var(--fd);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
-  color:rgba(255,255,255,.7);margin-bottom:0;
+  font-family:var(--fd);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:rgba(255,255,255,.75);
 }
 
 /* ─── WIDE CARD — Test Arena ─────────────────────────────── */
@@ -270,7 +284,7 @@ html.no-splash #afSplash{display:none!important;}
 .af-credit{text-align:center;padding:14px;font-size:11.5px;color:var(--tm);}
 .af-credit strong{color:var(--t2);font-weight:700;}
 
-/* ─── BOTTOM NAV — same as settings ─────────────────────── */
+/* ─── BOTTOM NAV ─────────────────────────────────────────── */
 .af-bnav{
   position:fixed;bottom:0;left:50%;transform:translateX(-50%);
   width:100%;max-width:var(--shell-max);z-index:999;height:var(--nav-h);
@@ -531,47 +545,41 @@ function renderQuickCards(){
   const mobile = localStorage.getItem('af_student_mobile') || localStorage.getItem('af_student_phone') || '';
   const loggedIn = !!(name && mobile);
 
-  /*
-    LEFT card:
-      - Not logged in  → indigo, "Student Login", "Login to continue →", opens /Student/
-      - Logged in      → indigo, "View Courses", "Your dashboard →", opens /Student/
-
-    RIGHT card:
-      - Not logged in  → indigo, "Hi, Student", "Login to view profile →", opens /Student/
-      - Logged in      → teal,   name (big), greeting (small), "View Courses →", opens /dash/
-  */
-
   let leftCard, rightCard;
 
   if(loggedIn){
     const firstName = escHtml(name.split(' ')[0]);
     const greeting  = getGreeting();
 
+    /* LEFT: View Courses — indigo */
     leftCard = `
-      <button class="af-quick-card" onclick="window.location.href='/Student/index.html'" type="button">
+      <button class="af-quick-card qc-courses" onclick="window.location.href='/Student/index.html'" type="button">
         <div class="af-quick-icon">🎓</div>
         <div class="af-quick-title">View Courses</div>
         <div class="af-quick-sub">Your dashboard →</div>
       </button>`;
 
+    /* RIGHT: Hi [Name] + greeting only — rose/pink, no "View Courses" sub */
     rightCard = `
-      <button class="af-quick-card profile-loggedin" onclick="window.location.href='/dash/index.html'" type="button">
+      <button class="af-quick-card qc-profile-in" onclick="window.location.href='/dash/index.html'" type="button">
         <div class="af-quick-icon">👋</div>
-        <div class="af-quick-title">${firstName}</div>
+        <div class="af-quick-title">Hi, ${firstName}!</div>
         <div class="af-quick-greeting">${greeting}</div>
-        <div class="af-quick-sub">View Courses →</div>
       </button>`;
 
   } else {
+
+    /* LEFT: Student Login — amber/orange */
     leftCard = `
-      <button class="af-quick-card" onclick="window.location.href='/Student/index.html'" type="button">
+      <button class="af-quick-card qc-login" onclick="window.location.href='/student/index.html'" type="button">
         <div class="af-quick-icon">🎓</div>
         <div class="af-quick-title">Student Login</div>
         <div class="af-quick-sub">Login to continue →</div>
       </button>`;
 
+    /* RIGHT: Hi Student — emerald/green */
     rightCard = `
-      <button class="af-quick-card" onclick="window.location.href='/Student/index.html'" type="button">
+      <button class="af-quick-card qc-profile-guest" onclick="window.location.href='/student/index.html'" type="button">
         <div class="af-quick-icon">👤</div>
         <div class="af-quick-title">Hi, Student</div>
         <div class="af-quick-sub">Login to view profile →</div>
@@ -714,7 +722,7 @@ function startBanner(){
   },{passive:true});
 })();
 
-/* ── PAGE SWIPE nav ──────────────────────────────────────── */
+/* ── PAGE SWIPE NAV ──────────────────────────────────────── */
 (function(){
   const page=$('afPage');
   if(!page) return;
@@ -772,7 +780,7 @@ function openExternal(url){
 }
 window.openExternal=openExternal;
 
-/* ── STORAGE SYNC (cross-tab / login-logout) ─────────────── */
+/* ── STORAGE SYNC ────────────────────────────────────────── */
 window.addEventListener('storage',e=>{
   if(e.key==='af_dark_mode') applyTheme(e.newValue==='1');
   if(['af_student_name','af_student_phone','af_student_mobile','af_student_uuid'].includes(e.key)){
@@ -781,7 +789,7 @@ window.addEventListener('storage',e=>{
   }
 });
 
-/* ── VISIBILITY — refresh when tab comes back ────────────── */
+/* ── VISIBILITY ──────────────────────────────────────────── */
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'){
     renderQuickCards();
