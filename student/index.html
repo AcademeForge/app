@@ -406,7 +406,7 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
   <!-- HEADER -->
   <header class="hdr">
     <span class="hdr-title" id="hdrTitle">Student 🎓</span>
-    
+    <button class="hdr-logout hidden" id="hdrLogout" onclick="doLogout()">Logout</button>
   </header>
 
   <!-- PAGE -->
@@ -481,16 +481,19 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
       </div>
     </div>
 
-    <!-- ══ COURSE SELECT ══ -->
-    <div id="panelCourses" class="hidden">
-      <div class="dash-card">
-        <div class="dash-head">
-          <div>
-            <div class="dash-welcome" id="welcomeText">Welcome Student</div>
-        <p class="dash-sub">Your enrolled programs are ready to explore.</p>
-        <div class="course-grid" id="courseCards"></div>
+  
+<!-- ══ COURSE SELECT ══ -->
+<div id="panelCourses" class="hidden">
+  <div class="dash-card">
+    <div class="dash-head">
+      <div>
+        <div class="dash-welcome" id="welcomeText">Welcome Student</div>
       </div>
     </div>
+    <p class="dash-sub">Your enrolled programs are ready to explore.</p>
+    <div class="course-grid" id="courseCards"></div>
+  </div>
+</div>
 
     <!-- ══ NO COURSE ══ -->
     <div id="panelNoCourse" class="hidden">
