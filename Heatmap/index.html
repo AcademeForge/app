@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<script>
+(function () {
+  /* Inherit dark mode from main app instantly — no flash */
+  var dm = localStorage.getItem("af_dark_mode");
+  document.documentElement.setAttribute("data-theme", dm === "1" ? "dark" : "light");
+})();
+</script>
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#4f46e5" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>Learning Heatmap — AcademeForge</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<style>
+/* ═══════════════════════════════════════════════════
+   ROOT TOKENS — mirrors main app exactly
+═══════════════════════════════════════════════════ */
+:root {
+  --af-primary:        #4f46e5;
+  --af-primary-dark:   #3730a3;
+  --af-primary-light:  #818cf8;
+  --af-accent:         #06b6d4;
+  --af-accent2:        #f59e0b;
+  --af-danger:         #ef4444;
+  --af-success:        #22c55e;
+
+  --bg-base:           #f0f2ff;
+  --bg-shell:          #ffffff;
+  --bg-card:           rgba(255,255,255,0.72);
+  --bg-card-solid:     #ffffff;
+  --bg-nav:            rgba(255,255,255,0.88);
+  --bg-header:         rgba(255,255,255,0.92);
+  --bg-group:          rgba(79,70,229,0.06);
+  --bg-group-hover:    rgba(79,70,229,0.10);
+  --bg-input:          #f4f5fb;
+
+  --text-primary:      #0f0e2a;
+  --text-secondary:    #4b5563;
+  --text-muted:        #9ca3af;
+  --text-on-primary:   #ffffff;
+  --text-link:         #4f46e5;
+
+  --border-subtle:     rgba(79,70,229,0.12);
+  --border-card:       rgba(79,70,229,0.15);
+  --border-input:      #d1d5db;
+
+  --shadow-card:       0 4px 24px rgba(79,70,229,0.10), 0 1px 4px rgba(0,0,0,0.06);
+  --shadow-btn:        0 4px 16px rgba(79,70,229,0.28);
+  --shadow-elevated:   0 12px 40px rgba(79,70,229,0.18);
+
+  --glass-blur:        12px;
+  --glass-sat:         160%;
+
+  --r-sm:    8px;
+  --r-md:    14px;
+  --r-lg:    20px;
+  --r-xl:    28px;
+  --r-full:  9999px;
+
+  --gap-xs:  6px;
+  --gap-sm:  10px;
+  --gap-md:  16px;
+  --gap-lg:  24px;
+  --gap-xl:  32px;
+
+  --font-display: 'Sora', sans-serif;
+  --font-body:    'Nunito', sans-serif;
+
+  --ease-spring: cubic-bezier(0.34,1.56,0.64,1);
+  --ease-out:    cubic-bezier(0.22,1,0.36,1);
+  --dur-fast:    140ms;
+  --dur-med:     240ms;
+  --dur-slow:    400ms;
+
+  --shell-max: 430px;
+  --header-h:  64px;
+}
+
+[data-theme="dark"] {
+  --bg-base:           #0c0b1d;
+  --bg-shell:          #120f2a;
+  --bg-card:           rgba(30,27,60,0.80);
+  --bg-card-solid:     #1e1b3c;
+  --bg-nav:            rgba(18,15,42,0.95);
+  --bg-header:         rgba(18,15,42,0.96);
+  --bg-group:          rgba(129,140,248,0.08);
+  --bg-group-hover:    rgba(129,140,248,0.14);
+  --bg-input:          #1e1b3c;
+
+  --text-primary:      #f0eeff;
+  --text-secondary:    #a5a3c2;
+  --text-muted:        #6b6a8a;
+  --text-on-primary:   #ffffff;
+  --text-link:         #818cf8;
+
+  --border-subtle:     rgba(129,140,248,0.12);
+  --border-card:       rgba(129,140,248,0.18);
+  --border-input:      rgba(129,140,248,0.20);
+
+  --shadow-card:       0 4px 24px rgba(0,0,0,0.32), 0 1px 4px rgba(0,0,0,0.20);
+  --shadow-btn:        0 4px 16px rgba(79,70,229,0.40);
+  --shadow-elevated:   0 12px 40px rgba(0,0,0,0.50);
+}
+
+/* ═══════════════════════════════════════════════════
+   RESET
+═══════════════════════════════════════════════════ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0; padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  color-scheme: light;
+}
+
+[data-theme="dark"] html { color-scheme: dark; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  transition: background var(--dur-med) var(--ease-out),
+              color var(--dur-med) var(--ease-out);
+  overflow-x: hidden;
+}
+
+button { font-family: var(--font-body); cursor: pointer; border: none; background: none; color: inherit; }
+a { text-decoration: none; color: inherit; }
+img { display: block; max-width: 100%; }
+ul { list-style: none; }
+
+/* ═══════════════════════════════════════════════════
+   SHELL — same max-width + look as main app
+═══════════════════════════════════════════════════ */
+.af-shell {
+  width: 100%;
+  max-width: var(--shell-max);
+  min-height: 100dvh;
+  background: var(--bg-shell);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px var(--border-subtle), var(--shadow-elevated);
+  transition: background var(--dur-med) var(--ease-out);
+}
+
+@media (min-width: 700px) {
+  body { padding: 32px 0 48px; align-items: flex-start; }
+  .af-shell {
+    border-radius: 40px;
+    min-height: calc(100dvh - 80px);
+    max-height: 900px;
+    overflow-y: auto;
+    box-shadow:
+      0 0 0 1px var(--border-card),
+      0 32px 80px rgba(0,0,0,0.22),
+      0 8px 24px rgba(79,70,229,0.15);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   TOPBAR
+═══════════════════════════════════════════════════ */
+.af-topbar {
+  position: sticky; top: 0; z-index: 100;
+  height: var(--header-h);
+  background: var(--bg-header);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--gap-md);
+  gap: var(--gap-sm);
+  transition: background var(--dur-med) var(--ease-out);
+}
+
+.af-topbar-left {
+  display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;
+}
+
+.af-back-btn {
+  width: 38px; height: 38px;
+  border-radius: var(--r-md);
+  background: var(--bg-group);
+  border: 1px solid var(--border-subtle);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  color: var(--text-primary);
+  transition: transform var(--dur-fast) var(--ease-spring), background var(--dur-fast);
+  flex-shrink: 0;
+}
+
+.af-back-btn:hover  { background: var(--bg-group-hover); transform: scale(1.06); }
+.af-back-btn:active { transform: scale(0.93); }
+
+.af-topbar-brand { min-width: 0; }
+
+.af-brand-logo {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: linear-gradient(135deg, var(--af-primary), var(--af-accent));
+  flex-shrink: 0;
+}
+
+.af-brand-name {
+  font-family: var(--font-display);
+  font-size: 15px; font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.af-brand-tagline { font-size: 10px; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
+
+.af-topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.af-theme-toggle {
+  width: 38px; height: 38px;
+  border-radius: var(--r-md);
+  background: var(--bg-group);
+  border: 1px solid var(--border-subtle);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  transition: transform var(--dur-fast) var(--ease-spring), background var(--dur-fast);
+}
+
+.af-theme-toggle:hover  { background: var(--bg-group-hover); transform: scale(1.08); }
+.af-theme-toggle:active { transform: scale(0.93); }
+
+/* ═══════════════════════════════════════════════════
+   PAGE SCROLL AREA
+═══════════════════════════════════════════════════ */
+.af-page {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--gap-md) var(--gap-md) 48px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-md);
+}
+
+.af-page::-webkit-scrollbar { width: 3px; }
+.af-page::-webkit-scrollbar-thumb { background: var(--border-card); border-radius: 99px; }
+.af-page::-webkit-scrollbar-track { background: transparent; }
+
+/* ═══════════════════════════════════════════════════
+   GLASS UTILITY
+═══════════════════════════════════════════════════ */
+.glass {
+  background: var(--bg-card);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  border: 1px solid var(--border-card);
+}
+
+/* ═══════════════════════════════════════════════════
+   HERO CARD
+═══════════════════════════════════════════════════ */
+.lh-hero {
+  border-radius: var(--r-xl);
+  padding: 22px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+
+.lh-hero::before {
+  content: "";
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(245,158,11,0.18), transparent 70%);
+  pointer-events: none;
+}
+
+.lh-hero-text p.lh-kicker {
+  font-family: var(--font-display);
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.lh-hero-text h2 {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 900;
+  letter-spacing: -0.04em;
+  color: var(--text-primary);
+  line-height: 1.15;
+  background: linear-gradient(135deg, var(--text-primary) 0%, #c7d2fe 60%, var(--af-primary-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.lh-hero-text p.lh-sub {
+  font-size: 12px; color: var(--text-muted);
+  font-weight: 600; margin-top: 4px;
+  max-width: 220px; line-height: 1.5;
+}
+
+.lh-streak-bubble {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 2px;
+  padding: 14px 16px;
+  border-radius: var(--r-lg);
+  background: linear-gradient(135deg, rgba(245,158,11,0.14), rgba(239,68,68,0.08));
+  border: 1px solid rgba(245,158,11,0.22);
+  flex-shrink: 0;
+  min-width: 70px;
+  text-align: center;
+}
+
+.lh-streak-fire { font-size: 28px; line-height: 1; }
+
+.lh-streak-count {
+  font-family: var(--font-display);
+  font-size: 28px; font-weight: 900;
+  letter-spacing: -0.05em;
+  color: var(--af-accent2);
+  line-height: 1;
+  transition: transform 0.4s var(--ease-spring);
+}
+
+.lh-streak-count.bump { transform: scale(1.25); }
+
+.lh-streak-label {
+  font-size: 10px; font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ═══════════════════════════════════════════════════
+   STATUS BAR
+═══════════════════════════════════════════════════ */
+.lh-status-bar {
+  border-radius: var(--r-lg);
+  padding: 13px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow-card);
+  transition: background var(--dur-fast);
+}
+
+.lh-status-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+  transition: background var(--dur-fast);
+}
+
+.lh-status-dot.active  { background: var(--af-success); box-shadow: 0 0 8px rgba(34,197,94,0.5); }
+.lh-status-dot.loading { background: var(--af-accent2); animation: lhPulse 1s ease-in-out infinite; }
+.lh-status-dot.error   { background: var(--af-danger); }
+
+@keyframes lhPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+
+.lh-status-text {
+  flex: 1; min-width: 0;
+  font-size: 13px; font-weight: 700;
+  color: var(--text-primary);
+}
+
+.lh-status-text small { display: block; font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 1px; }
+
+.lh-refresh-btn {
+  width: 34px; height: 34px;
+  border-radius: var(--r-sm);
+  background: var(--bg-group);
+  border: 1px solid var(--border-subtle);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; color: var(--text-muted);
+  transition: transform var(--dur-fast) var(--ease-spring), background var(--dur-fast);
+  flex-shrink: 0;
+}
+
+.lh-refresh-btn:hover  { background: var(--bg-group-hover); transform: rotate(30deg) scale(1.05); }
+.lh-refresh-btn:active { transform: rotate(180deg) scale(0.92); }
+.lh-refresh-btn.spin   { animation: lhSpin 0.7s linear; }
+
+@keyframes lhSpin { to { transform: rotate(360deg); } }
+
+/* ═══════════════════════════════════════════════════
+   WEEK CARD
+═══════════════════════════════════════════════════ */
+.lh-week-card {
+  border-radius: var(--r-xl);
+  padding: 18px 16px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.lh-week-title {
+  font-family: var(--font-display);
+  font-size: 13px; font-weight: 800;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.lh-week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.lh-day-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+}
+
+.lh-day-label {
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.lh-day-bubble {
+  width: 100%; aspect-ratio: 1;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  position: relative;
+  transition: transform var(--dur-fast) var(--ease-spring);
+}
+
+/* default: not-yet day */
+.lh-day-bubble.pending {
+  background: var(--bg-group);
+  border: 1.5px dashed var(--border-subtle);
+}
+
+.lh-day-bubble.inactive {
+  background: var(--bg-group);
+  border: 1.5px solid var(--border-subtle);
+}
+
+.lh-day-bubble.inactive::after {
+  content: "✗";
+  font-size: 13px; font-weight: 700;
+  color: var(--af-danger);
+  opacity: 0.55;
+}
+
+.lh-day-bubble.active {
+  background: linear-gradient(135deg, var(--af-success), #16a34a);
+  border: none;
+  box-shadow: 0 4px 16px rgba(34,197,94,0.30);
+}
+
+.lh-day-bubble.active::after {
+  content: "✓";
+  font-size: 14px; font-weight: 900;
+  color: white;
+}
+
+.lh-day-bubble.today {
+  outline: 2px solid var(--af-primary);
+  outline-offset: 2px;
+}
+
+.lh-day-bubble:not(.pending) { animation: lhBubbleIn 0.4s var(--ease-spring) both; }
+
+@keyframes lhBubbleIn {
+  from { opacity: 0; transform: scale(0.6); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* stagger */
+.lh-day-cell:nth-child(1) .lh-day-bubble { animation-delay: 0.04s; }
+.lh-day-cell:nth-child(2) .lh-day-bubble { animation-delay: 0.08s; }
+.lh-day-cell:nth-child(3) .lh-day-bubble { animation-delay: 0.12s; }
+.lh-day-cell:nth-child(4) .lh-day-bubble { animation-delay: 0.16s; }
+.lh-day-cell:nth-child(5) .lh-day-bubble { animation-delay: 0.20s; }
+.lh-day-cell:nth-child(6) .lh-day-bubble { animation-delay: 0.24s; }
+.lh-day-cell:nth-child(7) .lh-day-bubble { animation-delay: 0.28s; }
+
+.lh-week-note {
+  font-size: 11px; color: var(--text-muted); font-weight: 600;
+  text-align: center;
+  padding-top: 4px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* ═══════════════════════════════════════════════════
+   STATS ROW
+═══════════════════════════════════════════════════ */
+.lh-stats-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.lh-stat-card {
+  border-radius: var(--r-lg);
+  padding: 16px 14px;
+  box-shadow: var(--shadow-card);
+  display: flex; flex-direction: column; gap: 6px;
+  position: relative; overflow: hidden;
+}
+
+.lh-stat-card::before {
+  content: "";
+  position: absolute; top: -30px; right: -30px;
+  width: 80px; height: 80px; border-radius: 50%;
+  background: rgba(79,70,229,0.07);
+  pointer-events: none;
+}
+
+.lh-stat-icon { font-size: 22px; }
+
+.lh-stat-value {
+  font-family: var(--font-display);
+  font-size: 26px; font-weight: 900;
+  letter-spacing: -0.05em;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.lh-stat-label {
+  font-size: 11px; font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+/* ═══════════════════════════════════════════════════
+   INFO CARD
+═══════════════════════════════════════════════════ */
+.lh-info-card {
+  border-radius: var(--r-xl);
+  padding: 18px 16px;
+  box-shadow: var(--shadow-card);
+  display: flex; flex-direction: column; gap: 12px;
+  position: relative;
+}
+
+.lh-info-card::before {
+  content: "";
+  position: absolute; top: 0; left: 0;
+  width: 4px; height: 100%;
+  border-radius: 4px 0 0 4px;
+  background: linear-gradient(180deg, var(--af-primary), var(--af-accent));
+}
+
+.lh-info-card h3 {
+  font-family: var(--font-display);
+  font-size: 15px; font-weight: 800;
+  color: var(--text-primary);
+  padding-left: 6px;
+}
+
+.lh-info-card ul { padding-left: 6px; display: flex; flex-direction: column; gap: 8px; }
+
+.lh-info-card li {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 13px; font-weight: 600;
+  color: var(--text-secondary); line-height: 1.5;
+}
+
+.lh-info-card li::before {
+  content: "→";
+  color: var(--af-primary);
+  flex-shrink: 0;
+  font-weight: 900;
+}
+
+/* ═══════════════════════════════════════════════════
+   NOT LOGGED IN STATE
+═══════════════════════════════════════════════════ */
+.lh-locked-card {
+  border-radius: var(--r-xl);
+  padding: 28px 20px;
+  box-shadow: var(--shadow-card);
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+}
+
+.lh-locked-icon { font-size: 48px; animation: lhFloat 3s ease-in-out infinite; }
+
+@keyframes lhFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+.lh-locked-card h3 {
+  font-family: var(--font-display);
+  font-size: 18px; font-weight: 800;
+  color: var(--text-primary);
+}
+
+.lh-locked-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; max-width: 260px; }
+
+.lh-locked-btn {
+  padding: 13px 28px;
+  border-radius: var(--r-lg);
+  background: linear-gradient(135deg, var(--af-primary), var(--af-primary-dark));
+  color: white; font-weight: 700; font-size: 14px;
+  box-shadow: var(--shadow-btn);
+  transition: transform var(--dur-fast) var(--ease-spring), opacity var(--dur-fast);
+  text-decoration: none; display: inline-block;
+}
+
+.lh-locked-btn:hover  { opacity: 0.92; transform: scale(1.03); }
+.lh-locked-btn:active { transform: scale(0.97); }
+
+/* ═══════════════════════════════════════════════════
+   LOADING SKELETON
+═══════════════════════════════════════════════════ */
+.lh-skeleton {
+  border-radius: var(--r-md);
+  background: var(--bg-group);
+  position: relative; overflow: hidden;
+}
+
+.lh-skeleton::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%);
+  animation: lhShimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes lhShimmer {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
+/* ═══════════════════════════════════════════════════
+   BACK LINK — bottom
+═══════════════════════════════════════════════════ */
+.lh-back-row {
+  display: flex; justify-content: center;
+  padding-top: 4px;
+}
+
+.lh-back-link {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 700;
+  color: var(--text-muted);
+  padding: 10px 18px;
+  border-radius: var(--r-full);
+  background: var(--bg-group);
+  border: 1px solid var(--border-subtle);
+  transition: transform var(--dur-fast) var(--ease-spring), background var(--dur-fast);
+}
+
+.lh-back-link:hover  { background: var(--bg-group-hover); transform: scale(1.03); }
+.lh-back-link:active { transform: scale(0.97); }
+
+/* ═══════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════ */
+.lh-toast-wrap {
+  position: fixed;
+  bottom: 28px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 99999;
+  width: min(90vw, 420px);
+  pointer-events: none;
+}
+
+.lh-toast {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: var(--bg-card-solid);
+  border: 1px solid var(--border-card);
+  border-radius: 18px;
+  padding: 13px 16px;
+  box-shadow: var(--shadow-elevated);
+  animation: lhToastIn .22s ease;
+  pointer-events: auto;
+}
+
+.lh-toast-success { border-left: 4px solid var(--af-success); }
+.lh-toast-error   { border-left: 4px solid var(--af-danger); }
+.lh-toast-info    { border-left: 4px solid var(--af-primary); }
+
+.lh-toast-title { font-size: 13px; font-weight: 700; }
+.lh-toast-msg   { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+
+@keyframes lhToastIn  { from { opacity:0; transform: translateY(18px); } to { opacity:1; transform:none; } }
+@keyframes lhToastOut { from { opacity:1; } to { opacity:0; transform: translateY(12px); } }
+
+/* ═══════════════════════════════════════════════════
+   PAGE-IN ANIMATION
+═══════════════════════════════════════════════════ */
+@keyframes lhPageIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.lh-anim { animation: lhPageIn 0.32s var(--ease-out) both; }
+.lh-anim:nth-child(1) { animation-delay: 0.00s; }
+.lh-anim:nth-child(2) { animation-delay: 0.06s; }
+.lh-anim:nth-child(3) { animation-delay: 0.10s; }
+.lh-anim:nth-child(4) { animation-delay: 0.14s; }
+.lh-anim:nth-child(5) { animation-delay: 0.18s; }
+.lh-anim:nth-child(6) { animation-delay: 0.22s; }
+</style>
+</head>
+<body>
+
+<div class="af-shell" id="afShell">
+
+  <!-- ── TOPBAR ── -->
+  <header class="af-topbar">
+    <div class="af-topbar-left">
+      <button
+        class="af-back-btn"
+        onclick="lhGoBack()"
+        aria-label="Go back to AcademeForge"
+        type="button"
+      >←</button>
+      <img
+        src="../IMG/AF LOGO 1.jpeg"
+        alt="AcademeForge"
+        class="af-brand-logo"
+        onerror="this.style.display='none'"
+      />
+      <div class="af-topbar-brand">
+        <div class="af-brand-name">AcademeForge</div>
+        <div class="af-brand-tagline">Learning Heatmap</div>
+      </div>
+    </div>
+    <div class="af-topbar-actions">
+      <button
+        class="af-theme-toggle"
+        onclick="lhToggleTheme()"
+        aria-label="Toggle dark mode"
+        type="button"
+        id="themeBtn"
+      >🌙</button>
+    </div>
+  </header>
+
+  <!-- ── MAIN PAGE ── -->
+  <div class="af-page" id="lhPage">
+
+    <!-- LOGGED-OUT STATE (hidden by default, shown if not logged in) -->
+    <div class="lh-locked-card glass lh-anim" id="lhLockedCard" style="display:none;">
+      <div class="lh-locked-icon">🔒</div>
+      <h3>Login Required</h3>
+      <p>Login with your Student ID to track your daily learning streak and activity.</p>
+      <a href="../index.html" class="lh-locked-btn">← Go to App & Login</a>
+    </div>
+
+    <!-- LOGGED-IN CONTENT (hidden until auth confirmed) -->
+    <div id="lhContent" style="display:none; display:contents;">
+
+      <!-- HERO -->
+      <div class="lh-hero glass lh-anim">
+        <div class="lh-hero-text">
+          <p class="lh-kicker">Weekly Online Activity</p>
+          <h2>Learning<br>Heatmap</h2>
+          <p class="lh-sub">Login daily and stay active to maintain your streak.</p>
+        </div>
+        <div class="lh-streak-bubble">
+          <span class="lh-streak-fire">🔥</span>
+          <span class="lh-streak-count" id="lhStreakCount">-</span>
+          <span class="lh-streak-label">Day Streak</span>
+        </div>
+      </div>
+
+      <!-- STATUS BAR -->
+      <div class="lh-status-bar glass lh-anim" id="lhStatusBar">
+        <div class="lh-status-dot loading" id="lhStatusDot"></div>
+        <div class="lh-status-text">
+          <span id="lhStatusMain">Checking activity…</span>
+          <small id="lhStatusSub">Fetching from server</small>
+        </div>
+        <button
+          class="lh-refresh-btn"
+          onclick="lhLoad(true)"
+          aria-label="Refresh"
+          type="button"
+          id="lhRefreshBtn"
+        >↻</button>
+      </div>
+
+      <!-- WEEK GRID -->
+      <div class="lh-week-card glass lh-anim">
+        <div class="lh-week-title">This Week's Activity</div>
+        <div class="lh-week-grid" id="lhWeekGrid">
+          <!-- Skeleton placeholders -->
+          <div class="lh-day-cell" data-day="0">
+            <span class="lh-day-label">Mon</span>
+            <div class="lh-day-bubble pending lh-skeleton" style="height:40px;"></div>
+          </div>
+          <div class="lh-day-cell" data-day="1">
+            <span class="lh-day-label">Tue</span>
+            <div class="lh-day-bubble pending lh-skeleton" style="height:40px;"></div>
+          </div>
+          <div class="lh-day-cell" data-day="2">
+            <span class="lh-day-label">Wed</span>
+            <div class="lh-day-bubble pending lh-skeleton" style="height:40px;"></div>
+          </div>
+          <div class="lh-day-cell" data-day="3">
+            <span class="lh-day-label">Thu</span>
+            <div class="lh-day-bubble pending lh-skeleton" style="height:40px;"></div>
+          </div>
+          <div class="lh-day-cell" data-day="4">
+            <span class="lh-day-label">Fri</span>
+            <div class="lh-day-bubble pending lh-skeleton" style="height:40px;"></div>
+          </div>
+          <div class="lh-day-cell" data-day="5">
+            <span class="lh-day-label">Sat</span>
+            <div class="lh-day-bubble pending lh-skeleton" style="height:40px;"></div>
+          </div>
+          <div class="lh-day-cell" data-day="6">
+            <span class="lh-day-label">Sun</span>
+            <div class="lh-day-bubble pending lh-skeleton" style="height:40px;"></div>
+          </div>
+        </div>
+        <div class="lh-week-note" id="lhWeekNote">Loading your activity data…</div>
+      </div>
+
+      <!-- STATS -->
+      <div class="lh-stats-row lh-anim">
+        <div class="lh-stat-card glass">
+          <div class="lh-stat-icon">🔥</div>
+          <div class="lh-stat-value" id="lhStatStreak">-</div>
+          <div class="lh-stat-label">Current Streak</div>
+        </div>
+        <div class="lh-stat-card glass">
+          <div class="lh-stat-icon">✅</div>
+          <div class="lh-stat-value" id="lhStatActive">-</div>
+          <div class="lh-stat-label">Days This Week</div>
+        </div>
+      </div>
+
+      <!-- HOW IT WORKS -->
+      <div class="lh-info-card glass lh-anim">
+        <h3>How Streak Works</h3>
+        <ul>
+          <li>Login daily to keep your learning streak alive.</li>
+          <li>Your activity is automatically recorded each day.</li>
+          <li>Continuous daily presence builds your streak count.</li>
+          <li>Missing a day resets the streak back to zero.</li>
+          <li>Use the 🔥 button in the main app to open this page anytime.</li>
+        </ul>
+      </div>
+
+      <!-- BOTTOM BACK LINK -->
+      <div class="lh-back-row lh-anim">
+        <a class="lh-back-link" href="../index.html" aria-label="Back to AcademeForge">
+          ← Back to AcademeForge
+        </a>
+      </div>
+
+    </div><!-- /lhContent -->
+
+  </div><!-- /af-page -->
+</div><!-- /af-shell -->
+
+<!-- TOAST CONTAINER -->
+<div class="lh-toast-wrap" id="lhToastWrap"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════════════ */
+const LH_EDGE_URL =
+  "https://afooyyydhlwngzssgqih.supabase.co/functions/v1/learning-activity-af";
+
+const LH_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb295eXlkaGx3bmd6c3NncWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDQxMjgsImV4cCI6MjA5NDIyMDEyOH0.KG0XO0oP_2MpewHoIwTtbrKg5FkyOYRUtVzLH1MSJiE";
+
+/* ═══════════════════════════════════════════════════
+   DARK MODE
+═══════════════════════════════════════════════════ */
+function lhIsDark() {
+  return document.documentElement.getAttribute("data-theme") === "dark";
+}
+
+function lhApplyTheme(dark) {
+  document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+  localStorage.setItem("af_dark_mode", dark ? "1" : "0");
+  const btn = document.getElementById("themeBtn");
+  if (btn) btn.textContent = dark ? "☀️" : "🌙";
+}
+
+function lhToggleTheme() {
+  lhApplyTheme(!lhIsDark());
+}
+
+/* init theme button icon */
+document.getElementById("themeBtn").textContent = lhIsDark() ? "☀️" : "🌙";
+
+/* ═══════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════ */
+function lhGoBack() {
+  /* Try browser back first, then fallback to main app */
+  if (document.referrer && document.referrer.includes(location.hostname)) {
+    history.back();
+  } else {
+    window.location.href = "../index.html";
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════ */
+let _lhToastTimer = null;
+
+function lhToast(message, type, title, duration) {
+  type     = type     || "info";
+  duration = duration || 2800;
+  const titles = { success: "Success", error: "Error", info: "Info" };
+  const wrap = document.getElementById("lhToastWrap");
+  wrap.innerHTML = "";
+  if (_lhToastTimer) { clearTimeout(_lhToastTimer); _lhToastTimer = null; }
+
+  const t = document.createElement("div");
+  t.className = "lh-toast lh-toast-" + type;
+  t.innerHTML =
+    "<div><div class='lh-toast-title'>" + (title || titles[type]) + "</div>"
+    + "<div class='lh-toast-msg'>" + message + "</div></div>";
+  wrap.appendChild(t);
+
+  function close() {
+    t.style.animation = "lhToastOut 0.22s ease forwards";
+    setTimeout(() => { if (t.parentNode) t.parentNode.removeChild(t); }, 220);
+  }
+
+  _lhToastTimer = setTimeout(close, duration);
+}
+
+/* ═══════════════════════════════════════════════════
+   STATUS HELPERS
+═══════════════════════════════════════════════════ */
+function lhSetStatus(state, main, sub) {
+  const dot  = document.getElementById("lhStatusDot");
+  const mainEl = document.getElementById("lhStatusMain");
+  const subEl  = document.getElementById("lhStatusSub");
+  if (dot) { dot.className = "lh-status-dot " + (state || ""); }
+  if (mainEl) mainEl.textContent = main || "";
+  if (subEl)  subEl.textContent  = sub  || "";
+}
+
+/* ═══════════════════════════════════════════════════
+   DAY LABELS
+═══════════════════════════════════════════════════ */
+const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+/* ═══════════════════════════════════════════════════
+   RENDER WEEK GRID
+═══════════════════════════════════════════════════ */
+function lhRenderWeek(week) {
+  const grid = document.getElementById("lhWeekGrid");
+  const note = document.getElementById("lhWeekNote");
+  if (!grid) return;
+
+  let activeDays = 0;
+
+  grid.innerHTML = week.map(function(dayObj, i) {
+    let cls = "lh-day-bubble";
+    const date = dayObj.date; // YYYY-MM-DD
+    const isToday   = dayObj.today  === true;
+    const isActive  = dayObj.active === true;
+    const isPast    = !isToday && new Date(date) < new Date(new Date().toISOString().slice(0, 10));
+    const isFuture  = !isToday && new Date(date) > new Date(new Date().toISOString().slice(0, 10));
+
+    if (isFuture) {
+      cls += " pending";
+    } else if (isActive) {
+      cls += " active";
+      activeDays++;
+    } else {
+      cls += " inactive";
+    }
+
+    if (isToday) cls += " today";
+
+    return `<div class="lh-day-cell" data-day="${i}">
+      <span class="lh-day-label">${DAY_LABELS[i]}</span>
+      <div class="${cls}" title="${date}"></div>
+    </div>`;
+  }).join("");
+
+  /* stat */
+  const statActive = document.getElementById("lhStatActive");
+  if (statActive) statActive.textContent = activeDays + "/7";
+
+  if (note) {
+    note.textContent = activeDays === 7
+      ? "🏆 Perfect week! You were active every day."
+      : activeDays >= 5
+        ? "🔥 Great consistency! Keep going."
+        : activeDays >= 3
+          ? "📈 Good progress. Try to be active daily."
+          : "💪 Every day counts. Start your streak today.";
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   UPDATE STREAK COUNT
+═══════════════════════════════════════════════════ */
+function lhSetStreak(count) {
+  const el  = document.getElementById("lhStreakCount");
+  const el2 = document.getElementById("lhStatStreak");
+  if (el)  { el.textContent  = count; el.classList.add("bump"); setTimeout(() => el.classList.remove("bump"), 500); }
+  if (el2) el2.textContent = count + " day" + (count !== 1 ? "s" : "");
+  /* sync main app streak in localStorage so header badge updates on next visit */
+  localStorage.setItem("af_streak", String(count));
+}
+
+/* ═══════════════════════════════════════════════════
+   CALL EDGE FUNCTION
+═══════════════════════════════════════════════════ */
+async function lhCallEdge(action) {
+  const studentId = localStorage.getItem("af_student_uuid") || "";
+  if (!studentId) throw new Error("No student session.");
+
+  const res = await fetch(LH_EDGE_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": LH_ANON_KEY,
+      "Authorization": "Bearer " + LH_ANON_KEY
+    },
+    body: JSON.stringify({ action: action, studentId: studentId })
+  });
+
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error("Server error " + res.status + ": " + txt);
+  }
+
+  return await res.json();
+}
+
+/* ═══════════════════════════════════════════════════
+   LOAD HEATMAP
+═══════════════════════════════════════════════════ */
+let _lhLoading = false;
+
+async function lhLoad(markToday) {
+  if (_lhLoading) return;
+  _lhLoading = true;
+
+  const refreshBtn = document.getElementById("lhRefreshBtn");
+  if (refreshBtn) refreshBtn.classList.add("spin");
+
+  lhSetStatus("loading", "Fetching activity…", "Talking to AcademeForge server");
+
+  try {
+    /* 1. Mark today as active if requested (page open = active) */
+    const action = markToday ? "mark" : "summary";
+    const data   = await lhCallEdge(action);
+
+    if (!data || !data.ok) {
+      throw new Error(data?.error || "Unexpected response from server.");
+    }
+
+    /* 2. Render */
+    if (Array.isArray(data.week)) lhRenderWeek(data.week);
+    const streak = typeof data.streak === "number" ? data.streak : 0;
+    lhSetStreak(streak);
+
+    const today = data.today || new Date().toISOString().slice(0, 10);
+    lhSetStatus(
+      "active",
+      "Today marked as active ✓",
+      "Last synced: " + new Date().toLocaleTimeString()
+    );
+
+    if (markToday) {
+      lhToast("Today's learning activity has been recorded.", "success", "Activity Marked");
+    }
+
+  } catch (err) {
+    console.error("lhLoad error:", err);
+
+    lhSetStatus("error", "Could not load activity", err.message || "Check internet connection");
+    lhToast(err.message || "Could not fetch your heatmap.", "error", "Load Failed");
+
+    /* Render empty week so page still looks good */
+    const today = new Date().toISOString().slice(0, 10);
+    const week  = buildFallbackWeek(today);
+    lhRenderWeek(week);
+    lhSetStreak(parseInt(localStorage.getItem("af_streak") || "0", 10));
+
+  } finally {
+    _lhLoading = false;
+    if (refreshBtn) { refreshBtn.classList.remove("spin"); }
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   FALLBACK WEEK (offline / error)
+═══════════════════════════════════════════════════ */
+function buildFallbackWeek(today) {
+  /* Build Mon–Sun of the current week, mark all as pending */
+  const d = new Date(today + "T00:00:00Z");
+  const dow = d.getUTCDay(); // 0=Sun
+  const diff = dow === 0 ? -6 : 1 - dow;
+  const monday = new Date(d);
+  monday.setUTCDate(d.getUTCDate() + diff);
+
+  return Array.from({ length: 7 }, function(_, i) {
+    const dd = new Date(monday);
+    dd.setUTCDate(monday.getUTCDate() + i);
+    const ds = dd.toISOString().slice(0, 10);
+    return { date: ds, active: false, today: ds === today };
+  });
+}
+
+/* ═══════════════════════════════════════════════════
+   AUTH CHECK + INIT
+═══════════════════════════════════════════════════ */
+function lhInit() {
+  const name     = localStorage.getItem("af_student_name")  || "";
+  const phone    = localStorage.getItem("af_student_mobile") ||
+                   localStorage.getItem("af_student_phone")  || "";
+  const uuid     = localStorage.getItem("af_student_uuid")  || "";
+  const loggedIn = !!(name && (phone || uuid));
+
+  const lockedCard = document.getElementById("lhLockedCard");
+  const content    = document.getElementById("lhContent");
+
+  if (!loggedIn) {
+    if (lockedCard) lockedCard.style.display = "";
+    if (content)    content.style.display    = "none";
+    lhSetStatus("error", "Not logged in", "Please login in the main app first");
+    return;
+  }
+
+  if (lockedCard) lockedCard.style.display = "none";
+  if (content)    { content.style.display = ""; content.style.display = "contents"; }
+
+  /* Show cached streak instantly */
+  const cached = parseInt(localStorage.getItem("af_streak") || "0", 10);
+  lhSetStreak(cached);
+
+  /* Then fetch fresh data (mark today) */
+  lhLoad(true);
+}
+
+/* ═══════════════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════════════ */
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", lhInit);
+} else {
+  lhInit();
+}
+</script>
+</body>
+</html>
