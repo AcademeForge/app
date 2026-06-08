@@ -100,24 +100,6 @@
               radial-gradient(ellipse at 60% 80%, rgba(16,217,138,.05) 0%, transparent 50%);
 }
 
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    color-scheme:light;
-    --bg-base:#F0F2FF;--bg-1:#EAECF8;--bg-2:#E3E6F5;--bg-3:#DDE0F0;--bg-4:#D5D9EC;
-    --surf-1:#FFFFFF;--surf-2:#F5F6FE;--surf-3:#EDEFFE;--surf-4:#E5E8FC;
-    --surf-glass:rgba(255,255,255,.82);
-    --bdr-1:rgba(0,0,0,.06);--bdr-2:rgba(0,0,0,.10);--bdr-3:rgba(0,0,0,.16);
-    --bdr-accent:rgba(108,99,255,.25);
-    --t-1:#0D0F1A;--t-2:#3A4060;--t-3:#7880A0;--t-4:#BBC1D8;
-    --sh-xs:0 1px 3px rgba(0,0,0,.08);--sh-sm:0 2px 10px rgba(0,0,0,.10);
-    --sh-md:0 6px 24px rgba(0,0,0,.12);--sh-lg:0 16px 48px rgba(0,0,0,.15);
-    --grad-hero:linear-gradient(145deg, #2D1B8A 0%, #1A2B6E 40%, #0F2057 100%);
-    --grad-mesh:radial-gradient(ellipse at 20% 50%, rgba(108,99,255,.10) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 20%, rgba(61,142,248,.07) 0%, transparent 60%),
-                radial-gradient(ellipse at 60% 80%, rgba(16,217,138,.05) 0%, transparent 50%);
-  }
-}
-
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 html{-webkit-tap-highlight-color:transparent;scroll-behavior:smooth;}
 body{
@@ -597,7 +579,6 @@ img{display:block;max-width:100%;}
     </div>
     <div class="hdr-right">
       <button class="icon-btn" onclick="history.back()" title="Back">←</button>
-      <button class="icon-btn" id="darkBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
       <button class="icon-btn" onclick="fullRefresh(false)" title="Refresh">↺</button>
     </div>
   </div>
@@ -687,10 +668,6 @@ img{display:block;max-width:100%;}
     </div>
     <div class="sec-lbl">Preferences</div>
     <div class="set-section">
-      <div class="set-row">
-        <div><div class="sr-lbl">Dark Mode</div></div>
-        <button class="toggle" id="darkToggle" onclick="toggleTheme()"></button>
-      </div>
       <div class="set-row">
         <div><div class="sr-lbl">Refresh Data</div><div class="sr-sub">Pull latest tests &amp; history</div></div>
         <button class="icon-btn" onclick="fullRefresh(false)">↺</button>
@@ -794,10 +771,51 @@ img{display:block;max-width:100%;}
 const API_URL = "https://afooyyydhlwngzssgqih.supabase.co/functions/v1/student-test-af";
 
 /* ══════════════════════════════════════
+   CACHE CONFIG  (same pattern as Batch section)
+══════════════════════════════════════ */
+const CACHE_DASH_KEY  = 'af_test_dash_cache_v1';
+const CACHE_TESTS_KEY = 'af_test_list_cache_v1';
+const CACHE_TTL_MS    = 30 * 60 * 1000; // 30 minutes
+
+function cacheGet(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    if (Date.now() - obj.ts > CACHE_TTL_MS) return null; // expired
+    return obj.data;
+  } catch(_) { return null; }
+}
+
+function cacheSet(key, data) {
+  try { localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch(_) {}
+}
+
+function cacheClear(key) {
+  try { localStorage.removeItem(key); } catch(_) {}
+}
+
+/* ══════════════════════════════════════
+   THEME  — reads af_dark_mode from main app
+   (same as Batch section & Settings page)
+══════════════════════════════════════ */
+(function initTheme() {
+  const dark = localStorage.getItem('af_dark_mode') === '1';
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+})();
+
+/* Cross-tab sync for theme changes made in Settings/Batch pages */
+window.addEventListener('storage', e => {
+  if (e.key === 'af_dark_mode') {
+    document.documentElement.setAttribute('data-theme', e.newValue === '1' ? 'dark' : 'light');
+  }
+});
+
+/* ══════════════════════════════════════
    STATE
 ══════════════════════════════════════ */
-let _testsList    = null; // list-tests result
-let _activeTest   = null; // currently loaded test for quiz
+let _testsList    = null;
+let _activeTest   = null;
 let _questions    = [];
 let _answers      = {};
 let _currentQ     = 0;
@@ -805,7 +823,7 @@ let _timerSecs    = 0;
 let _timerIv      = null;
 let _duration     = 600;
 let _quizActive   = false;
-let _quizTestId   = null; // which test is being quizzed
+let _quizTestId   = null;
 let _dashData     = null;
 let _loadedScreens = new Set();
 let _histSortMode  = 'newest';
@@ -813,37 +831,6 @@ let _histSearch    = '';
 let _charts        = {};
 let _reviewTestId  = null;
 let _testFilter    = 'all';
-
-/* ══════════════════════════════════════
-   THEME
-══════════════════════════════════════ */
-(function initTheme() {
-  const stored = localStorage.getItem('af_theme');
-  if (stored) document.documentElement.setAttribute('data-theme', stored);
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-    if (!localStorage.getItem('af_theme')) updateThemeUI();
-  });
-  updateThemeUI();
-})();
-
-function isDark() {
-  const stored = localStorage.getItem('af_theme');
-  if (stored) return stored === 'dark';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches;
-}
-function updateThemeUI() {
-  const dark = isDark();
-  const toggle = document.getElementById('darkToggle');
-  const btn    = document.getElementById('darkBtn');
-  if (toggle) toggle.classList.toggle('on', dark);
-  if (btn)    btn.textContent = dark ? '☀️' : '🌙';
-}
-function toggleTheme() {
-  const newTheme = isDark() ? 'light' : 'dark';
-  localStorage.setItem('af_theme', newTheme);
-  document.documentElement.setAttribute('data-theme', newTheme);
-  updateThemeUI();
-}
 
 /* ══════════════════════════════════════
    STUDENT
@@ -953,7 +940,6 @@ function openScreen(id) {
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
-  // nav highlight mapping
   const navMap = {
     homeScreen:'homeScreen', testScreen:'testScreen', quizScreen:'testScreen',
     reviewScreen:'historyScreen', historyScreen:'historyScreen',
@@ -1057,7 +1043,6 @@ function renderHome() {
     document.getElementById('stBest').textContent  = bestRank ? `#${bestRank}` : '—';
     document.getElementById('stAcc').textContent   = acc     !== null ? `${acc}%`     : '—';
 
-    // Live banner — show latest active test not yet attempted
     const liveEl = document.getElementById('homeLiveBanner');
     const liveTests = (_testsList?.tests || []).filter(t => t.status === 'active' && !t.attempted);
     if (liveTests.length) {
@@ -1124,15 +1109,16 @@ function buildRecentCard(h) {
 }
 
 /* ══════════════════════════════════════
-   TEST LIBRARY — MULTI-TEST
+   TEST LIBRARY
 ══════════════════════════════════════ */
 async function loadTestsList() {
   document.getElementById('testContent').innerHTML = `<div class="empty"><div class="spin" style="margin:0 auto 14px"></div><p>Loading tests…</p></div>`;
   try {
     const res = await api('list-tests');
     _testsList = res;
+    cacheSet(CACHE_TESTS_KEY, res); // save to cache
     renderTestsList();
-    renderHome(); // refresh home live banner
+    renderHome();
   } catch(e) {
     document.getElementById('testContent').innerHTML = `<div class="empty">
       <div class="empty-ico">⚠️</div>
@@ -1172,13 +1158,12 @@ function renderTestsList() {
     return;
   }
 
-  // filter
   let filtered = tests;
-  if (_testFilter === 'active')   filtered = tests.filter(t => t.status === 'active' && !t.attempted);
+  if (_testFilter === 'active')    filtered = tests.filter(t => t.status === 'active' && !t.attempted);
   if (_testFilter === 'attempted') filtered = tests.filter(t => t.attempted);
-  if (_testFilter === 'closed')   filtered = tests.filter(t => t.status !== 'active' && !t.attempted);
+  if (_testFilter === 'closed')    filtered = tests.filter(t => t.status !== 'active' && !t.attempted);
 
-  const liveCount     = tests.filter(t => t.status === 'active' && !t.attempted).length;
+  const liveCount      = tests.filter(t => t.status === 'active' && !t.attempted).length;
   const attemptedCount = tests.filter(t => t.attempted).length;
 
   el.innerHTML = `
@@ -1197,9 +1182,9 @@ function renderTestsList() {
 }
 
 function buildTestCard(t) {
-  const isActive   = t.status === 'active';
+  const isActive    = t.status === 'active';
   const isAttempted = t.attempted;
-  const isLocked   = !isActive && !isAttempted;
+  const isLocked    = !isActive && !isAttempted;
 
   let cardMod = isAttempted ? 'test-card--attempted' : isActive ? 'test-card--active' : 'test-card--locked';
   let barMod  = isAttempted ? 'tc-accent-bar--attempted' : isActive ? 'tc-accent-bar--active' : 'tc-accent-bar--locked';
@@ -1286,7 +1271,6 @@ function buildTestCard(t) {
    OPEN A SPECIFIC TEST FOR QUIZ
 ══════════════════════════════════════ */
 async function openTest(testId) {
-  // Switch to quiz screen first, show loader
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('quizScreen').classList.add('active');
   document.getElementById('quizContent').innerHTML = `<div class="empty"><div class="spin" style="margin:0 auto 14px"></div><p>Loading test…</p></div>`;
@@ -1537,7 +1521,6 @@ async function submitTest() {
         </div>
       </div>`;
 
-    // Wire review button to correct test
     document.getElementById('modalResultReviewBtn').onclick = () => {
       closeModal('modalResult');
       openReviewScreen(submittedTestId);
@@ -1549,10 +1532,13 @@ async function submitTest() {
       confetti({ particleCount: 130, spread: 85, origin: { y: 0.5 }, colors: ['#6C63FF','#10D98A','#F5A623','#3D8EF8','#A78BFA'] });
     }
 
+    // Invalidate caches after submission so next visit fetches fresh data
     _activeTest  = null;
     _quizTestId  = null;
-    _testsList   = null; // invalidate so tests refresh
+    _testsList   = null;
     _dashData    = null;
+    cacheClear(CACHE_DASH_KEY);
+    cacheClear(CACHE_TESTS_KEY);
     _loadedScreens.clear();
     fullRefresh(true);
 
@@ -1669,7 +1655,7 @@ function renderHistoryScreen() {
   _loadedScreens.add('history');
   if (_dashData) { renderHistoryList(); return; }
   document.getElementById('historyContent').innerHTML = `<div class="empty"><div class="spin" style="margin:0 auto 14px"></div><p>Loading…</p></div>`;
-  api('dashboard').then(d => { _dashData = d; renderHistoryList(); })
+  api('dashboard').then(d => { _dashData = d; cacheSet(CACHE_DASH_KEY, d); renderHistoryList(); })
     .catch(() => {
       document.getElementById('historyContent').innerHTML = `<div class="empty"><div class="empty-ico">⚠️</div><div class="empty-ttl">Load Failed</div></div>`;
     });
@@ -1857,7 +1843,7 @@ function renderAnalyticsScreen() {
     }).join('')}`;
 
   setTimeout(() => {
-    const dark      = isDark();
+    const dark      = localStorage.getItem('af_dark_mode') === '1';
     const gridColor = dark ? 'rgba(255,255,255,.04)' : 'rgba(0,0,0,.04)';
     const tickColor = dark ? '#5C6882' : '#7880A0';
     const labels    = trend.map(h => (h.test_code||'').slice(0,6));
@@ -1893,11 +1879,16 @@ function renderAnalyticsScreen() {
 }
 
 /* ══════════════════════════════════════
-   FULL REFRESH
+   FULL REFRESH  — clears cache, fetches fresh
 ══════════════════════════════════════ */
 async function fullRefresh(silent = false) {
   if (!silent) toast('Refreshing…', '', 'info', 2000);
+
+  // Clear both caches so fresh data is fetched
+  cacheClear(CACHE_DASH_KEY);
+  cacheClear(CACHE_TESTS_KEY);
   _dashData = null; _testsList = null; _loadedScreens.clear();
+
   try {
     const [dash, tests] = await Promise.all([
       api('dashboard').catch(() => null),
@@ -1905,6 +1896,9 @@ async function fullRefresh(silent = false) {
     ]);
     _dashData  = dash;
     _testsList = tests;
+    if (dash)  cacheSet(CACHE_DASH_KEY,  dash);
+    if (tests) cacheSet(CACHE_TESTS_KEY, tests);
+
     renderHome();
     const active = document.querySelector('.screen.active')?.id;
     if (active === 'testScreen')      renderTestsList();
@@ -1917,11 +1911,16 @@ async function fullRefresh(silent = false) {
 }
 
 /* ══════════════════════════════════════
-   STORAGE SYNC
+   STORAGE SYNC  (cross-tab: profile + theme)
 ══════════════════════════════════════ */
 window.addEventListener('storage', e => {
-  const keys = ['af_student_name','af_student_mobile','af_student_email','af_student_logged_in','af_student_id','af_student_uuid'];
-  if (keys.includes(e.key)) {
+  // Theme sync — reads af_dark_mode just like Batch/Settings pages
+  if (e.key === 'af_dark_mode') {
+    document.documentElement.setAttribute('data-theme', e.newValue === '1' ? 'dark' : 'light');
+  }
+  // Profile sync
+  const profileKeys = ['af_student_name','af_student_mobile','af_student_email','af_student_logged_in','af_student_id','af_student_uuid'];
+  if (profileKeys.includes(e.key)) {
     refreshSettings();
     renderHome();
     const s = getStudent();
@@ -1943,15 +1942,34 @@ document.addEventListener('visibilitychange', () => {
 });
 
 /* ══════════════════════════════════════
-   INIT
+   INIT  — cache-first, network as fallback
 ══════════════════════════════════════ */
 async function init() {
   refreshSettings();
   const s = getStudent();
+
+  // STEP 1: Try to hydrate from cache immediately (zero network, instant render)
+  const cachedDash  = cacheGet(CACHE_DASH_KEY);
+  const cachedTests = cacheGet(CACHE_TESTS_KEY);
+
+  if (cachedDash)  { _dashData  = cachedDash;  }
+  if (cachedTests) { _testsList = cachedTests;  }
+
+  // Render right away if we had anything cached
+  if (_dashData || _testsList) {
+    renderHome();
+    if (s.loggedIn && s.name) {
+      setTimeout(() => toast(`${greeting().split(' ').slice(0,2).join(' ')}, ${s.name.split(' ')[0]}!`, 'Loaded from cache', 'success', 2500), 400);
+    }
+    return; // ← done, no network call on cached visit
+  }
+
+  // STEP 2: Nothing cached — fetch from network (first visit or expired cache)
   if (s.loggedIn && s.name) {
     setTimeout(() => toast(`${greeting().split(' ').slice(0,2).join(' ')}, ${s.name.split(' ')[0]}!`, 'Loading your data…', 'success', 3000), 500);
   }
-  renderHome();
+  renderHome(); // show skeleton/empty state while loading
+
   try {
     const [dash, tests] = await Promise.all([
       api('dashboard').catch(() => null),
@@ -1959,8 +1977,12 @@ async function init() {
     ]);
     _dashData  = dash;
     _testsList = tests;
+    if (dash)  cacheSet(CACHE_DASH_KEY,  dash);
+    if (tests) cacheSet(CACHE_TESTS_KEY, tests);
     renderHome();
-  } catch(e) { console.warn('Init prefetch failed:', e); }
+  } catch(e) {
+    console.warn('Init prefetch failed:', e);
+  }
 }
 
 init();
