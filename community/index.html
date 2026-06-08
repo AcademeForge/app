@@ -225,15 +225,11 @@ ul{list-style:none;}
 .action-btn:hover{background:var(--b1);}
 .action-btn.liked{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.25);color:var(--err);}
 
-/* ── FAB ── */
 .fab{
-  position:fixed;
+  position:absolute;
 
   right:16px;
-  left:auto;
-  transform:none;
-
-  bottom:78px; /* bottom nav ke just upar */
+  bottom:85px;
 
   z-index:300;
 
@@ -257,7 +253,8 @@ ul{list-style:none;}
 
   font-size:22px;
 
-  transition:transform .2s var(--spring),box-shadow .2s;
+  transition:transform .2s var(--spring),
+             box-shadow .2s;
 
   border:2px solid rgba(255,255,255,.15);
 }
