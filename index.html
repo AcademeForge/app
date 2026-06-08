@@ -2435,13 +2435,6 @@ if (afPage) {
    AUTO SYNC + PATCHES
 ════════════════════════════════════ */
 
-document.addEventListener('DOMContentLoaded', function() {
-  afDashSyncCards('');
-
-  if (typeof AF_VIEWS !== 'undefined' && !AF_VIEWS['dashboard']) {
-    AF_VIEWS['dashboard'] = { view: 'viewDashboard', nav: null };
-  }
-});
 
 var _afOriginalSwitchView = window.afSwitchView;
 window.afSwitchView = function(viewKey) {
