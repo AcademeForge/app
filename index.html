@@ -8526,6 +8526,34 @@ async function afSyncStreak() {
   };
 })();
 
+    /* Auto-clear heatmap badge when session is gone */
+(function () {
+
+  function afRefreshHeatmapBadge() {
+    const uuid = localStorage.getItem("af_student_uuid") || "";
+    const badge = document.getElementById("afHeaderStreakCount");
+
+    if (!badge) return;
+
+    if (!uuid) {
+      localStorage.removeItem("af_streak");
+      badge.textContent = "0";
+      return;
+    }
+
+    badge.textContent = localStorage.getItem("af_streak") || "0";
+  }
+
+  /* Run immediately */
+  afRefreshHeatmapBadge();
+
+  /* Run whenever localStorage changes */
+  window.addEventListener("storage", afRefreshHeatmapBadge);
+
+  /* Check every second in same tab */
+  setInterval(afRefreshHeatmapBadge, 1000);
+
+})();
     /* ════════════════════════════════════════════════════
    NOTIFICATIONS — open page + unread dot
 ════════════════════════════════════════════════════ */
