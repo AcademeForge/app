@@ -228,23 +228,53 @@ ul{list-style:none;}
 /* ── FAB ── */
 .fab{
   position:fixed;
+
+  left:50%;
+  transform:translateX(-50%);
+
   bottom:calc(var(--nav-h) + 20px + env(safe-area-inset-bottom,0px));
-  right:20px;
+
   z-index:300;
-  width:54px;height:54px;border-radius:18px;
+
+  width:54px;
+  height:54px;
+  border-radius:18px;
+
   background:linear-gradient(135deg,var(--p),var(--p2));
   color:#fff;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+
   gap:1px;
+
   box-shadow:var(--shb),0 8px 24px rgba(79,70,229,.35);
+
   font-size:22px;
+
   transition:transform .2s var(--spring),box-shadow .2s;
+
   border:2px solid rgba(255,255,255,.15);
 }
-.fab:hover{transform:scale(1.08);box-shadow:0 8px 28px rgba(79,70,229,.45);}
-.fab:active{transform:scale(.95);}
-.fab-label{font-size:8px;font-weight:900;letter-spacing:.03em;line-height:1;}
 
+.fab:hover{
+  transform:translateX(-50%) scale(1.08);
+  box-shadow:0 8px 28px rgba(79,70,229,.45);
+}
+
+.fab:active{
+  transform:translateX(-50%) scale(.95);
+}
+
+.fab-label{
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.03em;
+  line-height:1;
+}
+  
 /* ── BOTTOM NAV (mirror main app) ── */
 .bnav{
   position:fixed;bottom:0;left:50%;transform:translateX(-50%);
@@ -425,19 +455,25 @@ textarea.compose{-webkit-user-select:text;-moz-user-select:text;user-select:text
 
   <!-- HEADER -->
   <header class="hdr" id="hdr">
-    <div class="hdr-left">
-      <button class="hdr-back" onclick="goBack()" aria-label="Back">‹</button>
-      <div style="min-width:0;">
-        <div class="hdr-title">AF Nexus 💬</div>
-        <div class="hdr-posting" id="hdrPosting">Posting as Student</div>
-      </div>
+   <div class="hdr-left">
+
+  <div style="min-width:0;">
+    <div class="hdr-title">AF Nexus 💬</div>
+
+    <div class="hdr-posting hidden" id="hdrPosting">
+      Posting as Student
     </div>
-    <div class="hdr-right">
-      <button class="hdr-btn hdr-btn-ghost" onclick="nxOpenMyPosts()" style="display:flex;align-items:center;gap:5px;">
-        <span>👤</span><span id="myPostsBtnLabel">My Posts</span>
-      </button>
-      <button class="hdr-menu-btn" onclick="nxRefresh()" aria-label="Refresh">↻</button>
-    </div>
+  </div>
+</div>
+
+<div class="hdr-right" id="hdrActions">
+  <button class="hdr-btn hdr-btn-ghost" onclick="nxOpenMyPosts()">
+    <span>👤</span>
+    <span id="myPostsBtnLabel">My Posts</span>
+  </button>
+
+  <button class="hdr-menu-btn" onclick="nxRefresh()">↻</button>
+</div>
   </header>
 
   <!-- FILTER BAR -->
@@ -644,13 +680,27 @@ let _mode='relevant',_posts=[],_curPostId=null,_replyParentId=null,_menuTarget=n
 /* ── INIT ── */
 function init(){
   $('hdrPosting').textContent='Posting as '+sName();
-  if(!isLoggedIn()){
-    hide('feed');hide('filterBar');hide('fab');
+if(!isLoggedIn()){
+
+    hide('feed');
+    hide('filterBar');
+    hide('fab');
+
+    hide('hdrPosting');
+    hide('hdrActions');
+
     show('lockedBox');
     return;
-  }
-  show('feed');show('filterBar');show('fab');
-  hide('lockedBox');
+}
+  
+ show('feed');
+show('filterBar');
+show('fab');
+
+show('hdrPosting');
+show('hdrActions');
+
+hide('lockedBox');
 
   // show cached instantly
   const c=loadCache();
