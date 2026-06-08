@@ -687,13 +687,27 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
   </div><!-- /page -->
 
   <!-- BOTTOM NAV -->
-  <nav class="bnav">
-    <button class="bnav-btn" onclick="goToTab('home')"><span class="bnav-icon">🏠</span><span class="bnav-label">Home</span></button>
-    <button class="bnav-btn" onclick="goToTab('student')"><span class="bnav-icon">🎓</span><span class="bnav-label">Student</span></button>
-    <button class="bnav-btn" onclick="goToTab('batches')"><span class="bnav-icon">📚</span><span class="bnav-label">Batches</span></button>
-    <button class="bnav-btn" onclick="goToTab('community')"><span class="bnav-icon">💬</span><span class="bnav-label">Community</span></button>
-    <button class="bnav-btn active"><span class="bnav-icon">⚙️</span><span class="bnav-label">Settings</span></button>
-  </nav>
+<nav class="bnav">
+  <button class="bnav-btn" onclick="window.location.href='/index.html'">
+    <span class="bnav-icon">🏠</span><span class="bnav-label">Home</span>
+  </button>
+
+  <button class="bnav-btn" onclick="window.location.href='/student/index.html'">
+    <span class="bnav-icon">🎓</span><span class="bnav-label">Student</span>
+  </button>
+
+  <button class="bnav-btn" onclick="window.location.href='/batches/index.html'">
+    <span class="bnav-icon">📚</span><span class="bnav-label">Batches</span>
+  </button>
+
+  <button class="bnav-btn" onclick="window.location.href='/community/index.html'">
+    <span class="bnav-icon">💬</span><span class="bnav-label">Community</span>
+  </button>
+
+  <button class="bnav-btn active">
+    <span class="bnav-icon">⚙️</span><span class="bnav-label">Settings</span>
+  </button>
+</nav>
 
 </div><!-- /shell -->
 
