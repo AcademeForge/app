@@ -716,7 +716,7 @@ textarea,input{font-family:var(--font-body);}
 
 <script>
 // ════════════════════════════════════════
-// CONSTANTS — matched to edge function
+// CONSTANTS — matched directly to Edge Function updates
 // ════════════════════════════════════════
 const SUPABASE_URL  = "https://afooyyydhlwngzssgqih.supabase.co";
 const EDGE_URL      = SUPABASE_URL + "/functions/v1/af-ask-ai";
@@ -764,7 +764,7 @@ const sId    = () => ls('af_student_id') || '';
 function initials(n){return String(n||'AF').trim().split(/\s+/).slice(0,2).map(v=>v[0].toUpperCase()).join('');}
 function esc(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function fmtSecs(secs){
-  if(!secs||secs<=0) return null;
+  if(!secs||secs <= 0) return null;
   const h=Math.floor(secs/3600), m=Math.ceil((secs%3600)/60);
   return h>0 ? `${h}h ${m}m` : `${m}m`;
 }
@@ -873,14 +873,15 @@ function renderUsageFromCache() {
     return;
   }
 
+  // Edge Function matching keys
   const reqUsed = u.sessionReqUsed !== undefined ? u.sessionReqUsed : 0;
   const tokUsed = u.sessionTokenUsed !== undefined ? u.sessionTokenUsed : 0;
   const reqLimit = WINDOW_REQ_LIMIT;
   const tokLimit = WINDOW_TOKEN_LIMIT;
 
   const reqLeft    = Math.max(0, reqLimit - reqUsed);
-  const reqPct     = Math.min(100, (reqUsed / reqLimit) * 100);
-  const tokPct     = Math.min(100, (tokUsed / tokLimit) * 100);
+  const reqPct      = Math.min(100, (reqUsed / reqLimit) * 100);
+  const tokPct      = Math.min(100, (tokUsed / tokLimit) * 100);
   const tokRemain = Math.max(0, 100 - Math.round(tokPct));
 
   $('drReqVal').textContent = `${reqLeft} / ${reqLimit}`;
@@ -926,9 +927,6 @@ function applyLockdown(timeStr) {
   $('inputGlowWrap').classList.add('locked-glow');
 }
 
-// ════════════════════════════════════════
-// MODE SETUP
-// ════════════════════════════════════════
 function removeLockdown() {
   $('warnBannerWrap').innerHTML = '';
   $('msgInput').disabled = false;
@@ -1003,11 +1001,11 @@ function renderGreeting() {
 
   if (_mode === 'dev13') {
     if (h>=5 && h<12)       { timeLabel='Morning';       main=`Morning ${name} ☕`;         sub="What are we shipping today?"; }
-    else if (h>=12 && h<17) { timeLabel='Afternoon';     main=`Yo ${name} 🛠️`;               sub="Got a product problem? Let's crack it."; }
+    else if (h>=12 && h<17) { timeLabel='Afternoon';     main=`Yo ${name} 🛠️`;                sub="Got a product problem? Let's crack it."; }
     else if (h>=17 && h<21) { timeLabel='Evening';       main=`Still building ${name}? 🔥`;  sub="Good. Most people already quit."; }
     else                    { timeLabel='Late Night';     main=`Late night grind ${name} 🌙`; sub="The best products get built at this hour."; }
   } else if (_mode === 'tapri') {
-    if (h>=5 && h<12)       { timeLabel='Subah subah';   main=`Uth gaye ${name}? 🌅`;      sub="Chal baat karte hain, kya chal raha hai?"; }
+    if (h>=5 && h<12)       { timeLabel='Subah subah';   main=`Uth gaye ${name}? 🌅`;       sub="Chal baat karte hain, kya chal raha hai?"; }
     else if (h>=12 && h<17) { timeLabel='Dopahar';       main=`Kya haal hai ${name} 😎`;   sub="Kuch confuse ho? Bata, sorted karte hain."; }
     else if (h>=17 && h<21) { timeLabel='Shaam';         main=`Aaja baat karte hain ${name} ☕`; sub="Din kaisa raha? Kuch bhi pooch, judge nahi karunga."; }
     else                    { timeLabel='Raat ko';        main=`Raat ko jaag rahe ho ${name}? 🌙`; sub="Koi tension hai toh bata. Akele mat socho."; }
@@ -1015,7 +1013,7 @@ function renderGreeting() {
     if (h>=5 && h<12)       { timeLabel='Good Morning';  main=`Good Morning ${name} ☀️`;   sub='Ready to learn something new today?'; }
     else if (h>=12 && h<17) { timeLabel='Good Afternoon';main=`Good Afternoon ${name} 📚`; sub="What skill are we levelling up today?"; }
     else if (h>=17 && h<21) { timeLabel='Good Evening';  main=`Good Evening ${name} 🌆`;   sub="Let's continue your learning journey."; }
-    else                    { timeLabel='Late Night';     main=`Late Night ${name} 🌙`;     sub="Focused sessions at this hour hit different."; }
+    else                    { timeLabel='Late Night';     main=`Late Night ${name} 🌙`;      sub="Focused sessions at this hour hit different."; }
   }
 
   $('greetingTime').textContent = timeLabel;
@@ -1450,7 +1448,7 @@ function openProfileModal() {
     $('pmTokPctLabel').textContent = `${tokPct}% Remaining`;
     $('pmTokBar').style.width = tokPct + '%';
   } else {
-    $('pmSReq').textContent    = `0 / ${WINDOW_REQ_LIMIT}`;
+    $('pmSReq').textContent     = `0 / ${WINDOW_REQ_LIMIT}`;
     $('pmSReqBar').style.width = '0%';
     $('pmDailyReq').textContent = `0 / ${DAILY_REQ_LIMIT}`;
     $('pmDailyReqBar').style.width = '0%';
