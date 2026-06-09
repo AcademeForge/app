@@ -738,7 +738,7 @@ const SUPABASE_URL = "https://afooyyydhlwngzssgqih.supabase.co";
 const EDGE_URL     = SUPABASE_URL + "/functions/v1/af-ask-ai";
 
 const TOTAL_TOKEN_LIMIT   = 25000;
-const SESSION_TOKEN_LIMIT = 3000; // Complete 3k scale mapping configuration rules
+const SESSION_TOKEN_LIMIT = 3000; // Complete 3k metrics tracking layout
 const TOTAL_REQ_LIMIT      = 25;
 const SESSION_REQ_LIMIT   = 5;
 const SESSION_COOLDOWN_H  = 6;
@@ -833,7 +833,11 @@ function updateUsageBar(backendPayload = null){
   
   if(backendPayload) {
     if(backendPayload.sessionReqUsed !== undefined) currentSessionRequestsUsed = backendPayload.sessionReqUsed;
-    if(backendPayload.tokensThisCall !== undefined) currentSessionTokensUsed += backendPayload.tokensThisCall;
+    if(backendPayload.sessionTokenUsed !== undefined) {
+      currentSessionTokensUsed = backendPayload.sessionTokenUsed;
+    } else if(backendPayload.tokensThisCall !== undefined) {
+      currentSessionTokensUsed += backendPayload.tokensThisCall;
+    }
   }
 
   const tokenPctRemaining = Math.max(0, 100 - Math.round((currentSessionTokensUsed / SESSION_TOKEN_LIMIT) * 100));
@@ -921,18 +925,14 @@ function checkAndEnforceGlobalLimits(forceTimeStr = null){
   const cd = cdMs(s);
   const container = $('warnBannerWrap');
   
-  // Strict condition validation mapping over session token references explicitly
   const isSessionLimitReached = forceTimeStr || cd > 0 || s.sTok >= SESSION_TOKEN_LIMIT || s.sReq >= SESSION_REQ_LIMIT;
   
   if (isSessionLimitReached) {
     let remainingTimeStr = forceTimeStr || (cd > 0 ? fmtCd(cd) : `${SESSION_COOLDOWN_H}h 00m`);
-    
-    // Fallback block string builder safety check execution
     if(remainingTimeStr.includes("undefined")) {
       remainingTimeStr = `${SESSION_COOLDOWN_H}h 00m`;
     }
 
-    // Direct injection into DOM space triggered seamlessly
     container.innerHTML = `
       <div class="alert-banner-system">
         <div class="marquee-content">
@@ -941,7 +941,6 @@ function checkAndEnforceGlobalLimits(forceTimeStr = null){
       </div>
     `;
     
-    // Strict control locks
     $('msgInput').disabled = true;
     $('msgInput').value = "";
     $('msgInput').placeholder = "Your free session token limit reached. Come back later.";
@@ -961,12 +960,19 @@ function checkAndEnforceGlobalLimits(forceTimeStr = null){
 async function edgeCall(payload){
   try{
     if(!navigator.onLine) return{error:'Please check your internet connection and try again.'};
-    const r=await fetch(EDGE_URL,{
+    const response = await fetch(EDGE_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json','x-af-student-key':sKey()},
-      body:stringify({...payload,student_key:sKey(),student_name:sName()})
+      body:JSON.stringify({...payload,student_key:sKey(),student_name:sName()})
     });
-    return await r.json();
+    
+    // Intercept 429 rate limit statuses cleanly before engine rejects JSON structure
+    if(response.status === 429) {
+      const data = await response.json().catch(() => ({}));
+      return { ...data, limitReached: true, networkForced: true };
+    }
+    
+    return await response.json();
   }catch(e){return{error:'The AI channel is exceptionally busy right now. Please try again.'};}
 }
 
@@ -1045,48 +1051,38 @@ function newChat(){
 }
 
 function renderAIContent(rawText){
-  const container = document.createElement('div');
-  // FIX: Regex split mapping code single unified string block line me adjust kar diya hai
-  const parts = rawText.split(/(```[\s\S]*?```)/g);
-  
-  parts.forEach(part => {
-    const codeMatch = part.match(/^```(\w*)\n?([\s\S]*?)```$/);
+  const container=document.createElement('div');
+  const parts=rawText.split(/(```[\s\S]*?```)/g);
+  parts.forEach(part=>{
+    const codeMatch=part.match(/^```(\w*)\n?([\s\S]*?)```$/);
     if(codeMatch){
-      const lang = (codeMatch[1] || '').trim().toLowerCase() || 'plaintext';
-      const code = codeMatch[2];
-      const wrap = document.createElement('div');
-      wrap.className = 'code-block-wrap';
-      wrap.innerHTML = `<div class="code-block-header"><span class="code-lang-label">${esc(lang)}</span></div>`;
-      
-      const pre = document.createElement('pre');
-      const codeEl = document.createElement('code');
-      if(lang && lang !== 'plaintext') codeEl.className = `language-${lang}`;
-      codeEl.textContent = code;
-      pre.appendChild(codeEl);
-      
-      if(typeof hljs !== 'undefined'){
-        try { hljs.highlightElement(codeEl); } catch(e) {}
-      }
-      wrap.appendChild(pre);
-      container.appendChild(wrap);
+      const lang=(codeMatch[1]||'').trim().toLowerCase()||'plaintext';
+      const code=codeMatch[2];
+      const wrap=document.createElement('div');
+      wrap.className='code-block-wrap';
+      wrap.innerHTML=`<div class="code-block-header"><span class="code-lang-label">${esc(lang)}</span></div>`;
+      const pre=document.createElement('pre');
+      const codeEl=document.createElement('code');
+      if(lang&&lang!=='plaintext') codeEl.className=`language-${lang}`;
+      codeEl.textContent=code;pre.appendChild(codeEl);
+      if(typeof hljs!=='undefined'){try{hljs.highlightElement(codeEl);}catch(e){}}
+      wrap.appendChild(pre);container.appendChild(wrap);
     } else {
       if(!part) return;
-      const segs = part.split(/(`[^`]+`)/g);
-      const paraDiv = document.createElement('div');
-      paraDiv.className = 'ai-para';
-      
-      segs.forEach(seg => {
-        const inlineMatch = seg.match(/^`([^`]+)`$/);
+      const segs=part.split(/(`[^`]+`)/g);
+      const paraDiv=document.createElement('div');
+      paraDiv.className='ai-para';
+      segs.forEach(seg=>{
+        const inlineMatch=seg.match(/^`([^`]+)`$/);
         if(inlineMatch){
-          const code = document.createElement('code');
-          code.className = 'inline-code';
-          code.textContent = inlineMatch[1];
+          const code=document.createElement('code');
+          code.className='inline-code';code.textContent=inlineMatch[1];
           paraDiv.appendChild(code);
         } else {
-          const lines = seg.split('\n');
-          lines.forEach((line, i) => {
+          const lines=seg.split('\n');
+          lines.forEach((line,i)=>{
             if(line) paraDiv.appendChild(document.createTextNode(line));
-            if(i < lines.length - 1) paraDiv.appendChild(document.createElement('br'));
+            if(i<lines.length-1) paraDiv.appendChild(document.createElement('br'));
           });
         }
       });
@@ -1173,8 +1169,8 @@ async function doSend(){
   const res=await edgeCall(payload);
   removeEl(ph);
 
-  // Intercepting backend errors clean block logic pipeline
-  if(!res || res.error){
+  // Hard intercept logic to capture limit data structure formats cleanly
+  if(!res || res.error || res.limitReached){
     _loading=false;
     $('sendBtn').disabled=false;
     
@@ -1183,20 +1179,17 @@ async function doSend(){
 
     if (res && res.error) {
       safeUserMsg = res.error;
-      // Regex pattern interceptor extracts countdown context from backend string cleanly
       const timeMatch = res.error.match(/in\s+([0-9a-zA-Z\s]+)\./);
       if(timeMatch && timeMatch[1]) {
         extractedTime = timeMatch[1].trim();
       }
     }
     
-    if(res && res.limitReached) {
-      // Local tracking structural save injection overrides state
-      let s = dayReset(getSes());
-      s.start = new Date().toISOString();
-      s.sTok = SESSION_TOKEN_LIMIT; 
-      saveSes(s);
-    }
+    // Forces internal storage locks sequence
+    let s = dayReset(getSes());
+    if(!s.start) s.start = new Date().toISOString();
+    s.sTok = SESSION_TOKEN_LIMIT; 
+    saveSes(s);
 
     toast(safeUserMsg, 'err');
     updateUsageBar(res);
