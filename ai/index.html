@@ -38,7 +38,6 @@
   --ease:cubic-bezier(.22,1,.36,1);
   --spring:cubic-bezier(.34,1.56,.64,1);
   
-  /* Gemini-style AcademeForge Animated Gradients */
   --gemini-glow: linear-gradient(90deg, #4f8aff, #a855f7, #f43f5e, #4f8aff);
   --gemini-glow-dev: linear-gradient(90deg, #f97316, #ea580c, #ef4444, #f97316);
 }
@@ -57,7 +56,7 @@
 html,body{
   height:100%;
   font-family:var(--font-body);
-  background:#05070a; /* True pitch black desktop space background */
+  background:#05070a; 
   color:var(--t1);
   overflow:hidden;
 }
@@ -76,9 +75,6 @@ textarea,input{font-family:var(--font-body);}
 
 *{-webkit-user-select:text;-moz-user-select:text;user-select:text;-webkit-touch-callout:default;}
 
-/* ════════════════════════════════════════
-   APP SHELL — Desktop Mobile View Enforcer
-════════════════════════════════════════ */
 #app{
   display:flex;flex-direction:column;
   height:100dvh;
@@ -90,7 +86,6 @@ textarea,input{font-family:var(--font-body);}
   transition: box-shadow 0.3s;
 }
 
-/* Transform into a high-end mobile frame context on laptops/desktops */
 @media(min-width:480px){
   #app{
     border: 8px solid #1e2230;
@@ -102,7 +97,7 @@ textarea,input{font-family:var(--font-body);}
 }
 
 /* ════════════════════════════════════════
-   OVERLAY
+   OVERLAY & DRAWER
 ════════════════════════════════════════ */
 #overlay{
   position:absolute;inset:0;z-index:400;
@@ -113,9 +108,6 @@ textarea,input{font-family:var(--font-body);}
 }
 #overlay.open{opacity:1;visibility:visible;}
 
-/* ════════════════════════════════════════
-   LEFT DRAWER
-════════════════════════════════════════ */
 #drawer{
   position:absolute;top:0;bottom:0;z-index:500;
   width:var(--drawer-w);
@@ -229,7 +221,37 @@ textarea,input{font-family:var(--font-body);}
 .usage-fill{height:100%;border-radius:99px;background:var(--p);transition:width .4s var(--ease);}
 
 /* ════════════════════════════════════════
-   HEADER
+   CRITICAL TEXT BANNERS (LOCKDOWN UI)
+════════════════════════════════════════ */
+.alert-banner-system {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  color: #ffffff;
+  padding: 12px 16px;
+  font-weight: 800;
+  font-size: 13px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  border-bottom: 2px solid rgba(0,0,0,0.2);
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.25);
+  animation: slideDownBanner .35s cubic-bezier(.34,1.56,.64,1) both;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 300;
+}
+.alert-banner-system strong {
+  font-size: 15px;
+  font-family: var(--font-display);
+  letter-spacing: .05em;
+}
+@keyframes slideDownBanner {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ════════════════════════════════════════
+   HEADER & CHAT AREA
 ════════════════════════════════════════ */
 #header{
   flex-shrink:0;height:var(--hdr-h);
@@ -260,12 +282,9 @@ textarea,input{font-family:var(--font-body);}
 }
 @keyframes freeBlink{ 0%,100%{opacity:1;} 50%{opacity:.45;} }
 
-/* ════════════════════════════════════════
-   CHAT AREA
-════════════════════════════════════════ */
 #chat{
   flex:1;overflow-y:auto;
-  padding:0 14px 200px;
+  padding:0 14px 220px;
   display:flex;flex-direction:column;
   scroll-behavior:smooth;
 }
@@ -276,7 +295,6 @@ textarea,input{font-family:var(--font-body);}
 .greeting-sub{font-size:13.5px;color:var(--t2);font-weight:500;margin-bottom:20px;}
 .suggestion-chips{display:flex;flex-wrap:wrap;gap:8px;}
 
-/* 🌟 Gemini Glow Interaction Model Configuration */
 .chip{
   padding:8px 16px;border-radius:var(--rf);
   font-size:12.5px;font-weight:600;color:var(--t2);
@@ -323,10 +341,6 @@ textarea,input{font-family:var(--font-body);}
 .bubble{padding:10px 14px;border-radius:var(--r3);font-size:14px;line-height:1.65;word-break:break-word;}
 .bubble-ai{background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:4px;color:var(--t1);}
 .bubble-user{background:var(--p);border-bottom-right-radius:4px;color:#fff;box-shadow:0 2px 12px rgba(79,138,255,.15);white-space:pre-wrap;}
-.bubble-user-dev{background:var(--dev);box-shadow:0 2px 12px rgba(249,115,22,.15);}
-
-.bubble-ai .ai-para{margin-bottom:8px;}
-.bubble-ai .ai-para:last-child{margin-bottom:0;}
 
 .code-block-wrap{
   position:relative; margin:8px 0; border-radius:var(--r2);
@@ -355,7 +369,7 @@ textarea,input{font-family:var(--font-body);}
 @keyframes dotBounce{0%,80%,100%{transform:translateY(0);opacity:.3;}40%{transform:translateY(-5px);opacity:1;}}
 
 /* ════════════════════════════════════════
-   📐 PRODUCTION 3-WAY SEGMENT MODE SELECTOR
+   MODE SELECTOR
 ════════════════════════════════════════ */
 .mode-selector-container {
   padding: 10px 14px 4px;
@@ -386,9 +400,7 @@ textarea,input{font-family:var(--font-body);}
   justify-content: center;
   gap: 4px;
 }
-.mode-segment.active {
-  color: #fff;
-}
+.mode-segment.active { color: #fff; }
 [data-theme="light"] .mode-segment.active-af { color: var(--p3); }
 [data-theme="light"] .mode-segment.active-dev { color: var(--dev2); }
 
@@ -411,7 +423,6 @@ textarea,input{font-family:var(--font-body);}
   transition: transform 0.25s var(--ease), background 0.25s, box-shadow 0.25s;
 }
 
-/* Selector Slide States */
 .mode-track-bar[data-active="af24"] .slider-pill {
   transform: translateX(0);
   background: var(--p);
@@ -422,14 +433,9 @@ textarea,input{font-family:var(--font-body);}
   background: var(--dev);
   box-shadow: 0 2px 10px rgba(249,115,22,0.3);
 }
-.mode-track-bar[data-active="bigbro"] .slider-pill {
-  transform: translateX(200%);
-  background: var(--surface3);
-  box-shadow: none;
-}
 
 /* ════════════════════════════════════════
-   ✨ GEMINI GLOW INPUT CONTAINER
+   INPUT GLOW CONTAINER
 ════════════════════════════════════════ */
 #inputArea{
   position:absolute;bottom:0;left:0;right:0;
@@ -457,6 +463,11 @@ textarea,input{font-family:var(--font-body);}
   box-shadow: 0 0 20px rgba(249, 115, 22, 0.25);
 }
 
+.input-glow-wrapper.locked-glow {
+  background: var(--err) !important;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.4) !important;
+}
+
 @keyframes glowMove {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -477,6 +488,10 @@ textarea,input{font-family:var(--font-body);}
   min-height:36px;max-height:120px;overflow-y:auto;
 }
 #msgInput::placeholder{color:var(--tm);}
+#msgInput:disabled {
+  cursor: not-allowed;
+  color: var(--tm);
+}
 
 #sendBtn{
   width:36px;height:36px;border-radius:10px;flex-shrink:0;
@@ -491,7 +506,7 @@ textarea,input{font-family:var(--font-body);}
 .input-hint{font-size:10.5px;color:var(--tm);font-weight:600;text-align:right;margin-top:6px;display:flex;justify-content:space-between;padding:0 4px;}
 
 /* ════════════════════════════════════════
-   MODALS / TOASTS
+   MODALS & LOCKED SCREEN
 ════════════════════════════════════════ */
 #lockedBox{flex:1;display:none;align-items:center;justify-content:center;padding:24px;}
 #lockedBox.visible{display:flex;}
@@ -525,10 +540,10 @@ textarea,input{font-family:var(--font-body);}
 .pm-section-title{font-size:10px;font-weight:800;color:var(--tm);text-transform:uppercase;margin-bottom:4px;}
 .pm-usage-block{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r2);padding:12px;}
 .pm-usage-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
-.pm-usage-label{font-size:12px;color:var(--t2);}
+.pm-usage-label{font-size:12px;color:var(--t2);font-weight:600;}
 .pm-usage-val{font-size:11px;font-weight:700;font-family:monospace;}
 .pm-track{height:5px;background:var(--surface3);border-radius:99px;overflow:hidden;margin-bottom:10px;}
-.pm-fill{height:100%;border-radius:99px;background:var(--p);}
+.pm-fill{height:100%;border-radius:99px;background:var(--p);transition: width .3s;}
 
 #toastWrap{position:absolute;left:50%;bottom:84px;transform:translateX(-50%);z-index:99999;width:calc(100% - 28px);pointer-events:none;}
 .toast{display:flex;align-items:flex-start;gap:10px;background:var(--surface);color:var(--t1);border:1px solid var(--border2);border-radius:12px;padding:10px 14px;box-shadow:var(--she);animation:fadeUp .22s ease;}
@@ -591,18 +606,18 @@ textarea,input{font-family:var(--font-body);}
     <div class="dr-footer">
       <div class="dr-usage-title">AI Usage Today</div>
       <div class="usage-row">
-        <span class="usage-label">Requests</span>
+        <span class="usage-label">Requests Left</span>
         <span class="usage-val" id="drReqVal">— / 5</span>
       </div>
       <div class="usage-track">
         <div class="usage-fill" id="drReqBar" style="width:0%"></div>
       </div>
       <div class="usage-row">
-        <span class="usage-label">Tokens</span>
-        <span class="usage-val" id="drTokVal">— / 15k</span>
+        <span class="usage-label">Token Allocation Available</span>
+        <span class="usage-val" id="drTokVal">100%</span>
       </div>
       <div class="usage-track">
-        <div class="usage-fill" id="drTokBar" style="width:0%"></div>
+        <div class="usage-fill" id="drTokBar" style="width:100%"></div>
       </div>
       <div style="font-size:10.5px;color:var(--tm);font-weight:600;margin-top:4px;" id="drSessInfo">4 sessions/day · 6h cooldown</div>
     </div>
@@ -629,7 +644,6 @@ textarea,input{font-family:var(--font-body);}
   </div>
 
   <div id="warnBannerWrap"></div>
-  <div id="sessionBanner" class="hidden"></div>
 
   <div id="lockedBox">
     <div class="locked-card">
@@ -689,19 +703,18 @@ textarea,input{font-family:var(--font-body);}
           <span class="pm-val" id="pmPhone">—</span>
         </div>
         <div>
-          <div class="pm-section-title">Today's Usage</div>
+          <div class="pm-section-title">Today's Session Usage</div>
           <div class="pm-usage-block">
             <div class="pm-usage-row">
-              <span class="pm-usage-label">Requests this session</span>
+              <span class="pm-usage-label">Requests</span>
               <span class="pm-usage-val" id="pmSReq">0 / 5</span>
             </div>
             <div class="pm-track"><div class="pm-fill" id="pmSReqBar" style="width:0%"></div></div>
             <div class="pm-usage-row">
-              <span class="pm-usage-label">Tokens today</span>
-              <span class="pm-usage-val" id="pmTokVal">0 / 15k</span>
+              <span class="pm-usage-label">Session Token Status</span>
+              <span class="pm-usage-val" id="pmTokPctLabel">100% Remaining</span>
             </div>
-            <div class="pm-track"><div class="pm-fill" id="pmTokBar" style="width:0%"></div></div>
-            <div class="pm-remaining" id="pmRemaining"></div>
+            <div class="pm-track"><div class="pm-fill" id="pmTokBar" style="width:100%"></div></div>
           </div>
         </div>
       </div>
@@ -716,10 +729,19 @@ const SUPABASE_URL = "https://afooyyydhlwngzssgqih.supabase.co";
 const EDGE_URL     = SUPABASE_URL + "/functions/v1/af-ask-ai";
 
 const TOTAL_TOKEN_LIMIT   = 25000;
-const SESSION_TOKEN_LIMIT = 5000;
+const SESSION_TOKEN_LIMIT = 5000; // Calculated runtime limit base reference metric per requirement 
 const TOTAL_REQ_LIMIT      = 25;
 const SESSION_REQ_LIMIT   = 5;
 const SESSION_COOLDOWN_H  = 6;
+
+// Engaging highly professional system warm-up emergency alert titles strings collection repository
+const ENGAGING_LOCKDOWN_ALERTS = [
+  "⚡ Time to refuel your brain cells! Session capacity reached.",
+  "🚀 Epic session completed! Take a step back and absorb the knowledge.",
+  "🔥 Brain-power quota maximized! Standby while modules cool down.",
+  "📚 Incredible grinding session! Your mental compiler needs a quick break.",
+  "🎯 Workspace throttle activated! Let's pause to process everything built."
+];
 
 const $    = id => document.getElementById(id);
 const show = id => $(id) && $(id).classList.remove('hidden');
@@ -790,34 +812,36 @@ function saveSes(s){try{localStorage.setItem(sesKey(),JSON.stringify(s));}catch{
 function dayReset(s){if(s.day!==today()){Object.assign(s,{start:null,sTok:0,sReq:0,totTok:0,totReq:0,day:today()});}return s;}
 function cdMs(s){if(!s.start) return 0;return Math.max(0,SESSION_COOLDOWN_H*3600000-(Date.now()-new Date(s.start).getTime()));}
 function fmtCd(ms){const h=Math.floor(ms/3600000),m=Math.ceil((ms%3600000)/60000);return h>0?`${h}h ${m}m`:`${m}m`;}
-function sesOk(s){
-  if(s.start&&cdMs(s)>0&&s.sTok<SESSION_TOKEN_LIMIT&&s.sReq<SESSION_REQ_LIMIT) return{ok:true};
-  if(s.totTok>=TOTAL_TOKEN_LIMIT) return{ok:false,why:'total_tokens'};
-  if(s.totReq>=TOTAL_REQ_LIMIT)   return{ok:false,why:'total_reqs'};
-  const cd=cdMs(s);
-  if(cd>0) return{ok:false,why:'cooldown',ms:cd};
-  return{ok:true,new:true};
+
+function getRandomAlertMsg() {
+  return ENGAGING_LOCKDOWN_ALERTS[Math.floor(Math.random() * ENGAGING_LOCKDOWN_ALERTS.length)];
 }
-function startSes(s){s.start=new Date().toISOString();s.sTok=0;s.sReq=0;return s;}
 
 function updateUsageBar(backendPayload = null){
-  if(backendPayload) {
-    $('drReqVal').textContent = `${backendPayload.sessionReqLimit - backendPayload.sessionReqUsed} / ${backendPayload.sessionReqLimit}`;
-    $('drTokVal').textContent = `${(backendPayload.dailyTokenUsed / 1000).toFixed(1)}k / 25k`;
-    $('drReqBar').style.width = Math.min(100,(backendPayload.sessionReqUsed / backendPayload.sessionReqLimit)*100)+'%';
-    $('drTokBar').style.width = Math.min(100,(backendPayload.dailyTokenUsed / backendPayload.dailyTokenLimit)*100)+'%';
-    return;
-  }
   const s=dayReset(getSes());
-  const reqLeft=Math.max(0,SESSION_REQ_LIMIT-s.sReq);
-  const reqPct=Math.min(100,(s.sReq/SESSION_REQ_LIMIT)*100);
-  const tokPct=Math.min(100,(s.totTok/TOTAL_TOKEN_LIMIT)*100);
-  $('drReqVal').textContent=`${reqLeft} / ${SESSION_REQ_LIMIT}`;
-  $('drTokVal').textContent=`${(s.totTok/1000).toFixed(1)}k / 25k`;
-  $('drReqBar').style.width=reqPct+'%';
-  $('drTokBar').style.width=tokPct+'%';
-  const cd=cdMs(s);
-  $('drSessInfo').textContent=cd>0?`Next session in ${fmtCd(cd)}`:`4 sessions/day · 6h cooldown`;
+  
+  let currentSessionTokensUsed = s.sTok || 0;
+  let currentSessionRequestsUsed = s.sReq || 0;
+  
+  if(backendPayload) {
+    if(backendPayload.sessionReqUsed !== undefined) currentSessionRequestsUsed = backendPayload.sessionReqUsed;
+    if(backendPayload.tokensThisCall !== undefined) currentSessionTokensUsed += backendPayload.tokensThisCall;
+  }
+
+  // Pure Token Percentage Calculation Logic Engine Base Matrix
+  const tokenPctRemaining = Math.max(0, 100 - Math.round((currentSessionTokensUsed / SESSION_TOKEN_LIMIT) * 100));
+  const reqLeft = Math.max(0, SESSION_REQ_LIMIT - currentSessionRequestsUsed);
+  const reqPct = Math.min(100, (currentSessionRequestsUsed / SESSION_REQ_LIMIT) * 100);
+
+  // Synchronizing UI displays mapping context cleanly
+  $('drReqVal').textContent = `${reqLeft} / ${SESSION_REQ_LIMIT}`;
+  $('drReqBar').style.width = reqPct + '%';
+  
+  $('drTokVal').textContent = `${tokenPctRemaining}%`;
+  $('drTokBar').style.width = tokenPctRemaining + '%';
+  
+  const cd = cdMs(s);
+  $('drSessInfo').textContent = cd > 0 ? `Next session in ${fmtCd(cd)}` : `4 sessions/day · 6h cooldown`;
 }
 
 function setMode(m){
@@ -836,13 +860,13 @@ function setMode(m){
     $('hdrSub').textContent='AF 2.4 · Student Mentor';
     $('inputGlowWrap').classList.remove('dev-glow');
     $('sendBtn').style.background='var(--p)';
-    $('msgInput').placeholder='Ask AF 2.4 anything…';
+    if(!$('msgInput').disabled) $('msgInput').placeholder='Ask AF 2.4 anything…';
   } else if(m === 'dev39') {
     $('segDev').classList.add('active', 'active-dev');
     $('hdrSub').textContent='Dev 3.9 · Founder Mode';
     $('inputGlowWrap').classList.add('dev-glow');
     $('sendBtn').style.background='var(--dev)';
-    $('msgInput').placeholder='Ask Dev 3.9 anything…';
+    if(!$('msgInput').disabled) $('msgInput').placeholder='Ask Dev 3.9 anything…';
   }
   
   if($('greeting').style.display !== 'none') {
@@ -869,33 +893,57 @@ function renderGreeting(){
   const suggestions=_mode==='dev39'
     ?['Build a startup','Freelancing strategy','Product roadmap','Find co-founder','Launch MVP']
     :['Learn Python','Build a portfolio','Freelancing tips','AI tools for students','Career advice','React basics'];
-    
+      
   $('chips').innerHTML=suggestions.map(s=> {
     const escapedText = s.replace(/'/g, "\\'");
     return `<button class="chip" onclick="chipClick('${escapedText}')">${s}</button>`;
   }).join('');
 }
 
-function chipClick(text){$('msgInput').value=text;onTyping();$('msgInput').focus();}
-
-function updateBanner(s){
-  const el=$('sessionBanner');
-  const cd=cdMs(s);
-  const done=s.totTok>=TOTAL_TOKEN_LIMIT||s.totReq>=TOTAL_REQ_LIMIT;
-  if(done){
-    el.className='err';el.innerHTML='🚫 Capacity allocated spent for today. Resetting tomorrow.';
-    el.style.display='flex';disableInput();return;
-  }
-  if(cd>0||(s.sTok>=SESSION_TOKEN_LIMIT||s.sReq>=SESSION_REQ_LIMIT)){
-    const remaining=cd>0?fmtCd(cd):`${SESSION_COOLDOWN_H}h`;
-    el.className='warn';el.innerHTML=`⏳ Session allocation spent. Clear to resume in <strong>${remaining}</strong>`;
-    el.style.display='flex';disableInput();
-    return;
-  }
-  el.style.display='none';enableInput();
+function chipClick(text){
+  if($('msgInput').disabled) return;
+  $('msgInput').value=text;
+  onTyping();
+  $('msgInput').focus();
 }
-function disableInput(){if($('msgInput')){$('msgInput').disabled=true;$('sendBtn').disabled=true;}}
-function enableInput(){if($('msgInput')){$('msgInput').disabled=false;}}
+
+/* ════════════════════════════════════════
+   CRITICAL PRODUCTION TEXT BANNER & KEYBOARD LOCKDOWN ENGINE
+════════════════════════════════════════ */
+function checkAndEnforceGlobalLimits(){
+  const s = dayReset(getSes());
+  const cd = cdMs(s);
+  const container = $('warnBannerWrap');
+  
+  const isLimitReached = cd > 0 || s.sTok >= SESSION_TOKEN_LIMIT || s.sReq >= SESSION_REQ_LIMIT || s.totTok >= TOTAL_TOKEN_LIMIT || s.totReq >= TOTAL_REQ_LIMIT;
+  
+  if (isLimitReached) {
+    const remainingTimeStr = cd > 0 ? fmtCd(cd) : `${SESSION_COOLDOWN_H}h 00m`;
+    
+    // Dynamic engaging layout setup initialization
+    container.innerHTML = `
+      <div class="alert-banner-system">
+        <strong>${getRandomAlertMsg()}</strong>
+        <span>Your free session token limit reached. Come back after <strong>${remainingTimeStr}</strong> to continue grinding!</span>
+      </div>
+    `;
+    
+    // Hard lock input controls
+    $('msgInput').disabled = true;
+    $('msgInput').value = "";
+    $('msgInput').placeholder = "Session locked. Capacity reached.";
+    $('sendBtn').disabled = true;
+    $('inputGlowWrap').classList.add('locked-glow');
+    return true;
+  } else {
+    container.innerHTML = '';
+    $('msgInput').disabled = false;
+    $('inputGlowWrap').classList.remove('locked-glow');
+    if(_mode === 'af24') $('msgInput').placeholder = 'Ask AF 2.4 anything…';
+    else $('msgInput').placeholder = 'Ask Dev 3.9 anything…';
+    return false;
+  }
+}
 
 async function edgeCall(payload){
   try{
@@ -945,6 +993,10 @@ async function openConv(c){
   _convId=c.id;setMode(c.mode);
   clearChat();showGreeting(false);
   renderConvList();closeDrawer();
+  
+  // Checking banner constraint conditions during cross navigation space environments
+  if(checkAndEnforceGlobalLimits()) return;
+
   const ph=addThinking();
   const res=await edgeCall({action:'load_conversation',conversation_id:c.id});
   removeEl(ph);
@@ -970,7 +1022,16 @@ async function clearAllConvs(){
   await edgeCall({action:'delete_all_conversations'});
 }
 
-function newChat(){_convId=null;clearChat();showGreeting(true);renderGreeting();closeDrawer();toast('New environment initialized','info');}
+function newChat(){
+  _convId=null;
+  clearChat();
+  showGreeting(true);
+  renderGreeting();
+  closeDrawer();
+  toast('New environment initialized','info');
+  // Bold Text Banner verification persistent checks executed on every workspace instantiations
+  checkAndEnforceGlobalLimits();
+}
 
 function renderAIContent(rawText){
   const container=document.createElement('div');
@@ -1027,7 +1088,8 @@ function addMsg(role,content,mode,scroll){
   const wrap=document.createElement('div');wrap.className='bubble-wrap';
   const bub=document.createElement('div');
   if(isUser){
-    bub.className='bubble bubble-user'+(mode==='dev39'?' bubble-user-dev':'');
+    bub.className='bubble bubble-user';
+    bub.style.background = mode==='dev39'?'var(--dev)':'var(--p)';
     bub.textContent=content;
   } else {
     bub.className='bubble bubble-ai';
@@ -1055,6 +1117,7 @@ function removeEl(el){if(el&&el.parentNode) el.parentNode.removeChild(el);}
 function scrollBot(){$('chat').scrollTop=$('chat').scrollHeight;}
 
 function onTyping(){
+  if($('msgInput').disabled) return;
   const v=$('msgInput').value,l=v.length,over=l>800;
   $('charHint').textContent=l+' / 800';
   $('charHint').className=over?'warn-txt':'';
@@ -1069,8 +1132,9 @@ function autoResize(){
 }
 
 async function doSend(){
+  if(checkAndEnforceGlobalLimits() || _loading) return;
   const content=$('msgInput').value.trim();
-  if(!content||_loading) return;
+  if(!content) return;
 
   _loading=true;
   $('sendBtn').disabled=true;
@@ -1088,7 +1152,6 @@ async function doSend(){
   const res=await edgeCall(payload);
   removeEl(ph);
 
-  // Intercepting backend database errors and routing cleanly to clean UI messages
   if(!res || res.error){
     _loading=false;
     $('sendBtn').disabled=false;
@@ -1100,8 +1163,9 @@ async function doSend(){
     return;
   }
 
-  // Record Local Runtime Limits Validation Metrics Sync
+  // Record runtime tracking operations matrix cleanly
   let s=dayReset(getSes());
+  if(!s.start) s.start = new Date().toISOString();
   s.sTok=(s.sTok||0)+res.tokensThisCall;
   s.totTok=(s.totTok||0)+res.dailyTokenUsed;
   s.sReq=(s.sReq||0)+1;
@@ -1118,10 +1182,12 @@ async function doSend(){
   }
 
   addMsg('assistant',res.answer,_mode,true);
-  updateBanner(s);
-  updateUsageBar(res);
   _loading=false;
   $('sendBtn').disabled=false;
+  
+  // Realtime usage context metrics refresh updates layout checks triggered instantly
+  updateUsageBar(res);
+  checkAndEnforceGlobalLimits();
 }
 
 function openProfileModal(){
@@ -1135,12 +1201,12 @@ function openProfileModal(){
   const s=dayReset(getSes());
   $('pmSReq').textContent=`${s.sReq||0} / ${SESSION_REQ_LIMIT}`;
   $('pmSReqBar').style.width=Math.min(100,((s.sReq||0)/SESSION_REQ_LIMIT)*100)+'%';
-  $('pmTokVal').textContent=`${(s.totTok/1000).toFixed(1)}k / 25k`;
-  $('pmTokBar').style.width=Math.min(100,(s.totTok/TOTAL_TOKEN_LIMIT)*100)+'%';
   
-  const cd=cdMs(s);
-  $('pmRemaining').textContent=cd>0?`Next channel resets in ${fmtCd(cd)}`:`${SESSION_REQ_LIMIT - (s.sReq||0)} requests remaining this session`;
-
+  // Absolute percentage allocation visibility mapping computation metric engine
+  const tokenPctRemaining = Math.max(0, 100 - Math.round(((s.sTok||0) / SESSION_TOKEN_LIMIT) * 100));
+  $('pmTokPctLabel').textContent = `${tokenPctRemaining}% Allocation Available`;
+  $('pmTokBar').style.width = tokenPctRemaining + '%';
+  
   show('profileModal');
   closeDrawer();
 }
@@ -1160,9 +1226,10 @@ function init(){
   show('chat');show('inputArea');show('modeSelectorArea');
   setMode('af24');
   renderDrawerProfile();
-  const s=dayReset(getSes());
-  updateBanner(s);
+  
+  // Boot sequence runtime sync operations
   updateUsageBar();
+  checkAndEnforceGlobalLimits();
 }
 
 document.addEventListener('keydown',e=>{
