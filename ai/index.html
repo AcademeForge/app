@@ -18,11 +18,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <style>
 /* ════════════════════════════════════════
-   TOKENS
+    TOKENS
 ════════════════════════════════════════ */
 :root {
   --p:#4f8aff;--p2:#3b6fd4;--p3:#2a52a8;
   --dev:#f97316;--dev2:#ea580c;
+  --bro:#a855f7;--bro2:#7c3aed;
   --ok:#10b981;--err:#ef4444;--amber:#f59e0b;
   --bg:#0d0f14;--surface:#161921;--surface2:#1e2230;--surface3:#242838;
   --card:#1a1d28;--border:#2a2f3d;--border2:#353a4d;
@@ -43,7 +44,7 @@
   --gemini-glow-dev: linear-gradient(90deg, #f97316, #ea580c, #ef4444, #f97316);
 }
 [data-theme="light"]{
-  --bg:#0a0c10; /* Keep deep workspace for laptop mobile-frame alignment */
+  --bg:#0a0c10; 
   --surface:#ffffff;--surface2:#f3f5fc;--surface3:#e8eaf5;
   --card:#ffffff;--border:rgba(79,138,255,.14);--border2:rgba(79,138,255,.22);
   --inp:#f3f5fc;--grp:rgba(79,138,255,.06);
@@ -57,7 +58,7 @@
 html,body{
   height:100%;
   font-family:var(--font-body);
-  background:#05070a; /* True deep black canvas for desktop */
+  background:#05070a; 
   color:var(--t1);
   overflow:hidden;
 }
@@ -90,7 +91,6 @@ textarea,input{font-family:var(--font-body);}
   transition: box-shadow 0.3s;
 }
 
-/* Enforce physical mobile chassis on screens wider than a mobile device */
 @media(min-width:480px){
   #app{
     border: 6px solid #222530;
@@ -114,7 +114,7 @@ textarea,input{font-family:var(--font-body);}
 #overlay.open{opacity:1;visibility:visible;}
 
 /* ════════════════════════════════════════
-   LEFT DRAWER (Confined exactly to app shell)
+   LEFT DRAWER
 ════════════════════════════════════════ */
 #drawer{
   position:absolute;top:0;bottom:0;z-index:500;
@@ -123,10 +123,11 @@ textarea,input{font-family:var(--font-body);}
   border-right:1px solid var(--border);
   display:flex;flex-direction:column;
   transform:translateX(-100%);
-  transition:transform .28s var(--ease);
+  transition:transform .24s var(--ease);
   box-shadow:var(--she);
   overflow:hidden;
   left:0;
+  will-change: transform;
 }
 #drawer.open{transform:translateX(0);}
 
@@ -135,16 +136,24 @@ textarea,input{font-family:var(--font-body);}
   padding:14px 14px 10px;
   border-bottom:1px solid var(--border);
 }
-.dr-back{
-  display:flex;align-items:center;gap:7px;
-  padding:7px 10px;border-radius:var(--r2);
-  font-size:12.5px;font-weight:700;color:var(--t2);
-  background:var(--surface2);border:1px solid var(--border);
-  margin-bottom:14px;width:fit-content;
-  transition:background .14s,color .14s;
+
+/* Premium Navigation Button Upgrade */
+.dr-back {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-radius: var(--r2);
+  font-size: 13px; font-weight: 700; color: var(--t1);
+  background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border: 1px solid var(--border2);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  margin-bottom: 14px; width: 100%;
+  transition: all .2s var(--ease);
 }
-.dr-back:hover{background:var(--surface3);color:var(--t1);}
-.dr-back svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+.dr-back:hover {
+  background: var(--surface3);
+  border-color: var(--p);
+  transform: translateY(-1px);
+}
+.dr-back svg { width: 16px; height: 16px; stroke: var(--p); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
 .dr-profile-card{
   display:flex;align-items:center;gap:10px;
@@ -171,15 +180,24 @@ textarea,input{font-family:var(--font-body);}
 }
 .dr-profile-btn:hover{background:rgba(79,138,255,.2);}
 
-.dr-model-row{display:flex;gap:6px;}
+.dr-model-row{display:flex;gap:4px;flex-wrap:nowrap;}
 .model-btn{
-  flex:1;padding:8px 6px;border-radius:var(--r2);
-  font-size:12px;font-weight:700;color:var(--t2);
+  flex:1;padding:8px 4px;border-radius:var(--r1);
+  font-size:11px;font-weight:700;color:var(--t2);
   background:var(--surface2);border:1.5px solid var(--border);
   text-align:center;transition:all .15s var(--ease);cursor:pointer;
+  position: relative; white-space: nowrap;
 }
 .model-btn.active-af{background:rgba(79,138,255,.12);border-color:var(--p);color:var(--p);box-shadow: 0 0 10px rgba(79,138,255,0.2);}
 .model-btn.active-dev{background:rgba(249,115,22,.10);border-color:var(--dev);color:var(--dev);box-shadow: 0 0 10px rgba(249,115,22,0.2);}
+.model-btn.disabled{opacity: 0.6; cursor: not-allowed;}
+
+.soon-badge {
+  position: absolute; top: -6px; right: -2px;
+  background: var(--bro); color: #fff; font-size: 8px;
+  padding: 1px 4px; border-radius: var(--rf); font-weight: 900;
+  text-transform: uppercase; border: 1px solid var(--bg);
+}
 
 .dr-new-btn{
   width:100%;margin-top:10px;padding:10px 14px;border-radius:var(--r2);
@@ -235,7 +253,6 @@ textarea,input{font-family:var(--font-body);}
 .conv-del:hover{color:var(--err);}
 .conv-del svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;}
 .conv-empty{padding:24px 12px;text-align:center;font-size:12px;color:var(--tm);line-height:1.6;}
-.conv-empty-icon{font-size:28px;margin-bottom:6px;}
 
 .dr-footer{
   flex-shrink:0;border-top:1px solid var(--border);
@@ -318,7 +335,7 @@ textarea,input{font-family:var(--font-body);}
 ════════════════════════════════════════ */
 #chat{
   flex:1;overflow-y:auto;
-  padding:0 14px 160px;
+  padding:0 14px 200px;
   display:flex;flex-direction:column;
   scroll-behavior:smooth;
 }
@@ -329,7 +346,6 @@ textarea,input{font-family:var(--font-body);}
 .greeting-sub{font-size:13.5px;color:var(--t2);font-weight:500;margin-bottom:20px;}
 .suggestion-chips{display:flex;flex-wrap:wrap;gap:8px;}
 
-/* 🌟 Gemini Glow Buttons Interaction Style */
 .chip{
   padding:8px 16px;border-radius:var(--rf);
   font-size:12.5px;font-weight:600;color:var(--t1);
@@ -390,11 +406,6 @@ textarea,input{font-family:var(--font-body);}
   border-bottom:1px solid rgba(255,255,255,.05);
 }
 .code-lang-label{font-size:10.5px;font-weight:800;color:#8892a4;font-family:monospace;}
-.code-copy-btn{
-  display:flex;align-items:center;gap:5px; padding:3px 9px;border-radius:6px;
-  font-size:10.5px;font-weight:700;color:#8892a4; background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.08); cursor:pointer;
-}
 
 .code-block-wrap pre{margin:0; padding:12px; overflow-x:auto; font-size:12.5px; background:transparent !important;}
 .code-block-wrap pre code{font-family:monospace; background:transparent !important;}
@@ -419,9 +430,22 @@ textarea,input{font-family:var(--font-body);}
 #inputArea{
   position:absolute;bottom:0;left:0;right:0;
   background:linear-gradient(transparent, var(--bg) 30%);
-  padding:20px 14px 14px;
+  padding:12px 14px 14px;
   z-index:200;
 }
+
+/* Dual-Model In-Keyboard Inline Selector Matrix */
+.keyboard-selectors {
+  display: flex; gap: 6px; margin-bottom: 8px; padding: 0 4px;
+}
+.kb-btn {
+  padding: 6px 12px; border-radius: var(--r1); font-size: 11px;
+  font-weight: 700; color: var(--t2); background: var(--surface2);
+  border: 1px solid var(--border); transition: all 0.2s; position: relative;
+}
+.kb-btn.active-af { background: rgba(79,138,255,0.1); border-color: var(--p); color: var(--p); }
+.kb-btn.active-dev { background: rgba(249,115,22,0.1); border-color: var(--dev); color: var(--dev); }
+
 .input-glow-wrapper {
   position: relative;
   border-radius: var(--r3);
@@ -430,7 +454,6 @@ textarea,input{font-family:var(--font-body);}
   transition: background 0.25s;
 }
 
-/* Dynamic shifting gradient border on focused container */
 .input-glow-wrapper:focus-within {
   background: var(--gemini-glow);
   background-size: 300% 100%;
@@ -488,7 +511,6 @@ textarea,input{font-family:var(--font-body);}
 .locked-card p{font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:22px;}
 .locked-btn{width:100%;min-height:44px;border-radius:var(--r2);font-size:14px;font-weight:800;color:#fff;background:var(--p);transition:opacity .15s;}
 
-/* Contextual Modal inside app frame container */
 .modal-overlay{
   position:absolute;inset:0;z-index:9999;
   display:flex;align-items:center;justify-content:center;
@@ -556,6 +578,7 @@ textarea,input{font-family:var(--font-body);}
       <div class="dr-model-row" id="drModelRow">
         <button class="model-btn active-af" id="drBtnAF" onclick="setMode('af24')">AF 2.4</button>
         <button class="model-btn" id="drBtnDev" onclick="setMode('dev39')">Dev 3.9 Pro</button>
+        <button class="model-btn disabled" id="drBtnBro" disabled>Big Bro 2.0 <span class="soon-badge">Soon</span></button>
       </div>
 
       <button class="dr-new-btn" onclick="newChat()">
@@ -583,7 +606,7 @@ textarea,input{font-family:var(--font-body);}
     <div class="dr-footer">
       <div class="dr-usage-title">AI Usage Today</div>
       <div class="usage-row">
-        <span class="usage-label">Requests</span>
+        <span class="usage-label">Requests Left</span>
         <span class="usage-val" id="drReqVal">— / 5</span>
       </div>
       <div class="usage-track">
@@ -634,6 +657,11 @@ textarea,input{font-family:var(--font-body);}
   </div>
 
   <div id="inputArea" class="hidden">
+    <div class="keyboard-selectors">
+      <button class="kb-btn active-af" id="kbBtnAF" onclick="setMode('af24')">AF 2.4</button>
+      <button class="kb-btn" id="kbBtnDev" onclick="setMode('dev39')">Dev 3.9 Pro</button>
+      <button class="kb-btn" style="opacity:0.6; cursor:not-allowed;" disabled>Big Bro <span class="soon-badge" style="top:-4px; right:-6px;">Soon</span></button>
+    </div>
     <div class="input-glow-wrapper" id="inputGlowWrap">
       <div class="input-box">
         <textarea id="msgInput" rows="1" placeholder="Ask AF 2.4 anything…"
@@ -746,6 +774,38 @@ function closeDrawer(){
   $('overlay').classList.remove('open');
 }
 
+/* ════════════════════════════════════════
+   FINGER SWIPE TO GESTURE CONTROLLER
+════════════════════════════════════════ */
+let touchStartX = 0;
+let touchStartY = 0;
+let touchEndX = 0;
+let touchEndY = 0;
+
+document.addEventListener('touchstart', e => {
+  touchStartX = e.changedTouches[0].screenX;
+  touchStartY = e.changedTouches[0].screenY;
+}, {passive: true});
+
+document.addEventListener('touchend', e => {
+  touchEndX = e.changedTouches[0].screenX;
+  touchEndY = e.changedTouches[0].screenY;
+  handleSwipeGesture();
+}, {passive: true});
+
+function handleSwipeGesture() {
+  const xDiff = touchEndX - touchStartX;
+  const yDiff = touchEndY - touchStartY;
+  
+  if (Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > 40) {
+    if (xDiff > 0 && touchStartX < 50 && !$('drawer').classList.contains('open')) {
+      openDrawer();
+    } else if (xDiff < 0 && $('drawer').classList.contains('open')) {
+      closeDrawer();
+    }
+  }
+}
+
 function syncHamburger(){
   const btn=$('hdrMenu');
   if(isLoggedIn()){btn.classList.remove('hide');}
@@ -773,13 +833,17 @@ function saveSes(s){try{localStorage.setItem(sesKey(),JSON.stringify(s));}catch{
 function dayReset(s){if(s.day!==today()){Object.assign(s,{start:null,sTok:0,sReq:0,totTok:0,totReq:0,day:today()});}return s;}
 function cdMs(s){if(!s.start) return 0;return Math.max(0,SESSION_COOLDOWN_H*3600000-(Date.now()-new Date(s.start).getTime()));}
 function fmtCd(ms){const h=Math.floor(ms/3600000),m=Math.ceil((ms%3600000)/60000);return h>0?`${h}h ${m}m`:`${m}m`;}
+
+/* Unlocked continuous asking mechanism - strictly restricted to 3.7k token cap threshold rules */
 function sesOk(s){
-  if(s.start&&cdMs(s)>0&&s.sTok<SESSION_TOKEN_LIMIT&&s.sReq<SESSION_REQ_LIMIT) return{ok:true};
   if(s.totTok>=TOTAL_TOKEN_LIMIT) return{ok:false,why:'total_tokens'};
   if(s.totReq>=TOTAL_REQ_LIMIT)   return{ok:false,why:'total_reqs'};
-  const cd=cdMs(s);
-  if(cd>0) return{ok:false,why:'cooldown',ms:cd};
-  return{ok:true,new:true};
+  if(s.sTok>=SESSION_TOKEN_LIMIT) return{ok:false,why:'session_tokens'};
+  if(s.sReq>=SESSION_REQ_LIMIT)   return{ok:false,why:'session_reqs'};
+  
+  const cd = cdMs(s);
+  if(cd > 0 && s.sTok >= SESSION_TOKEN_LIMIT) return{ok:false,why:'cooldown',ms:cd};
+  return{ok:true};
 }
 function startSes(s){s.start=new Date().toISOString();s.sTok=0;s.sReq=0;return s;}
 
@@ -820,15 +884,18 @@ function setMode(m){
   _mode=m;
   $('drBtnAF').className='model-btn'+(m==='af24'?' active-af':'');
   $('drBtnDev').className='model-btn'+(m==='dev39'?' active-dev':'');
+  
+  $('kbBtnAF').className='kb-btn'+(m==='af24'?' active-af':'');
+  $('kbBtnDev').className='kb-btn'+(m==='dev39'?' active-dev':'');
+  
   $('hdrSub').textContent=m==='dev39'?'Dev 3.9 · Founder Mode':'AF 2.4 · Student Mentor';
   
-  // Dynamic switch between model glow variants
   if(m === 'dev39') {
-    $('inputGlowWrap').classList.add('dev-glow');
+    $('inputGlowWrap').className='input-glow-wrapper dev-glow';
     $('sendBtn').style.background='var(--dev)';
     $('msgInput').placeholder='Ask Dev 3.9 anything…';
   } else {
-    $('inputGlowWrap').classList.remove('dev-glow');
+    $('inputGlowWrap').className='input-glow-wrapper';
     $('sendBtn').style.background='var(--p)';
     $('msgInput').placeholder='Ask AF 2.4 anything…';
   }
@@ -854,7 +921,6 @@ function renderGreeting(){
     ?['Build a startup','Freelancing strategy','Product roadmap','Find co-founder','Launch MVP']
     :['Learn Python','Build a portfolio','Freelancing tips','AI tools for students','Career advice','React basics'];
     
-  // Fixed quotes generation to avoid parsing syntax bugs breaking chip execution runtime
   $('chips').innerHTML=suggestions.map(s=> {
     const escapedText = s.replace(/'/g, "\\'");
     return `<button class="chip" onclick="chipClick('${escapedText}')">${s}</button>`;
@@ -871,7 +937,7 @@ function updateBanner(s){
     el.className='err';el.innerHTML='🚫 Daily limit reached. Come back tomorrow!';
     el.style.display='flex';disableInput();return;
   }
-  if(cd>0||(s.sTok>=SESSION_TOKEN_LIMIT||s.sReq>=SESSION_REQ_LIMIT)){
+  if(s.sTok>=SESSION_TOKEN_LIMIT || s.sReq>=SESSION_REQ_LIMIT){
     const remaining=cd>0?fmtCd(cd):`${SESSION_COOLDOWN_H}h`;
     el.className='warn';el.innerHTML=`⏳ Session limit reached. Next session in <strong>${remaining}</strong>`;
     el.style.display='flex';disableInput();
@@ -954,8 +1020,6 @@ async function clearAllConvs(){
   renderConvList();clearChat();showGreeting(true);
   await edgeCall({action:'delete_all_conversations'});
 }
-
-function newChat(){_convId=null;clearChat();showGreeting(true);closeDrawer();toast('New chat started','info','✦');}
 
 function renderAIContent(rawText){
   const container=document.createElement('div');
@@ -1053,6 +1117,8 @@ function autoResize(){
   el.style.height=Math.min(el.scrollHeight,120)+'px';
 }
 
+function newChat(){_convId=null;clearChat();showGreeting(true);closeDrawer();toast('New chat started','info','✦');}
+
 async function doSend(){
   const content=$('msgInput').value.trim();
   if(!content||_loading) return;
@@ -1061,9 +1127,13 @@ async function doSend(){
   const chk=sesOk(s);
   if(!chk.ok){
     if(chk.why==='cooldown'){toast(`Session cooldown. Wait ${fmtCd(chk.ms)}`,'err','⏳');return;}
+    if(chk.why==='session_tokens' || chk.why==='session_reqs'){
+       toast('Session capacity reached. Waiting for next window!','err','⏳'); return;
+    }
     toast('Daily limit reached. Come back tomorrow!','err','🚫');return;
   }
-  if(chk.new) s=startSes(s);
+  
+  if(!s.start) s = startSes(s);
   saveSes(s);
 
   _loading=true;
@@ -1087,6 +1157,7 @@ async function doSend(){
       return;
     }
 
+    /* Fixed tracking parameters configuration rules to assure absolute answers print fully */
     const toks=res.tokensThisCall||Math.ceil((content.length+(res.answer||'').length)/4);
     s=dayReset(getSes());
     s.sTok=(s.sTok||0)+toks;s.totTok=(s.totTok||0)+toks;
@@ -1103,7 +1174,11 @@ async function doSend(){
     }
 
     addMsg('assistant',res.answer,_mode,true);
-    updateBanner(s);updateUsageBar();checkWarningBanners(s);
+    
+    /* Instant state counters update triggers after every message block */
+    updateBanner(s);
+    updateUsageBar();
+    checkWarningBanners(s);
   }catch(e){
     removeEl(ph);toast('Network error. Try again.','err','Error');
   }finally{
