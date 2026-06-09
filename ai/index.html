@@ -221,33 +221,42 @@ textarea,input{font-family:var(--font-body);}
 .usage-fill{height:100%;border-radius:99px;background:var(--p);transition:width .4s var(--ease);}
 
 /* ════════════════════════════════════════
-   CRITICAL TEXT BANNERS (LOCKDOWN UI)
+   ✨ PREMIUM MOVING TEXT MARQUEE BANNER
 ════════════════════════════════════════ */
 .alert-banner-system {
-  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  background: linear-gradient(90deg, #b91c1c, #ef4444, #b91c1c);
   color: #ffffff;
-  padding: 12px 16px;
-  font-weight: 800;
-  font-size: 13px;
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: .03em;
-  border-bottom: 2px solid rgba(0,0,0,0.2);
-  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.25);
-  animation: slideDownBanner .35s cubic-bezier(.34,1.56,.64,1) both;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  padding: 8px 0;
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
   z-index: 300;
+  display: flex;
+  align-items: center;
+  animation: bannerFadeIn .3s ease-out;
 }
-.alert-banner-system strong {
-  font-size: 15px;
-  font-family: var(--font-display);
+.marquee-content {
+  display: inline-block;
+  padding-left: 100%;
+  font-weight: 800;
+  font-size: 12px;
+  text-transform: uppercase;
   letter-spacing: .05em;
+  animation: marqueeRun 18s linear infinite;
 }
-@keyframes slideDownBanner {
-  from { transform: translateY(-100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+.marquee-content strong {
+  color: #ffe4e6;
+  text-shadow: 0 0 6px rgba(255,255,255,0.4);
+}
+@keyframes marqueeRun {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-100%, 0, 0); }
+}
+@keyframes bannerFadeIn {
+  from { opacity: 0; height: 0; }
+  to { opacity: 1; height: auto; }
 }
 
 /* ════════════════════════════════════════
@@ -709,7 +718,7 @@ textarea,input{font-family:var(--font-body);}
               <span class="pm-usage-label">Requests</span>
               <span class="pm-usage-val" id="pmSReq">0 / 5</span>
             </div>
-            <div class="pm-track"><div class="pm-fill" id="pmSReqBar" style="width:0%"></div></div>
+            <div class="pm-track"><div class="PM-fill" id="pmSReqBar" style="width:0%"></div></div>
             <div class="pm-usage-row">
               <span class="pm-usage-label">Session Token Status</span>
               <span class="pm-usage-val" id="pmTokPctLabel">100% Remaining</span>
@@ -728,13 +737,12 @@ textarea,input{font-family:var(--font-body);}
 const SUPABASE_URL = "https://afooyyydhlwngzssgqih.supabase.co";
 const EDGE_URL     = SUPABASE_URL + "/functions/v1/af-ask-ai";
 
-const TOTAL_TOKEN_LIMIT   = 3000;
-const SESSION_TOKEN_LIMIT = 3000; // Complete 3k metrics parameter scale configuration
+const TOTAL_TOKEN_LIMIT   = 25000;
+const SESSION_TOKEN_LIMIT = 3000; // Strictly filtered on a 3k metric framework context
 const TOTAL_REQ_LIMIT      = 25;
 const SESSION_REQ_LIMIT   = 5;
 const SESSION_COOLDOWN_H  = 6;
 
-// Engaging system lockdown dynamic warm-up warning strings dictionary
 const ENGAGING_LOCKDOWN_ALERTS = [
   "⚡ Time to refuel your brain cells! Session capacity reached.",
   "🚀 Epic session completed! Take a step back and absorb the knowledge.",
@@ -828,12 +836,10 @@ function updateUsageBar(backendPayload = null){
     if(backendPayload.tokensThisCall !== undefined) currentSessionTokensUsed += backendPayload.tokensThisCall;
   }
 
-  // Pure Token Percentage Calculation Base Matrix calculated over explicit 3k parameters limit 
   const tokenPctRemaining = Math.max(0, 100 - Math.round((currentSessionTokensUsed / SESSION_TOKEN_LIMIT) * 100));
   const reqLeft = Math.max(0, SESSION_REQ_LIMIT - currentSessionRequestsUsed);
   const reqPct = Math.min(100, (currentSessionRequestsUsed / SESSION_REQ_LIMIT) * 100);
 
-  // Sync Drawer Elements
   $('drReqVal').textContent = `${reqLeft} / ${SESSION_REQ_LIMIT}`;
   $('drReqBar').style.width = reqPct + '%';
   
@@ -908,27 +914,29 @@ function chipClick(text){
 }
 
 /* ════════════════════════════════════════
-   CRITICAL PRODUCTION TEXT BANNER & KEYBOARD LOCKDOWN ENGINE
+   CRITICAL TEXT MARQUEE & KEYBOARD LOCKDOWN ENGINE
 ════════════════════════════════════════ */
 function checkAndEnforceGlobalLimits(){
   const s = dayReset(getSes());
   const cd = cdMs(s);
   const container = $('warnBannerWrap');
   
-  const isLimitReached = cd > 0 || s.sTok >= SESSION_TOKEN_LIMIT || s.sReq >= SESSION_REQ_LIMIT || s.totTok >= TOTAL_TOKEN_LIMIT || s.totReq >= TOTAL_REQ_LIMIT;
+  // Strict condition mapping directly focusing on Session Limits parameters
+  const isSessionLimitReached = cd > 0 || s.sTok >= SESSION_TOKEN_LIMIT || s.sReq >= SESSION_REQ_LIMIT;
   
-  if (isLimitReached) {
+  if (isSessionLimitReached) {
     const remainingTimeStr = cd > 0 ? fmtCd(cd) : `${SESSION_COOLDOWN_H}h 00m`;
     
-    // Inject dynamic text warning alert blocks seamlessly 
+    // Injected moving text marquee structure safely
     container.innerHTML = `
       <div class="alert-banner-system">
-        <strong>${getRandomAlertMsg()}</strong>
-        <span>Your free session token limit reached. Come back after <strong>${remainingTimeStr}</strong> to continue grinding!</span>
+        <div class="marquee-content">
+          <strong>${getRandomAlertMsg()}</strong> &nbsp;&bull;&nbsp; Your free session token limit reached. Come back after <strong>${remainingTimeStr}</strong> to continue grinding! &nbsp;&bull;&nbsp; <strong>${getRandomAlertMsg()}</strong> &nbsp;&bull;&nbsp; Your free session token limit reached. Come back after <strong>${remainingTimeStr}</strong> to continue grinding!
+        </div>
       </div>
     `;
     
-    // Absolute hard lock automation configurations
+    // System lock controls
     $('msgInput').disabled = true;
     $('msgInput').value = "";
     $('msgInput').placeholder = "Your free session token limit reached. Come back later.";
@@ -1028,13 +1036,11 @@ function newChat(){
   renderGreeting();
   closeDrawer();
   toast('New environment initialized','info');
-  // Persistent lockdown validation triggered explicitly on creating workspace sessions
   checkAndEnforceGlobalLimits();
 }
 
 function renderAIContent(rawText){
   const container=document.createElement('div');
-  // Markdown parsing regex structure fix completed
   const parts=rawText.split(/(```[\s\S]*?```)/g);
   parts.forEach(part=>{
     const codeMatch=part.match(/^```(\w*)\n?([\s\S]*?)```$/);
@@ -1200,7 +1206,6 @@ function openProfileModal(){
   $('pmSReq').textContent=`${s.sReq||0} / ${SESSION_REQ_LIMIT}`;
   $('pmSReqBar').style.width=Math.min(100,((s.sReq||0)/SESSION_REQ_LIMIT)*100)+'%';
   
-  // Dynamic 3,000 baseline percentage remaining visibility converter calculation
   const tokenPctRemaining = Math.max(0, 100 - Math.round(((s.sTok||0) / SESSION_TOKEN_LIMIT) * 100));
   $('pmTokPctLabel').textContent = `${tokenPctRemaining}% Allocation Available`;
   $('pmTokBar').style.width = tokenPctRemaining + '%';
