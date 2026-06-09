@@ -443,6 +443,11 @@ textarea,input{font-family:var(--font-body);}
   text-align:right;margin-top:6px;
   display:flex;justify-content:space-between;padding:0 4px;
 }
+.ai-disclaimer{
+  font-size:10px;color:var(--tm);font-weight:500;
+  font-style:italic;opacity:.75;text-align:left;
+  max-width:72%;line-height:1.4;
+}
 .warn-txt{color:var(--err) !important;}
 
 /* ════ MODALS ════ */
@@ -662,7 +667,7 @@ textarea,input{font-family:var(--font-body);}
       </div>
     </div>
     <div class="input-hint">
-      <span>Shift+Enter for new line</span>
+      <span class="ai-disclaimer">AcademeForge AI can make mistakes. Please double-check responses.</span>
       <span id="charHint">0 / 800</span>
     </div>
   </div>
@@ -1001,10 +1006,26 @@ function renderGreeting() {
   const h = new Date().getHours();
   const name = sName().split(' ')[0];
   let timeLabel, main, sub;
-  if (h>=5 && h<12)       { timeLabel='Good Morning';   main=`Good Morning ${name} ☀️`;  sub='Ready to learn something new today?'; }
-  else if (h>=12 && h<17) { timeLabel='Good Afternoon'; main=`Good Afternoon ${name} 🚀`; sub='What are we building today?'; }
-  else if (h>=17 && h<21) { timeLabel='Good Evening';   main=`Good Evening ${name} 🌆`;   sub="Let's continue your learning journey."; }
-  else                    { timeLabel='Late Night';      main=`Late Night Session ${name} 🌙`; sub="Let's make it count."; }
+
+  if (_mode === 'dev13') {
+    // Founder / builder energy — direct, no fluff
+    if (h>=5 && h<12)       { timeLabel='Morning';       main=`Morning ${name} ☕`;        sub="What are we shipping today?"; }
+    else if (h>=12 && h<17) { timeLabel='Afternoon';     main=`Yo ${name} 🛠️`;            sub="Got a product problem? Let's crack it."; }
+    else if (h>=17 && h<21) { timeLabel='Evening';       main=`Still building ${name}? 🔥`; sub="Good. Most people already quit."; }
+    else                    { timeLabel='Late Night';     main=`Late night grind ${name} 🌙`; sub="The best products get built at this hour."; }
+  } else if (_mode === 'tapri') {
+    // Big bro / chai tapri energy — warm, casual, Hinglish-friendly
+    if (h>=5 && h<12)       { timeLabel='Subah subah';   main=`Uth gaye ${name}? 🌅`;     sub="Chal baat karte hain, kya chal raha hai?"; }
+    else if (h>=12 && h<17) { timeLabel='Dopahar';       main=`Kya haal hai ${name} 😎`;  sub="Kuch confuse ho? Bata, sorted karte hain."; }
+    else if (h>=17 && h<21) { timeLabel='Shaam';         main=`Aaja baat karte hain ${name} ☕`; sub="Din kaisa raha? Kuch bhi pooch, judge nahi karunga."; }
+    else                    { timeLabel='Raat ko';        main=`Raat ko jaag rahe ho ${name}? 🌙`; sub="Koi tension hai toh bata. Akele mat socho."; }
+  } else {
+    // AF ProGuide — mentor energy, encouraging
+    if (h>=5 && h<12)       { timeLabel='Good Morning';  main=`Good Morning ${name} ☀️`;  sub='Ready to learn something new today?'; }
+    else if (h>=12 && h<17) { timeLabel='Good Afternoon';main=`Good Afternoon ${name} 📚`; sub="What skill are we levelling up today?"; }
+    else if (h>=17 && h<21) { timeLabel='Good Evening';  main=`Good Evening ${name} 🌆`;   sub="Let's continue your learning journey."; }
+    else                    { timeLabel='Late Night';     main=`Late Night ${name} 🌙`;    sub="Focused sessions at this hour hit different."; }
+  }
 
   $('greetingTime').textContent = timeLabel;
   $('greetingMain').textContent = main;
