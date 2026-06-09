@@ -37,8 +37,11 @@
   --hdr-h:54px;--drawer-w:300px;--shell:430px;
   --ease:cubic-bezier(.22,1,.36,1);
   --spring:cubic-bezier(.34,1.56,.64,1);
+  --dev13:#f97316;--dev13-2:#ea580c;
+  --tapri:#a855f7;--tapri2:#9333ea;
   --gemini-glow: linear-gradient(90deg, #4f8aff, #a855f7, #f43f5e, #4f8aff);
   --gemini-glow-dev: linear-gradient(90deg, #f97316, #ea580c, #ef4444, #f97316);
+  --gemini-glow-tapri: linear-gradient(90deg, #a855f7, #ec4899, #8b5cf6, #a855f7);
 }
 [data-theme="light"]{
   --bg:#f4f6fa;--surface:#ffffff;--surface2:#eef2fc;--surface3:#e0e7ff;
@@ -170,7 +173,8 @@ textarea,input{font-family:var(--font-body);}
 .conv-item.active{background:var(--surface3);border-color:var(--border);}
 .conv-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 .conv-dot.af24{background:var(--p);}
-.conv-dot.dev39{background:var(--dev);}
+.conv-dot.dev13{background:var(--dev);}
+.conv-dot.tapri{background:var(--tapri);}
 .conv-title{flex:1;min-width:0;font-size:12.5px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .conv-item.active .conv-title{color:var(--t1);font-weight:600;}
 .conv-del{
@@ -286,6 +290,7 @@ textarea,input{font-family:var(--font-body);}
 }
 .av-ai{background:linear-gradient(135deg,var(--p),#a855f7);color:#fff;}
 .av-ai.dev{background:linear-gradient(135deg,var(--dev),#dc2626);}
+.av-ai.tapri{background:linear-gradient(135deg,#a855f7,#ec4899);}
 .av-user{background:var(--surface2);border:1px solid var(--border);color:var(--t2);font-size:10px;}
 .bubble-wrap{display:flex;flex-direction:column;gap:3px;max-width:85%;}
 .msg-row.user .bubble-wrap{align-items:flex-end;}
@@ -317,7 +322,8 @@ textarea,input{font-family:var(--font-body);}
 .msg-meta{font-size:10.5px;color:var(--tm);font-weight:600;margin-top:2px;}
 .mode-pill-sm{display:inline-block;font-size:9.5px;font-weight:800;padding:1px 5px;border-radius:4px;margin-right:4px;font-family:monospace;}
 .mode-pill-sm.af24{background:rgba(79,138,255,.15);color:var(--p);}
-.mode-pill-sm.dev39{background:rgba(249,115,22,.15);color:var(--dev);}
+.mode-pill-sm.dev13{background:rgba(249,115,22,.15);color:var(--dev);}
+.mode-pill-sm.tapri{background:rgba(168,85,247,.15);color:var(--tapri);}
 
 .thinking-row{display:flex;gap:10px;padding:4px 0;}
 .thinking-bub{
@@ -349,6 +355,7 @@ textarea,input{font-family:var(--font-body);}
 .mode-segment.active{color:#fff;}
 [data-theme="light"] .mode-segment.active-af{color:var(--p3);}
 [data-theme="light"] .mode-segment.active-dev{color:var(--dev2);}
+[data-theme="light"] .mode-segment.active-tapri{color:var(--tapri2);}
 .mode-segment .badge-soon{
   font-size:8px;background:#a855f7;color:#fff;
   padding:1px 4px;border-radius:4px;font-weight:900;text-transform:uppercase;
@@ -364,8 +371,11 @@ textarea,input{font-family:var(--font-body);}
 .mode-track-bar[data-active="af24"] .slider-pill{
   transform:translateX(0);background:var(--p);box-shadow:0 2px 10px rgba(79,138,255,.3);
 }
-.mode-track-bar[data-active="dev39"] .slider-pill{
+.mode-track-bar[data-active="dev13"] .slider-pill{
   transform:translateX(100%);background:var(--dev);box-shadow:0 2px 10px rgba(249,115,22,.3);
+}
+.mode-track-bar[data-active="tapri"] .slider-pill{
+  transform:translateX(200%);background:var(--tapri);box-shadow:0 2px 10px rgba(168,85,247,.3);
 }
 
 /* ════ INPUT AREA ════ */
@@ -389,6 +399,12 @@ textarea,input{font-family:var(--font-body);}
   background:var(--gemini-glow-dev);
   background-size:300% 100%;
   box-shadow:0 0 20px rgba(249,115,22,.25);
+}
+.input-glow-wrapper.tapri-glow:focus-within{
+  background:var(--gemini-glow-tapri);
+  background-size:300% 100%;
+  animation:glowMove 4s linear infinite;
+  box-shadow:0 0 20px rgba(168,85,247,.3);
 }
 .input-glow-wrapper.locked-glow{
   background:var(--err) !important;
@@ -605,8 +621,8 @@ textarea,input{font-family:var(--font-body);}
     <div class="mode-track-bar" id="modeTrackBar" data-active="af24">
       <div class="slider-pill"></div>
       <div class="mode-segment active" id="segAF" onclick="setMode('af24')">AF 2.4</div>
-      <div class="mode-segment" id="segDev" onclick="setMode('dev39')">Dev 3.9 Pro</div>
-      <div class="mode-segment" id="segBigBro" onclick="setMode('bigbro')">Big Bro <span class="badge-soon">Soon</span></div>
+      <div class="mode-segment" id="segDev" onclick="setMode('dev13')">Dev 1.3</div>
+      <div class="mode-segment" id="segTapri" onclick="setMode('tapri')">Tapri 7.9</div>
     </div>
   </div>
 
@@ -716,7 +732,15 @@ const DAILY_TOKEN_LIMIT  = 30000;
 const MAX_CHARS          = 800;
 
 // Mode mapping: UI mode → edge function mode value
-const MODE_MAP = { af24: 'af_proguide', dev39: 'dev', bigbro: 'tapri' };
+// Edge accepts: 'af_proguide', 'dev', 'tapri'
+const MODE_MAP = { af24: 'af_proguide', dev13: 'dev', tapri: 'tapri' };
+
+// Mode display config
+const MODE_CONFIG = {
+  af24:  { label: 'AF-PROGUIDE-2.4', display: 'AF 2.4',   emoji: '🎓', pill: 'af24',  hdr: 'AF 2.4 · Student Mentor',  placeholder: 'Ask AF 2.4 anything…'  },
+  dev13: { label: 'DEV-1.3',         display: 'Dev 1.3',  emoji: '🔥', pill: 'dev13', hdr: 'Dev 1.3 · Founder Mode',   placeholder: 'Ask Dev 1.3 anything…'  },
+  tapri: { label: 'TAPRI-7.9',       display: 'Tapri 7.9',emoji: '☕', pill: 'tapri', hdr: 'Tapri 7.9 · Big Bro Mode', placeholder: 'Ask Tapri anything…'    },
+};
 
 const LOCKDOWN_ALERTS = [
   "⚡ Time to refuel your brain cells! Session capacity reached.",
@@ -897,7 +921,7 @@ function removeLockdown() {
   $('warnBannerWrap').innerHTML = '';
   $('msgInput').disabled = false;
   $('inputGlowWrap').classList.remove('locked-glow');
-  const placeholder = _mode === 'dev39' ? 'Ask Dev 3.9 anything…' : 'Ask AF 2.4 anything…';
+  const placeholder = (MODE_CONFIG[_mode] || MODE_CONFIG.af24).placeholder;
   $('msgInput').placeholder = placeholder;
 }
 
@@ -941,29 +965,31 @@ let _loading = false;
 let _filteredConvs = [];
 
 function setMode(m) {
-  if (m === 'bigbro') {
-    toast('Big Bro mode is coming soon! Stay tuned.', 'info');
-    return;
-  }
+  const cfg = MODE_CONFIG[m];
+  if (!cfg) return;
+
   _mode = m;
   $('modeTrackBar').setAttribute('data-active', m);
 
   document.querySelectorAll('.mode-segment').forEach(el =>
-    el.classList.remove('active','active-af','active-dev'));
+    el.classList.remove('active','active-af','active-dev','active-tapri'));
 
-  if (m === 'af24') {
-    $('segAF').classList.add('active','active-af');
-    $('hdrSub').textContent = 'AF 2.4 · Student Mentor';
-    $('inputGlowWrap').classList.remove('dev-glow');
-    $('sendBtn').style.background = 'var(--p)';
-    if (!$('msgInput').disabled) $('msgInput').placeholder = 'Ask AF 2.4 anything…';
-  } else if (m === 'dev39') {
-    $('segDev').classList.add('active','active-dev');
-    $('hdrSub').textContent = 'Dev 3.9 · Founder Mode';
-    $('inputGlowWrap').classList.add('dev-glow');
-    $('sendBtn').style.background = 'var(--dev)';
-    if (!$('msgInput').disabled) $('msgInput').placeholder = 'Ask Dev 3.9 anything…';
-  }
+  const segMap = { af24: 'segAF', dev13: 'segDev', tapri: 'segTapri' };
+  const seg = $(segMap[m]);
+  if (seg) seg.classList.add('active', m === 'af24' ? 'active-af' : m === 'dev13' ? 'active-dev' : 'active-tapri');
+
+  $('hdrSub').textContent = cfg.hdr;
+
+  // Input glow class
+  $('inputGlowWrap').classList.remove('dev-glow','tapri-glow');
+  if (m === 'dev13') $('inputGlowWrap').classList.add('dev-glow');
+  if (m === 'tapri') $('inputGlowWrap').classList.add('tapri-glow');
+
+  // Send button color
+  const btnColors = { af24: 'var(--p)', dev13: 'var(--dev)', tapri: 'var(--tapri)' };
+  $('sendBtn').style.background = btnColors[m] || 'var(--p)';
+
+  if (!$('msgInput').disabled) $('msgInput').placeholder = cfg.placeholder;
 
   if ($('greeting').style.display !== 'none') renderGreeting();
 }
@@ -984,8 +1010,10 @@ function renderGreeting() {
   $('greetingMain').textContent = main;
   $('greetingSub').textContent  = sub;
 
-  const suggestions = _mode === 'dev39'
+  const suggestions = _mode === 'dev13'
     ? ['Build a startup','Freelancing strategy','Product roadmap','Find co-founder','Launch MVP']
+    : _mode === 'tapri'
+    ? ['Career mein confused hoon','Coding kaise seekhun','Kya karna chahiye abhi','Self-doubt se kaise niklu','College vs job advice']
     : ['Learn Python','Build a portfolio','Freelancing tips','AI tools for students','Career advice','React basics'];
 
   $('chips').innerHTML = suggestions.map(s => {
@@ -1044,7 +1072,7 @@ async function loadConvList() {
   // Re-map edge mode strings back to UI dot colors
   _convs = _convs.map(c => ({
     ...c,
-    uiMode: c.mode === 'dev' ? 'dev39' : 'af24'
+    uiMode: c.mode === 'dev' ? 'dev13' : c.mode === 'tapri' ? 'tapri' : 'af24'
   }));
   _filteredConvs = [..._convs];
   renderConvList();
@@ -1081,7 +1109,7 @@ function renderConvList() {
 async function openConv(c) {
   _convId = c.id;
   // Map edge mode back to UI mode
-  const uiMode = (c.mode === 'dev' || c.mode === 'dev39') ? 'dev39' : 'af24';
+  const uiMode = c.mode === 'dev' ? 'dev13' : c.mode === 'tapri' ? 'tapri' : 'af24';
   setMode(uiMode);
   clearChat();
   showGreeting(false);
@@ -1096,7 +1124,7 @@ async function openConv(c) {
 
   if (res && res.messages && res.messages.length) {
     res.messages.forEach(m => {
-      const msgUiMode = (m.mode === 'dev') ? 'dev39' : 'af24';
+      const msgUiMode = m.mode === 'dev' ? 'dev13' : m.mode === 'tapri' ? 'tapri' : 'af24';
       addMsg(m.role, m.content, msgUiMode, false);
     });
     scrollBot();
@@ -1210,8 +1238,9 @@ function addMsg(role, content, mode, scroll) {
     av.className = 'av av-user';
     av.textContent = initials(sName());
   } else {
-    av.className = 'av av-ai' + (mode === 'dev39' ? ' dev' : '');
-    av.textContent = mode === 'dev39' ? '🔥' : '🎓';
+    const cfg = MODE_CONFIG[mode] || MODE_CONFIG.af24;
+    av.className = 'av av-ai' + (mode === 'dev13' ? ' dev' : mode === 'tapri' ? ' tapri' : '');
+    av.textContent = cfg.emoji;
   }
 
   const wrap = document.createElement('div');
@@ -1220,7 +1249,8 @@ function addMsg(role, content, mode, scroll) {
   const bub = document.createElement('div');
   if (isUser) {
     bub.className = 'bubble bubble-user';
-    bub.style.background = mode === 'dev39' ? 'var(--dev)' : 'var(--p)';
+    const bubColors = { af24: 'var(--p)', dev13: 'var(--dev)', tapri: 'var(--tapri)' };
+    bub.style.background = bubColors[mode] || 'var(--p)';
     bub.textContent = content;
   } else {
     bub.className = 'bubble bubble-ai';
@@ -1230,7 +1260,8 @@ function addMsg(role, content, mode, scroll) {
   const meta = document.createElement('div');
   meta.className = 'msg-meta';
   if (!isUser) {
-    meta.innerHTML = `<span class="mode-pill-sm ${mode}">${mode === 'dev39' ? 'DEV 3.9' : 'AF 2.4'}</span>AcademeForge AI`;
+    const cfg = MODE_CONFIG[mode] || MODE_CONFIG.af24;
+    meta.innerHTML = `<span class="mode-pill-sm ${mode}">${cfg.label}</span>AcademeForge AI`;
   } else {
     meta.textContent = sName();
   }
@@ -1248,8 +1279,8 @@ function addThinking() {
   const row = document.createElement('div');
   row.className = 'thinking-row';
   const av = document.createElement('div');
-  av.className = 'av av-ai' + (_mode === 'dev39' ? ' dev' : '');
-  av.textContent = _mode === 'dev39' ? '🔥' : '🎓';
+  av.className = 'av av-ai' + (_mode === 'dev13' ? ' dev' : _mode === 'tapri' ? ' tapri' : '');
+  av.textContent = (MODE_CONFIG[_mode] || MODE_CONFIG.af24).emoji;
   const bub = document.createElement('div');
   bub.className = 'thinking-bub';
   bub.innerHTML = '<div class="dots"><span></span><span></span><span></span></div>';
