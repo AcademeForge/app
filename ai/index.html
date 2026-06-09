@@ -716,7 +716,7 @@ textarea,input{font-family:var(--font-body);}
 
 <script>
 // ════════════════════════════════════════
-// CONSTANTS — matched directly to Edge Function updates
+// CONSTANTS
 // ════════════════════════════════════════
 const SUPABASE_URL  = "https://afooyyydhlwngzssgqih.supabase.co";
 const EDGE_URL      = SUPABASE_URL + "/functions/v1/af-ask-ai";
@@ -729,6 +729,13 @@ const MAX_CHARS          = 800;
 const CACHE_EXPIRY_MS    = 36 * 60 * 60 * 1000; // 36 Hours
 
 const MODE_MAP = { af24: 'af_proguide', dev13: 'dev', tapri: 'tapri' };
+
+// Map incoming backend database strings perfectly safely into correct configuration objects
+function normalizeModeKey(rawMode) {
+  if (rawMode === 'dev' || rawMode === 'dev13') return 'dev13';
+  if (rawMode === 'tapri') return 'tapri';
+  return 'af24';
+}
 
 const MODE_CONFIG = {
   af24:  { label: 'AF-PROGUIDE-2.4', display: 'AF 2.4',   emoji: '🎓', pill: 'af24',  hdr: 'AF 2.4 · Student Mentor',  placeholder: 'Ask AF 2.4 anything…'  },
@@ -774,7 +781,7 @@ function syncTheme(){document.documentElement.setAttribute('data-theme',ls('af_d
 syncTheme();
 
 // ════════════════════════════════════════
-// 36-HOUR FRONTEND TIMELINE CACHE ENGINE
+// TIMELINE CACHE ENGINE
 // ════════════════════════════════════════
 function getCacheKey(suffix) {
   return 'af_local_cache_' + btoa(sKey()).replace(/=/g,'') + '_' + suffix;
@@ -873,7 +880,6 @@ function renderUsageFromCache() {
     return;
   }
 
-  // Edge Function matching keys
   const reqUsed = u.sessionReqUsed !== undefined ? u.sessionReqUsed : 0;
   const tokUsed = u.sessionTokenUsed !== undefined ? u.sessionTokenUsed : 0;
   const reqLimit = WINDOW_REQ_LIMIT;
@@ -935,6 +941,11 @@ function removeLockdown() {
   $('msgInput').placeholder = placeholder;
 }
 
+// ════════════════════════════════════════
+// MODE SETUP
+// ════════════════════════════════════════
+if (typeof _mode === 'undefined') { var _mode = 'af24'; }
+
 function syncLockdownState() {
   const u = loadUsageCache();
   if (!u) { removeLockdown(); return false; }
@@ -957,34 +968,29 @@ function syncLockdownState() {
   return false;
 }
 
-let _mode = 'af24';
-let _convId = null;
-let _convs = [];
-let _loading = false;
-let _filteredConvs = [];
-
 function setMode(m) {
-  const cfg = MODE_CONFIG[m];
+  const normalizedKey = normalizeModeKey(m);
+  const cfg = MODE_CONFIG[normalizedKey];
   if (!cfg) return;
 
-  _mode = m;
-  $('modeTrackBar').setAttribute('data-active', m);
+  _mode = normalizedKey;
+  $('modeTrackBar').setAttribute('data-active', normalizedKey);
 
   document.querySelectorAll('.mode-segment').forEach(el =>
     el.classList.remove('active','active-af','active-dev','active-tapri'));
 
   const segMap = { af24: 'segAF', dev13: 'segDev', tapri: 'segTapri' };
-  const seg = $(segMap[m]);
-  if (seg) seg.classList.add('active', m === 'af24' ? 'active-af' : m === 'dev13' ? 'active-dev' : 'active-tapri');
+  const seg = $(segMap[normalizedKey]);
+  if (seg) seg.classList.add('active', normalizedKey === 'af24' ? 'active-af' : normalizedKey === 'dev13' ? 'active-dev' : 'active-tapri');
 
   $('hdrSub').textContent = cfg.hdr;
 
   $('inputGlowWrap').classList.remove('dev-glow','tapri-glow');
-  if (m === 'dev13') $('inputGlowWrap').classList.add('dev-glow');
-  if (m === 'tapri') $('inputGlowWrap').classList.add('tapri-glow');
+  if (normalizedKey === 'dev13') $('inputGlowWrap').classList.add('dev-glow');
+  if (normalizedKey === 'tapri') $('inputGlowWrap').classList.add('tapri-glow');
 
   const btnColors = { af24: 'var(--p)', dev13: 'var(--dev)', tapri: 'var(--tapri)' };
-  $('sendBtn').style.background = btnColors[m] || 'var(--p)';
+  $('sendBtn').style.background = btnColors[normalizedKey] || 'var(--p)';
 
   if (!$('msgInput').disabled) $('msgInput').placeholder = cfg.placeholder;
 
@@ -1040,39 +1046,6 @@ function chipClick(text) {
 }
 
 // ════════════════════════════════════════
-// EDGE CALL
-// ════════════════════════════════════════
-async function edgeCall(payload) {
-  try {
-    if (!navigator.onLine) return { error: 'Please check your internet connection and try again.' };
-
-    const edgeMode = MODE_MAP[payload.mode] || 'af_proguide';
-    const body = { ...payload, mode: edgeMode, student_key: sKey(), student_name: sName() };
-
-    const res = await fetch(EDGE_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-af-student-key': sKey()
-      },
-      body: JSON.stringify(body)
-    });
-
-    const data = await res.json().catch(() => ({}));
-
-    if (res.status === 429) {
-      return { ...data, limitReached: true, httpStatus: 429 };
-    }
-    if (!res.ok) {
-      return { ...data, httpStatus: res.status };
-    }
-    return data;
-  } catch (e) {
-    return { error: 'Connection error. Please try again.' };
-  }
-}
-
-// ════════════════════════════════════════
 // CONVERSATIONS WITH TIMELINE PERSISTENCE
 // ════════════════════════════════════════
 async function loadConvList() {
@@ -1084,7 +1057,7 @@ async function loadConvList() {
     _convs = (res && res.conversations) ? res.conversations : [];
     _convs = _convs.map(c => ({
       ...c,
-      uiMode: c.mode === 'dev' ? 'dev13' : c.mode === 'tapri' ? 'tapri' : 'af24'
+      uiMode: normalizeModeKey(c.mode)
     }));
     if (_convs.length > 0) {
       saveToLocalTimeline('conversations', _convs);
@@ -1124,8 +1097,8 @@ function renderConvList() {
 
 async function openConv(c) {
   _convId = c.id;
-  const uiMode = c.mode === 'dev' ? 'dev13' : c.mode === 'tapri' ? 'tapri' : 'af24';
-  setMode(uiMode);
+  const targetUiMode = normalizeModeKey(c.mode);
+  setMode(targetUiMode);
   clearChat();
   showGreeting(false);
   renderConvList();
@@ -1136,7 +1109,7 @@ async function openConv(c) {
   let cachedMsgs = loadFromLocalTimeline('messages_' + _convId);
   if (cachedMsgs && cachedMsgs.length > 0) {
     cachedMsgs.forEach(m => {
-      const msgUiMode = m.mode === 'dev' ? 'dev13' : m.mode === 'tapri' ? 'tapri' : 'af24';
+      const msgUiMode = normalizeModeKey(m.mode);
       addMsg(m.role, m.content, msgUiMode, false);
     });
     scrollBot();
@@ -1147,7 +1120,7 @@ async function openConv(c) {
 
     if (res && res.messages && res.messages.length) {
       res.messages.forEach(m => {
-        const msgUiMode = m.mode === 'dev' ? 'dev13' : m.mode === 'tapri' ? 'tapri' : 'af24';
+        const msgUiMode = normalizeModeKey(m.mode);
         addMsg(m.role, m.content, msgUiMode, false);
       });
       saveToLocalTimeline('messages_' + _convId, res.messages);
@@ -1263,12 +1236,14 @@ function addMsg(role, content, mode, scroll) {
   row.className = 'msg-row ' + (isUser ? 'user' : 'ai');
 
   const av = document.createElement('div');
+  const normalizedKey = normalizeModeKey(mode);
+  
   if (isUser) {
     av.className = 'av av-user';
     av.textContent = initials(sName());
   } else {
-    const cfg = MODE_CONFIG[mode] || MODE_CONFIG.af24;
-    av.className = 'av av-ai' + (mode === 'dev13' ? ' dev' : mode === 'tapri' ? ' tapri' : '');
+    const cfg = MODE_CONFIG[normalizedKey] || MODE_CONFIG.af24;
+    av.className = 'av av-ai' + (normalizedKey === 'dev13' ? ' dev' : normalizedKey === 'tapri' ? ' tapri' : '');
     av.textContent = cfg.emoji;
   }
 
@@ -1279,7 +1254,7 @@ function addMsg(role, content, mode, scroll) {
   if (isUser) {
     bub.className = 'bubble bubble-user';
     const bubColors = { af24: 'var(--p)', dev13: 'var(--dev)', tapri: 'var(--tapri)' };
-    bub.style.background = bubColors[mode] || 'var(--p)';
+    bub.style.background = bubColors[normalizedKey] || 'var(--p)';
     bub.textContent = content;
   } else {
     bub.className = 'bubble bubble-ai';
@@ -1289,8 +1264,8 @@ function addMsg(role, content, mode, scroll) {
   const meta = document.createElement('div');
   meta.className = 'msg-meta';
   if (!isUser) {
-    const cfg = MODE_CONFIG[mode] || MODE_CONFIG.af24;
-    meta.innerHTML = `<span class="mode-pill-sm ${mode}">${cfg.label}</span>AcademeForge AI`;
+    const cfg = MODE_CONFIG[normalizedKey] || MODE_CONFIG.af24;
+    meta.innerHTML = `<span class="mode-pill-sm ${normalizedKey}">${cfg.label}</span>AcademeForge AI`;
   } else {
     meta.textContent = sName();
   }
@@ -1396,6 +1371,8 @@ async function doSend() {
     saveUsageCache(res);
   }
 
+  const normalizedResponseMode = normalizeModeKey(res.mode || _mode);
+
   if (res.conversation_id) {
     const isNew = !_convId;
     _convId = res.conversation_id;
@@ -1404,7 +1381,7 @@ async function doSend() {
         id: _convId,
         title: res.conversation_title || 'New Chat',
         mode: res.mode || 'af_proguide',
-        uiMode: _mode
+        uiMode: normalizedResponseMode
       };
       _convs.unshift(nc);
       _filteredConvs.unshift(nc);
@@ -1413,11 +1390,11 @@ async function doSend() {
 
     let currentLocalMsgs = loadFromLocalTimeline('messages_' + _convId) || [];
     currentLocalMsgs.push({ role: 'user', content: content, mode: _mode });
-    currentLocalMsgs.push({ role: 'assistant', content: res.answer, mode: _mode });
+    currentLocalMsgs.push({ role: 'assistant', content: res.answer, mode: normalizedResponseMode });
     saveToLocalTimeline('messages_' + _convId, currentLocalMsgs);
   }
 
-  addMsg('assistant', res.answer, _mode, true);
+  addMsg('assistant', res.answer, normalizedResponseMode, true);
   renderUsageFromCache();
   syncLockdownState();
 }
