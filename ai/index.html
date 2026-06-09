@@ -729,7 +729,7 @@ const SUPABASE_URL = "https://afooyyydhlwngzssgqih.supabase.co";
 const EDGE_URL     = SUPABASE_URL + "/functions/v1/af-ask-ai";
 
 const TOTAL_TOKEN_LIMIT   = 25000;
-const SESSION_TOKEN_LIMIT = 5000; // Calculated runtime limit base reference metric per requirement 
+const SESSION_TOKEN_LIMIT = 3000; // Change updated directly to 3k baseline metric!
 const TOTAL_REQ_LIMIT      = 25;
 const SESSION_REQ_LIMIT   = 5;
 const SESSION_COOLDOWN_H  = 6;
@@ -828,7 +828,7 @@ function updateUsageBar(backendPayload = null){
     if(backendPayload.tokensThisCall !== undefined) currentSessionTokensUsed += backendPayload.tokensThisCall;
   }
 
-  // Pure Token Percentage Calculation Logic Engine Base Matrix
+  // Pure Token Percentage Calculation Logic Engine Base Matrix based on 3000 limit
   const tokenPctRemaining = Math.max(0, 100 - Math.round((currentSessionTokensUsed / SESSION_TOKEN_LIMIT) * 100));
   const reqLeft = Math.max(0, SESSION_REQ_LIMIT - currentSessionRequestsUsed);
   const reqPct = Math.min(100, (currentSessionRequestsUsed / SESSION_REQ_LIMIT) * 100);
@@ -1035,7 +1035,8 @@ function newChat(){
 
 function renderAIContent(rawText){
   const container=document.createElement('div');
-  const parts=rawText.split(/(```[\s\S]*?```)/g);
+  const parts=rawText.split(/(```[\s\S]*?
+```)/g);
   parts.forEach(part=>{
     const codeMatch=part.match(/^```(\w*)\n?([\s\S]*?)```$/);
     if(codeMatch){
@@ -1202,7 +1203,7 @@ function openProfileModal(){
   $('pmSReq').textContent=`${s.sReq||0} / ${SESSION_REQ_LIMIT}`;
   $('pmSReqBar').style.width=Math.min(100,((s.sReq||0)/SESSION_REQ_LIMIT)*100)+'%';
   
-  // Absolute percentage allocation visibility mapping computation metric engine
+  // Absolute percentage allocation visibility mapping computation metric engine using 3000 limit
   const tokenPctRemaining = Math.max(0, 100 - Math.round(((s.sTok||0) / SESSION_TOKEN_LIMIT) * 100));
   $('pmTokPctLabel').textContent = `${tokenPctRemaining}% Allocation Available`;
   $('pmTokBar').style.width = tokenPctRemaining + '%';
