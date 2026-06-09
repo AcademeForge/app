@@ -18,12 +18,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <style>
 /* ════════════════════════════════════════
-    TOKENS
+   TOKENS & THEME RULES
 ════════════════════════════════════════ */
 :root {
   --p:#4f8aff;--p2:#3b6fd4;--p3:#2a52a8;
   --dev:#f97316;--dev2:#ea580c;
-  --bro:#a855f7;--bro2:#7c3aed;
   --ok:#10b981;--err:#ef4444;--amber:#f59e0b;
   --bg:#0d0f14;--surface:#161921;--surface2:#1e2230;--surface3:#242838;
   --card:#1a1d28;--border:#2a2f3d;--border2:#353a4d;
@@ -39,18 +38,18 @@
   --ease:cubic-bezier(.22,1,.36,1);
   --spring:cubic-bezier(.34,1.56,.64,1);
   
-  /* Gemini Glow Gradients */
+  /* Gemini-style AcademeForge Animated Gradients */
   --gemini-glow: linear-gradient(90deg, #4f8aff, #a855f7, #f43f5e, #4f8aff);
   --gemini-glow-dev: linear-gradient(90deg, #f97316, #ea580c, #ef4444, #f97316);
 }
+
 [data-theme="light"]{
-  --bg:#0a0c10; 
-  --surface:#ffffff;--surface2:#f3f5fc;--surface3:#e8eaf5;
-  --card:#ffffff;--border:rgba(79,138,255,.14);--border2:rgba(79,138,255,.22);
-  --inp:#f3f5fc;--grp:rgba(79,138,255,.06);
-  --t1:#0f1123;--t2:#4b5569;--tm:#9499b7;
-  --sh:0 2px 12px rgba(0,0,0,.07);--she:0 8px 32px rgba(0,0,0,.12);
-  --shb:0 4px 18px rgba(79,138,255,.28);
+  --bg:#f4f6fa;--surface:#ffffff;--surface2:#eef2fc;--surface3:#e0e7ff;
+  --card:#ffffff;--border:rgba(79,138,255,.16);--border2:rgba(79,138,255,.28);
+  --inp:#eef2fc;--grp:rgba(79,138,255,.06);
+  --t1:#0b0d17;--t2:#334155;--tm:#64748b;
+  --sh:0 4px 14px rgba(0,0,0,.05);--she:0 12px 36px rgba(79,138,255,.1);
+  --shb:0 4px 18px rgba(79,138,255,.2);
 }
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -58,7 +57,7 @@
 html,body{
   height:100%;
   font-family:var(--font-body);
-  background:#05070a; 
+  background:#05070a; /* True pitch black desktop space background */
   color:var(--t1);
   overflow:hidden;
 }
@@ -78,7 +77,7 @@ textarea,input{font-family:var(--font-body);}
 *{-webkit-user-select:text;-moz-user-select:text;user-select:text;-webkit-touch-callout:default;}
 
 /* ════════════════════════════════════════
-   APP SHELL — Strict Mobile Phone Persona
+   APP SHELL — Desktop Mobile View Enforcer
 ════════════════════════════════════════ */
 #app{
   display:flex;flex-direction:column;
@@ -86,18 +85,19 @@ textarea,input{font-family:var(--font-body);}
   width:100%;
   max-width:var(--shell);
   position:relative;
-  background:linear-gradient(to bottom, var(--bg), var(--surface));
+  background:var(--bg);
   overflow:hidden;
   transition: box-shadow 0.3s;
 }
 
+/* Transform into a high-end mobile frame context on laptops/desktops */
 @media(min-width:480px){
   #app{
-    border: 6px solid #222530;
-    border-radius:40px;
+    border: 8px solid #1e2230;
+    border-radius:42px;
     height:calc(100dvh - 40px);
     max-height:860px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.04);
   }
 }
 
@@ -106,8 +106,8 @@ textarea,input{font-family:var(--font-body);}
 ════════════════════════════════════════ */
 #overlay{
   position:absolute;inset:0;z-index:400;
-  background:rgba(0,0,0,.6);
-  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+  background:rgba(0,0,0,.5);
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
   opacity:0;visibility:hidden;
   transition:opacity .25s,visibility .25s;
 }
@@ -123,11 +123,10 @@ textarea,input{font-family:var(--font-body);}
   border-right:1px solid var(--border);
   display:flex;flex-direction:column;
   transform:translateX(-100%);
-  transition:transform .24s var(--ease);
+  transition:transform .28s var(--ease);
   box-shadow:var(--she);
   overflow:hidden;
   left:0;
-  will-change: transform;
 }
 #drawer.open{transform:translateX(0);}
 
@@ -136,67 +135,36 @@ textarea,input{font-family:var(--font-body);}
   padding:14px 14px 10px;
   border-bottom:1px solid var(--border);
 }
-
-/* Premium Navigation Button Upgrade */
-.dr-back {
-  display: flex; align-items: center; gap: 8px;
-  padding: 10px 14px; border-radius: var(--r2);
-  font-size: 13px; font-weight: 700; color: var(--t1);
-  background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-  border: 1px solid var(--border2);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  margin-bottom: 14px; width: 100%;
-  transition: all .2s var(--ease);
+.dr-back{
+  display:flex;align-items:center;gap:7px;
+  padding:7px 10px;border-radius:var(--r2);
+  font-size:12.5px;font-weight:700;color:var(--t2);
+  background:var(--surface2);border:1px solid var(--border);
+  margin-bottom:14px;width:fit-content;
+  transition:background .14s,color .14s;
 }
-.dr-back:hover {
-  background: var(--surface3);
-  border-color: var(--p);
-  transform: translateY(-1px);
-}
-.dr-back svg { width: 16px; height: 16px; stroke: var(--p); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.dr-back:hover{background:var(--surface3);color:var(--t1);}
+.dr-back svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
 
 .dr-profile-card{
   display:flex;align-items:center;gap:10px;
   padding:11px 12px;border-radius:var(--r2);
   background:var(--surface2);border:1px solid var(--border);
   margin-bottom:10px;cursor:pointer;
-  transition:background .14s,border-color .14s;
 }
-.dr-profile-card:hover{background:var(--surface3);border-color:var(--border2);}
 .dr-avatar{
-  width:38px;height:38px;border-radius:11px;flex-shrink:0;
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
   background:linear-gradient(135deg,var(--p),#a855f7);
   display:grid;place-items:center;font-size:13px;font-weight:800;color:#fff;
-  box-shadow:0 2px 8px rgba(79,138,255,.3);
 }
 .dr-profile-info{flex:1;min-width:0;}
 .dr-profile-name{font-size:13px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .dr-profile-sub{font-size:10.5px;color:var(--tm);margin-top:1px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
 .dr-profile-btn{
   flex-shrink:0;padding:5px 10px;border-radius:var(--rf);
   font-size:10.5px;font-weight:800;color:var(--p);
   background:rgba(79,138,255,.12);border:1px solid rgba(79,138,255,.2);
-  transition:background .12s;cursor:pointer;
-}
-.dr-profile-btn:hover{background:rgba(79,138,255,.2);}
-
-.dr-model-row{display:flex;gap:4px;flex-wrap:nowrap;}
-.model-btn{
-  flex:1;padding:8px 4px;border-radius:var(--r1);
-  font-size:11px;font-weight:700;color:var(--t2);
-  background:var(--surface2);border:1.5px solid var(--border);
-  text-align:center;transition:all .15s var(--ease);cursor:pointer;
-  position: relative; white-space: nowrap;
-}
-.model-btn.active-af{background:rgba(79,138,255,.12);border-color:var(--p);color:var(--p);box-shadow: 0 0 10px rgba(79,138,255,0.2);}
-.model-btn.active-dev{background:rgba(249,115,22,.10);border-color:var(--dev);color:var(--dev);box-shadow: 0 0 10px rgba(249,115,22,0.2);}
-.model-btn.disabled{opacity: 0.6; cursor: not-allowed;}
-
-.soon-badge {
-  position: absolute; top: -6px; right: -2px;
-  background: var(--bro); color: #fff; font-size: 8px;
-  padding: 1px 4px; border-radius: var(--rf); font-weight: 900;
-  text-transform: uppercase; border: 1px solid var(--bg);
 }
 
 .dr-new-btn{
@@ -204,30 +172,26 @@ textarea,input{font-family:var(--font-body);}
   font-size:13px;font-weight:700;color:var(--t1);
   background:var(--surface2);border:1px solid var(--border);
   display:flex;align-items:center;gap:8px;
-  transition:background .14s,border-color .14s;cursor:pointer;
+  transition:background .14s;cursor:pointer;
 }
-.dr-new-btn:hover{background:var(--surface3);border-color:var(--border2);}
-.dr-new-btn svg{width:15px;height:15px;stroke:var(--p);fill:none;stroke-width:2;stroke-linecap:round;}
+.dr-new-btn:hover{background:var(--surface3);}
+.dr-new-btn svg{width:15px;height:15px;stroke:var(--p);fill:none;stroke-width:2;}
 
 .dr-search-wrap{padding:10px 14px 0;flex-shrink:0;}
 .dr-search{
   width:100%;padding:8px 12px;border-radius:var(--r2);
   background:var(--surface2);border:1px solid var(--border);
   color:var(--t1);font-size:12.5px;outline:none;
-  transition:border-color .14s;
 }
 .dr-search::placeholder{color:var(--tm);}
-.dr-search:focus{border-color:var(--p);}
 
 .dr-conv-label{
-  padding:10px 14px 4px;
+  padding:12px 14px 4px;
   font-size:10px;font-weight:800;color:var(--tm);
   text-transform:uppercase;letter-spacing:.08em;
   display:flex;align-items:center;justify-content:space-between;
-  flex-shrink:0;
 }
-.dr-clear-btn{font-size:11px;font-weight:700;color:var(--err);opacity:.7;transition:opacity .12s;cursor:pointer;}
-.dr-clear-btn:hover{opacity:1;}
+.dr-clear-btn{font-size:11px;font-weight:700;color:var(--err);opacity:.7;}
 
 #convList{flex:1;overflow-y:auto;padding:0 8px 10px;}
 .conv-item{
@@ -235,7 +199,7 @@ textarea,input{font-family:var(--font-body);}
   padding:9px 10px;border-radius:var(--r2);
   cursor:pointer;border:1px solid transparent;
   margin-bottom:2px;min-width:0;
-  transition:background .12s,border-color .12s;
+  transition:background .12s;
 }
 .conv-item:hover{background:var(--surface2);}
 .conv-item.active{background:var(--surface3);border-color:var(--border);}
@@ -244,25 +208,23 @@ textarea,input{font-family:var(--font-body);}
 .conv-dot.dev39{background:var(--dev);}
 .conv-title{flex:1;min-width:0;font-size:12.5px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .conv-item.active .conv-title{color:var(--t1);font-weight:600;}
+
 .conv-del{
   flex-shrink:0;opacity:0;background:none;border:none;
-  color:var(--tm);padding:3px;border-radius:5px;cursor:pointer;
-  transition:opacity .12s,color .12s;
+  color:var(--tm);padding:3px;border-radius:5px;
 }
 .conv-item:hover .conv-del{opacity:1;}
-.conv-del:hover{color:var(--err);}
-.conv-del svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;}
-.conv-empty{padding:24px 12px;text-align:center;font-size:12px;color:var(--tm);line-height:1.6;}
+.conv-del svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;}
 
 .dr-footer{
   flex-shrink:0;border-top:1px solid var(--border);
   padding:12px 14px 14px;
   background:var(--surface);
 }
-.dr-usage-title{font-size:11px;font-weight:800;color:var(--tm);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+.dr-usage-title{font-size:11px;font-weight:800;color:var(--tm);text-transform:uppercase;margin-bottom:10px;}
 .usage-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
 .usage-label{font-size:11.5px;color:var(--t2);font-weight:600;}
-.usage-val{font-size:11px;color:var(--tm);font-family:monospace;font-weight:600;}
+.usage-val{font-size:11px;color:var(--tm);font-family:monospace;}
 .usage-track{height:5px;background:var(--surface3);border-radius:99px;overflow:hidden;margin-bottom:9px;}
 .usage-fill{height:100%;border-radius:99px;background:var(--p);transition:width .4s var(--ease);}
 
@@ -281,10 +243,8 @@ textarea,input{font-family:var(--font-body);}
   width:36px;height:36px;border-radius:var(--r2);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
   background:var(--surface2);border:1px solid var(--border);
-  flex-shrink:0;transition:background .14s,opacity .2s;
-  cursor:pointer;
+  flex-shrink:0;cursor:pointer;
 }
-.hdr-menu:hover{background:var(--surface3);}
 .hdr-menu span{display:block;width:17px;height:1.5px;background:var(--t2);border-radius:99px;}
 .hdr-menu.hide{opacity:0;pointer-events:none;}
 
@@ -293,42 +253,12 @@ textarea,input{font-family:var(--font-body);}
 .hdr-sub{font-size:10.5px;color:var(--tm);font-weight:600;margin-top:1px;}
 
 .hdr-free-badge{
-  flex-shrink:0;
-  padding:4px 10px;border-radius:var(--r2);
+  flex-shrink:0;padding:4px 10px;border-radius:var(--r2);
   font-size:10.5px;font-weight:800;letter-spacing:.03em;
-  background:rgba(16,185,129,.12);
-  border:1px solid rgba(16,185,129,.25);
-  color:var(--ok);
-  animation:freeBlink 2s ease-in-out infinite;
-  white-space:nowrap;
+  background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);
+  color:var(--ok);animation:freeBlink 2s ease-in-out infinite;
 }
 @keyframes freeBlink{ 0%,100%{opacity:1;} 50%{opacity:.45;} }
-
-/* ════════════════════════════════════════
-   WARNING BANNERS
-════════════════════════════════════════ */
-.warn-banner{
-  margin:8px 14px 0;
-  padding:9px 12px;border-radius:var(--r2);
-  font-size:12px;font-weight:700;
-  display:flex;align-items:center;justify-content:space-between;gap:8px;
-  border:1px solid;flex-shrink:0;
-  animation:fadeUp .25s var(--ease) both;
-}
-.warn-banner.warn{background:rgba(245,158,11,.09);border-color:rgba(245,158,11,.28);color:var(--amber);}
-.warn-banner.err{background:rgba(239,68,68,.09);border-color:rgba(239,68,68,.25);color:var(--err);}
-.warn-banner .dismiss{background:none;border:none;color:inherit;opacity:.7;font-size:16px;cursor:pointer;padding:0 2px;line-height:1;}
-
-#sessionBanner{
-  margin:10px 14px 0;
-  padding:10px 14px;border-radius:var(--r2);
-  font-size:12.5px;font-weight:700;
-  display:flex;align-items:center;gap:8px;
-  border:1px solid;flex-shrink:0;
-  animation:fadeUp .25s var(--ease) both;
-}
-#sessionBanner.warn{background:rgba(245,158,11,.09);border-color:rgba(245,158,11,.28);color:var(--amber);}
-#sessionBanner.err{background:rgba(239,68,68,.09);border-color:rgba(239,68,68,.25);color:var(--err);}
 
 /* ════════════════════════════════════════
    CHAT AREA
@@ -340,27 +270,29 @@ textarea,input{font-family:var(--font-body);}
   scroll-behavior:smooth;
 }
 
-#greeting{padding:40px 0 28px;animation:fadeUp .5s var(--ease) both;}
+#greeting{padding:30px 0 20px;animation:fadeUp .5s var(--ease) both;}
 .greeting-time{font-size:11px;font-weight:700;color:var(--tm);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
 .greeting-main{font-family:var(--font-display);font-size:24px;font-weight:800;color:var(--t1);line-height:1.25;margin-bottom:6px;}
 .greeting-sub{font-size:13.5px;color:var(--t2);font-weight:500;margin-bottom:20px;}
 .suggestion-chips{display:flex;flex-wrap:wrap;gap:8px;}
 
+/* 🌟 Gemini Glow Interaction Model Configuration */
 .chip{
   padding:8px 16px;border-radius:var(--rf);
-  font-size:12.5px;font-weight:600;color:var(--t1);
-  background:var(--surface2);
-  border:1px solid var(--border);
+  font-size:12.5px;font-weight:600;color:var(--t2);
+  background:var(--surface2);border:1px solid var(--border);
   cursor:pointer;position:relative;
-  transition: transform 0.2s, color 0.2s;
+  transition: transform 0.2s, color 0.2s, background 0.2s;
 }
 .chip:hover{
   transform: translateY(-2px);
   color: #fff;
   border-color: transparent;
   background: var(--surface3);
-  box-shadow: 0 4px 14px rgba(79,138,255,0.25);
+  box-shadow: 0 4px 14px rgba(79,138,255,0.2);
 }
+[data-theme="light"] .chip:hover { color: #000; }
+
 .chip:hover::before {
   content: ''; position: absolute; inset: -1px; border-radius: var(--rf);
   padding: 1px; background: var(--gemini-glow);
@@ -370,9 +302,9 @@ textarea,input{font-family:var(--font-body);}
 }
 
 /* ════════════════════════════════════════
-   MESSAGES
+   MESSAGES LAYOUT
 ════════════════════════════════════════ */
-.msg-row{display:flex;gap:10px;padding:6px 0;animation:fadeUp .22s var(--ease) both;}
+.msg-row{display:flex;gap:10px;padding:8px 0;animation:fadeUp .22s var(--ease) both;}
 .msg-row.user{flex-direction:row-reverse;}
 
 .av{
@@ -390,8 +322,8 @@ textarea,input{font-family:var(--font-body);}
 
 .bubble{padding:10px 14px;border-radius:var(--r3);font-size:14px;line-height:1.65;word-break:break-word;}
 .bubble-ai{background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:4px;color:var(--t1);}
-.bubble-user{background:var(--p);border-bottom-right-radius:4px;color:#fff;box-shadow:0 2px 12px rgba(79,138,255,.2);white-space:pre-wrap;}
-.bubble-user-dev{background:var(--dev);box-shadow:0 2px 12px rgba(249,115,22,.2);}
+.bubble-user{background:var(--p);border-bottom-right-radius:4px;color:#fff;box-shadow:0 2px 12px rgba(79,138,255,.15);white-space:pre-wrap;}
+.bubble-user-dev{background:var(--dev);box-shadow:0 2px 12px rgba(249,115,22,.15);}
 
 .bubble-ai .ai-para{margin-bottom:8px;}
 .bubble-ai .ai-para:last-child{margin-bottom:0;}
@@ -406,9 +338,7 @@ textarea,input{font-family:var(--font-body);}
   border-bottom:1px solid rgba(255,255,255,.05);
 }
 .code-lang-label{font-size:10.5px;font-weight:800;color:#8892a4;font-family:monospace;}
-
-.code-block-wrap pre{margin:0; padding:12px; overflow-x:auto; font-size:12.5px; background:transparent !important;}
-.code-block-wrap pre code{font-family:monospace; background:transparent !important;}
+.code-block-wrap pre{margin:0; padding:12px; overflow-x:auto; font-size:12.5px;}
 .bubble-ai code.inline-code{font-family:monospace; font-size:12px; padding:2px 5px; border-radius:4px; background:var(--surface3); color:var(--p);}
 
 .msg-meta{font-size:10.5px;color:var(--tm);font-weight:600;margin-top:2px;}
@@ -425,33 +355,94 @@ textarea,input{font-family:var(--font-body);}
 @keyframes dotBounce{0%,80%,100%{transform:translateY(0);opacity:.3;}40%{transform:translateY(-5px);opacity:1;}}
 
 /* ════════════════════════════════════════
+   📐 PRODUCTION 3-WAY SEGMENT MODE SELECTOR
+════════════════════════════════════════ */
+.mode-selector-container {
+  padding: 10px 14px 4px;
+  background: var(--bg);
+  flex-shrink: 0;
+}
+.mode-track-bar {
+  display: flex;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 3px;
+  position: relative;
+}
+.mode-segment {
+  flex: 1;
+  padding: 8px 4px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--t2);
+  text-align: center;
+  border-radius: calc(var(--r2) - 2px);
+  position: relative;
+  z-index: 2;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.mode-segment.active {
+  color: #fff;
+}
+[data-theme="light"] .mode-segment.active-af { color: var(--p3); }
+[data-theme="light"] .mode-segment.active-dev { color: var(--dev2); }
+
+.mode-segment .badge-soon {
+  font-size: 8px;
+  background: #a855f7;
+  color: #fff;
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.slider-pill {
+  position: absolute;
+  top: 3px; bottom: 3px; left: 3px;
+  width: calc(33.333% - 2px);
+  background: var(--surface3);
+  border-radius: calc(var(--r2) - 2px);
+  z-index: 1;
+  transition: transform 0.25s var(--ease), background 0.25s, box-shadow 0.25s;
+}
+
+/* Selector Slide States */
+.mode-track-bar[data-active="af24"] .slider-pill {
+  transform: translateX(0);
+  background: var(--p);
+  box-shadow: 0 2px 10px rgba(79,138,255,0.3);
+}
+.mode-track-bar[data-active="dev39"] .slider-pill {
+  transform: translateX(100%);
+  background: var(--dev);
+  box-shadow: 0 2px 10px rgba(249,115,22,0.3);
+}
+.mode-track-bar[data-active="bigbro"] .slider-pill {
+  transform: translateX(200%);
+  background: var(--surface3);
+  box-shadow: none;
+}
+
+/* ════════════════════════════════════════
    ✨ GEMINI GLOW INPUT CONTAINER
 ════════════════════════════════════════ */
 #inputArea{
   position:absolute;bottom:0;left:0;right:0;
-  background:linear-gradient(transparent, var(--bg) 30%);
-  padding:12px 14px 14px;
+  background:linear-gradient(transparent, var(--bg) 25%);
+  padding:16px 14px 14px;
   z-index:200;
 }
-
-/* Dual-Model In-Keyboard Inline Selector Matrix */
-.keyboard-selectors {
-  display: flex; gap: 6px; margin-bottom: 8px; padding: 0 4px;
-}
-.kb-btn {
-  padding: 6px 12px; border-radius: var(--r1); font-size: 11px;
-  font-weight: 700; color: var(--t2); background: var(--surface2);
-  border: 1px solid var(--border); transition: all 0.2s; position: relative;
-}
-.kb-btn.active-af { background: rgba(79,138,255,0.1); border-color: var(--p); color: var(--p); }
-.kb-btn.active-dev { background: rgba(249,115,22,0.1); border-color: var(--dev); color: var(--dev); }
-
 .input-glow-wrapper {
   position: relative;
   border-radius: var(--r3);
   padding: 1px;
   background: var(--border2);
-  transition: background 0.25s;
+  transition: background 0.25s, box-shadow 0.25s;
 }
 
 .input-glow-wrapper:focus-within {
@@ -493,15 +484,14 @@ textarea,input{font-family:var(--font-body);}
   background:var(--p);color:#fff;
   transition:transform .15s var(--spring), opacity .12s;
 }
-#sendBtn:disabled{opacity:.3;cursor:not-allowed;}
+#sendBtn:disabled{opacity:.25;cursor:not-allowed;}
 #sendBtn:not(:disabled):active{transform:scale(.92);}
 #sendBtn svg{width:15px;height:15px;fill:currentColor;}
 
 .input-hint{font-size:10.5px;color:var(--tm);font-weight:600;text-align:right;margin-top:6px;display:flex;justify-content:space-between;padding:0 4px;}
-.input-hint .warn-txt{color:var(--err);}
 
 /* ════════════════════════════════════════
-   LOCKED STATE / PROFILE MODAL
+   MODALS / TOASTS
 ════════════════════════════════════════ */
 #lockedBox{flex:1;display:none;align-items:center;justify-content:center;padding:24px;}
 #lockedBox.visible{display:flex;}
@@ -514,15 +504,10 @@ textarea,input{font-family:var(--font-body);}
 .modal-overlay{
   position:absolute;inset:0;z-index:9999;
   display:flex;align-items:center;justify-content:center;
-  padding:16px;background:rgba(0,0,0,.65);
+  padding:16px;background:rgba(0,0,0,.6);
   backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
 }
-.modal-card{
-  width:100%;max-width:360px;
-  background:var(--surface);border:1px solid var(--border2);
-  border-radius:var(--r3);box-shadow:var(--she);
-  overflow:hidden;animation:modalIn .26s var(--spring) both;
-}
+.modal-card{width:100%;max-width:360px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r3);box-shadow:var(--she);overflow:hidden;animation:modalIn .26s var(--spring) both;}
 .modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);}
 .modal-head h4{font-family:var(--font-display);font-size:15px;font-weight:800;color:var(--t1);}
 .modal-close{font-size:22px;color:var(--tm);cursor:pointer;}
@@ -547,6 +532,12 @@ textarea,input{font-family:var(--font-body);}
 
 #toastWrap{position:absolute;left:50%;bottom:84px;transform:translateX(-50%);z-index:99999;width:calc(100% - 28px);pointer-events:none;}
 .toast{display:flex;align-items:flex-start;gap:10px;background:var(--surface);color:var(--t1);border:1px solid var(--border2);border-radius:12px;padding:10px 14px;box-shadow:var(--she);animation:fadeUp .22s ease;}
+.toast.err { border-left: 4px solid var(--err); }
+.toast.info { border-left: 4px solid var(--p); }
+.toast-body { flex: 1; }
+.toast-title { font-size: 12px; font-weight: 800; margin-bottom: 2px; }
+.toast-msg { font-size: 11.5px; color: var(--t2); }
+.toast-x { font-size: 18px; color: var(--tm); cursor: pointer; font-weight: 700; }
 
 .hidden { display: none !important; }
 
@@ -575,12 +566,6 @@ textarea,input{font-family:var(--font-body);}
         <button class="dr-profile-btn" onclick="event.stopPropagation();openProfileModal()">View</button>
       </div>
 
-      <div class="dr-model-row" id="drModelRow">
-        <button class="model-btn active-af" id="drBtnAF" onclick="setMode('af24')">AF 2.4</button>
-        <button class="model-btn" id="drBtnDev" onclick="setMode('dev39')">Dev 3.9 Pro</button>
-        <button class="model-btn disabled" id="drBtnBro" disabled>Big Bro 2.0 <span class="soon-badge">Soon</span></button>
-      </div>
-
       <button class="dr-new-btn" onclick="newChat()">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         New Chat
@@ -606,7 +591,7 @@ textarea,input{font-family:var(--font-body);}
     <div class="dr-footer">
       <div class="dr-usage-title">AI Usage Today</div>
       <div class="usage-row">
-        <span class="usage-label">Requests Left</span>
+        <span class="usage-label">Requests</span>
         <span class="usage-val" id="drReqVal">— / 5</span>
       </div>
       <div class="usage-track">
@@ -634,6 +619,15 @@ textarea,input{font-family:var(--font-body);}
     <div class="hdr-free-badge" id="hdrFreeBadge">✦ Free</div>
   </header>
 
+  <div class="mode-selector-container" id="modeSelectorArea">
+    <div class="mode-track-bar" id="modeTrackBar" data-active="af24">
+      <div class="slider-pill"></div>
+      <div class="mode-segment active" id="segAF" onclick="setMode('af24')">AF 2.4</div>
+      <div class="mode-segment" id="segDev" onclick="setMode('dev39')">Dev 3.9 Pro</div>
+      <div class="mode-segment" id="segBigBro" onclick="setMode('bigbro')">Big Bro <span class="badge-soon">Soon</span></div>
+    </div>
+  </div>
+
   <div id="warnBannerWrap"></div>
   <div id="sessionBanner" class="hidden"></div>
 
@@ -657,11 +651,6 @@ textarea,input{font-family:var(--font-body);}
   </div>
 
   <div id="inputArea" class="hidden">
-    <div class="keyboard-selectors">
-      <button class="kb-btn active-af" id="kbBtnAF" onclick="setMode('af24')">AF 2.4</button>
-      <button class="kb-btn" id="kbBtnDev" onclick="setMode('dev39')">Dev 3.9 Pro</button>
-      <button class="kb-btn" style="opacity:0.6; cursor:not-allowed;" disabled>Big Bro <span class="soon-badge" style="top:-4px; right:-6px;">Soon</span></button>
-    </div>
     <div class="input-glow-wrapper" id="inputGlowWrap">
       <div class="input-box">
         <textarea id="msgInput" rows="1" placeholder="Ask AF 2.4 anything…"
@@ -726,9 +715,9 @@ textarea,input{font-family:var(--font-body);}
 const SUPABASE_URL = "https://afooyyydhlwngzssgqih.supabase.co";
 const EDGE_URL     = SUPABASE_URL + "/functions/v1/af-ask-ai";
 
-const TOTAL_TOKEN_LIMIT   = 15000;
-const SESSION_TOKEN_LIMIT = 3750;
-const TOTAL_REQ_LIMIT      = 20;
+const TOTAL_TOKEN_LIMIT   = 25000;
+const SESSION_TOKEN_LIMIT = 5000;
+const TOTAL_REQ_LIMIT      = 25;
 const SESSION_REQ_LIMIT   = 5;
 const SESSION_COOLDOWN_H  = 6;
 
@@ -754,12 +743,12 @@ let _tTimer=null;
 function toast(msg,type='info',title=''){
   const w=$('toastWrap'); w.innerHTML='';
   if(_tTimer){clearTimeout(_tTimer);_tTimer=null;}
-  const labels={ok:'Done',err:'Error',info:'Notice'};
+  const labels={ok:'Success',err:'Notice',info:'Notice'};
   const d=document.createElement('div');
   d.className='toast '+type;
-  d.innerHTML=`<div class="toast-body"><div class="toast-title">${title||labels[type]||'Info'}</div><div class="toast-msg">${msg}</div></div><span class="toast-x" onclick="this.parentElement.remove()">×</span>`;
+  d.innerHTML=`<div class="toast-body"><div class="toast-title">${title||labels[type]||'Notice'}</div><div class="toast-msg">${msg}</div></div><span class="toast-x" onclick="this.parentElement.remove()">×</span>`;
   w.appendChild(d);
-  _tTimer=setTimeout(()=>{if(d.parentNode){d.style.transform='translateY(12px)';d.style.opacity='0';d.style.transition='all .22s';setTimeout(()=>d.remove(),220);}},3200);
+  _tTimer=setTimeout(()=>{if(d.parentNode){d.style.opacity='0';d.style.transition='all .22s';setTimeout(()=>d.remove(),220);}},3500);
 }
 
 function openDrawer(){
@@ -772,38 +761,6 @@ function openDrawer(){
 function closeDrawer(){
   $('drawer').classList.remove('open');
   $('overlay').classList.remove('open');
-}
-
-/* ════════════════════════════════════════
-   FINGER SWIPE TO GESTURE CONTROLLER
-════════════════════════════════════════ */
-let touchStartX = 0;
-let touchStartY = 0;
-let touchEndX = 0;
-let touchEndY = 0;
-
-document.addEventListener('touchstart', e => {
-  touchStartX = e.changedTouches[0].screenX;
-  touchStartY = e.changedTouches[0].screenY;
-}, {passive: true});
-
-document.addEventListener('touchend', e => {
-  touchEndX = e.changedTouches[0].screenX;
-  touchEndY = e.changedTouches[0].screenY;
-  handleSwipeGesture();
-}, {passive: true});
-
-function handleSwipeGesture() {
-  const xDiff = touchEndX - touchStartX;
-  const yDiff = touchEndY - touchStartY;
-  
-  if (Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > 40) {
-    if (xDiff > 0 && touchStartX < 50 && !$('drawer').classList.contains('open')) {
-      openDrawer();
-    } else if (xDiff < 0 && $('drawer').classList.contains('open')) {
-      closeDrawer();
-    }
-  }
 }
 
 function syncHamburger(){
@@ -833,71 +790,63 @@ function saveSes(s){try{localStorage.setItem(sesKey(),JSON.stringify(s));}catch{
 function dayReset(s){if(s.day!==today()){Object.assign(s,{start:null,sTok:0,sReq:0,totTok:0,totReq:0,day:today()});}return s;}
 function cdMs(s){if(!s.start) return 0;return Math.max(0,SESSION_COOLDOWN_H*3600000-(Date.now()-new Date(s.start).getTime()));}
 function fmtCd(ms){const h=Math.floor(ms/3600000),m=Math.ceil((ms%3600000)/60000);return h>0?`${h}h ${m}m`:`${m}m`;}
-
-/* Unlocked continuous asking mechanism - strictly restricted to 3.7k token cap threshold rules */
 function sesOk(s){
+  if(s.start&&cdMs(s)>0&&s.sTok<SESSION_TOKEN_LIMIT&&s.sReq<SESSION_REQ_LIMIT) return{ok:true};
   if(s.totTok>=TOTAL_TOKEN_LIMIT) return{ok:false,why:'total_tokens'};
   if(s.totReq>=TOTAL_REQ_LIMIT)   return{ok:false,why:'total_reqs'};
-  if(s.sTok>=SESSION_TOKEN_LIMIT) return{ok:false,why:'session_tokens'};
-  if(s.sReq>=SESSION_REQ_LIMIT)   return{ok:false,why:'session_reqs'};
-  
-  const cd = cdMs(s);
-  if(cd > 0 && s.sTok >= SESSION_TOKEN_LIMIT) return{ok:false,why:'cooldown',ms:cd};
-  return{ok:true};
+  const cd=cdMs(s);
+  if(cd>0) return{ok:false,why:'cooldown',ms:cd};
+  return{ok:true,new:true};
 }
 function startSes(s){s.start=new Date().toISOString();s.sTok=0;s.sReq=0;return s;}
 
-function updateUsageBar(){
+function updateUsageBar(backendPayload = null){
+  if(backendPayload) {
+    $('drReqVal').textContent = `${backendPayload.sessionReqLimit - backendPayload.sessionReqUsed} / ${backendPayload.sessionReqLimit}`;
+    $('drTokVal').textContent = `${(backendPayload.dailyTokenUsed / 1000).toFixed(1)}k / 25k`;
+    $('drReqBar').style.width = Math.min(100,(backendPayload.sessionReqUsed / backendPayload.sessionReqLimit)*100)+'%';
+    $('drTokBar').style.width = Math.min(100,(backendPayload.dailyTokenUsed / backendPayload.dailyTokenLimit)*100)+'%';
+    return;
+  }
   const s=dayReset(getSes());
   const reqLeft=Math.max(0,SESSION_REQ_LIMIT-s.sReq);
-  const reqUsed=s.sReq;
-  const tokUsed=s.totTok;
-  const tokK=(tokUsed/1000).toFixed(1);
-  const reqPct=Math.min(100,(reqUsed/SESSION_REQ_LIMIT)*100);
-  const tokPct=Math.min(100,(tokUsed/TOTAL_TOKEN_LIMIT)*100);
+  const reqPct=Math.min(100,(s.sReq/SESSION_REQ_LIMIT)*100);
+  const tokPct=Math.min(100,(s.totTok/TOTAL_TOKEN_LIMIT)*100);
   $('drReqVal').textContent=`${reqLeft} / ${SESSION_REQ_LIMIT}`;
-  $('drTokVal').textContent=`${tokK}k / 15k`;
+  $('drTokVal').textContent=`${(s.totTok/1000).toFixed(1)}k / 25k`;
   $('drReqBar').style.width=reqPct+'%';
   $('drTokBar').style.width=tokPct+'%';
   const cd=cdMs(s);
   $('drSessInfo').textContent=cd>0?`Next session in ${fmtCd(cd)}`:`4 sessions/day · 6h cooldown`;
 }
 
-const _shownBanners=new Set();
-function checkWarningBanners(s){
-  const wrap=$('warnBannerWrap');
-  const tokPct=(s.totTok/TOTAL_TOKEN_LIMIT)*100;
-  const reqLeft=Math.max(0,SESSION_REQ_LIMIT-s.sReq);
-  function addBanner(key,type,msg){
-    if(_shownBanners.has(key)) return;
-    _shownBanners.add(key);
-    const el=document.createElement('div');
-    el.className=`warn-banner ${type}`;
-    el.innerHTML=`<span>${msg}</span><button class="dismiss" onclick="this.parentElement.remove()">×</button>`;
-    wrap.appendChild(el);
-  }
-  if(tokPct>=90) addBanner('tok90','err','🚨 90% tokens used today');
-  if(reqLeft===1) addBanner('req1','warn','⚠️ 1 request remaining this session');
-}
-
 function setMode(m){
+  if(m === 'bigbro') {
+    toast("Big Bro mode is coming soon! Stay tuned.", "info");
+    return;
+  }
   _mode=m;
-  $('drBtnAF').className='model-btn'+(m==='af24'?' active-af':'');
-  $('drBtnDev').className='model-btn'+(m==='dev39'?' active-dev':'');
+  $('modeTrackBar').setAttribute('data-active', m);
   
-  $('kbBtnAF').className='kb-btn'+(m==='af24'?' active-af':'');
-  $('kbBtnDev').className='kb-btn'+(m==='dev39'?' active-dev':'');
+  const segments = document.querySelectorAll('.mode-segment');
+  segments.forEach(el => el.classList.remove('active', 'active-af', 'active-dev'));
   
-  $('hdrSub').textContent=m==='dev39'?'Dev 3.9 · Founder Mode':'AF 2.4 · Student Mentor';
-  
-  if(m === 'dev39') {
-    $('inputGlowWrap').className='input-glow-wrapper dev-glow';
-    $('sendBtn').style.background='var(--dev)';
-    $('msgInput').placeholder='Ask Dev 3.9 anything…';
-  } else {
-    $('inputGlowWrap').className='input-glow-wrapper';
+  if(m === 'af24') {
+    $('segAF').classList.add('active', 'active-af');
+    $('hdrSub').textContent='AF 2.4 · Student Mentor';
+    $('inputGlowWrap').classList.remove('dev-glow');
     $('sendBtn').style.background='var(--p)';
     $('msgInput').placeholder='Ask AF 2.4 anything…';
+  } else if(m === 'dev39') {
+    $('segDev').classList.add('active', 'active-dev');
+    $('hdrSub').textContent='Dev 3.9 · Founder Mode';
+    $('inputGlowWrap').classList.add('dev-glow');
+    $('sendBtn').style.background='var(--dev)';
+    $('msgInput').placeholder='Ask Dev 3.9 anything…';
+  }
+  
+  if($('greeting').style.display !== 'none') {
+    renderGreeting();
   }
 }
 
@@ -934,12 +883,12 @@ function updateBanner(s){
   const cd=cdMs(s);
   const done=s.totTok>=TOTAL_TOKEN_LIMIT||s.totReq>=TOTAL_REQ_LIMIT;
   if(done){
-    el.className='err';el.innerHTML='🚫 Daily limit reached. Come back tomorrow!';
+    el.className='err';el.innerHTML='🚫 Capacity allocated spent for today. Resetting tomorrow.';
     el.style.display='flex';disableInput();return;
   }
-  if(s.sTok>=SESSION_TOKEN_LIMIT || s.sReq>=SESSION_REQ_LIMIT){
+  if(cd>0||(s.sTok>=SESSION_TOKEN_LIMIT||s.sReq>=SESSION_REQ_LIMIT)){
     const remaining=cd>0?fmtCd(cd):`${SESSION_COOLDOWN_H}h`;
-    el.className='warn';el.innerHTML=`⏳ Session limit reached. Next session in <strong>${remaining}</strong>`;
+    el.className='warn';el.innerHTML=`⏳ Session allocation spent. Clear to resume in <strong>${remaining}</strong>`;
     el.style.display='flex';disableInput();
     return;
   }
@@ -950,14 +899,14 @@ function enableInput(){if($('msgInput')){$('msgInput').disabled=false;}}
 
 async function edgeCall(payload){
   try{
-    if(!navigator.onLine) return{error:'No internet.'};
+    if(!navigator.onLine) return{error:'Please check your internet connection and try again.'};
     const r=await fetch(EDGE_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json','x-af-student-key':sKey()},
       body:JSON.stringify({...payload,student_key:sKey(),student_name:sName()})
     });
     return await r.json();
-  }catch(e){return{error:e.message};}
+  }catch(e){return{error:'The AI channel is exceptionally busy right now. Please try again.'};}
 }
 
 async function loadConvList(){
@@ -974,7 +923,7 @@ function filterConvs(){
 function renderConvList(){
   const box=$('convList');
   if(!_filteredConvs.length){
-    box.innerHTML='<div class="conv-empty"><div class="conv-empty-icon">💬</div>No conversations yet.</div>';
+    box.innerHTML='<div class="conv-empty"><div class="conv-empty-icon">💬</div>No active environments found.</div>';
     return;
   }
   box.innerHTML='';
@@ -1009,17 +958,19 @@ async function delConv(e,id){
   e.stopPropagation();
   _convs=_convs.filter(c=>c.id!==id);
   _filteredConvs=_filteredConvs.filter(c=>c.id!==id);
-  if(_convId===id){_convId=null;clearChat();showGreeting(true);}
+  if(_convId===id){_convId=null;clearChat();showGreeting(true);renderGreeting();}
   renderConvList();
   await edgeCall({action:'delete_conversation',conversation_id:id});
 }
 
 async function clearAllConvs(){
-  if(!confirm('Delete all conversations?')) return;
+  if(!confirm('Delete all active chat sessions permanently?')) return;
   _convs=[];_filteredConvs=[];_convId=null;
-  renderConvList();clearChat();showGreeting(true);
+  renderConvList();clearChat();showGreeting(true);renderGreeting();
   await edgeCall({action:'delete_all_conversations'});
 }
+
+function newChat(){_convId=null;clearChat();showGreeting(true);renderGreeting();closeDrawer();toast('New environment initialized','info');}
 
 function renderAIContent(rawText){
   const container=document.createElement('div');
@@ -1117,24 +1068,9 @@ function autoResize(){
   el.style.height=Math.min(el.scrollHeight,120)+'px';
 }
 
-function newChat(){_convId=null;clearChat();showGreeting(true);closeDrawer();toast('New chat started','info','✦');}
-
 async function doSend(){
   const content=$('msgInput').value.trim();
   if(!content||_loading) return;
-
-  let s=dayReset(getSes());
-  const chk=sesOk(s);
-  if(!chk.ok){
-    if(chk.why==='cooldown'){toast(`Session cooldown. Wait ${fmtCd(chk.ms)}`,'err','⏳');return;}
-    if(chk.why==='session_tokens' || chk.why==='session_reqs'){
-       toast('Session capacity reached. Waiting for next window!','err','⏳'); return;
-    }
-    toast('Daily limit reached. Come back tomorrow!','err','🚫');return;
-  }
-  
-  if(!s.start) s = startSes(s);
-  saveSes(s);
 
   _loading=true;
   $('sendBtn').disabled=true;
@@ -1146,45 +1082,46 @@ async function doSend(){
   addMsg('user',content,_mode,true);
   const ph=addThinking();
 
-  try{
-    const payload={action:'ask',question:content,mode:_mode};
-    if(_convId) payload.conversation_id=_convId;
-    const res=await edgeCall(payload);
-    removeEl(ph);
+  const payload={action:'ask',question:content,mode:_mode};
+  if(_convId) payload.conversation_id=_convId;
+  
+  const res=await edgeCall(payload);
+  removeEl(ph);
 
-    if(!res||res.error){
-      toast((res&&res.error)||'Request failed','err','Error');
-      return;
-    }
-
-    /* Fixed tracking parameters configuration rules to assure absolute answers print fully */
-    const toks=res.tokensThisCall||Math.ceil((content.length+(res.answer||'').length)/4);
-    s=dayReset(getSes());
-    s.sTok=(s.sTok||0)+toks;s.totTok=(s.totTok||0)+toks;
-    s.sReq=(s.sReq||0)+1;s.totReq=(s.totReq||0)+1;
-    saveSes(s);
-
-    if(res.conversation_id){
-      const isNew=!_convId;
-      _convId=res.conversation_id;
-      if(isNew){
-        const nc={id:_convId,title:res.conversation_title||'New Chat',mode:_mode};
-        _convs.unshift(nc);_filteredConvs.unshift(nc);
-      }
-    }
-
-    addMsg('assistant',res.answer,_mode,true);
-    
-    /* Instant state counters update triggers after every message block */
-    updateBanner(s);
-    updateUsageBar();
-    checkWarningBanners(s);
-  }catch(e){
-    removeEl(ph);toast('Network error. Try again.','err','Error');
-  }finally{
+  // Intercepting backend database errors and routing cleanly to clean UI messages
+  if(!res || res.error){
     _loading=false;
     $('sendBtn').disabled=false;
+    let safeUserMsg = "The active workspace session is unavailable right now. Please try again in a moment.";
+    if (res && res.limitReached) {
+      safeUserMsg = res.error; 
+    }
+    toast(safeUserMsg, 'err');
+    return;
   }
+
+  // Record Local Runtime Limits Validation Metrics Sync
+  let s=dayReset(getSes());
+  s.sTok=(s.sTok||0)+res.tokensThisCall;
+  s.totTok=(s.totTok||0)+res.dailyTokenUsed;
+  s.sReq=(s.sReq||0)+1;
+  s.totReq=(s.totReq||0)+1;
+  saveSes(s);
+
+  if(res.conversation_id){
+    const isNew=!_convId;
+    _convId=res.conversation_id;
+    if(isNew){
+      const nc={id:_convId,title:res.conversation_title||'New Chat',mode:_mode};
+      _convs.unshift(nc);_filteredConvs.unshift(nc);
+    }
+  }
+
+  addMsg('assistant',res.answer,_mode,true);
+  updateBanner(s);
+  updateUsageBar(res);
+  _loading=false;
+  $('sendBtn').disabled=false;
 }
 
 function openProfileModal(){
@@ -1198,7 +1135,12 @@ function openProfileModal(){
   const s=dayReset(getSes());
   $('pmSReq').textContent=`${s.sReq||0} / ${SESSION_REQ_LIMIT}`;
   $('pmSReqBar').style.width=Math.min(100,((s.sReq||0)/SESSION_REQ_LIMIT)*100)+'%';
+  $('pmTokVal').textContent=`${(s.totTok/1000).toFixed(1)}k / 25k`;
+  $('pmTokBar').style.width=Math.min(100,(s.totTok/TOTAL_TOKEN_LIMIT)*100)+'%';
   
+  const cd=cdMs(s);
+  $('pmRemaining').textContent=cd>0?`Next channel resets in ${fmtCd(cd)}`:`${SESSION_REQ_LIMIT - (s.sReq||0)} requests remaining this session`;
+
   show('profileModal');
   closeDrawer();
 }
@@ -1211,14 +1153,12 @@ function init(){
   syncHamburger();
   if(!isLoggedIn()){
     $('lockedBox').classList.add('visible');
-    hide('chat');hide('inputArea');
+    hide('chat');hide('inputArea');hide('modeSelectorArea');
     return;
   }
   $('lockedBox').classList.remove('visible');
-  show('chat');show('inputArea');
+  show('chat');show('inputArea');show('modeSelectorArea');
   setMode('af24');
-  renderGreeting();
-  showGreeting(true);
   renderDrawerProfile();
   const s=dayReset(getSes());
   updateBanner(s);
