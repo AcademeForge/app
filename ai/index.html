@@ -560,7 +560,6 @@ textarea,input{font-family:var(--font-body);}
   <div id="overlay" onclick="closeDrawer()"></div>
   <div class="swipe-edge-hint" id="swipeHint"></div>
 
-  <!-- ════ DRAWER ════ -->
   <div id="drawer">
     <div class="dr-top">
       <button class="dr-back" onclick="window.location.href='/index.html'">
@@ -609,7 +608,6 @@ textarea,input{font-family:var(--font-body);}
     </div>
   </div>
 
-  <!-- ════ HEADER ════ -->
   <header id="header">
     <button class="hdr-menu hide" id="hdrMenu" onclick="openDrawer()" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -621,7 +619,6 @@ textarea,input{font-family:var(--font-body);}
     <div class="hdr-free-badge" id="hdrFreeBadge">✦ Free</div>
   </header>
 
-  <!-- ════ MODE SELECTOR ════ -->
   <div class="mode-selector-container" id="modeSelectorArea">
     <div class="mode-track-bar" id="modeTrackBar" data-active="af24">
       <div class="slider-pill"></div>
@@ -631,10 +628,8 @@ textarea,input{font-family:var(--font-body);}
     </div>
   </div>
 
-  <!-- ════ ALERT BANNER ════ -->
   <div id="warnBannerWrap"></div>
 
-  <!-- ════ LOCKED SCREEN ════ -->
   <div id="lockedBox">
     <div class="locked-card">
       <div class="locked-icon">🔒</div>
@@ -644,7 +639,6 @@ textarea,input{font-family:var(--font-body);}
     </div>
   </div>
 
-  <!-- ════ CHAT ════ -->
   <div id="chat" class="hidden">
     <div id="greeting">
       <div class="greeting-time" id="greetingTime"></div>
@@ -655,7 +649,6 @@ textarea,input{font-family:var(--font-body);}
     <div id="msgList"></div>
   </div>
 
-  <!-- ════ INPUT AREA ════ -->
   <div id="inputArea" class="hidden">
     <div class="input-glow-wrapper" id="inputGlowWrap">
       <div class="input-box">
@@ -672,7 +665,6 @@ textarea,input{font-family:var(--font-body);}
     </div>
   </div>
 
-  <!-- ════ PROFILE MODAL ════ -->
   <div id="profileModal" class="modal-overlay hidden" role="dialog" aria-modal="true" onclick="closeProfileOnBg(event)">
     <div class="modal-card">
       <div class="modal-head">
@@ -886,9 +878,9 @@ function renderUsageFromCache() {
   const reqLimit = WINDOW_REQ_LIMIT;
   const tokLimit = WINDOW_TOKEN_LIMIT;
 
-  const reqLeft   = Math.max(0, reqLimit - reqUsed);
-  const reqPct    = Math.min(100, (reqUsed / reqLimit) * 100);
-  const tokPct    = Math.min(100, (tokUsed / tokLimit) * 100);
+  const reqLeft    = Math.max(0, reqLimit - reqUsed);
+  const reqPct     = Math.min(100, (reqUsed / reqLimit) * 100);
+  const tokPct     = Math.min(100, (tokUsed / tokLimit) * 100);
   const tokRemain = Math.max(0, 100 - Math.round(tokPct));
 
   $('drReqVal').textContent = `${reqLeft} / ${reqLimit}`;
@@ -1011,7 +1003,7 @@ function renderGreeting() {
 
   if (_mode === 'dev13') {
     if (h>=5 && h<12)       { timeLabel='Morning';       main=`Morning ${name} ☕`;        sub="What are we shipping today?"; }
-    else if (h>=12 && h<17) { timeLabel='Afternoon';     main=`Yo ${name} 🛠️`;             sub="Got a product problem? Let's crack it."; }
+    else if (h>=12 && h<17) { timeLabel='Afternoon';     main=`Yo ${name} 🛠️`;              sub="Got a product problem? Let's crack it."; }
     else if (h>=17 && h<21) { timeLabel='Evening';       main=`Still building ${name}? 🔥`; sub="Good. Most people already quit."; }
     else                    { timeLabel='Late Night';     main=`Late night grind ${name} 🌙`; sub="The best products get built at this hour."; }
   } else if (_mode === 'tapri') {
@@ -1205,8 +1197,7 @@ function newChat() {
 // ════════════════════════════════════════
 function renderAIContent(rawText) {
   const container = document.createElement('div');
-  const parts = rawText.split(/(```[\s\S]*?
-```)/g);
+  const parts = rawText.split(/(```[\s\S]*?```)/g);
   parts.forEach(part => {
     const codeMatch = part.match(/^```(\w*)\n?([\s\S]*?)```$/);
     if (codeMatch) {
