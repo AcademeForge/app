@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#0d0f14"/>
 <title>AcademeForge AI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin"/>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -560,6 +560,7 @@ textarea,input{font-family:var(--font-body);}
   <div id="overlay" onclick="closeDrawer()"></div>
   <div class="swipe-edge-hint" id="swipeHint"></div>
 
+  <!-- ════ DRAWER ════ -->
   <div id="drawer">
     <div class="dr-top">
       <button class="dr-back" onclick="window.location.href='/index.html'">
@@ -608,6 +609,7 @@ textarea,input{font-family:var(--font-body);}
     </div>
   </div>
 
+  <!-- ════ HEADER ════ -->
   <header id="header">
     <button class="hdr-menu hide" id="hdrMenu" onclick="openDrawer()" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -619,6 +621,7 @@ textarea,input{font-family:var(--font-body);}
     <div class="hdr-free-badge" id="hdrFreeBadge">✦ Free</div>
   </header>
 
+  <!-- ════ MODE SELECTOR ════ -->
   <div class="mode-selector-container" id="modeSelectorArea">
     <div class="mode-track-bar" id="modeTrackBar" data-active="af24">
       <div class="slider-pill"></div>
@@ -628,8 +631,10 @@ textarea,input{font-family:var(--font-body);}
     </div>
   </div>
 
+  <!-- ════ ALERT BANNER ════ -->
   <div id="warnBannerWrap"></div>
 
+  <!-- ════ LOCKED SCREEN ════ -->
   <div id="lockedBox">
     <div class="locked-card">
       <div class="locked-icon">🔒</div>
@@ -639,6 +644,7 @@ textarea,input{font-family:var(--font-body);}
     </div>
   </div>
 
+  <!-- ════ CHAT ════ -->
   <div id="chat" class="hidden">
     <div id="greeting">
       <div class="greeting-time" id="greetingTime"></div>
@@ -649,6 +655,7 @@ textarea,input{font-family:var(--font-body);}
     <div id="msgList"></div>
   </div>
 
+  <!-- ════ INPUT AREA ════ -->
   <div id="inputArea" class="hidden">
     <div class="input-glow-wrapper" id="inputGlowWrap">
       <div class="input-box">
@@ -665,6 +672,7 @@ textarea,input{font-family:var(--font-body);}
     </div>
   </div>
 
+  <!-- ════ PROFILE MODAL ════ -->
   <div id="profileModal" class="modal-overlay hidden" role="dialog" aria-modal="true" onclick="closeProfileOnBg(event)">
     <div class="modal-card">
       <div class="modal-head">
@@ -726,6 +734,7 @@ const WINDOW_TOKEN_LIMIT = 15000;
 const DAILY_REQ_LIMIT    = 20;
 const DAILY_TOKEN_LIMIT  = 30000;
 const MAX_CHARS          = 800;
+const CACHE_EXPIRY_MS    = 36 * 60 * 60 * 1000; // 36 Hours
 
 const MODE_MAP = { af24: 'af_proguide', dev13: 'dev', tapri: 'tapri' };
 
@@ -751,6 +760,7 @@ const show = id => $(id) && $(id).classList.remove('hidden');
 const hide = id => $(id) && $(id).classList.add('hidden');
 const ls   = k => localStorage.getItem(k);
 const lsSet= (k,v) => localStorage.setItem(k,v);
+const lsDel= k => localStorage.removeItem(k);
 
 const isLoggedIn = () => !!(ls('af_student_email') || ls('af_student_mobile'));
 const sKey   = () => ls('af_student_email') || ls('af_student_mobile') || '';
@@ -772,22 +782,45 @@ function syncTheme(){document.documentElement.setAttribute('data-theme',ls('af_d
 syncTheme();
 
 // ════════════════════════════════════════
-// USAGE CACHE — parsed direct from edge payload
+// 36-HOUR FRONTEND TIMELINE CACHE ENGINE
 // ════════════════════════════════════════
-let _usageCache = null;
+function getCacheKey(suffix) {
+  return 'af_local_cache_' + btoa(sKey()).replace(/=/g,'') + '_' + suffix;
+}
 
+function saveToLocalTimeline(suffix, data) {
+  const wrapper = {
+    timestamp: Date.now(),
+    payload: data
+  };
+  lsSet(getCacheKey(suffix), JSON.stringify(wrapper));
+}
+
+function loadFromLocalTimeline(suffix) {
+  try {
+    const raw = ls(getCacheKey(suffix));
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (Date.now() - data.timestamp > CACHE_EXPIRY_MS) {
+      lsDel(getCacheKey(suffix)); // 36 hours limit passed! Auto deleted.
+      return null;
+    }
+    return data.payload;
+  } catch(e) {
+    return null;
+  }
+}
+
+let _usageCache = null;
 function saveUsageCache(payload) {
   if (!payload) return;
   _usageCache = payload;
-  try { lsSet('af_usage_cache_'+btoa(sKey()).replace(/=/g,''), JSON.stringify(payload)); } catch {}
+  saveToLocalTimeline('usage', payload);
 }
 function loadUsageCache() {
   if (_usageCache) return _usageCache;
-  try {
-    const raw = ls('af_usage_cache_'+btoa(sKey()).replace(/=/g,''));
-    if (raw) { _usageCache = JSON.parse(raw); return _usageCache; }
-  } catch {}
-  return null;
+  _usageCache = loadFromLocalTimeline('usage');
+  return _usageCache;
 }
 
 // ════════════════════════════════════════
@@ -812,12 +845,12 @@ function toast(msg, type='info', title='') {
 // ════════════════════════════════════════
 // DRAWER
 // ════════════════════════════════════════
-function openDrawer() {
+async function openDrawer() {
   $('drawer').classList.add('open');
   $('overlay').classList.add('open');
-  loadConvList();
-  renderUsageFromCache();
   renderDrawerProfile();
+  renderUsageFromCache();
+  await loadConvList();
 }
 function closeDrawer() {
   $('drawer').classList.remove('open');
@@ -835,7 +868,7 @@ function renderDrawerProfile() {
 }
 
 // ════════════════════════════════════════
-// USAGE DISPLAY — Fixed parsing mapping direct to edge payload layout
+// USAGE DISPLAY
 // ════════════════════════════════════════
 function renderUsageFromCache() {
   const u = loadUsageCache();
@@ -901,6 +934,9 @@ function applyLockdown(timeStr) {
   $('inputGlowWrap').classList.add('locked-glow');
 }
 
+// ════════════════════════════════════════
+// MODE SETUP
+// ════════════════════════════════════════
 function removeLockdown() {
   $('warnBannerWrap').innerHTML = '';
   $('msgInput').disabled = false;
@@ -931,9 +967,6 @@ function syncLockdownState() {
   return false;
 }
 
-// ════════════════════════════════════════
-// MODE
-// ════════════════════════════════════════
 let _mode = 'af24';
 let _convId = null;
 let _convs = [];
@@ -1050,15 +1083,23 @@ async function edgeCall(payload) {
 }
 
 // ════════════════════════════════════════
-// CONVERSATIONS & CHAT HISTORY SYNC
+// CONVERSATIONS WITH TIMELINE PERSISTENCE
 // ════════════════════════════════════════
 async function loadConvList() {
-  const res = await edgeCall({ action: 'list_conversations' });
-  _convs = (res && res.conversations) ? res.conversations : [];
-  _convs = _convs.map(c => ({
-    ...c,
-    uiMode: c.mode === 'dev' ? 'dev13' : c.mode === 'tapri' ? 'tapri' : 'af24'
-  }));
+  let localConvs = loadFromLocalTimeline('conversations');
+  if (localConvs) {
+    _convs = localConvs;
+  } else {
+    const res = await edgeCall({ action: 'list_conversations' });
+    _convs = (res && res.conversations) ? res.conversations : [];
+    _convs = _convs.map(c => ({
+      ...c,
+      uiMode: c.mode === 'dev' ? 'dev13' : c.mode === 'tapri' ? 'tapri' : 'af24'
+    }));
+    if (_convs.length > 0) {
+      saveToLocalTimeline('conversations', _convs);
+    }
+  }
   _filteredConvs = [..._convs];
   renderConvList();
 }
@@ -1102,16 +1143,27 @@ async function openConv(c) {
 
   if (syncLockdownState()) return;
 
-  const ph = addThinking();
-  const res = await edgeCall({ action: 'load_conversation', conversation_id: c.id });
-  removeEl(ph);
-
-  if (res && res.messages && res.messages.length) {
-    res.messages.forEach(m => {
+  // Pehle check karein local cached messages hain ya nahi
+  let cachedMsgs = loadFromLocalTimeline('messages_' + _convId);
+  if (cachedMsgs && cachedMsgs.length > 0) {
+    cachedMsgs.forEach(m => {
       const msgUiMode = m.mode === 'dev' ? 'dev13' : m.mode === 'tapri' ? 'tapri' : 'af24';
       addMsg(m.role, m.content, msgUiMode, false);
     });
     scrollBot();
+  } else {
+    const ph = addThinking();
+    const res = await edgeCall({ action: 'load_conversation', conversation_id: c.id });
+    removeEl(ph);
+
+    if (res && res.messages && res.messages.length) {
+      res.messages.forEach(m => {
+        const msgUiMode = m.mode === 'dev' ? 'dev13' : m.mode === 'tapri' ? 'tapri' : 'af24';
+        addMsg(m.role, m.content, msgUiMode, false);
+      });
+      saveToLocalTimeline('messages_' + _convId, res.messages);
+      scrollBot();
+    }
   }
 }
 
@@ -1120,6 +1172,8 @@ async function delConv(e, id) {
   _convs = _convs.filter(c => c.id !== id);
   _filteredConvs = _filteredConvs.filter(c => c.id !== id);
   if (_convId === id) { _convId = null; clearChat(); showGreeting(true); renderGreeting(); }
+  saveToLocalTimeline('conversations', _convs);
+  lsDel(getCacheKey('messages_' + id));
   renderConvList();
   await edgeCall({ action: 'delete_conversation', conversation_id: id });
 }
@@ -1128,8 +1182,12 @@ async function clearAllConvs() {
   if (!confirm('Delete all chat sessions permanently?')) return;
   const ids = [..._convs.map(c => c.id)];
   _convs = []; _filteredConvs = []; _convId = null;
+  saveToLocalTimeline('conversations', []);
+  ids.forEach(id => {
+    lsDel(getCacheKey('messages_' + id));
+    edgeCall({ action: 'delete_conversation', conversation_id: id }).catch(() => {});
+  });
   renderConvList(); clearChat(); showGreeting(true); renderGreeting();
-  ids.forEach(id => edgeCall({ action: 'delete_conversation', conversation_id: id }).catch(() => {}));
   toast('All conversations cleared', 'ok');
 }
 
@@ -1148,7 +1206,8 @@ function newChat() {
 // ════════════════════════════════════════
 function renderAIContent(rawText) {
   const container = document.createElement('div');
-  const parts = rawText.split(/(```[\s\S]*?```)/g);
+  const parts = rawText.split(/(```[\s\S]*?
+```)/g);
   parts.forEach(part => {
     const codeMatch = part.match(/^```(\w*)\n?([\s\S]*?)```$/);
     if (codeMatch) {
@@ -1361,7 +1420,14 @@ async function doSend() {
       };
       _convs.unshift(nc);
       _filteredConvs.unshift(nc);
+      saveToLocalTimeline('conversations', _convs);
     }
+
+    // Dynamic current messages stack local sync matrix
+    let currentLocalMsgs = loadFromLocalTimeline('messages_' + _convId) || [];
+    currentLocalMsgs.push({ role: 'user', content: content, mode: _mode });
+    currentLocalMsgs.push({ role: 'assistant', content: res.answer, mode: _mode });
+    saveToLocalTimeline('messages_' + _convId, currentLocalMsgs);
   }
 
   addMsg('assistant', res.answer, _mode, true);
@@ -1472,7 +1538,6 @@ async function init() {
   setMode('af24');
   renderDrawerProfile();
   
-  // Sync initial usage details with the dashboard metrics framework upon loading
   const initialUsage = await edgeCall({ action: 'usage_only' });
   if (initialUsage && !initialUsage.error) {
     saveUsageCache(initialUsage);
