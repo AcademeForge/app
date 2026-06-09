@@ -327,7 +327,7 @@ textarea,input{font-family:var(--font-body);}
 
 .av{
   width:30px;height:30px;min-width:30px;
-  border-radius:9px;display:grid;place-items:center;
+  border-radius:99px;display:grid;place-items:center;
   font-size:11px;font-weight:800;flex-shrink:0;
   align-self:flex-end;margin-bottom:2px;
 }
@@ -729,12 +729,12 @@ const SUPABASE_URL = "https://afooyyydhlwngzssgqih.supabase.co";
 const EDGE_URL     = SUPABASE_URL + "/functions/v1/af-ask-ai";
 
 const TOTAL_TOKEN_LIMIT   = 25000;
-const SESSION_TOKEN_LIMIT = 3000; // Change updated directly to 3k baseline metric!
+const SESSION_TOKEN_LIMIT = 3000; // Complete 3k metrics parameter scale configuration
 const TOTAL_REQ_LIMIT      = 25;
 const SESSION_REQ_LIMIT   = 5;
 const SESSION_COOLDOWN_H  = 6;
 
-// Engaging highly professional system warm-up emergency alert titles strings collection repository
+// Engaging system lockdown dynamic warm-up warning strings dictionary
 const ENGAGING_LOCKDOWN_ALERTS = [
   "⚡ Time to refuel your brain cells! Session capacity reached.",
   "🚀 Epic session completed! Take a step back and absorb the knowledge.",
@@ -828,12 +828,12 @@ function updateUsageBar(backendPayload = null){
     if(backendPayload.tokensThisCall !== undefined) currentSessionTokensUsed += backendPayload.tokensThisCall;
   }
 
-  // Pure Token Percentage Calculation Logic Engine Base Matrix based on 3000 limit
+  // Pure Token Percentage Calculation Base Matrix calculated over explicit 3k parameters limit 
   const tokenPctRemaining = Math.max(0, 100 - Math.round((currentSessionTokensUsed / SESSION_TOKEN_LIMIT) * 100));
   const reqLeft = Math.max(0, SESSION_REQ_LIMIT - currentSessionRequestsUsed);
   const reqPct = Math.min(100, (currentSessionRequestsUsed / SESSION_REQ_LIMIT) * 100);
 
-  // Synchronizing UI displays mapping context cleanly
+  // Sync Drawer Elements
   $('drReqVal').textContent = `${reqLeft} / ${SESSION_REQ_LIMIT}`;
   $('drReqBar').style.width = reqPct + '%';
   
@@ -920,7 +920,7 @@ function checkAndEnforceGlobalLimits(){
   if (isLimitReached) {
     const remainingTimeStr = cd > 0 ? fmtCd(cd) : `${SESSION_COOLDOWN_H}h 00m`;
     
-    // Dynamic engaging layout setup initialization
+    // Inject dynamic text warning alert blocks seamlessly 
     container.innerHTML = `
       <div class="alert-banner-system">
         <strong>${getRandomAlertMsg()}</strong>
@@ -928,10 +928,10 @@ function checkAndEnforceGlobalLimits(){
       </div>
     `;
     
-    // Hard lock input controls
+    // Absolute hard lock automation configurations
     $('msgInput').disabled = true;
     $('msgInput').value = "";
-    $('msgInput').placeholder = "Session locked. Capacity reached.";
+    $('msgInput').placeholder = "Your free session token limit reached. Come back later.";
     $('sendBtn').disabled = true;
     $('inputGlowWrap').classList.add('locked-glow');
     return true;
@@ -994,7 +994,6 @@ async function openConv(c){
   clearChat();showGreeting(false);
   renderConvList();closeDrawer();
   
-  // Checking banner constraint conditions during cross navigation space environments
   if(checkAndEnforceGlobalLimits()) return;
 
   const ph=addThinking();
@@ -1029,14 +1028,14 @@ function newChat(){
   renderGreeting();
   closeDrawer();
   toast('New environment initialized','info');
-  // Bold Text Banner verification persistent checks executed on every workspace instantiations
+  // Persistent lockdown validation triggered explicitly on creating workspace sessions
   checkAndEnforceGlobalLimits();
 }
 
 function renderAIContent(rawText){
   const container=document.createElement('div');
-  const parts=rawText.split(/(```[\s\S]*?
-```)/g);
+  // Markdown parsing regex structure fix completed
+  const parts=rawText.split(/(```[\s\S]*?```)/g);
   parts.forEach(part=>{
     const codeMatch=part.match(/^```(\w*)\n?([\s\S]*?)```$/);
     if(codeMatch){
@@ -1164,7 +1163,6 @@ async function doSend(){
     return;
   }
 
-  // Record runtime tracking operations matrix cleanly
   let s=dayReset(getSes());
   if(!s.start) s.start = new Date().toISOString();
   s.sTok=(s.sTok||0)+res.tokensThisCall;
@@ -1186,7 +1184,6 @@ async function doSend(){
   _loading=false;
   $('sendBtn').disabled=false;
   
-  // Realtime usage context metrics refresh updates layout checks triggered instantly
   updateUsageBar(res);
   checkAndEnforceGlobalLimits();
 }
@@ -1203,7 +1200,7 @@ function openProfileModal(){
   $('pmSReq').textContent=`${s.sReq||0} / ${SESSION_REQ_LIMIT}`;
   $('pmSReqBar').style.width=Math.min(100,((s.sReq||0)/SESSION_REQ_LIMIT)*100)+'%';
   
-  // Absolute percentage allocation visibility mapping computation metric engine using 3000 limit
+  // Dynamic 3,000 baseline percentage remaining visibility converter calculation
   const tokenPctRemaining = Math.max(0, 100 - Math.round(((s.sTok||0) / SESSION_TOKEN_LIMIT) * 100));
   $('pmTokPctLabel').textContent = `${tokenPctRemaining}% Allocation Available`;
   $('pmTokBar').style.width = tokenPctRemaining + '%';
@@ -1228,7 +1225,6 @@ function init(){
   setMode('af24');
   renderDrawerProfile();
   
-  // Boot sequence runtime sync operations
   updateUsageBar();
   checkAndEnforceGlobalLimits();
 }
