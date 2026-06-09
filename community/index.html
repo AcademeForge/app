@@ -42,25 +42,25 @@
   --shb:0 4px 18px rgba(99,102,241,.44);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html{font-size:16px;-webkit-text-size-adjust:100%;}
+html{font-size:16px;-webkit-text-size-adjust:100%;height:100%;height:100dvh;}
 body{
   font-family:var(--font-body);background:var(--bg);color:var(--t1);
-  min-height:100dvh;display:flex;justify-content:center;
-  overflow-x:hidden;transition:background .18s,color .18s;
+  height:100%;height:100dvh;display:flex;justify-content:center;
+  overflow:hidden;transition:background .18s,color .18s;
 }
 button{font-family:var(--font-body);cursor:pointer;border:none;background:none;color:inherit;}
 a{text-decoration:none;color:inherit;}
 
 /* SHELL */
 .shell{
-  width:100%;max-width:var(--shell);min-height:100dvh;
+  width:100%;max-width:var(--shell);height:100%;height:100dvh;
   background:var(--surface);display:flex;flex-direction:column;
   position:relative;box-shadow:0 0 0 1px var(--b1),var(--she);
   overflow:hidden;transition:background .18s;
 }
 @media(min-width:700px){
-  body{padding:32px 0 48px;align-items:flex-start;}
-  .shell{border-radius:40px;min-height:calc(100dvh - 80px);max-height:900px;overflow-y:auto;}
+  body{padding:24px 0 40px;height:auto;min-height:100dvh;overflow-y:auto;}
+  .shell{border-radius:40px;height:calc(100dvh - 64px);max-height:880px;}
 }
 
 /* HEADER */
@@ -70,7 +70,7 @@ a{text-decoration:none;color:inherit;}
   backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
   border-bottom:1px solid var(--b1);
   display:flex;align-items:center;padding:0 14px;gap:10px;
-  transition:background .18s;
+  transition:background .18s;flex-shrink:0;
 }
 .hdr-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
 .hdr-logo{
@@ -154,8 +154,10 @@ a{text-decoration:none;color:inherit;}
 
 /* FEED */
 .feed{
-  flex:1;overflow-y:auto;overflow-x:hidden;
+  flex:1;overflow-y:scroll;overflow-x:hidden;-webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:contain;
   padding:12px 12px calc(var(--nav-h) + 88px + env(safe-area-inset-bottom,0px));
+  min-height:0;-webkit-transform:translateZ(0);transform:translateZ(0);
 }
 .feed::-webkit-scrollbar{width:3px;}
 .feed::-webkit-scrollbar-thumb{background:var(--bc);border-radius:99px;}
@@ -219,10 +221,10 @@ a{text-decoration:none;color:inherit;}
 .action-btn.liked{background:rgba(244,63,94,.10);border-color:rgba(244,63,94,.22);color:var(--rose);}
 .action-btn .cnt{font-variant-numeric:tabular-nums;}
 
-/* FAB — fixed */
+/* FAB — bound cleanly into shell context */
 .fab{
-  position:fixed;
-  right:calc(50% - var(--shell)/2 + 16px);
+  position:absolute;
+  right:16px;
   bottom:calc(var(--nav-h) + 16px + env(safe-area-inset-bottom,0px));
   z-index:300;width:56px;height:56px;border-radius:18px;
   background:linear-gradient(135deg,var(--p),var(--p3));color:#fff;
@@ -233,7 +235,6 @@ a{text-decoration:none;color:inherit;}
 }
 .fab:hover{transform:scale(1.08);box-shadow:var(--shb),0 12px 36px rgba(99,102,241,.50);}
 .fab:active{transform:scale(.94);}
-@media(max-width:699px){.fab{right:16px;}}
 
 /* BOTTOM NAV */
 .bnav{
@@ -262,7 +263,7 @@ a{text-decoration:none;color:inherit;}
 .bnav-btn.active .bnav-label{color:var(--p);}
 
 /* LOCKED */
-.locked-box{display:none;place-items:center;min-height:60vh;padding:24px;}
+.locked-box{display:none;place-items:center;min-height:60dvh;padding:24px;}
 .locked-box.visible{display:grid;}
 .locked-card{
   width:100%;max-width:300px;background:var(--card);border:1px solid var(--bc);
@@ -291,7 +292,7 @@ a{text-decoration:none;color:inherit;}
   backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
   opacity:0;visibility:hidden;transition:opacity .22s,visibility .22s;
 }
-.modal-ov.open{opacity:1;visibility:visible;}
+.modal-ov.open {opacity:1;visibility:visible;}
 .modal-card{
   width:100%;max-width:var(--shell);background:var(--surface);
   border-radius:var(--r4) var(--r4) 0 0;
@@ -413,7 +414,6 @@ textarea.compose{-webkit-user-select:text;-moz-user-select:text;user-select:text
 <body>
 <div class="shell" id="shell">
 
-  <!-- HEADER -->
   <header class="hdr" id="hdr">
     <div class="hdr-left">
       <div class="hdr-info">
@@ -422,23 +422,19 @@ textarea.compose{-webkit-user-select:text;-moz-user-select:text;user-select:text
       </div>
     </div>
     <div class="hdr-right hidden" id="hdrActions">
-      <!-- shown in feed mode -->
       <button class="hdr-btn hdr-btn-ghost hidden" id="btnMyPosts" onclick="nxOpenMyPosts()">
         <span>👤</span><span>My Posts</span>
       </button>
-      <!-- refresh: always present, context-aware -->
       <button class="hdr-icon-btn" id="btnRefresh" onclick="nxRefresh()" title="Refresh">↻</button>
     </div>
   </header>
 
-  <!-- FILTER BAR — shown in feed mode -->
   <div class="subbar hidden" id="filterBar">
     <button class="filter-pill active" id="pillRelevant" onclick="nxSetMode('relevant')">✦ Relevant</button>
     <button class="filter-pill" id="pillRecent" onclick="nxSetMode('recent')">🕐 Recent</button>
     <span class="live-dot" title="Live"></span>
   </div>
 
-  <!-- MY POSTS BAR — shown instead of filter bar when in my-posts mode -->
   <div class="subbar hidden" id="myPostsBar">
     <div class="mp-title">
       <span>👤</span>
@@ -447,7 +443,6 @@ textarea.compose{-webkit-user-select:text;-moz-user-select:text;user-select:text
     <button class="mp-back" onclick="nxCloseMyPosts()">← Back</button>
   </div>
 
-  <!-- LOCKED -->
   <div class="locked-box" id="lockedBox">
     <div class="locked-card">
       <div class="locked-icon">🔒</div>
@@ -457,17 +452,14 @@ textarea.compose{-webkit-user-select:text;-moz-user-select:text;user-select:text
     </div>
   </div>
 
-  <!-- FEED -->
   <div class="feed hidden" id="feed">
     <div id="postsList">
       <div class="state-msg"><div class="spinner"></div><span>Loading posts…</span></div>
     </div>
   </div>
 
-  <!-- FAB -->
   <button class="fab hidden" id="fab" onclick="nxOpenComposer()" aria-label="Write Post">✍️</button>
 
-  <!-- BOTTOM NAV -->
   <nav class="bnav">
     <button class="bnav-btn" onclick="window.location.href='/index.html'">
       <span class="bnav-icon">🏠</span><span class="bnav-label">Home</span>
@@ -489,7 +481,6 @@ textarea.compose{-webkit-user-select:text;-moz-user-select:text;user-select:text
 
 <div class="toast-wrap" id="toastWrap"></div>
 
-<!-- COMPOSER MODAL -->
 <div class="modal-ov" id="composerModal" onclick="nxCloseComposer()">
   <div class="modal-card" onclick="event.stopPropagation()">
     <div class="modal-drag"></div>
@@ -509,7 +500,6 @@ textarea.compose{-webkit-user-select:text;-moz-user-select:text;user-select:text
   </div>
 </div>
 
-<!-- COMMENTS MODAL -->
 <div class="modal-ov" id="commentsModal" onclick="nxCloseComments()">
   <div class="modal-card" onclick="event.stopPropagation()">
     <div class="modal-drag"></div>
@@ -532,7 +522,6 @@ textarea.compose{-webkit-user-select:text;-moz-user-select:text;user-select:text
   </div>
 </div>
 
-<!-- REPLY MODAL -->
 <div class="modal-ov" id="replyModal" onclick="nxCloseReply()">
   <div class="modal-card" onclick="event.stopPropagation()">
     <div class="modal-drag"></div>
@@ -551,7 +540,6 @@ textarea.compose{-webkit-user-select:text;-moz-user-select:text;user-select:text
   </div>
 </div>
 
-<!-- ACTION MENU -->
 <div class="modal-ov" id="menuModal" onclick="nxCloseMenu()">
   <div class="menu-sheet" onclick="event.stopPropagation()">
     <div class="modal-drag"></div>
@@ -660,15 +648,11 @@ let _mode='relevant',_posts=[],_curPostId=null,
 
 /* ── UI: toggle between feed view and my-posts view ── */
 function setFeedMode(){
-  // show filter bar, hide my-posts bar
   show('filterBar'); hide('myPostsBar');
-  // show "My Posts" button, refresh btn stays
   show('btnMyPosts');
 }
 function setMyPostsMode(){
-  // hide filter bar, show my-posts bar
   hide('filterBar'); show('myPostsBar');
-  // hide "My Posts" button (redundant when already inside my posts)
   hide('btnMyPosts');
 }
 
@@ -757,11 +741,8 @@ function nxSetMode(m){
 }
 
 /* ── SCROLL LOCK ── */
-function lockScroll(){document.body.style.overflow='hidden';}
-function unlockScroll(){
-  const any=['composerModal','commentsModal','replyModal','menuModal'].some(id=>$(id)&&$(id).classList.contains('open'));
-  if(!any) document.body.style.overflow='';
-}
+function lockScroll(){ /* Managed natively via uniform layout architecture */ }
+function unlockScroll(){ /* Managed natively via uniform layout architecture */ }
 
 /* ── COMPOSER ── */
 function nxOpenComposer(){
