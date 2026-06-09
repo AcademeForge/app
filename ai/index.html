@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#0d0f14"/>
 <title>AcademeForge AI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -794,7 +794,7 @@ function loadFromLocalTimeline(suffix) {
     if (!raw) return null;
     const data = JSON.parse(raw);
     if (Date.now() - data.timestamp > CACHE_EXPIRY_MS) {
-      lsDel(getCacheKey(suffix)); 
+      lsDel(getCacheKey(suffix));
       return null;
     }
     return data.payload;
@@ -1002,20 +1002,20 @@ function renderGreeting() {
   let timeLabel, main, sub;
 
   if (_mode === 'dev13') {
-    if (h>=5 && h<12)       { timeLabel='Morning';       main=`Morning ${name} ☕`;        sub="What are we shipping today?"; }
-    else if (h>=12 && h<17) { timeLabel='Afternoon';     main=`Yo ${name} 🛠️`;              sub="Got a product problem? Let's crack it."; }
-    else if (h>=17 && h<21) { timeLabel='Evening';       main=`Still building ${name}? 🔥`; sub="Good. Most people already quit."; }
+    if (h>=5 && h<12)       { timeLabel='Morning';       main=`Morning ${name} ☕`;         sub="What are we shipping today?"; }
+    else if (h>=12 && h<17) { timeLabel='Afternoon';     main=`Yo ${name} 🛠️`;               sub="Got a product problem? Let's crack it."; }
+    else if (h>=17 && h<21) { timeLabel='Evening';       main=`Still building ${name}? 🔥`;  sub="Good. Most people already quit."; }
     else                    { timeLabel='Late Night';     main=`Late night grind ${name} 🌙`; sub="The best products get built at this hour."; }
   } else if (_mode === 'tapri') {
-    if (h>=5 && h<12)       { timeLabel='Subah subah';   main=`Uth gaye ${name}? 🌅`;     sub="Chal baat karte hain, kya chal raha hai?"; }
-    else if (h>=12 && h<17) { timeLabel='Dopahar';       main=`Kya haal hai ${name} 😎`;  sub="Kuch confuse ho? Bata, sorted karte hain."; }
+    if (h>=5 && h<12)       { timeLabel='Subah subah';   main=`Uth gaye ${name}? 🌅`;      sub="Chal baat karte hain, kya chal raha hai?"; }
+    else if (h>=12 && h<17) { timeLabel='Dopahar';       main=`Kya haal hai ${name} 😎`;   sub="Kuch confuse ho? Bata, sorted karte hain."; }
     else if (h>=17 && h<21) { timeLabel='Shaam';         main=`Aaja baat karte hain ${name} ☕`; sub="Din kaisa raha? Kuch bhi pooch, judge nahi karunga."; }
     else                    { timeLabel='Raat ko';        main=`Raat ko jaag rahe ho ${name}? 🌙`; sub="Koi tension hai toh bata. Akele mat socho."; }
   } else {
-    if (h>=5 && h<12)       { timeLabel='Good Morning';  main=`Good Morning ${name} ☀️`;  sub='Ready to learn something new today?'; }
+    if (h>=5 && h<12)       { timeLabel='Good Morning';  main=`Good Morning ${name} ☀️`;   sub='Ready to learn something new today?'; }
     else if (h>=12 && h<17) { timeLabel='Good Afternoon';main=`Good Afternoon ${name} 📚`; sub="What skill are we levelling up today?"; }
     else if (h>=17 && h<21) { timeLabel='Good Evening';  main=`Good Evening ${name} 🌆`;   sub="Let's continue your learning journey."; }
-    else                    { timeLabel='Late Night';     main=`Late Night ${name} 🌙`;    sub="Focused sessions at this hour hit different."; }
+    else                    { timeLabel='Late Night';     main=`Late Night ${name} 🌙`;     sub="Focused sessions at this hour hit different."; }
   }
 
   $('greetingTime').textContent = timeLabel;
@@ -1029,8 +1029,8 @@ function renderGreeting() {
     : ['Learn Python','Build a portfolio','Freelancing tips','AI tools for students','Career advice','React basics'];
 
   $('chips').innerHTML = suggestions.map(s => {
-    const e = s.replace(/'/g,"\\'");
-    return `<button class="chip" onclick="chipClick('${e}')">${esc(s)}</button>`;
+    const escaped = s.replace(/'/g,"\\'");
+    return `<button class="chip" onclick="chipClick('${escaped}')">${esc(s)}</button>`;
   }).join('');
 }
 
@@ -1171,7 +1171,7 @@ async function delConv(e, id) {
 
 async function clearAllConvs() {
   if (!confirm('Delete all chat sessions permanently?')) return;
-  const ids = [..._convs.map(c => c.id)];
+  const ids = _convs.map(c => c.id);
   _convs = []; _filteredConvs = []; _convId = null;
   saveToLocalTimeline('conversations', []);
   ids.forEach(id => {
@@ -1526,12 +1526,12 @@ async function init() {
   show('chat'); show('inputArea'); show('modeSelectorArea');
   setMode('af24');
   renderDrawerProfile();
-  
+
   const initialUsage = await edgeCall({ action: 'usage_only' });
   if (initialUsage && !initialUsage.error) {
     saveUsageCache(initialUsage);
   }
-  
+
   renderUsageFromCache();
   syncLockdownState();
   await loadConvList();
