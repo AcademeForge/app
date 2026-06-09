@@ -783,10 +783,13 @@ syncTheme();
 // EDGE CALL ENGINE
 // ════════════════════════════════════════
 async function edgeCall(payload) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 45000);
   try {
     if (!navigator.onLine) return { error: 'Please check your internet connection and try again.' };
+    if (!sKey()) return { error: 'Access denied. Please sign in.', httpStatus: 401 };
 
-    const edgeMode = MODE_MAP[payload.mode] || 'af_proguide';
+    const edgeMode = MODE_MAP[payload.mode] || payload.mode || 'af_proguide';
     const body = { ...payload, mode: edgeMode, student_key: sKey(), student_name: sName() };
 
     const res = await fetch(EDGE_URL, {
@@ -795,7 +798,8 @@ async function edgeCall(payload) {
         'Content-Type': 'application/json',
         'x-af-student-key': sKey()
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
+      signal: controller.signal
     });
 
     const data = await res.json().catch(() => ({}));
@@ -804,11 +808,17 @@ async function edgeCall(payload) {
       return { ...data, limitReached: true, httpStatus: 429 };
     }
     if (!res.ok) {
-      return { ...data, httpStatus: res.status };
+      return { error: data.error || `Request failed (${res.status}).`, ...data, httpStatus: res.status };
     }
     return data;
   } catch (e) {
-    return { error: 'Connection error. Please try again.' };
+    return {
+      error: e && e.name === 'AbortError'
+        ? 'The request timed out. Please try again.'
+        : 'Connection error. Please try again.'
+    };
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -845,13 +855,46 @@ function loadFromLocalTimeline(suffix) {
 let _usageCache = null;
 function saveUsageCache(payload) {
   if (!payload) return;
-  _usageCache = payload;
-  saveToLocalTimeline('usage', payload);
+  _usageCache = {
+    dailyReqUsed: Number(payload.dailyReqUsed || 0),
+    dailyReqLimit: Number(payload.dailyReqLimit || DAILY_REQ_LIMIT),
+    dailyReqRemaining: Number(payload.dailyReqRemaining ?? DAILY_REQ_LIMIT),
+    dailyTokenUsed: Number(payload.dailyTokenUsed || 0),
+    dailyTokenLimit: Number(payload.dailyTokenLimit || DAILY_TOKEN_LIMIT),
+    dailyTokenRemaining: Number(payload.dailyTokenRemaining ?? DAILY_TOKEN_LIMIT),
+    sessionReqUsed: Number(payload.sessionReqUsed || 0),
+    sessionReqLimit: Number(payload.sessionReqLimit || WINDOW_REQ_LIMIT),
+    sessionTokenUsed: Number(payload.sessionTokenUsed || 0),
+    sessionTokenLimit: Number(payload.sessionTokenLimit || WINDOW_TOKEN_LIMIT),
+    sessionCount: Number(payload.sessionCount || 0),
+    sessionActive: Boolean(payload.sessionActive),
+    sessionSecondsRemaining: Number(payload.sessionSecondsRemaining || 0),
+    savedAt: Date.now()
+  };
+  saveToLocalTimeline('usage', _usageCache);
 }
 function loadUsageCache() {
-  if (_usageCache) return _usageCache;
-  _usageCache = loadFromLocalTimeline('usage');
-  return _usageCache;
+  if (!_usageCache) _usageCache = loadFromLocalTimeline('usage');
+  if (!_usageCache) return null;
+  const elapsed = Math.floor((Date.now() - Number(_usageCache.savedAt || Date.now())) / 1000);
+  const current = {
+    ..._usageCache,
+    sessionSecondsRemaining: Math.max(0, Number(_usageCache.sessionSecondsRemaining || 0) - elapsed)
+  };
+  if (current.sessionActive && current.sessionSecondsRemaining === 0) {
+    current.sessionActive = false;
+    current.sessionReqUsed = 0;
+    current.sessionTokenUsed = 0;
+  }
+  return current;
+}
+
+async function refreshUsage() {
+  const res = await edgeCall({ action: 'usage_only' });
+  if (res && !res.error) saveUsageCache(res);
+  renderUsageFromCache();
+  syncLockdownState();
+  return res;
 }
 
 // ════════════════════════════════════════
@@ -912,10 +955,10 @@ function renderUsageFromCache() {
     return;
   }
 
-  const reqUsed = u.sessionReqUsed !== undefined ? u.sessionReqUsed : 0;
-  const tokUsed = u.sessionTokenUsed !== undefined ? u.sessionTokenUsed : 0;
-  const reqLimit = WINDOW_REQ_LIMIT;
-  const tokLimit = WINDOW_TOKEN_LIMIT;
+  const reqUsed = u.sessionReqUsed;
+  const tokUsed = u.sessionTokenUsed;
+  const reqLimit = u.sessionReqLimit;
+  const tokLimit = u.sessionTokenLimit;
 
   const reqLeft    = Math.max(0, reqLimit - reqUsed);
   const reqPct      = Math.min(100, (reqUsed / reqLimit) * 100);
@@ -929,21 +972,25 @@ function renderUsageFromCache() {
 
   const reqBar = $('drReqBar');
   reqBar.className = 'usage-fill' + (reqPct >= 90 ? ' danger' : reqPct >= 70 ? ' warn' : '');
+  $('drTokBar').className = 'usage-fill' + (tokRemain <= 10 ? ' danger' : tokRemain <= 30 ? ' warn' : '');
 
   const isLocked = checkLimitFromCache(u);
   if (isLocked && u.sessionSecondsRemaining > 0) {
     $('drSessInfo').textContent = `Window resets in ${fmtSecs(u.sessionSecondsRemaining) || '…'}`;
-  } else if (u.dailyReqRemaining <= 0) {
+  } else if (u.dailyReqRemaining <= 0 || u.dailyTokenRemaining <= 0) {
     $('drSessInfo').textContent = 'Daily limit reached · Resets tomorrow';
   } else {
-    $('drSessInfo').textContent = `${u.dailyReqRemaining} daily requests remaining`;
+    $('drSessInfo').textContent =
+      `${u.dailyReqRemaining}/${u.dailyReqLimit} daily requests · ` +
+      `${u.dailyTokenRemaining.toLocaleString()} tokens left`;
   }
 }
 
 function checkLimitFromCache(u) {
   if (!u) return false;
   if (u.dailyReqRemaining <= 0 || u.dailyTokenRemaining <= 0) return true;
-  return (u.sessionReqUsed >= WINDOW_REQ_LIMIT || u.sessionTokenUsed >= WINDOW_TOKEN_LIMIT);
+  if (!u.sessionActive) return false;
+  return (u.sessionReqUsed >= u.sessionReqLimit || u.sessionTokenUsed >= u.sessionTokenLimit);
 }
 
 // ════════════════════════════════════════
@@ -990,7 +1037,10 @@ function syncLockdownState() {
     applyLockdown('tomorrow (token limit)');
     return true;
   }
-  if (u.sessionReqUsed >= WINDOW_REQ_LIMIT || u.sessionTokenUsed >= WINDOW_TOKEN_LIMIT) {
+  if (u.sessionActive && (
+    u.sessionReqUsed >= u.sessionReqLimit ||
+    u.sessionTokenUsed >= u.sessionTokenLimit
+  )) {
     const cd = fmtSecs(u.sessionSecondsRemaining);
     applyLockdown(cd || '12h');
     return true;
@@ -1081,19 +1131,16 @@ function chipClick(text) {
 // CONVERSATIONS WITH TIMELINE PERSISTENCE
 // ════════════════════════════════════════
 async function loadConvList() {
-  let localConvs = loadFromLocalTimeline('conversations');
-  if (localConvs) {
-    _convs = localConvs;
-  } else {
-    const res = await edgeCall({ action: 'list_conversations' });
-    _convs = (res && res.conversations) ? res.conversations : [];
-    _convs = _convs.map(c => ({
+  const res = await edgeCall({ action: 'list_conversations' });
+  if (res && Array.isArray(res.conversations)) {
+    _convs = res.conversations.map(c => ({
       ...c,
       uiMode: normalizeModeKey(c.mode)
     }));
-    if (_convs.length > 0) {
-      saveToLocalTimeline('conversations', _convs);
-    }
+    saveToLocalTimeline('conversations', _convs);
+  } else {
+    _convs = loadFromLocalTimeline('conversations') || [];
+    if (res && res.error) toast(res.error, 'err');
   }
   _filteredConvs = [..._convs];
   renderConvList();
@@ -1136,40 +1183,44 @@ async function openConv(c) {
   renderConvList();
   closeDrawer();
 
-  if (syncLockdownState()) return;
+  const ph = addThinking();
+  const res = await edgeCall({ action: 'load_conversation', conversation_id: c.id });
+  removeEl(ph);
+  const messages = res && Array.isArray(res.messages)
+    ? res.messages
+    : (loadFromLocalTimeline('messages_' + _convId) || []);
 
-  let cachedMsgs = loadFromLocalTimeline('messages_' + _convId);
-  if (cachedMsgs && cachedMsgs.length > 0) {
-    cachedMsgs.forEach(m => {
+  if (res && res.error) toast(res.error, 'err');
+  if (messages.length) {
+    messages.forEach(m => {
       const msgUiMode = normalizeModeKey(m.mode);
       addMsg(m.role, m.content, msgUiMode, false);
     });
-    scrollBot();
-  } else {
-    const ph = addThinking();
-    const res = await edgeCall({ action: 'load_conversation', conversation_id: c.id });
-    removeEl(ph);
-
-    if (res && res.messages && res.messages.length) {
-      res.messages.forEach(m => {
-        const msgUiMode = normalizeModeKey(m.mode);
-        addMsg(m.role, m.content, msgUiMode, false);
-      });
+    if (res && Array.isArray(res.messages)) {
       saveToLocalTimeline('messages_' + _convId, res.messages);
-      scrollBot();
     }
+    scrollBot();
   }
 }
 
 async function delConv(e, id) {
   e.stopPropagation();
+  const previous = [..._convs];
   _convs = _convs.filter(c => c.id !== id);
   _filteredConvs = _filteredConvs.filter(c => c.id !== id);
   if (_convId === id) { _convId = null; clearChat(); showGreeting(true); renderGreeting(); }
   saveToLocalTimeline('conversations', _convs);
-  lsDel(getCacheKey('messages_' + id));
   renderConvList();
-  await edgeCall({ action: 'delete_conversation', conversation_id: id });
+  const res = await edgeCall({ action: 'delete_conversation', conversation_id: id });
+  if (!res || res.error || !res.success) {
+    _convs = previous;
+    _filteredConvs = [...previous];
+    saveToLocalTimeline('conversations', _convs);
+    renderConvList();
+    toast((res && res.error) || 'Could not delete conversation.', 'err');
+    return;
+  }
+  lsDel(getCacheKey('messages_' + id));
 }
 
 async function clearAllConvs() {
@@ -1177,12 +1228,17 @@ async function clearAllConvs() {
   const ids = _convs.map(c => c.id);
   _convs = []; _filteredConvs = []; _convId = null;
   saveToLocalTimeline('conversations', []);
-  ids.forEach(id => {
-    lsDel(getCacheKey('messages_' + id));
-    edgeCall({ action: 'delete_conversation', conversation_id: id }).catch(() => {});
-  });
+  const results = await Promise.all(ids.map(id =>
+    edgeCall({ action: 'delete_conversation', conversation_id: id })
+  ));
+  ids.forEach(id => lsDel(getCacheKey('messages_' + id)));
   renderConvList(); clearChat(); showGreeting(true); renderGreeting();
-  toast('All conversations cleared', 'ok');
+  if (results.some(r => !r || r.error || !r.success)) {
+    toast('Some conversations could not be deleted. Refreshing...', 'err');
+    await loadConvList();
+  } else {
+    toast('All conversations cleared', 'ok');
+  }
 }
 
 function newChat() {
@@ -1358,6 +1414,11 @@ function autoResize() {
 async function doSend() {
   if (_loading) return;
 
+  const latestUsage = await refreshUsage();
+  if (latestUsage && latestUsage.error && latestUsage.httpStatus === 401) {
+    toast(latestUsage.error, 'err');
+    return;
+  }
   if (syncLockdownState()) {
     toast('Session limit reached. Please wait for your window to reset.', 'err');
     return;
@@ -1383,7 +1444,7 @@ async function doSend() {
   removeEl(ph);
 
   _loading = false;
-  $('sendBtn').disabled = false;
+  onTyping();
 
   if (!res || res.error || res.limitReached) {
     let userMsg = 'The AI is busy right now. Please try again.';
@@ -1416,17 +1477,28 @@ async function doSend() {
         uiMode: normalizedResponseMode
       };
       _convs.unshift(nc);
-      _filteredConvs.unshift(nc);
       saveToLocalTimeline('conversations', _convs);
+    } else {
+      const existing = _convs.find(c => c.id === _convId);
+      if (existing) {
+        existing.updated_at = new Date().toISOString();
+        existing.mode = res.mode || existing.mode;
+        existing.uiMode = normalizedResponseMode;
+      }
     }
+    _convs.sort((a, b) =>
+      new Date(b.updated_at || 0).getTime() - new Date(a.updated_at || 0).getTime()
+    );
+    _filteredConvs = [..._convs];
+    renderConvList();
 
     let currentLocalMsgs = loadFromLocalTimeline('messages_' + _convId) || [];
-    currentLocalMsgs.push({ role: 'user', content: content, mode: _mode });
-    currentLocalMsgs.push({ role: 'assistant', content: res.answer, mode: normalizedResponseMode });
+    currentLocalMsgs.push({ role: 'user', content, mode: MODE_MAP[_mode] || 'af_proguide' });
+    currentLocalMsgs.push({ role: 'assistant', content: res.answer, mode: res.mode || 'af_proguide' });
     saveToLocalTimeline('messages_' + _convId, currentLocalMsgs);
   }
 
-  addMsg('assistant', res.answer, normalizedResponseMode, true);
+  addMsg('assistant', String(res.answer || 'No response received.'), normalizedResponseMode, true);
   renderUsageFromCache();
   syncLockdownState();
 }
@@ -1434,7 +1506,7 @@ async function doSend() {
 // ════════════════════════════════════════
 // PROFILE MODAL
 // ════════════════════════════════════════
-function openProfileModal() {
+async function openProfileModal() {
   const name = sName(), email = sEmail(), mobile = sMobile(), id = sId();
   $('pmAvatar').textContent = initials(name);
   $('pmName').textContent   = name;
@@ -1442,19 +1514,23 @@ function openProfileModal() {
   $('pmEmail').textContent  = email  || '—';
   $('pmPhone').textContent  = mobile || '—';
 
+  show('profileModal');
+  closeDrawer();
+  await refreshUsage();
   const u = loadUsageCache();
   if (u) {
-    const reqUsed = u.sessionReqUsed !== undefined ? u.sessionReqUsed : 0;
-    const tokUsed = u.sessionTokenUsed !== undefined ? u.sessionTokenUsed : 0;
+    const reqUsed = u.sessionReqUsed;
+    const tokUsed = u.sessionTokenUsed;
 
-    $('pmSReq').textContent   = `${reqUsed} / ${WINDOW_REQ_LIMIT}`;
-    $('pmSReqBar').style.width = Math.min(100, (reqUsed / WINDOW_REQ_LIMIT) * 100) + '%';
+    $('pmSReq').textContent = `${Math.max(0, u.sessionReqLimit - reqUsed)} left / ${u.sessionReqLimit}`;
+    $('pmSReqBar').style.width = Math.min(100, (reqUsed / u.sessionReqLimit) * 100) + '%';
 
-    $('pmDailyReq').textContent = `${u.dailyReqUsed || 0} / ${DAILY_REQ_LIMIT}`;
-    $('pmDailyReqBar').style.width = Math.min(100, ((u.dailyReqUsed || 0) / DAILY_REQ_LIMIT) * 100) + '%';
+    $('pmDailyReq').textContent = `${u.dailyReqRemaining} left / ${u.dailyReqLimit}`;
+    $('pmDailyReqBar').style.width = Math.min(100, (u.dailyReqUsed / u.dailyReqLimit) * 100) + '%';
 
-    const tokPct = Math.max(0, 100 - Math.round((tokUsed / WINDOW_TOKEN_LIMIT) * 100));
-    $('pmTokPctLabel').textContent = `${tokPct}% Remaining`;
+    const tokPct = Math.max(0, 100 - Math.round((tokUsed / u.sessionTokenLimit) * 100));
+    $('pmTokPctLabel').textContent =
+      `${Math.max(0, u.sessionTokenLimit - tokUsed).toLocaleString()} left (${tokPct}%)`;
     $('pmTokBar').style.width = tokPct + '%';
   } else {
     $('pmSReq').textContent     = `0 / ${WINDOW_REQ_LIMIT}`;
@@ -1465,8 +1541,6 @@ function openProfileModal() {
     $('pmTokBar').style.width = '100%';
   }
 
-  show('profileModal');
-  closeDrawer();
 }
 
 function closeProfileModal() { hide('profileModal'); }
@@ -1534,15 +1608,14 @@ async function init() {
   setMode('af24');
   renderDrawerProfile();
 
-  const initialUsage = await edgeCall({ action: 'usage_only' });
-  if (initialUsage && !initialUsage.error) {
-    saveUsageCache(initialUsage);
-  }
-
-  renderUsageFromCache();
-  syncLockdownState();
+  await refreshUsage();
   await loadConvList();
   $('sendBtn').disabled = true;
+
+  setInterval(() => {
+    renderUsageFromCache();
+    syncLockdownState();
+  }, 60000);
 }
 
 document.addEventListener('DOMContentLoaded', init);
