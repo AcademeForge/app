@@ -49,6 +49,8 @@ input,textarea,select{font-family:var(--fb);}
 @media(min-width:700px){body{padding:24px 0 40px;height:auto;min-height:100dvh;overflow-y:auto;}.shell{border-radius:32px;height:calc(100dvh - 64px);max-height:880px;}}
 .hdr{position:sticky;top:0;z-index:100;height:var(--hdr-h);background:var(--nav);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;}
 .hdr-title{font-family:var(--fd);font-size:15px;font-weight:800;color:var(--t1);flex:1;}
+.hdr-logout{height:30px;padding:0 12px;border-radius:var(--rf);font-size:11px;font-weight:800;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);color:var(--err);}
+.hdr-logout:active{opacity:.7;}
 .page{flex:1;overflow-y:scroll;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;padding:14px 12px calc(var(--nav-h) + 20px + env(safe-area-inset-bottom,0px));min-height:0;-webkit-transform:translateZ(0);transform:translateZ(0);}
 .page::-webkit-scrollbar{width:2px;}
 .page::-webkit-scrollbar-thumb{background:var(--bc);border-radius:99px;}
@@ -177,8 +179,10 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
 <div class="shell">
   <header class="hdr">
     <span class="hdr-title" id="hdrTitle">Student 🎓</span>
+    <button class="hdr-logout hidden" id="hdrLogout" onclick="doLogout()">Logout</button>
   </header>
 
+  <!-- Cache status bar (shows when serving from cache) -->
   <div class="cache-bar hidden" id="cacheBar">
     <span id="cacheMsg">Loaded from cache</span>
     <button onclick="forceRefreshCourses()">↻ Refresh</button>
@@ -186,6 +190,7 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
 
   <div class="page" id="page">
 
+    <!-- AUTH -->
     <div id="panelAuth" class="auth-card">
       <div class="auth-icon">🎓</div>
       <h2 class="auth-title">Student ID Access</h2>
@@ -240,6 +245,7 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
       <div class="auth-note">If you face any issue while creating your Student ID, email us at <b>academeforge@gmail.com</b> with your name and WhatsApp number.</div>
     </div>
 
+    <!-- COURSES -->
     <div id="panelCourses" class="hidden">
       <div class="dash-card">
         <div class="dash-welcome" id="welcomeText">Welcome Student</div>
@@ -248,6 +254,7 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
       </div>
     </div>
 
+    <!-- NO COURSE -->
     <div id="panelNoCourse" class="hidden">
       <div class="dash-card">
         <div class="no-course">
@@ -256,10 +263,12 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
           <p id="noCourseMsg">You are not enrolled in any batch.</p>
           <p>Please enroll from the Batches section.</p>
           <button class="main-btn" style="margin-top:12px;" onclick="window.location.href='/batches/index.html'">Browse Batches</button>
+          <button class="danger-btn" style="margin-top:8px;" onclick="doLogout()">Logout</button>
         </div>
       </div>
     </div>
 
+    <!-- COURSE DETAIL -->
     <div id="panelCourseDetail" class="hidden">
       <button class="back-mini" onclick="showPanel('courses')">← Back to Courses</button>
       <div class="dash-card">
@@ -274,6 +283,7 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
       </div>
     </div>
 
+    <!-- LEARNING CHOICE -->
     <div id="panelLearning" class="hidden">
       <button class="back-mini" onclick="showPanel('courseDetail')">← Back to Course</button>
       <div class="dash-card">
@@ -286,6 +296,7 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
       </div>
     </div>
 
+    <!-- CHAPTERS -->
     <div id="panelChapters" class="hidden">
       <button class="back-mini" onclick="showPanel('learning')">← Back</button>
       <div class="dash-card">
@@ -295,6 +306,7 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
       </div>
     </div>
 
+    <!-- CONTENT -->
     <div id="panelContent" class="hidden">
       <button class="back-mini" onclick="showPanel('chapters')">← Back to Chapters</button>
       <div class="dash-card">
@@ -413,6 +425,7 @@ function showPanel(name) {
   const el = $('panel' + name.charAt(0).toUpperCase() + name.slice(1));
   if (el) el.classList.remove('hidden');
   $('page').scrollTop = 0;
+  $('hdrLogout').classList.toggle('hidden', name === 'auth');
   const titles = { auth:'Student 🎓', courses:'My Courses 📚', noCourse:'Not Enrolled 😬', courseDetail:'Course Details 📘', learning:'Start Learning 🎯', chapters:'Chapters 📖', content:'Content 📄' };
   $('hdrTitle').textContent = titles[name] || 'Student 🎓';
 }
@@ -500,7 +513,7 @@ async function verifyCreateOtp() {
 }
 
 /* ── FORGOT ── */
-async function findStudent ForReset() {
+async function findStudentForReset() {
   const value = ($('forgotLogin').value||'').trim(), clean = cleanPhone(value);
   if (!value) { showMsg('err','Enter your Student ID, phone, or email.'); return; }
   showMsg('info','Finding your account…');
@@ -544,11 +557,19 @@ function saveSession(student, token, deviceId) {
   localStorage.setItem('af_student_logged_in','true');
   localStorage.setItem('af_session_token',    token||'');
   localStorage.setItem('af_device_id',        deviceId||getDeviceId());
-  localStorage.setItem('af_student_uuid',      student.id||'');
+  localStorage.setItem('af_student_uuid',     student.id||'');
   localStorage.setItem('af_student_id',       student.student_id||student.mobile||student.phone||'');
   localStorage.setItem('af_student_mobile',   student.mobile||student.phone||'');
   localStorage.setItem('af_student_name',     student.name||'Student');
   localStorage.setItem('af_student_email',    student.email||'');
+}
+function doLogout() {
+  ['af_student_logged_in','af_student_uuid','af_student_id','af_student_mobile','af_student_name','af_student_email','af_session_token','af_student_phone'].forEach(k => localStorage.removeItem(k));
+  cacheClear(COURSES_KEY);
+  enrolledCourses=[]; selectedCourse=null; learningMode='lectures';
+  $('cacheBar').classList.add('hidden');
+  showPanel('auth'); switchMode('login');
+  showToast('Logged out 👋','ok');
 }
 
 /* ── STATE ── */
@@ -578,10 +599,10 @@ async function loadCourses(force) {
       // Show cache bar
       const ts = cacheTimestamp(COURSES_KEY);
       const mins = Math.round((Date.now()-ts)/60000);
-      $('cacheMsg').textContent =
-    mins > 0
-      ? `Last updated ${mins}m ago`
-      : 'Updated just now';
+    $('cacheMsg').textContent =
+  mins > 0
+    ? `Last updated ${mins}m ago`
+    : 'Updated just now';
       $('cacheBar').classList.remove('hidden');
       return;
     }
