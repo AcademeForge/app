@@ -688,7 +688,7 @@ textarea,input{font-family:var(--font-body);}
           <span class="pm-val" id="pmPhone">—</span>
         </div>
         <div>
-          <div class="pm-section-title">Active Window Usage</div>
+          <div class="PM-section-title">Active Window Usage</div>
           <div class="pm-usage-block">
             <div class="pm-usage-row">
               <span class="pm-usage-label">Requests</span>
@@ -730,7 +730,6 @@ const CACHE_EXPIRY_MS    = 36 * 60 * 60 * 1000; // 36 Hours
 
 const MODE_MAP = { af24: 'af_proguide', dev13: 'dev', tapri: 'tapri' };
 
-// Map incoming backend database strings perfectly safely into correct configuration objects
 function normalizeModeKey(rawMode) {
   if (rawMode === 'dev' || rawMode === 'dev13') return 'dev13';
   if (rawMode === 'tapri') return 'tapri';
@@ -779,6 +778,39 @@ function randAlert(){return LOCKDOWN_ALERTS[Math.floor(Math.random()*LOCKDOWN_AL
 
 function syncTheme(){document.documentElement.setAttribute('data-theme',ls('af_dark_mode')==='1'?'dark':'light');}
 syncTheme();
+
+// ════════════════════════════════════════
+// EDGE CALL ENGINE
+// ════════════════════════════════════════
+async function edgeCall(payload) {
+  try {
+    if (!navigator.onLine) return { error: 'Please check your internet connection and try again.' };
+
+    const edgeMode = MODE_MAP[payload.mode] || 'af_proguide';
+    const body = { ...payload, mode: edgeMode, student_key: sKey(), student_name: sName() };
+
+    const res = await fetch(EDGE_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-af-student-key': sKey()
+      },
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (res.status === 429) {
+      return { ...data, limitReached: true, httpStatus: 429 };
+    }
+    if (!res.ok) {
+      return { ...data, httpStatus: res.status };
+    }
+    return data;
+  } catch (e) {
+    return { error: 'Connection error. Please try again.' };
+  }
+}
 
 // ════════════════════════════════════════
 // TIMELINE CACHE ENGINE
