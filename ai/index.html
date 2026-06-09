@@ -17,9 +17,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <style>
-/* ════════════════════════════════════════
-   TOKENS & THEME RULES
-════════════════════════════════════════ */
 :root {
   --p:#4f8aff;--p2:#3b6fd4;--p3:#2a52a8;
   --dev:#f97316;--dev2:#ea580c;
@@ -37,19 +34,17 @@
   --hdr-h:54px;--drawer-w:300px;--shell:430px;
   --ease:cubic-bezier(.22,1,.36,1);
   --spring:cubic-bezier(.34,1.56,.64,1);
-  --dev13:#f97316;--dev13-2:#ea580c;
   --tapri:#a855f7;--tapri2:#9333ea;
-  --gemini-glow: linear-gradient(90deg, #4f8aff, #a855f7, #f43f5e, #4f8aff);
-  --gemini-glow-dev: linear-gradient(90deg, #f97316, #ea580c, #ef4444, #f97316);
-  --gemini-glow-tapri: linear-gradient(90deg, #a855f7, #ec4899, #8b5cf6, #a855f7);
+  --gemini-glow:linear-gradient(90deg,#4f8aff,#a855f7,#f43f5e,#4f8aff);
+  --gemini-glow-dev:linear-gradient(90deg,#f97316,#ea580c,#ef4444,#f97316);
+  --gemini-glow-tapri:linear-gradient(90deg,#a855f7,#ec4899,#8b5cf6,#a855f7);
 }
 [data-theme="light"]{
   --bg:#f4f6fa;--surface:#ffffff;--surface2:#eef2fc;--surface3:#e0e7ff;
   --card:#ffffff;--border:rgba(79,138,255,.16);--border2:rgba(79,138,255,.28);
   --inp:#eef2fc;--grp:rgba(79,138,255,.06);
   --t1:#0b0d17;--t2:#334155;--tm:#64748b;
-  --sh:0 4px 14px rgba(0,0,0,.05);--she:0 12px 36px rgba(79,138,255,.1);
-  --shb:0 4px 18px rgba(79,138,255,.2);
+  --sh:0 4px 14px rgba(0,0,0,.05);--she:0 12px 36px rgba(79,138,255,.1);--shb:0 4px 18px rgba(79,138,255,.2);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;font-family:var(--font-body);background:#05070a;color:var(--t1);overflow:hidden;}
@@ -65,7 +60,6 @@ textarea,input{font-family:var(--font-body);}
   display:flex;flex-direction:column;
   height:100dvh;width:100%;max-width:var(--shell);
   position:relative;background:var(--bg);overflow:hidden;
-  transition:box-shadow .3s;
 }
 @media(min-width:480px){
   #app{
@@ -75,45 +69,35 @@ textarea,input{font-family:var(--font-body);}
   }
 }
 
-/* ════ OVERLAY & DRAWER ════ */
+/* ── OVERLAY & DRAWER ── */
 #overlay{
   position:absolute;inset:0;z-index:400;
-  background:rgba(0,0,0,.5);
-  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
-  opacity:0;visibility:hidden;
-  transition:opacity .25s,visibility .25s;
+  background:rgba(0,0,0,.5);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s;
 }
 #overlay.open{opacity:1;visibility:visible;}
-
 #drawer{
   position:absolute;top:0;bottom:0;z-index:500;
   width:var(--drawer-w);background:var(--surface);
   border-right:1px solid var(--border);
   display:flex;flex-direction:column;
-  transform:translateX(-100%);
-  transition:transform .28s var(--ease);
+  transform:translateX(-100%);transition:transform .28s var(--ease);
   box-shadow:var(--she);overflow:hidden;left:0;
 }
 #drawer.open{transform:translateX(0);}
 
 .dr-top{flex-shrink:0;padding:14px 14px 10px;border-bottom:1px solid var(--border);}
 .dr-back{
-  display:flex;align-items:center;gap:7px;
-  padding:7px 10px;border-radius:var(--r2);
+  display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:var(--r2);
   font-size:12.5px;font-weight:700;color:var(--t2);
-  background:var(--surface2);border:1px solid var(--border);
-  margin-bottom:14px;width:fit-content;
+  background:var(--surface2);border:1px solid var(--border);margin-bottom:14px;width:fit-content;
   transition:background .14s,color .14s;
 }
 .dr-back:hover{background:var(--surface3);color:var(--t1);}
 .dr-back svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
-
 .dr-profile-card{
-  display:flex;align-items:center;gap:10px;
-  padding:11px 12px;border-radius:var(--r2);
-  background:var(--surface2);border:1px solid var(--border);
-  margin-bottom:10px;cursor:pointer;
-  transition:background .14s;
+  display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:var(--r2);
+  background:var(--surface2);border:1px solid var(--border);margin-bottom:10px;cursor:pointer;transition:background .14s;
 }
 .dr-profile-card:hover{background:var(--surface3);}
 .dr-avatar{
@@ -129,17 +113,14 @@ textarea,input{font-family:var(--font-body);}
   font-size:10.5px;font-weight:800;color:var(--p);
   background:rgba(79,138,255,.12);border:1px solid rgba(79,138,255,.2);
 }
-
 .dr-new-btn{
   width:100%;margin-top:10px;padding:10px 14px;border-radius:var(--r2);
   font-size:13px;font-weight:700;color:var(--t1);
   background:var(--surface2);border:1px solid var(--border);
-  display:flex;align-items:center;gap:8px;
-  transition:background .14s;cursor:pointer;
+  display:flex;align-items:center;gap:8px;transition:background .14s;cursor:pointer;
 }
 .dr-new-btn:hover{background:var(--surface3);}
 .dr-new-btn svg{width:15px;height:15px;stroke:var(--p);fill:none;stroke-width:2;}
-
 .dr-search-wrap{padding:10px 14px 0;flex-shrink:0;}
 .dr-search{
   width:100%;padding:8px 12px;border-radius:var(--r2);
@@ -148,7 +129,6 @@ textarea,input{font-family:var(--font-body);}
 }
 .dr-search::placeholder{color:var(--tm);}
 .dr-search:focus{border-color:var(--p);}
-
 .dr-conv-label{
   padding:12px 14px 4px;font-size:10px;font-weight:800;color:var(--tm);
   text-transform:uppercase;letter-spacing:.08em;
@@ -156,18 +136,12 @@ textarea,input{font-family:var(--font-body);}
 }
 .dr-clear-btn{font-size:11px;font-weight:700;color:var(--err);opacity:.7;cursor:pointer;}
 .dr-clear-btn:hover{opacity:1;}
-
 #convList{flex:1;overflow-y:auto;padding:0 8px 10px;}
-.conv-empty{
-  padding:24px 12px;text-align:center;
-  font-size:12px;color:var(--tm);line-height:1.6;
-}
+.conv-empty{padding:24px 12px;text-align:center;font-size:12px;color:var(--tm);line-height:1.6;}
 .conv-empty-icon{font-size:22px;margin-bottom:8px;}
 .conv-item{
-  display:flex;align-items:center;gap:8px;
-  padding:9px 10px;border-radius:var(--r2);
-  cursor:pointer;border:1px solid transparent;
-  margin-bottom:2px;min-width:0;transition:background .12s;
+  display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:var(--r2);
+  cursor:pointer;border:1px solid transparent;margin-bottom:2px;min-width:0;transition:background .12s;
 }
 .conv-item:hover{background:var(--surface2);}
 .conv-item.active{background:var(--surface3);border-color:var(--border);}
@@ -179,65 +153,57 @@ textarea,input{font-family:var(--font-body);}
 .conv-item.active .conv-title{color:var(--t1);font-weight:600;}
 .conv-del{
   flex-shrink:0;opacity:0;background:none;border:none;
-  color:var(--tm);padding:3px;border-radius:5px;cursor:pointer;
-  transition:opacity .12s,color .12s;
+  color:var(--tm);padding:3px;border-radius:5px;cursor:pointer;transition:opacity .12s,color .12s;
 }
 .conv-item:hover .conv-del{opacity:1;}
 .conv-del:hover{color:var(--err);}
 .conv-del svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;}
 
-.dr-footer{
-  flex-shrink:0;border-top:1px solid var(--border);
-  padding:12px 14px 14px;background:var(--surface);
-}
+/* ── DRAWER FOOTER — usage ── */
+.dr-footer{flex-shrink:0;border-top:1px solid var(--border);padding:12px 14px 14px;background:var(--surface);}
 .dr-usage-title{font-size:11px;font-weight:800;color:var(--tm);text-transform:uppercase;margin-bottom:10px;}
-.usage-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.usage-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
 .usage-label{font-size:11.5px;color:var(--t2);font-weight:600;}
 .usage-val{font-size:11px;color:var(--tm);font-family:monospace;}
-.usage-track{height:5px;background:var(--surface3);border-radius:99px;overflow:hidden;margin-bottom:9px;}
+.usage-track{height:5px;background:var(--surface3);border-radius:99px;overflow:hidden;margin-bottom:8px;}
 .usage-fill{height:100%;border-radius:99px;background:var(--p);transition:width .4s var(--ease);}
 .usage-fill.warn{background:var(--amber);}
 .usage-fill.danger{background:var(--err);}
+.dr-sess-info{font-size:10.5px;color:var(--tm);font-weight:600;margin-top:4px;}
 
-/* ════ ALERT BANNER ════ */
+/* ── ALERT BANNER ── */
 .alert-banner-system{
   background:linear-gradient(90deg,#b91c1c,#ef4444,#b91c1c);
-  color:#ffffff;padding:8px 0;overflow:hidden;
-  white-space:nowrap;position:relative;
-  border-bottom:1px solid rgba(0,0,0,.3);
-  box-shadow:0 4px 12px rgba(239,68,68,.2);
-  z-index:300;display:flex;align-items:center;
-  animation:bannerFadeIn .3s ease-out;
+  color:#fff;padding:8px 0;overflow:hidden;white-space:nowrap;
+  border-bottom:1px solid rgba(0,0,0,.3);box-shadow:0 4px 12px rgba(239,68,68,.2);
+  z-index:300;display:flex;align-items:center;animation:bannerFadeIn .3s ease-out;
 }
 .marquee-content{
   display:inline-block;padding-left:100%;
-  font-weight:800;font-size:12px;
-  text-transform:uppercase;letter-spacing:.05em;
+  font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.05em;
   animation:marqueeRun 22s linear infinite;
 }
 .marquee-content strong{color:#ffe4e6;text-shadow:0 0 6px rgba(255,255,255,.4);}
 @keyframes marqueeRun{0%{transform:translate3d(0,0,0);}100%{transform:translate3d(-100%,0,0);}}
 @keyframes bannerFadeIn{from{opacity:0;max-height:0;}to{opacity:1;max-height:50px;}}
 
-/* ════ HEADER ════ */
+/* ── HEADER ── */
 #header{
   flex-shrink:0;height:var(--hdr-h);
-  display:flex;align-items:center;
-  padding:0 14px;gap:12px;
+  display:flex;align-items:center;padding:0 14px;gap:12px;
   background:var(--surface);border-bottom:1px solid var(--border);z-index:100;
 }
 .hdr-menu{
   width:36px;height:36px;border-radius:var(--r2);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
-  background:var(--surface2);border:1px solid var(--border);
-  flex-shrink:0;cursor:pointer;transition:background .14s;
+  background:var(--surface2);border:1px solid var(--border);flex-shrink:0;cursor:pointer;transition:background .14s;
 }
 .hdr-menu:hover{background:var(--surface3);}
-.hdr-menu span{display:block;width:17px;height:1.5px;background:var(--t2);border-radius:99px;transition:background .14s;}
+.hdr-menu span{display:block;width:17px;height:1.5px;background:var(--t2);border-radius:99px;}
 .hdr-menu.hide{opacity:0;pointer-events:none;}
 .hdr-center{flex:1;min-width:0;}
 .hdr-title{font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--t1);line-height:1.2;}
-.hdr-sub{font-size:10.5px;color:var(--tm);font-weight:600;margin-top:1px;transition:color .2s;}
+.hdr-sub{font-size:10.5px;color:var(--tm);font-weight:600;margin-top:1px;}
 .hdr-free-badge{
   flex-shrink:0;padding:4px 10px;border-radius:var(--r2);
   font-size:10.5px;font-weight:800;letter-spacing:.03em;
@@ -246,48 +212,45 @@ textarea,input{font-family:var(--font-body);}
 }
 @keyframes freeBlink{0%,100%{opacity:1;}50%{opacity:.45;}}
 
-/* ════ CHAT AREA ════ */
-#chat{
-  flex:1;overflow-y:auto;
-  padding:0 14px 220px;
-  display:flex;flex-direction:column;
-  scroll-behavior:smooth;
+/* ── MODE SELECTOR ── */
+.mode-selector-container{padding:10px 14px 4px;background:var(--bg);flex-shrink:0;}
+.mode-track-bar{
+  display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r2);padding:3px;position:relative;
 }
+.mode-segment{
+  flex:1;padding:8px 4px;font-size:11.5px;font-weight:700;color:var(--t2);
+  text-align:center;border-radius:calc(var(--r2) - 2px);position:relative;z-index:2;
+  transition:color .2s;display:flex;align-items:center;justify-content:center;gap:4px;
+  cursor:pointer;user-select:none;-webkit-user-select:none;
+}
+.mode-segment.active{color:#fff;}
+.slider-pill{
+  position:absolute;top:3px;bottom:3px;left:3px;width:calc(33.333% - 2px);
+  background:var(--surface3);border-radius:calc(var(--r2) - 2px);z-index:1;
+  transition:transform .25s var(--ease),background .25s,box-shadow .25s;
+}
+.mode-track-bar[data-active="af24"]  .slider-pill{transform:translateX(0);background:var(--p);box-shadow:0 2px 10px rgba(79,138,255,.3);}
+.mode-track-bar[data-active="dev13"] .slider-pill{transform:translateX(100%);background:var(--dev);box-shadow:0 2px 10px rgba(249,115,22,.3);}
+.mode-track-bar[data-active="tapri"] .slider-pill{transform:translateX(200%);background:var(--tapri);box-shadow:0 2px 10px rgba(168,85,247,.3);}
+
+/* ── CHAT ── */
+#chat{flex:1;overflow-y:auto;padding:0 14px 220px;display:flex;flex-direction:column;scroll-behavior:smooth;}
 #greeting{padding:30px 0 20px;animation:fadeUp .5s var(--ease) both;}
 .greeting-time{font-size:11px;font-weight:700;color:var(--tm);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
 .greeting-main{font-family:var(--font-display);font-size:24px;font-weight:800;color:var(--t1);line-height:1.25;margin-bottom:6px;}
 .greeting-sub{font-size:13.5px;color:var(--t2);font-weight:500;margin-bottom:20px;}
 .suggestion-chips{display:flex;flex-wrap:wrap;gap:8px;}
 .chip{
-  padding:8px 16px;border-radius:var(--rf);
-  font-size:12.5px;font-weight:600;color:var(--t2);
-  background:var(--surface2);border:1px solid var(--border);
-  cursor:pointer;position:relative;
+  padding:8px 16px;border-radius:var(--rf);font-size:12.5px;font-weight:600;color:var(--t2);
+  background:var(--surface2);border:1px solid var(--border);cursor:pointer;
   transition:transform .2s,color .2s,background .2s,box-shadow .2s;
 }
-.chip:hover{
-  transform:translateY(-2px);color:#fff;
-  border-color:transparent;background:var(--surface3);
-  box-shadow:0 4px 14px rgba(79,138,255,.2);
-}
-[data-theme="light"] .chip:hover{color:#000;}
-.chip:hover::before{
-  content:'';position:absolute;inset:-1px;border-radius:var(--rf);
-  padding:1px;background:var(--gemini-glow);
-  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
-  -webkit-mask-composite:xor;mask-composite:exclude;
-  background-size:300% 100%;animation:glowMove 4s linear infinite;
-}
+.chip:hover{transform:translateY(-2px);color:#fff;border-color:transparent;background:var(--surface3);box-shadow:0 4px 14px rgba(79,138,255,.2);}
 
-/* ════ MESSAGES ════ */
+/* ── MESSAGES ── */
 .msg-row{display:flex;gap:10px;padding:8px 0;animation:fadeUp .22s var(--ease) both;}
 .msg-row.user{flex-direction:row-reverse;}
-.av{
-  width:30px;height:30px;min-width:30px;
-  border-radius:99px;display:grid;place-items:center;
-  font-size:11px;font-weight:800;flex-shrink:0;
-  align-self:flex-end;margin-bottom:2px;
-}
+.av{width:30px;height:30px;min-width:30px;border-radius:99px;display:grid;place-items:center;font-size:11px;font-weight:800;flex-shrink:0;align-self:flex-end;margin-bottom:2px;}
 .av-ai{background:linear-gradient(135deg,var(--p),#a855f7);color:#fff;}
 .av-ai.dev{background:linear-gradient(135deg,var(--dev),#dc2626);}
 .av-ai.tapri{background:linear-gradient(135deg,#a855f7,#ec4899);}
@@ -297,218 +260,69 @@ textarea,input{font-family:var(--font-body);}
 .bubble{padding:10px 14px;border-radius:var(--r3);font-size:14px;line-height:1.65;word-break:break-word;}
 .bubble-ai{background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:4px;color:var(--t1);}
 .bubble-user{background:var(--p);border-bottom-right-radius:4px;color:#fff;box-shadow:0 2px 12px rgba(79,138,255,.15);white-space:pre-wrap;}
-
-.code-block-wrap{
-  position:relative;margin:8px 0;border-radius:var(--r2);
-  overflow:hidden;border:1px solid var(--border2);background:#141721;
-}
-.code-block-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:6px 12px;background:rgba(0,0,0,.3);
-  border-bottom:1px solid rgba(255,255,255,.05);
-}
+.code-block-wrap{position:relative;margin:8px 0;border-radius:var(--r2);overflow:hidden;border:1px solid var(--border2);background:#141721;}
+.code-block-header{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;background:rgba(0,0,0,.3);border-bottom:1px solid rgba(255,255,255,.05);}
 .code-lang-label{font-size:10.5px;font-weight:800;color:#8892a4;font-family:monospace;}
-.copy-code-btn{
-  font-size:10px;font-weight:700;color:var(--t2);padding:2px 8px;
-  border-radius:4px;background:rgba(255,255,255,.06);border:1px solid var(--border2);
-  cursor:pointer;transition:background .12s,color .12s;
-}
+.copy-code-btn{font-size:10px;font-weight:700;color:var(--t2);padding:2px 8px;border-radius:4px;background:rgba(255,255,255,.06);border:1px solid var(--border2);cursor:pointer;transition:background .12s,color .12s;}
 .copy-code-btn:hover{background:rgba(255,255,255,.12);color:var(--t1);}
 .code-block-wrap pre{margin:0;padding:12px;overflow-x:auto;font-size:12.5px;}
-.bubble-ai code.inline-code{
-  font-family:monospace;font-size:12px;padding:2px 5px;
-  border-radius:4px;background:var(--surface3);color:var(--p);
-}
+.bubble-ai code.inline-code{font-family:monospace;font-size:12px;padding:2px 5px;border-radius:4px;background:var(--surface3);color:var(--p);}
 .msg-meta{font-size:10.5px;color:var(--tm);font-weight:600;margin-top:2px;}
 .mode-pill-sm{display:inline-block;font-size:9.5px;font-weight:800;padding:1px 5px;border-radius:4px;margin-right:4px;font-family:monospace;}
 .mode-pill-sm.af24{background:rgba(79,138,255,.15);color:var(--p);}
 .mode-pill-sm.dev13{background:rgba(249,115,22,.15);color:var(--dev);}
 .mode-pill-sm.tapri{background:rgba(168,85,247,.15);color:var(--tapri);}
-
 .thinking-row{display:flex;gap:10px;padding:4px 0;}
-.thinking-bub{
-  background:var(--surface2);border:1px solid var(--border);
-  border-radius:var(--r3);border-bottom-left-radius:4px;padding:12px 16px;
-}
+.thinking-bub{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r3);border-bottom-left-radius:4px;padding:12px 16px;}
 .dots{display:flex;gap:5px;align-items:center;}
 .dots span{display:block;width:6px;height:6px;border-radius:50%;background:var(--p);animation:dotBounce 1.3s ease-in-out infinite;}
 .dots span:nth-child(2){animation-delay:.18s;}
 .dots span:nth-child(3){animation-delay:.36s;}
 @keyframes dotBounce{0%,80%,100%{transform:translateY(0);opacity:.3;}40%{transform:translateY(-5px);opacity:1;}}
 
-/* ════ MODE SELECTOR ════ */
-.mode-selector-container{
-  padding:10px 14px 4px;background:var(--bg);flex-shrink:0;
-}
-.mode-track-bar{
-  display:flex;background:var(--surface2);
-  border:1px solid var(--border);border-radius:var(--r2);
-  padding:3px;position:relative;
-}
-.mode-segment{
-  flex:1;padding:8px 4px;font-size:11.5px;font-weight:700;color:var(--t2);
-  text-align:center;border-radius:calc(var(--r2) - 2px);
-  position:relative;z-index:2;transition:color .2s;
-  display:flex;align-items:center;justify-content:center;gap:4px;cursor:pointer;
-  user-select:none;-webkit-user-select:none;
-}
-.mode-segment.active{color:#fff;}
-[data-theme="light"] .mode-segment.active-af{color:var(--p3);}
-[data-theme="light"] .mode-segment.active-dev{color:var(--dev2);}
-[data-theme="light"] .mode-segment.active-tapri{color:var(--tapri2);}
-.mode-segment .badge-soon{
-  font-size:8px;background:#a855f7;color:#fff;
-  padding:1px 4px;border-radius:4px;font-weight:900;text-transform:uppercase;
-}
-.slider-pill{
-  position:absolute;top:3px;bottom:3px;left:3px;
-  width:calc(33.333% - 2px);
-  background:var(--surface3);
-  border-radius:calc(var(--r2) - 2px);
-  z-index:1;
-  transition:transform .25s var(--ease),background .25s,box-shadow .25s;
-}
-.mode-track-bar[data-active="af24"] .slider-pill{
-  transform:translateX(0);background:var(--p);box-shadow:0 2px 10px rgba(79,138,255,.3);
-}
-.mode-track-bar[data-active="dev13"] .slider-pill{
-  transform:translateX(100%);background:var(--dev);box-shadow:0 2px 10px rgba(249,115,22,.3);
-}
-.mode-track-bar[data-active="tapri"] .slider-pill{
-  transform:translateX(200%);background:var(--tapri);box-shadow:0 2px 10px rgba(168,85,247,.3);
-}
-
-/* ════ INPUT AREA ════ */
-#inputArea{
-  position:absolute;bottom:0;left:0;right:0;
-  background:linear-gradient(transparent,var(--bg) 25%);
-  padding:16px 14px 14px;z-index:200;
-}
-.input-glow-wrapper{
-  position:relative;border-radius:var(--r3);
-  padding:1px;background:var(--border2);
-  transition:background .25s,box-shadow .25s;
-}
-.input-glow-wrapper:focus-within{
-  background:var(--gemini-glow);
-  background-size:300% 100%;
-  animation:glowMove 4s linear infinite;
-  box-shadow:0 0 20px rgba(79,138,255,.25);
-}
-.input-glow-wrapper.dev-glow:focus-within{
-  background:var(--gemini-glow-dev);
-  background-size:300% 100%;
-  box-shadow:0 0 20px rgba(249,115,22,.25);
-}
-.input-glow-wrapper.tapri-glow:focus-within{
-  background:var(--gemini-glow-tapri);
-  background-size:300% 100%;
-  animation:glowMove 4s linear infinite;
-  box-shadow:0 0 20px rgba(168,85,247,.3);
-}
-.input-glow-wrapper.locked-glow{
-  background:var(--err) !important;
-  box-shadow:0 0 15px rgba(239,68,68,.4) !important;
-  animation:none !important;
-}
-@keyframes glowMove{
-  0%{background-position:0% 50%;}
-  50%{background-position:100% 50%;}
-  100%{background-position:0% 50%;}
-}
-.input-box{
-  display:flex;align-items:flex-end;gap:8px;
-  background:var(--surface);
-  border-radius:calc(var(--r3) - 1px);
-  padding:10px 10px 10px 14px;
-}
-#msgInput{
-  flex:1;background:transparent;border:none;outline:none;
-  resize:none;color:var(--t1);font-size:14px;line-height:1.5;
-  min-height:36px;max-height:120px;overflow-y:auto;
-}
+/* ── INPUT AREA ── */
+#inputArea{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,var(--bg) 25%);padding:16px 14px 14px;z-index:200;}
+.input-glow-wrapper{position:relative;border-radius:var(--r3);padding:1px;background:var(--border2);transition:background .25s,box-shadow .25s;}
+.input-glow-wrapper:focus-within{background:var(--gemini-glow);background-size:300% 100%;animation:glowMove 4s linear infinite;box-shadow:0 0 20px rgba(79,138,255,.25);}
+.input-glow-wrapper.dev-glow:focus-within{background:var(--gemini-glow-dev);background-size:300% 100%;box-shadow:0 0 20px rgba(249,115,22,.25);}
+.input-glow-wrapper.tapri-glow:focus-within{background:var(--gemini-glow-tapri);background-size:300% 100%;animation:glowMove 4s linear infinite;box-shadow:0 0 20px rgba(168,85,247,.3);}
+.input-glow-wrapper.locked-glow{background:var(--err)!important;box-shadow:0 0 15px rgba(239,68,68,.4)!important;animation:none!important;}
+@keyframes glowMove{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+.input-box{display:flex;align-items:flex-end;gap:8px;background:var(--surface);border-radius:calc(var(--r3) - 1px);padding:10px 10px 10px 14px;}
+#msgInput{flex:1;background:transparent;border:none;outline:none;resize:none;color:var(--t1);font-size:14px;line-height:1.5;min-height:36px;max-height:120px;overflow-y:auto;}
 #msgInput::placeholder{color:var(--tm);}
 #msgInput:disabled{cursor:not-allowed;color:var(--tm);}
-#sendBtn{
-  width:36px;height:36px;border-radius:10px;flex-shrink:0;
-  display:grid;place-items:center;
-  background:var(--p);color:#fff;
-  transition:transform .15s var(--spring),opacity .12s,background .2s;
-}
+#sendBtn{width:36px;height:36px;border-radius:10px;flex-shrink:0;display:grid;place-items:center;background:var(--p);color:#fff;transition:transform .15s var(--spring),opacity .12s,background .2s;}
 #sendBtn:disabled{opacity:.25;cursor:not-allowed;}
 #sendBtn:not(:disabled):active{transform:scale(.92);}
 #sendBtn svg{width:15px;height:15px;fill:currentColor;}
-.input-hint{
-  font-size:10.5px;color:var(--tm);font-weight:600;
-  text-align:right;margin-top:6px;
-  display:flex;justify-content:space-between;padding:0 4px;
-}
-.ai-disclaimer{
-  font-size:10px;color:var(--tm);font-weight:500;
-  font-style:italic;opacity:.75;text-align:left;
-  max-width:72%;line-height:1.4;
-}
-.warn-txt{color:var(--err) !important;}
+.input-hint{font-size:10.5px;color:var(--tm);font-weight:600;text-align:right;margin-top:6px;display:flex;justify-content:space-between;padding:0 4px;}
+.ai-disclaimer{font-size:10px;color:var(--tm);font-weight:500;font-style:italic;opacity:.75;text-align:left;max-width:72%;line-height:1.4;}
+.warn-txt{color:var(--err)!important;}
 
-/* ════ MODALS ════ */
+/* ── LOCKED ── */
 #lockedBox{flex:1;display:none;align-items:center;justify-content:center;padding:24px;}
 #lockedBox.visible{display:flex;}
-.locked-card{
-  max-width:280px;width:100%;text-align:center;
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--r4);padding:32px 22px;box-shadow:var(--sh);
-}
-.locked-icon{
-  width:56px;height:56px;border-radius:16px;margin:0 auto 14px;
-  display:grid;place-items:center;font-size:24px;
-  background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.20);
-}
+.locked-card{max-width:280px;width:100%;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--r4);padding:32px 22px;box-shadow:var(--sh);}
+.locked-icon{width:56px;height:56px;border-radius:16px;margin:0 auto 14px;display:grid;place-items:center;font-size:24px;background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.20);}
 .locked-card h2{font-family:var(--font-display);font-size:18px;font-weight:800;color:var(--err);margin-bottom:8px;}
 .locked-card p{font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:22px;}
-.locked-btn{
-  width:100%;min-height:44px;border-radius:var(--r2);
-  font-size:14px;font-weight:800;color:#fff;background:var(--p);
-  transition:opacity .15s;cursor:pointer;border:none;
-}
+.locked-btn{width:100%;min-height:44px;border-radius:var(--r2);font-size:14px;font-weight:800;color:#fff;background:var(--p);transition:opacity .15s;cursor:pointer;border:none;}
 .locked-btn:hover{opacity:.88;}
 
-.modal-overlay{
-  position:absolute;inset:0;z-index:9999;
-  display:flex;align-items:center;justify-content:center;
-  padding:16px;background:rgba(0,0,0,.6);
-  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
-}
-.modal-card{
-  width:100%;max-width:360px;
-  background:var(--surface);border:1px solid var(--border2);
-  border-radius:var(--r3);box-shadow:var(--she);overflow:hidden;
-  animation:modalIn .26s var(--spring) both;
-}
-.modal-head{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 16px;border-bottom:1px solid var(--border);
-}
+/* ── PROFILE MODAL ── */
+.modal-overlay{position:absolute;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
+.modal-card{width:100%;max-width:360px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r3);box-shadow:var(--she);overflow:hidden;animation:modalIn .26s var(--spring) both;}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);}
 .modal-head h4{font-family:var(--font-display);font-size:15px;font-weight:800;color:var(--t1);}
 .modal-close{font-size:22px;color:var(--tm);cursor:pointer;line-height:1;}
 .modal-close:hover{color:var(--t1);}
-.modal-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
-.pm-hero{
-  display:flex;align-items:center;gap:12px;
-  padding:12px;border-radius:var(--r2);
-  background:var(--surface2);border:1px solid var(--border);
-}
-.pm-avatar{
-  width:44px;height:44px;border-radius:12px;
-  background:linear-gradient(135deg,var(--p),#a855f7);
-  display:grid;place-items:center;font-size:15px;font-weight:800;color:#fff;
-}
+.modal-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:calc(100dvh - 160px);}
+.pm-hero{display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--r2);background:var(--surface2);border:1px solid var(--border);}
+.pm-avatar{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--p),#a855f7);display:grid;place-items:center;font-size:15px;font-weight:800;color:#fff;}
 .pm-name{font-family:var(--font-display);font-size:15px;font-weight:800;color:var(--t1);}
 .pm-id{font-size:11px;color:var(--tm);margin-top:2px;}
-.pm-row{
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
-  padding:10px 12px;border-radius:var(--r2);
-  background:var(--surface2);border:1px solid var(--border);
-}
+.pm-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-radius:var(--r2);background:var(--surface2);border:1px solid var(--border);}
 .pm-label{font-size:10px;font-weight:800;color:var(--tm);text-transform:uppercase;}
 .pm-val{font-size:12.5px;font-weight:700;color:var(--t1);text-align:right;}
 .pm-section-title{font-size:10px;font-weight:800;color:var(--tm);text-transform:uppercase;margin-bottom:4px;}
@@ -518,19 +332,11 @@ textarea,input{font-family:var(--font-body);}
 .pm-usage-val{font-size:11px;font-weight:700;font-family:monospace;}
 .pm-track{height:5px;background:var(--surface3);border-radius:99px;overflow:hidden;margin-bottom:10px;}
 .pm-fill{height:100%;border-radius:99px;background:var(--p);transition:width .3s;}
+.pm-sess-info{font-size:10.5px;color:var(--tm);margin-top:2px;line-height:1.5;}
 
-/* ════ TOAST ════ */
-#toastWrap{
-  position:absolute;left:50%;bottom:84px;
-  transform:translateX(-50%);z-index:99999;
-  width:calc(100% - 28px);pointer-events:none;
-}
-.toast{
-  display:flex;align-items:flex-start;gap:10px;
-  background:var(--surface);color:var(--t1);
-  border:1px solid var(--border2);border-radius:12px;
-  padding:10px 14px;box-shadow:var(--she);animation:fadeUp .22s ease;
-}
+/* ── TOAST ── */
+#toastWrap{position:absolute;left:50%;bottom:84px;transform:translateX(-50%);z-index:99999;width:calc(100% - 28px);pointer-events:none;}
+.toast{display:flex;align-items:flex-start;gap:10px;background:var(--surface);color:var(--t1);border:1px solid var(--border2);border-radius:12px;padding:10px 14px;box-shadow:var(--she);animation:fadeUp .22s ease;}
 .toast.err{border-left:4px solid var(--err);}
 .toast.info{border-left:4px solid var(--p);}
 .toast.ok{border-left:4px solid var(--ok);}
@@ -539,18 +345,9 @@ textarea,input{font-family:var(--font-body);}
 .toast-msg{font-size:11.5px;color:var(--t2);}
 .toast-x{font-size:18px;color:var(--tm);cursor:pointer;font-weight:700;pointer-events:all;}
 
-/* ════ SWIPE EDGE HINT ════ */
-.swipe-edge-hint{
-  position:absolute;top:50%;left:0;
-  transform:translateY(-50%);
-  width:4px;height:60px;
-  background:linear-gradient(180deg,transparent,var(--p),transparent);
-  border-radius:0 4px 4px 0;opacity:.3;
-  transition:opacity .3s;pointer-events:none;z-index:50;
-}
+.swipe-edge-hint{position:absolute;top:50%;left:0;transform:translateY(-50%);width:4px;height:60px;background:linear-gradient(180deg,transparent,var(--p),transparent);border-radius:0 4px 4px 0;opacity:.3;transition:opacity .3s;pointer-events:none;z-index:50;}
 #app:hover .swipe-edge-hint{opacity:.5;}
-
-.hidden{display:none !important;}
+.hidden{display:none!important;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
 @keyframes modalIn{from{opacity:0;transform:scale(.93);}to{opacity:1;transform:scale(1);}}
 </style>
@@ -558,14 +355,14 @@ textarea,input{font-family:var(--font-body);}
 <body>
 <div id="app">
   <div id="overlay" onclick="closeDrawer()"></div>
-  <div class="swipe-edge-hint" id="swipeHint"></div>
+  <div class="swipe-edge-hint"></div>
 
-  <!-- ════ DRAWER ════ -->
+  <!-- DRAWER -->
   <div id="drawer">
     <div class="dr-top">
       <button class="dr-back" onclick="window.location.href='/index.html'">
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-        Back to AcademeForge Home Page
+        Back to AcademeForge
       </button>
       <div class="dr-profile-card" onclick="openProfileModal()">
         <div class="dr-avatar" id="drAvatar">S</div>
@@ -588,13 +385,10 @@ textarea,input{font-family:var(--font-body);}
       <button class="dr-clear-btn" onclick="clearAllConvs()">Clear all</button>
     </div>
     <div id="convList">
-      <div class="conv-empty">
-        <div class="conv-empty-icon">💬</div>
-        No conversations yet.<br>Start a new chat.
-      </div>
+      <div class="conv-empty"><div class="conv-empty-icon">💬</div>No conversations yet.<br>Start a new chat.</div>
     </div>
     <div class="dr-footer">
-      <div class="dr-usage-title">AI Usage — Active Window</div>
+      <div class="dr-usage-title">Session Usage</div>
       <div class="usage-row">
         <span class="usage-label">Requests Left</span>
         <span class="usage-val" id="drReqVal">— / 10</span>
@@ -605,11 +399,11 @@ textarea,input{font-family:var(--font-body);}
         <span class="usage-val" id="drTokVal">100%</span>
       </div>
       <div class="usage-track"><div class="usage-fill" id="drTokBar" style="width:100%"></div></div>
-      <div style="font-size:10.5px;color:var(--tm);font-weight:600;margin-top:4px;" id="drSessInfo">2 windows/day · 12h each</div>
+      <div class="dr-sess-info" id="drSessInfo">10 requests · 15k tokens per session</div>
     </div>
   </div>
 
-  <!-- ════ HEADER ════ -->
+  <!-- HEADER -->
   <header id="header">
     <button class="hdr-menu hide" id="hdrMenu" onclick="openDrawer()" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -618,23 +412,23 @@ textarea,input{font-family:var(--font-body);}
       <div class="hdr-title">AcademeForge AI</div>
       <div class="hdr-sub" id="hdrSub">AF 2.4 · Student Mentor</div>
     </div>
-    <div class="hdr-free-badge" id="hdrFreeBadge">✦ Free</div>
+    <div class="hdr-free-badge">✦ Free</div>
   </header>
 
-  <!-- ════ MODE SELECTOR ════ -->
+  <!-- MODE SELECTOR -->
   <div class="mode-selector-container" id="modeSelectorArea">
     <div class="mode-track-bar" id="modeTrackBar" data-active="af24">
       <div class="slider-pill"></div>
-      <div class="mode-segment active" id="segAF" onclick="setMode('af24')">AF 2.4</div>
-      <div class="mode-segment" id="segDev" onclick="setMode('dev13')">Dev 1.3</div>
-      <div class="mode-segment" id="segTapri" onclick="setMode('tapri')">Tapri 7.9</div>
+      <div class="mode-segment active" id="segAF"    onclick="setMode('af24')">AF 2.4</div>
+      <div class="mode-segment"        id="segDev"   onclick="setMode('dev13')">Dev 1.3</div>
+      <div class="mode-segment"        id="segTapri" onclick="setMode('tapri')">Tapri 7.9</div>
     </div>
   </div>
 
-  <!-- ════ ALERT BANNER ════ -->
+  <!-- ALERT BANNER -->
   <div id="warnBannerWrap"></div>
 
-  <!-- ════ LOCKED SCREEN ════ -->
+  <!-- LOCKED -->
   <div id="lockedBox">
     <div class="locked-card">
       <div class="locked-icon">🔒</div>
@@ -644,18 +438,18 @@ textarea,input{font-family:var(--font-body);}
     </div>
   </div>
 
-  <!-- ════ CHAT ════ -->
+  <!-- CHAT -->
   <div id="chat" class="hidden">
     <div id="greeting">
       <div class="greeting-time" id="greetingTime"></div>
       <div class="greeting-main" id="greetingMain"></div>
-      <div class="greeting-sub" id="greetingSub"></div>
+      <div class="greeting-sub"  id="greetingSub"></div>
       <div class="suggestion-chips" id="chips"></div>
     </div>
     <div id="msgList"></div>
   </div>
 
-  <!-- ════ INPUT AREA ════ -->
+  <!-- INPUT -->
   <div id="inputArea" class="hidden">
     <div class="input-glow-wrapper" id="inputGlowWrap">
       <div class="input-box">
@@ -672,34 +466,28 @@ textarea,input{font-family:var(--font-body);}
     </div>
   </div>
 
-  <!-- ════ PROFILE MODAL ════ -->
-  <div id="profileModal" class="modal-overlay hidden" role="dialog" aria-modal="true" onclick="closeProfileOnBg(event)">
+  <!-- PROFILE MODAL -->
+  <div id="profileModal" class="modal-overlay hidden" onclick="closeProfileOnBg(event)">
     <div class="modal-card">
       <div class="modal-head">
         <h4>My Profile</h4>
-        <button class="modal-close" onclick="closeProfileModal()" aria-label="Close">×</button>
+        <button class="modal-close" onclick="closeProfileModal()">×</button>
       </div>
       <div class="modal-body">
         <div class="pm-hero">
           <div class="pm-avatar" id="pmAvatar">S</div>
           <div>
             <div class="pm-name" id="pmName">Student</div>
-            <div class="pm-id" id="pmStudentId">ID: —</div>
+            <div class="pm-id"   id="pmStudentId">AcademeForge Student</div>
           </div>
         </div>
-        <div class="pm-row">
-          <span class="pm-label">Email</span>
-          <span class="pm-val" id="pmEmail">—</span>
-        </div>
-        <div class="pm-row">
-          <span class="pm-label">Phone</span>
-          <span class="pm-val" id="pmPhone">—</span>
-        </div>
+        <div class="pm-row"><span class="pm-label">Email</span><span class="pm-val" id="pmEmail">—</span></div>
+        <div class="pm-row"><span class="pm-label">Phone</span><span class="pm-val" id="pmPhone">—</span></div>
         <div>
-          <div class="pm-section-title">Active Window Usage</div>
+          <div class="pm-section-title">Session Usage</div>
           <div class="pm-usage-block">
             <div class="pm-usage-row">
-              <span class="pm-usage-label">Requests</span>
+              <span class="pm-usage-label">Session Requests</span>
               <span class="pm-usage-val" id="pmSReq">0 / 10</span>
             </div>
             <div class="pm-track"><div class="pm-fill" id="pmSReqBar" style="width:0%"></div></div>
@@ -709,10 +497,11 @@ textarea,input{font-family:var(--font-body);}
             </div>
             <div class="pm-track"><div class="pm-fill" id="pmDailyReqBar" style="width:0%"></div></div>
             <div class="pm-usage-row">
-              <span class="pm-usage-label">Token Status</span>
-              <span class="pm-usage-val" id="pmTokPctLabel">100% Remaining</span>
+              <span class="pm-usage-label">Session Tokens</span>
+              <span class="pm-usage-val" id="pmTokLabel">100% Remaining</span>
             </div>
             <div class="pm-track"><div class="pm-fill" id="pmTokBar" style="width:100%"></div></div>
+            <div class="pm-sess-info" id="pmSessInfo">Session active</div>
           </div>
         </div>
       </div>
@@ -724,27 +513,25 @@ textarea,input{font-family:var(--font-body);}
 
 <script>
 // ════════════════════════════════════════
-// CONSTANTS — matched to edge function
+// CONSTANTS — must mirror edge function
 // ════════════════════════════════════════
-const SUPABASE_URL  = "https://afooyyydhlwngzssgqih.supabase.co";
-const EDGE_URL      = SUPABASE_URL + "/functions/v1/af-ask-ai";
+const SUPABASE_URL        = "https://afooyyydhlwngzssgqih.supabase.co";
+const EDGE_URL            = SUPABASE_URL + "/functions/v1/af-ask-ai";
+const SESSION_REQ_LIMIT   = 10;
+const SESSION_TOKEN_LIMIT = 15000;
+const DAILY_REQ_LIMIT     = 20;
+const DAILY_TOKEN_LIMIT   = 30000;
+const MAX_CHARS           = 800;
 
-// Must mirror edge function exactly
-const WINDOW_REQ_LIMIT   = 10;
-const WINDOW_TOKEN_LIMIT = 15000;
-const DAILY_REQ_LIMIT    = 20;
-const DAILY_TOKEN_LIMIT  = 30000;
-const MAX_CHARS          = 800;
-
-// Mode mapping: UI mode → edge function mode value
-// Edge accepts: 'af_proguide', 'dev', 'tapri'
+// UI mode → edge mode string
 const MODE_MAP = { af24: 'af_proguide', dev13: 'dev', tapri: 'tapri' };
+// Edge mode string → UI mode
+const EDGE_TO_UI = { af_proguide: 'af24', dev: 'dev13', tapri: 'tapri' };
 
-// Mode display config
 const MODE_CONFIG = {
-  af24:  { label: 'AF-PROGUIDE-2.4', display: 'AF 2.4',   emoji: '🎓', pill: 'af24',  hdr: 'AF 2.4 · Student Mentor',  placeholder: 'Ask AF 2.4 anything…'  },
-  dev13: { label: 'DEV-1.3',         display: 'Dev 1.3',  emoji: '🔥', pill: 'dev13', hdr: 'Dev 1.3 · Founder Mode',   placeholder: 'Ask Dev 1.3 anything…'  },
-  tapri: { label: 'TAPRI-7.9',       display: 'Tapri 7.9',emoji: '☕', pill: 'tapri', hdr: 'Tapri 7.9 · Big Bro Mode', placeholder: 'Ask Tapri anything…'    },
+  af24:  { label:'AF-PROGUIDE-2.4', display:'AF 2.4',    emoji:'🎓', hdr:'AF 2.4 · Student Mentor',  placeholder:'Ask AF 2.4 anything…'   },
+  dev13: { label:'DEV-1.3',         display:'Dev 1.3',   emoji:'🔥', hdr:'Dev 1.3 · Founder Mode',   placeholder:'Ask Dev 1.3 anything…'   },
+  tapri: { label:'TAPRI-7.9',       display:'Tapri 7.9', emoji:'☕', hdr:'Tapri 7.9 · Big Bro Mode', placeholder:'Ask Tapri anything…'     },
 };
 
 const LOCKDOWN_ALERTS = [
@@ -756,50 +543,148 @@ const LOCKDOWN_ALERTS = [
 ];
 
 // ════════════════════════════════════════
-// UTILS
+// UTILITIES
 // ════════════════════════════════════════
 const $    = id => document.getElementById(id);
 const show = id => $(id) && $(id).classList.remove('hidden');
 const hide = id => $(id) && $(id).classList.add('hidden');
-const ls   = k => localStorage.getItem(k);
+const ls   = k  => localStorage.getItem(k);
 const lsSet= (k,v) => localStorage.setItem(k,v);
 
 const isLoggedIn = () => !!(ls('af_student_email') || ls('af_student_mobile'));
-const sKey   = () => ls('af_student_email') || ls('af_student_mobile') || '';
-const sName  = () => ls('af_student_name') || 'Student';
-const sMobile= () => ls('af_student_mobile') || ls('af_student_phone') || '';
-const sEmail = () => ls('af_student_email') || '';
-const sId    = () => ls('af_student_id') || '';
+const sKey    = () => ls('af_student_email') || ls('af_student_mobile') || '';
+const sName   = () => ls('af_student_name')  || 'Student';
+const sEmail  = () => ls('af_student_email') || '';
+const sMobile = () => ls('af_student_mobile')|| ls('af_student_phone') || '';
+const sId     = () => ls('af_student_id')    || '';
 
-function initials(n){return String(n||'AF').trim().split(/\s+/).slice(0,2).map(v=>v[0].toUpperCase()).join('');}
-function esc(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function fmtSecs(secs){
-  if(!secs||secs<=0) return null;
-  const h=Math.floor(secs/3600), m=Math.ceil((secs%3600)/60);
+function initials(n){ return String(n||'AF').trim().split(/\s+/).slice(0,2).map(v=>v[0].toUpperCase()).join(''); }
+function esc(t){ return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtSecs(s){
+  if(!s||s<=0) return null;
+  const h=Math.floor(s/3600), m=Math.ceil((s%3600)/60);
   return h>0 ? `${h}h ${m}m` : `${m}m`;
 }
-function randAlert(){return LOCKDOWN_ALERTS[Math.floor(Math.random()*LOCKDOWN_ALERTS.length)];}
-
-function syncTheme(){document.documentElement.setAttribute('data-theme',ls('af_dark_mode')==='1'?'dark':'light');}
+function randAlert(){ return LOCKDOWN_ALERTS[Math.floor(Math.random()*LOCKDOWN_ALERTS.length)]; }
+function syncTheme(){ document.documentElement.setAttribute('data-theme', ls('af_dark_mode')==='1'?'dark':'light'); }
 syncTheme();
 
 // ════════════════════════════════════════
-// USAGE CACHE — stores last edge payload
+// USAGE CACHE
+// Keys from edge buildUsagePayload():
+//   dailyReqUsed, dailyReqLimit, dailyReqRemaining
+//   dailyTokenUsed, dailyTokenLimit, dailyTokenRemaining
+//   sessionReqUsed, sessionReqLimit
+//   sessionTokenUsed, sessionTokenLimit
+//   sessionCount, sessionActive, sessionSecondsRemaining
 // ════════════════════════════════════════
-let _usageCache = null; // stores the last buildUsagePayload snapshot from edge
+let _usageCache = null;
 
 function saveUsageCache(payload) {
-  if (!payload) return;
+  if (!payload || payload.dailyReqUsed === undefined) return;
   _usageCache = payload;
-  try { lsSet('af_usage_cache_'+btoa(sKey()).replace(/=/g,''), JSON.stringify(payload)); } catch {}
+  try { lsSet('af_uc_' + btoa(sKey()).replace(/=/g,''), JSON.stringify(payload)); } catch {}
 }
+
 function loadUsageCache() {
   if (_usageCache) return _usageCache;
   try {
-    const raw = ls('af_usage_cache_'+btoa(sKey()).replace(/=/g,''));
+    const raw = ls('af_uc_' + btoa(sKey()).replace(/=/g,''));
     if (raw) { _usageCache = JSON.parse(raw); return _usageCache; }
   } catch {}
   return null;
+}
+
+// Determine locked state from cached payload
+// Returns: { locked, reason, cooldownStr }
+function getLockState(u) {
+  if (!u) return { locked: false };
+
+  if (u.dailyReqRemaining <= 0)   return { locked: true, reason: 'daily_req',   cooldownStr: 'tomorrow' };
+  if (u.dailyTokenRemaining <= 0) return { locked: true, reason: 'daily_token', cooldownStr: 'tomorrow (token limit)' };
+
+  // Session exhausted but still active (not yet expired → waiting for next session)
+  if (u.sessionActive &&
+     (u.sessionReqUsed   >= SESSION_REQ_LIMIT ||
+      u.sessionTokenUsed >= SESSION_TOKEN_LIMIT)) {
+    const cd = fmtSecs(u.sessionSecondsRemaining);
+    return { locked: true, reason: 'session_exhausted', cooldownStr: cd || '12h' };
+  }
+  return { locked: false };
+}
+
+// ════════════════════════════════════════
+// RENDER USAGE — drawer & profile modal
+// ════════════════════════════════════════
+function renderUsageUI() {
+  const u = loadUsageCache();
+  if (!u) {
+    $('drReqVal').textContent  = '— / ' + SESSION_REQ_LIMIT;
+    $('drTokVal').textContent  = '100%';
+    $('drReqBar').style.width  = '0%';
+    $('drTokBar').style.width  = '100%';
+    $('drSessInfo').textContent = '10 requests · 15k tokens per session';
+    return;
+  }
+
+  const reqUsed  = u.sessionReqUsed  || 0;
+  const tokUsed  = u.sessionTokenUsed || 0;
+  const reqLeft  = Math.max(0, SESSION_REQ_LIMIT - reqUsed);
+  const reqPct   = Math.min(100, (reqUsed / SESSION_REQ_LIMIT) * 100);
+  const tokPct   = Math.min(100, (tokUsed / SESSION_TOKEN_LIMIT) * 100);
+  const tokRemPct= Math.max(0, 100 - Math.round(tokPct));
+
+  $('drReqVal').textContent = `${reqLeft} / ${SESSION_REQ_LIMIT}`;
+  $('drTokVal').textContent = `${tokRemPct}%`;
+  $('drReqBar').style.width = reqPct + '%';
+  $('drTokBar').style.width = tokRemPct + '%';
+
+  const bar = $('drReqBar');
+  bar.className = 'usage-fill' + (reqPct >= 90 ? ' danger' : reqPct >= 60 ? ' warn' : '');
+
+  const ls = getLockState(u);
+  if (ls.locked && ls.reason === 'session_exhausted' && u.sessionSecondsRemaining > 0) {
+    $('drSessInfo').textContent = `Next session in ${fmtSecs(u.sessionSecondsRemaining) || '…'}`;
+  } else if (ls.locked && ls.reason.startsWith('daily')) {
+    $('drSessInfo').textContent = 'Daily limit reached · Resets tomorrow';
+  } else {
+    $('drSessInfo').textContent = `${u.dailyReqRemaining} daily requests remaining`;
+  }
+}
+
+// ════════════════════════════════════════
+// LOCKDOWN ENGINE
+// ════════════════════════════════════════
+function applyLockdown(timeStr) {
+  const a1 = randAlert(), a2 = randAlert();
+  $('warnBannerWrap').innerHTML = `
+    <div class="alert-banner-system">
+      <div class="marquee-content">
+        <strong>${esc(a1)}</strong> &nbsp;•&nbsp; Free session limit reached. Come back in <strong>${esc(timeStr||'a while')}</strong> to continue! &nbsp;•&nbsp;
+        <strong>${esc(a2)}</strong> &nbsp;•&nbsp; Free session limit reached. Come back in <strong>${esc(timeStr||'a while')}</strong> to continue!
+      </div>
+    </div>`;
+  $('msgInput').disabled = true;
+  $('msgInput').value = '';
+  $('msgInput').placeholder = 'Session limit reached. Come back later.';
+  $('sendBtn').disabled = true;
+  $('inputGlowWrap').classList.add('locked-glow');
+}
+
+function removeLockdown() {
+  $('warnBannerWrap').innerHTML = '';
+  $('msgInput').disabled = false;
+  $('inputGlowWrap').classList.remove('locked-glow');
+  $('msgInput').placeholder = (MODE_CONFIG[_mode]||MODE_CONFIG.af24).placeholder;
+}
+
+// Returns true if locked
+function syncLockdownState() {
+  const u  = loadUsageCache();
+  const ls = getLockState(u);
+  if (ls.locked) { applyLockdown(ls.cooldownStr); return true; }
+  removeLockdown();
+  return false;
 }
 
 // ════════════════════════════════════════
@@ -827,176 +712,48 @@ function openDrawer() {
   $('drawer').classList.add('open');
   $('overlay').classList.add('open');
   loadConvList();
-  renderUsageFromCache();
+  renderUsageUI();
   renderDrawerProfile();
 }
 function closeDrawer() {
   $('drawer').classList.remove('open');
   $('overlay').classList.remove('open');
 }
-function syncHamburger() {
-  const btn = $('hdrMenu');
-  isLoggedIn() ? btn.classList.remove('hide') : btn.classList.add('hide');
-}
 function renderDrawerProfile() {
   const name = sName(), email = sEmail(), mobile = sMobile();
-  $('drAvatar').textContent = initials(name);
+  $('drAvatar').textContent      = initials(name);
   $('drStudentName').textContent = name;
-  $('drStudentSub').textContent = email || mobile || 'AcademeForge Student';
+  $('drStudentSub').textContent  = email || mobile || 'AcademeForge Student';
 }
-
-// ════════════════════════════════════════
-// USAGE DISPLAY — driven by edge payload
-// ════════════════════════════════════════
-function renderUsageFromCache() {
-  const u = loadUsageCache();
-  if (!u) {
-    $('drReqVal').textContent = '— / ' + WINDOW_REQ_LIMIT;
-    $('drTokVal').textContent = '100%';
-    $('drReqBar').style.width = '0%';
-    $('drTokBar').style.width = '100%';
-    $('drSessInfo').textContent = '2 windows/day · 12h each';
-    return;
-  }
-
-  // Use active window stats, fall back to window1
-  const win = u.activeWindow === 2 ? u.window2 : u.window1;
-  const reqUsed  = win ? win.reqUsed  : (u.dailyReqUsed  || 0);
-  const tokUsed  = win ? win.tokenUsed: (u.dailyTokenUsed || 0);
-  const reqLimit = WINDOW_REQ_LIMIT;
-  const tokLimit = WINDOW_TOKEN_LIMIT;
-
-  const reqLeft   = Math.max(0, reqLimit - reqUsed);
-  const reqPct    = Math.min(100, (reqUsed / reqLimit) * 100);
-  const tokPct    = Math.min(100, (tokUsed / tokLimit) * 100);
-  const tokRemain = Math.max(0, 100 - Math.round(tokPct));
-
-  $('drReqVal').textContent = `${reqLeft} / ${reqLimit}`;
-  $('drReqBar').style.width = reqPct + '%';
-  $('drTokVal').textContent = `${tokRemain}%`;
-  $('drTokBar').style.width = tokRemain + '%';
-
-  // Color the bar based on usage
-  const reqBar = $('drReqBar');
-  reqBar.className = 'usage-fill' + (reqPct >= 90 ? ' danger' : reqPct >= 70 ? ' warn' : '');
-
-  // Cooldown info
-  const win1Secs = u.window1 && u.window1.secondsRemaining;
-  const isLocked = checkLimitFromCache(u);
-  if (isLocked && win1Secs > 0) {
-    $('drSessInfo').textContent = `Window 2 opens in ${fmtSecs(win1Secs) || '…'}`;
-  } else if (u.dailyReqRemaining <= 0) {
-    $('drSessInfo').textContent = 'Daily limit reached · Resets tomorrow';
-  } else {
-    $('drSessInfo').textContent = `${u.dailyReqRemaining} daily requests remaining`;
-  }
-}
-
-// Determine if locked from last known usage payload
-function checkLimitFromCache(u) {
-  if (!u) return false;
-  if (u.dailyReqRemaining <= 0 || u.dailyTokenRemaining <= 0) return true;
-  const win = u.activeWindow === 2 ? u.window2 : u.window1;
-  if (!win) return false;
-  const reqExhausted  = win.reqUsed  >= WINDOW_REQ_LIMIT;
-  const tokExhausted  = win.tokenUsed >= WINDOW_TOKEN_LIMIT;
-  return reqExhausted || tokExhausted;
-}
-
-// ════════════════════════════════════════
-// LOCKDOWN ENGINE
-// ════════════════════════════════════════
-function applyLockdown(timeStr) {
-  const alert1 = randAlert(), alert2 = randAlert();
-  const timeDisplay = timeStr || 'some time';
-  $('warnBannerWrap').innerHTML = `
-    <div class="alert-banner-system">
-      <div class="marquee-content">
-        <strong>${esc(alert1)}</strong> &nbsp;•&nbsp; Free session limit reached. Come back in <strong>${esc(timeDisplay)}</strong> to continue! &nbsp;•&nbsp; <strong>${esc(alert2)}</strong> &nbsp;•&nbsp; Free session limit reached. Come back in <strong>${esc(timeDisplay)}</strong> to continue!
-      </div>
-    </div>`;
-  $('msgInput').disabled = true;
-  $('msgInput').value = '';
-  $('msgInput').placeholder = 'Session limit reached. Come back later.';
-  $('sendBtn').disabled = true;
-  $('inputGlowWrap').classList.add('locked-glow');
-}
-
-function removeLockdown() {
-  $('warnBannerWrap').innerHTML = '';
-  $('msgInput').disabled = false;
-  $('inputGlowWrap').classList.remove('locked-glow');
-  const placeholder = (MODE_CONFIG[_mode] || MODE_CONFIG.af24).placeholder;
-  $('msgInput').placeholder = placeholder;
-}
-
-// Check cached usage and enforce UI lockdown state — returns true if locked
-function syncLockdownState() {
-  const u = loadUsageCache();
-  if (!u) { removeLockdown(); return false; }
-
-  if (u.dailyReqRemaining <= 0) {
-    applyLockdown('tomorrow');
-    return true;
-  }
-  if (u.dailyTokenRemaining <= 0) {
-    applyLockdown('tomorrow (token limit)');
-    return true;
-  }
-
-  // Window 1 exhausted but window 2 not yet open
-  const win1 = u.window1;
-  if (win1 && win1.active && (win1.reqUsed >= WINDOW_REQ_LIMIT || win1.tokenUsed >= WINDOW_TOKEN_LIMIT)) {
-    // Check if window 2 has capacity
-    const win2 = u.window2;
-    if (!win2 || !win2.active || win2.reqUsed >= WINDOW_REQ_LIMIT || win2.tokenUsed >= WINDOW_TOKEN_LIMIT) {
-      const cd = fmtSecs(win1.secondsRemaining);
-      applyLockdown(cd || '12h');
-      return true;
-    }
-  }
-
-  removeLockdown();
-  return false;
+function syncHamburger() {
+  isLoggedIn() ? $('hdrMenu').classList.remove('hide') : $('hdrMenu').classList.add('hide');
 }
 
 // ════════════════════════════════════════
 // MODE
 // ════════════════════════════════════════
-let _mode = 'af24';
-let _convId = null;
+let _mode  = 'af24';
+let _convId= null;
 let _convs = [];
-let _loading = false;
 let _filteredConvs = [];
+let _loading = false;
 
 function setMode(m) {
-  const cfg = MODE_CONFIG[m];
-  if (!cfg) return;
-
+  const cfg = MODE_CONFIG[m]; if (!cfg) return;
   _mode = m;
   $('modeTrackBar').setAttribute('data-active', m);
-
-  document.querySelectorAll('.mode-segment').forEach(el =>
-    el.classList.remove('active','active-af','active-dev','active-tapri'));
-
-  const segMap = { af24: 'segAF', dev13: 'segDev', tapri: 'segTapri' };
+  document.querySelectorAll('.mode-segment').forEach(el => el.classList.remove('active'));
+  const segMap = { af24:'segAF', dev13:'segDev', tapri:'segTapri' };
   const seg = $(segMap[m]);
-  if (seg) seg.classList.add('active', m === 'af24' ? 'active-af' : m === 'dev13' ? 'active-dev' : 'active-tapri');
-
+  if (seg) seg.classList.add('active');
   $('hdrSub').textContent = cfg.hdr;
-
-  // Input glow class
   $('inputGlowWrap').classList.remove('dev-glow','tapri-glow');
   if (m === 'dev13') $('inputGlowWrap').classList.add('dev-glow');
   if (m === 'tapri') $('inputGlowWrap').classList.add('tapri-glow');
-
-  // Send button color
-  const btnColors = { af24: 'var(--p)', dev13: 'var(--dev)', tapri: 'var(--tapri)' };
+  const btnColors = { af24:'var(--p)', dev13:'var(--dev)', tapri:'var(--tapri)' };
   $('sendBtn').style.background = btnColors[m] || 'var(--p)';
-
   if (!$('msgInput').disabled) $('msgInput').placeholder = cfg.placeholder;
-
-  if ($('greeting').style.display !== 'none') renderGreeting();
+  if ($('greeting') && $('greeting').style.display !== 'none') renderGreeting();
 }
 
 // ════════════════════════════════════════
@@ -1006,27 +763,22 @@ function renderGreeting() {
   const h = new Date().getHours();
   const name = sName().split(' ')[0];
   let timeLabel, main, sub;
-
   if (_mode === 'dev13') {
-    // Founder / builder energy — direct, no fluff
-    if (h>=5 && h<12)       { timeLabel='Morning';       main=`Morning ${name} ☕`;        sub="What are we shipping today?"; }
-    else if (h>=12 && h<17) { timeLabel='Afternoon';     main=`Yo ${name} 🛠️`;            sub="Got a product problem? Let's crack it."; }
-    else if (h>=17 && h<21) { timeLabel='Evening';       main=`Still building ${name}? 🔥`; sub="Good. Most people already quit."; }
-    else                    { timeLabel='Late Night';     main=`Late night grind ${name} 🌙`; sub="The best products get built at this hour."; }
+    if (h>=5&&h<12)       { timeLabel='Morning';    main=`Morning ${name} ☕`;          sub="What are we shipping today?"; }
+    else if (h>=12&&h<17) { timeLabel='Afternoon';  main=`Yo ${name} 🛠️`;              sub="Got a product problem? Let's crack it."; }
+    else if (h>=17&&h<21) { timeLabel='Evening';    main=`Still building ${name}? 🔥`; sub="Good. Most people already quit."; }
+    else                  { timeLabel='Late Night'; main=`Late night grind ${name} 🌙`; sub="The best products get built at this hour."; }
   } else if (_mode === 'tapri') {
-    // Big bro / chai tapri energy — warm, casual, Hinglish-friendly
-    if (h>=5 && h<12)       { timeLabel='Subah subah';   main=`Uth gaye ${name}? 🌅`;     sub="Chal baat karte hain, kya chal raha hai?"; }
-    else if (h>=12 && h<17) { timeLabel='Dopahar';       main=`Kya haal hai ${name} 😎`;  sub="Kuch confuse ho? Bata, sorted karte hain."; }
-    else if (h>=17 && h<21) { timeLabel='Shaam';         main=`Aaja baat karte hain ${name} ☕`; sub="Din kaisa raha? Kuch bhi pooch, judge nahi karunga."; }
-    else                    { timeLabel='Raat ko';        main=`Raat ko jaag rahe ho ${name}? 🌙`; sub="Koi tension hai toh bata. Akele mat socho."; }
+    if (h>=5&&h<12)       { timeLabel='Subah';   main=`Uth gaye ${name}? 🌅`;            sub="Chal baat karte hain, kya chal raha hai?"; }
+    else if (h>=12&&h<17) { timeLabel='Dopahar'; main=`Kya haal hai ${name} 😎`;         sub="Kuch confuse ho? Bata, sorted karte hain."; }
+    else if (h>=17&&h<21) { timeLabel='Shaam';   main=`Aaja baat karte hain ${name} ☕`; sub="Din kaisa raha? Kuch bhi pooch."; }
+    else                  { timeLabel='Raat';    main=`Raat ko jaag rahe ho ${name}? 🌙`; sub="Koi tension hai toh bata. Akele mat socho."; }
   } else {
-    // AF ProGuide — mentor energy, encouraging
-    if (h>=5 && h<12)       { timeLabel='Good Morning';  main=`Good Morning ${name} ☀️`;  sub='Ready to learn something new today?'; }
-    else if (h>=12 && h<17) { timeLabel='Good Afternoon';main=`Good Afternoon ${name} 📚`; sub="What skill are we levelling up today?"; }
-    else if (h>=17 && h<21) { timeLabel='Good Evening';  main=`Good Evening ${name} 🌆`;   sub="Let's continue your learning journey."; }
-    else                    { timeLabel='Late Night';     main=`Late Night ${name} 🌙`;    sub="Focused sessions at this hour hit different."; }
+    if (h>=5&&h<12)       { timeLabel='Good Morning';   main=`Good Morning ${name} ☀️`; sub='Ready to learn something new today?'; }
+    else if (h>=12&&h<17) { timeLabel='Good Afternoon'; main=`Good Afternoon ${name} 📚`; sub="What skill are we levelling up today?"; }
+    else if (h>=17&&h<21) { timeLabel='Good Evening';   main=`Good Evening ${name} 🌆`; sub="Let's continue your learning journey."; }
+    else                  { timeLabel='Late Night';     main=`Late Night ${name} 🌙`;   sub="Focused sessions at this hour hit different."; }
   }
-
   $('greetingTime').textContent = timeLabel;
   $('greetingMain').textContent = main;
   $('greetingSub').textContent  = sub;
@@ -1045,9 +797,7 @@ function renderGreeting() {
 
 function chipClick(text) {
   if ($('msgInput').disabled) return;
-  $('msgInput').value = text;
-  onTyping();
-  $('msgInput').focus();
+  $('msgInput').value = text; onTyping(); $('msgInput').focus();
 }
 
 // ════════════════════════════════════════
@@ -1055,31 +805,19 @@ function chipClick(text) {
 // ════════════════════════════════════════
 async function edgeCall(payload) {
   try {
-    if (!navigator.onLine) return { error: 'Please check your internet connection and try again.' };
-
-    // Translate UI mode to edge function mode string
-    const edgeMode = MODE_MAP[payload.mode] || 'af_proguide';
+    if (!navigator.onLine) return { error: 'No internet connection. Please try again.' };
+    const edgeMode = MODE_MAP[payload.mode] || payload.mode || 'af_proguide';
     const body = { ...payload, mode: edgeMode, student_key: sKey(), student_name: sName() };
-
-    const res = await fetch(EDGE_URL, {
+    const res  = await fetch(EDGE_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-af-student-key': sKey()
-      },
+      headers: { 'Content-Type':'application/json', 'x-af-student-key': sKey() },
       body: JSON.stringify(body)
     });
-
     const data = await res.json().catch(() => ({}));
-
-    if (res.status === 429) {
-      return { ...data, limitReached: true, httpStatus: 429 };
-    }
-    if (!res.ok) {
-      return { ...data, httpStatus: res.status };
-    }
+    if (res.status === 429) return { ...data, limitReached: true };
+    if (!res.ok)            return { ...data, _httpStatus: res.status };
     return data;
-  } catch (e) {
+  } catch(e) {
     return { error: 'Connection error. Please try again.' };
   }
 }
@@ -1089,12 +827,9 @@ async function edgeCall(payload) {
 // ════════════════════════════════════════
 async function loadConvList() {
   const res = await edgeCall({ action: 'list_conversations' });
-  _convs = (res && res.conversations) ? res.conversations : [];
-  // Re-map edge mode strings back to UI dot colors
-  _convs = _convs.map(c => ({
-    ...c,
-    uiMode: c.mode === 'dev' ? 'dev13' : c.mode === 'tapri' ? 'tapri' : 'af24'
-  }));
+  _convs = (res && Array.isArray(res.conversations)) ? res.conversations : [];
+  // normalise mode to UI keys
+  _convs = _convs.map(c => ({ ...c, uiMode: EDGE_TO_UI[c.mode] || 'af24' }));
   _filteredConvs = [..._convs];
   renderConvList();
 }
@@ -1115,68 +850,64 @@ function renderConvList() {
   _filteredConvs.forEach(c => {
     const item = document.createElement('div');
     item.className = 'conv-item' + (c.id === _convId ? ' active' : '');
-    const dotClass = c.uiMode || (c.mode === 'dev' ? 'dev39' : 'af24');
+    const dotCls = c.uiMode || 'af24';
     item.innerHTML = `
-      <div class="conv-dot ${dotClass}"></div>
-      <div class="conv-title">${esc(c.title)}</div>
-      <button class="conv-del" onclick="delConv(event,'${esc(c.id)}')" aria-label="Delete conversation">
+      <div class="conv-dot ${dotCls}"></div>
+      <div class="conv-title">${esc(c.title || 'Chat')}</div>
+      <button class="conv-del" onclick="delConv(event,'${esc(c.id)}')" aria-label="Delete">
         <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
       </button>`;
-    item.onclick = (e) => { if (!e.target.closest('.conv-del')) openConv(c); };
+    item.onclick = e => { if (!e.target.closest('.conv-del')) openConv(c); };
     box.appendChild(item);
   });
 }
 
 async function openConv(c) {
   _convId = c.id;
-  // Map edge mode back to UI mode
-  const uiMode = c.mode === 'dev' ? 'dev13' : c.mode === 'tapri' ? 'tapri' : 'af24';
+  const uiMode = EDGE_TO_UI[c.mode] || c.uiMode || 'af24';
   setMode(uiMode);
   clearChat();
   showGreeting(false);
   renderConvList();
   closeDrawer();
-
   if (syncLockdownState()) return;
 
   const ph = addThinking();
   const res = await edgeCall({ action: 'load_conversation', conversation_id: c.id });
   removeEl(ph);
 
-  if (res && res.messages && res.messages.length) {
+  if (res && Array.isArray(res.messages) && res.messages.length) {
     res.messages.forEach(m => {
-      const msgUiMode = m.mode === 'dev' ? 'dev13' : m.mode === 'tapri' ? 'tapri' : 'af24';
+      const msgUiMode = EDGE_TO_UI[m.mode] || 'af24';
       addMsg(m.role, m.content, msgUiMode, false);
     });
     scrollBot();
+  } else {
+    showGreeting(false); // keep greeting hidden, just empty chat
   }
 }
 
 async function delConv(e, id) {
   e.stopPropagation();
-  _convs = _convs.filter(c => c.id !== id);
-  _filteredConvs = _filteredConvs.filter(c => c.id !== id);
+  _convs          = _convs.filter(c => c.id !== id);
+  _filteredConvs  = _filteredConvs.filter(c => c.id !== id);
   if (_convId === id) { _convId = null; clearChat(); showGreeting(true); renderGreeting(); }
   renderConvList();
   await edgeCall({ action: 'delete_conversation', conversation_id: id });
 }
 
 async function clearAllConvs() {
-  if (!confirm('Delete all chat sessions permanently?')) return;
+  if (!confirm('Delete all conversations permanently?')) return;
+  const ids = _convs.map(c => c.id);
   _convs = []; _filteredConvs = []; _convId = null;
   renderConvList(); clearChat(); showGreeting(true); renderGreeting();
-  // Edge function doesn't have delete_all; loop-delete or just clear UI
-  // Send individual deletes for each conv id in background
-  const ids = [..._convs.map(c => c.id)];
-  ids.forEach(id => edgeCall({ action: 'delete_conversation', conversation_id: id }).catch(() => {}));
+  ids.forEach(id => edgeCall({ action:'delete_conversation', conversation_id:id }).catch(()=>{}));
   toast('All conversations cleared', 'ok');
 }
 
 function newChat() {
   _convId = null;
-  clearChat();
-  showGreeting(true);
-  renderGreeting();
+  clearChat(); showGreeting(true); renderGreeting();
   closeDrawer();
   toast('New chat started', 'info');
   syncLockdownState();
@@ -1185,58 +916,46 @@ function newChat() {
 // ════════════════════════════════════════
 // MESSAGE RENDERING
 // ════════════════════════════════════════
-function renderAIContent(rawText) {
+function renderAIContent(raw) {
   const container = document.createElement('div');
-  const parts = rawText.split(/(```[\s\S]*?```)/g);
-  parts.forEach(part => {
-    const codeMatch = part.match(/^```(\w*)\n?([\s\S]*?)```$/);
-    if (codeMatch) {
-      const lang = (codeMatch[1] || '').trim().toLowerCase() || 'plaintext';
-      const code = codeMatch[2];
+  raw.split(/(```[\s\S]*?```)/g).forEach(part => {
+    const cm = part.match(/^```(\w*)\n?([\s\S]*?)```$/);
+    if (cm) {
+      const lang = (cm[1]||'').trim().toLowerCase() || 'plaintext';
+      const code = cm[2];
       const wrap = document.createElement('div');
       wrap.className = 'code-block-wrap';
-
-      const header = document.createElement('div');
-      header.className = 'code-block-header';
-      header.innerHTML = `<span class="code-lang-label">${esc(lang)}</span>`;
-
-      const copyBtn = document.createElement('button');
-      copyBtn.className = 'copy-code-btn';
-      copyBtn.textContent = 'Copy';
-      copyBtn.onclick = () => {
+      const hdr = document.createElement('div');
+      hdr.className = 'code-block-header';
+      hdr.innerHTML = `<span class="code-lang-label">${esc(lang)}</span>`;
+      const cpyBtn = document.createElement('button');
+      cpyBtn.className = 'copy-code-btn';
+      cpyBtn.textContent = 'Copy';
+      cpyBtn.onclick = () => {
         navigator.clipboard.writeText(code).then(() => {
-          copyBtn.textContent = 'Copied!';
-          setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
-        }).catch(() => { copyBtn.textContent = 'Error'; });
+          cpyBtn.textContent = 'Copied!';
+          setTimeout(() => { cpyBtn.textContent = 'Copy'; }, 1500);
+        }).catch(() => { cpyBtn.textContent = 'Error'; });
       };
-      header.appendChild(copyBtn);
-      wrap.appendChild(header);
-
+      hdr.appendChild(cpyBtn); wrap.appendChild(hdr);
       const pre = document.createElement('pre');
       const codeEl = document.createElement('code');
-      if (lang && lang !== 'plaintext') codeEl.className = `language-${lang}`;
+      if (lang !== 'plaintext') codeEl.className = `language-${lang}`;
       codeEl.textContent = code;
       pre.appendChild(codeEl);
-      if (typeof hljs !== 'undefined') { try { hljs.highlightElement(codeEl); } catch(e) {} }
-      wrap.appendChild(pre);
-      container.appendChild(wrap);
+      if (typeof hljs !== 'undefined') { try { hljs.highlightElement(codeEl); } catch(e){} }
+      wrap.appendChild(pre); container.appendChild(wrap);
     } else {
       if (!part) return;
-      const segs = part.split(/(`[^`]+`)/g);
       const paraDiv = document.createElement('div');
-      paraDiv.className = 'ai-para';
-      segs.forEach(seg => {
-        const inlineMatch = seg.match(/^`([^`]+)`$/);
-        if (inlineMatch) {
-          const code = document.createElement('code');
-          code.className = 'inline-code';
-          code.textContent = inlineMatch[1];
-          paraDiv.appendChild(code);
+      part.split(/(`[^`]+`)/g).forEach(seg => {
+        const im = seg.match(/^`([^`]+)`$/);
+        if (im) {
+          const c = document.createElement('code'); c.className = 'inline-code'; c.textContent = im[1]; paraDiv.appendChild(c);
         } else {
-          const lines = seg.split('\n');
-          lines.forEach((line, i) => {
+          seg.split('\n').forEach((line, i, arr) => {
             if (line) paraDiv.appendChild(document.createTextNode(line));
-            if (i < lines.length - 1) paraDiv.appendChild(document.createElement('br'));
+            if (i < arr.length-1) paraDiv.appendChild(document.createElement('br'));
           });
         }
       });
@@ -1246,21 +965,20 @@ function renderAIContent(rawText) {
   return container;
 }
 
-function clearChat() { $('msgList').innerHTML = ''; }
-function showGreeting(yes) { $('greeting').style.display = yes ? '' : 'none'; }
+function clearChat()      { $('msgList').innerHTML = ''; }
+function showGreeting(yes){ $('greeting').style.display = yes ? '' : 'none'; }
 
-function addMsg(role, content, mode, scroll) {
+function addMsg(role, content, uiMode, scroll) {
   const isUser = role === 'user';
   const row = document.createElement('div');
   row.className = 'msg-row ' + (isUser ? 'user' : 'ai');
 
   const av = document.createElement('div');
   if (isUser) {
-    av.className = 'av av-user';
-    av.textContent = initials(sName());
+    av.className = 'av av-user'; av.textContent = initials(sName());
   } else {
-    const cfg = MODE_CONFIG[mode] || MODE_CONFIG.af24;
-    av.className = 'av av-ai' + (mode === 'dev13' ? ' dev' : mode === 'tapri' ? ' tapri' : '');
+    const cfg = MODE_CONFIG[uiMode] || MODE_CONFIG.af24;
+    av.className = 'av av-ai' + (uiMode==='dev13'?' dev':uiMode==='tapri'?' tapri':'');
     av.textContent = cfg.emoji;
   }
 
@@ -1270,8 +988,8 @@ function addMsg(role, content, mode, scroll) {
   const bub = document.createElement('div');
   if (isUser) {
     bub.className = 'bubble bubble-user';
-    const bubColors = { af24: 'var(--p)', dev13: 'var(--dev)', tapri: 'var(--tapri)' };
-    bub.style.background = bubColors[mode] || 'var(--p)';
+    const bc = { af24:'var(--p)', dev13:'var(--dev)', tapri:'var(--tapri)' };
+    bub.style.background = bc[uiMode] || 'var(--p)';
     bub.textContent = content;
   } else {
     bub.className = 'bubble bubble-ai';
@@ -1281,16 +999,14 @@ function addMsg(role, content, mode, scroll) {
   const meta = document.createElement('div');
   meta.className = 'msg-meta';
   if (!isUser) {
-    const cfg = MODE_CONFIG[mode] || MODE_CONFIG.af24;
-    meta.innerHTML = `<span class="mode-pill-sm ${mode}">${cfg.label}</span>AcademeForge AI`;
+    const cfg = MODE_CONFIG[uiMode] || MODE_CONFIG.af24;
+    meta.innerHTML = `<span class="mode-pill-sm ${uiMode}">${cfg.label}</span>AcademeForge AI`;
   } else {
     meta.textContent = sName();
   }
 
-  wrap.appendChild(bub);
-  wrap.appendChild(meta);
-  row.appendChild(av);
-  row.appendChild(wrap);
+  wrap.appendChild(bub); wrap.appendChild(meta);
+  row.appendChild(av); row.appendChild(wrap);
   $('msgList').appendChild(row);
   if (scroll) scrollBot();
   return row;
@@ -1300,37 +1016,31 @@ function addThinking() {
   const row = document.createElement('div');
   row.className = 'thinking-row';
   const av = document.createElement('div');
-  av.className = 'av av-ai' + (_mode === 'dev13' ? ' dev' : _mode === 'tapri' ? ' tapri' : '');
-  av.textContent = (MODE_CONFIG[_mode] || MODE_CONFIG.af24).emoji;
+  av.className = 'av av-ai' + (_mode==='dev13'?' dev':_mode==='tapri'?' tapri':'');
+  av.textContent = (MODE_CONFIG[_mode]||MODE_CONFIG.af24).emoji;
   const bub = document.createElement('div');
   bub.className = 'thinking-bub';
   bub.innerHTML = '<div class="dots"><span></span><span></span><span></span></div>';
-  row.appendChild(av);
-  row.appendChild(bub);
-  $('msgList').appendChild(row);
-  scrollBot();
+  row.appendChild(av); row.appendChild(bub);
+  $('msgList').appendChild(row); scrollBot();
   return row;
 }
 
-function removeEl(el) { if (el && el.parentNode) el.parentNode.removeChild(el); }
-function scrollBot() { $('chat').scrollTop = $('chat').scrollHeight; }
+function removeEl(el)  { if (el && el.parentNode) el.parentNode.removeChild(el); }
+function scrollBot()   { $('chat').scrollTop = $('chat').scrollHeight; }
 
 // ════════════════════════════════════════
-// INPUT HANDLING
+// INPUT
 // ════════════════════════════════════════
 function onTyping() {
   if ($('msgInput').disabled) return;
-  const v = $('msgInput').value, l = v.length, over = l > MAX_CHARS;
+  const v=($('msgInput').value), l=v.length, over=l>MAX_CHARS;
   $('charHint').textContent = l + ' / ' + MAX_CHARS;
-  $('charHint').className = over ? 'warn-txt' : '';
-  $('sendBtn').disabled = over || l === 0 || _loading;
+  $('charHint').className   = over ? 'warn-txt' : '';
+  $('sendBtn').disabled     = over || l===0 || _loading;
   autoResize();
 }
-
-function onKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSend(); }
-}
-
+function onKey(e) { if (e.key==='Enter'&&!e.shiftKey) { e.preventDefault(); doSend(); } }
 function autoResize() {
   const el = $('msgInput');
   el.style.height = 'auto';
@@ -1338,23 +1048,18 @@ function autoResize() {
 }
 
 // ════════════════════════════════════════
-// SEND MESSAGE
+// SEND
 // ════════════════════════════════════════
 async function doSend() {
   if (_loading) return;
-
-  // Re-check lockdown before sending
-  if (syncLockdownState()) {
-    toast('Session limit reached. Please wait for your window to reset.', 'err');
-    return;
-  }
+  if (syncLockdownState()) { toast('Session limit reached. Please wait for your window to reset.','err'); return; }
 
   const content = $('msgInput').value.trim();
   if (!content || content.length > MAX_CHARS) return;
 
   _loading = true;
   $('sendBtn').disabled = true;
-  $('msgInput').value = '';
+  $('msgInput').value   = '';
   $('charHint').textContent = '0 / ' + MAX_CHARS;
   autoResize();
   showGreeting(false);
@@ -1362,170 +1067,158 @@ async function doSend() {
   addMsg('user', content, _mode, true);
   const ph = addThinking();
 
-  const payload = { action: 'ask', question: content, mode: _mode };
+  const payload = { action:'ask', question: content, mode: _mode };
   if (_convId) payload.conversation_id = _convId;
 
   const res = await edgeCall(payload);
   removeEl(ph);
-
   _loading = false;
   $('sendBtn').disabled = false;
 
-  // Handle errors and rate limits
+  // ── Handle errors / rate limits ─────────────────────────────
   if (!res || res.error || res.limitReached) {
-    let userMsg = 'The AI is busy right now. Please try again.';
-    let lockTimeStr = null;
+    // Cache usage data even on limit hit so lockdown UI works
+    if (res && res.dailyReqUsed !== undefined) saveUsageCache(res);
 
-    if (res) {
-      if (res.error) {
-        userMsg = res.error;
-        // Extract time from error like "opens in 5h 30m."
-        const m = res.error.match(/in\s+([\dh m]+)\./i);
-        if (m) lockTimeStr = m[1].trim();
-      }
-      // Cache the usage data even on limit hit
-      if (res.window1 || res.dailyReqUsed !== undefined) {
-        saveUsageCache(res);
-      }
-    }
-
-    toast(userMsg, 'err');
+    const msg = (res && res.error) ? res.error : 'The AI is busy right now. Please try again.';
+    toast(msg, 'err');
     syncLockdownState();
-    renderUsageFromCache();
+    renderUsageUI();
+    onTyping(); // re-enable send if input has text
     return;
   }
 
-  // Success — cache usage payload
-  if (res.window1 || res.dailyReqUsed !== undefined) {
-    saveUsageCache(res);
-  }
+  // ── Success ─────────────────────────────────────────────────
+  // Cache the usage snapshot returned by the edge function
+  // Edge sends: dailyReqUsed, sessionReqUsed, sessionTokenUsed, sessionSecondsRemaining, etc.
+  if (res.dailyReqUsed !== undefined) saveUsageCache(res);
 
-  // Update conversation
+  // Update / add conversation in sidebar
   if (res.conversation_id) {
     const isNew = !_convId;
     _convId = res.conversation_id;
     if (isNew) {
       const nc = {
-        id: _convId,
-        title: res.conversation_title || 'New Chat',
-        mode: res.mode || 'af_proguide',
+        id:     _convId,
+        title:  res.conversation_title || 'New Chat',
+        mode:   res.mode || 'af_proguide',
         uiMode: _mode
       };
       _convs.unshift(nc);
       _filteredConvs.unshift(nc);
+    } else {
+      // Update title if it came back
+      if (res.conversation_title) {
+        _convs = _convs.map(c => c.id === _convId ? { ...c, title: res.conversation_title } : c);
+        _filteredConvs = _filteredConvs.map(c => c.id === _convId ? { ...c, title: res.conversation_title } : c);
+      }
     }
   }
 
   addMsg('assistant', res.answer, _mode, true);
-  renderUsageFromCache();
+  renderUsageUI();
   syncLockdownState();
+  onTyping();
 }
 
 // ════════════════════════════════════════
 // PROFILE MODAL
 // ════════════════════════════════════════
 function openProfileModal() {
-  const name = sName(), email = sEmail(), mobile = sMobile(), id = sId();
-  $('pmAvatar').textContent = initials(name);
-  $('pmName').textContent   = name;
-  $('pmStudentId').textContent = id ? `ID: ${id}` : 'AcademeForge Student';
-  $('pmEmail').textContent  = email  || '—';
-  $('pmPhone').textContent  = mobile || '—';
+  $('pmAvatar').textContent    = initials(sName());
+  $('pmName').textContent      = sName();
+  $('pmStudentId').textContent = sId() ? `ID: ${sId()}` : 'AcademeForge Student';
+  $('pmEmail').textContent     = sEmail()  || '—';
+  $('pmPhone').textContent     = sMobile() || '—';
 
   const u = loadUsageCache();
   if (u) {
-    const win = u.activeWindow === 2 ? u.window2 : u.window1;
-    const reqUsed  = win ? win.reqUsed  : 0;
-    const tokUsed  = win ? win.tokenUsed: 0;
+    // Session
+    const sReq  = u.sessionReqUsed   || 0;
+    const sTok  = u.sessionTokenUsed  || 0;
+    const sReqPct = Math.min(100, (sReq / SESSION_REQ_LIMIT)   * 100);
+    const sTokPct = Math.min(100, (sTok / SESSION_TOKEN_LIMIT) * 100);
 
-    $('pmSReq').textContent   = `${reqUsed} / ${WINDOW_REQ_LIMIT}`;
-    $('pmSReqBar').style.width = Math.min(100, (reqUsed / WINDOW_REQ_LIMIT) * 100) + '%';
+    $('pmSReq').textContent     = `${sReq} / ${SESSION_REQ_LIMIT}`;
+    $('pmSReqBar').style.width  = sReqPct + '%';
 
-    $('pmDailyReq').textContent = `${u.dailyReqUsed || 0} / ${DAILY_REQ_LIMIT}`;
-    $('pmDailyReqBar').style.width = Math.min(100, ((u.dailyReqUsed || 0) / DAILY_REQ_LIMIT) * 100) + '%';
+    // Daily
+    const dReq    = u.dailyReqUsed || 0;
+    const dReqPct = Math.min(100, (dReq / DAILY_REQ_LIMIT) * 100);
+    $('pmDailyReq').textContent    = `${dReq} / ${DAILY_REQ_LIMIT}`;
+    $('pmDailyReqBar').style.width = dReqPct + '%';
 
-    const tokPct = Math.max(0, 100 - Math.round((tokUsed / WINDOW_TOKEN_LIMIT) * 100));
-    $('pmTokPctLabel').textContent = `${tokPct}% Remaining`;
-    $('pmTokBar').style.width = tokPct + '%';
+    // Token remaining
+    const tokRemPct = Math.max(0, 100 - Math.round(sTokPct));
+    $('pmTokLabel').textContent = `${tokRemPct}% Remaining`;
+    $('pmTokBar').style.width   = tokRemPct + '%';
+
+    // Session info line
+    let sessInfo = '';
+    if (u.sessionActive) {
+      const cd = fmtSecs(u.sessionSecondsRemaining);
+      sessInfo = cd ? `Session expires in ${cd}` : 'Session active';
+      if (sReq >= SESSION_REQ_LIMIT || sTok >= SESSION_TOKEN_LIMIT) {
+        sessInfo = cd ? `Session exhausted · resets in ${cd}` : 'Session exhausted';
+      }
+    } else {
+      sessInfo = 'No active session · next message starts one';
+    }
+    $('pmSessInfo').textContent = sessInfo;
   } else {
-    $('pmSReq').textContent    = `0 / ${WINDOW_REQ_LIMIT}`;
-    $('pmSReqBar').style.width = '0%';
-    $('pmDailyReq').textContent = `0 / ${DAILY_REQ_LIMIT}`;
+    $('pmSReq').textContent        = `0 / ${SESSION_REQ_LIMIT}`;
+    $('pmSReqBar').style.width     = '0%';
+    $('pmDailyReq').textContent    = `0 / ${DAILY_REQ_LIMIT}`;
     $('pmDailyReqBar').style.width = '0%';
-    $('pmTokPctLabel').textContent = '100% Remaining';
-    $('pmTokBar').style.width = '100%';
+    $('pmTokLabel').textContent    = '100% Remaining';
+    $('pmTokBar').style.width      = '100%';
+    $('pmSessInfo').textContent    = 'Send a message to start a session';
   }
 
   show('profileModal');
   closeDrawer();
 }
 
-function closeProfileModal() { hide('profileModal'); }
-function closeProfileOnBg(e) { if (e.target === e.currentTarget) closeProfileModal(); }
-function goToLogin() { sessionStorage.setItem('af_last_tab','student'); window.location.href='../'; }
+function closeProfileModal()    { hide('profileModal'); }
+function closeProfileOnBg(e)    { if (e.target===e.currentTarget) closeProfileModal(); }
+function goToLogin()            { sessionStorage.setItem('af_last_tab','student'); window.location.href='../'; }
 
 // ════════════════════════════════════════
-// SWIPE GESTURE ENGINE
+// SWIPE GESTURE
 // ════════════════════════════════════════
-(function() {
-  const SWIPE_THRESHOLD = 60;   // min px horizontal travel
-  const EDGE_ZONE = 40;         // px from left edge to trigger open-drawer swipe
-  const VELOCITY_MIN = 0.3;     // px/ms
-
-  let startX = 0, startY = 0, startTime = 0, active = false;
-
+(function(){
+  const THRESH = 60, EDGE = 40, VEL = 0.3;
+  let sx=0, sy=0, st=0, active=false;
   const app = document.getElementById('app');
-
-  app.addEventListener('touchstart', (e) => {
+  app.addEventListener('touchstart', e => {
     const t = e.touches[0];
-    startX = t.clientX;
-    startY = t.clientY;
-    startTime = Date.now();
-
-    // For open: only allow from left edge zone
-    // For close: allow from anywhere when drawer is open
-    const drawerOpen = document.getElementById('drawer').classList.contains('open');
-    active = drawerOpen || startX <= EDGE_ZONE;
-  }, { passive: true });
-
-  app.addEventListener('touchend', (e) => {
+    sx=t.clientX; sy=t.clientY; st=Date.now();
+    active = $('drawer').classList.contains('open') || sx<=EDGE;
+  }, { passive:true });
+  app.addEventListener('touchend', e => {
     if (!active) return;
-
     const t = e.changedTouches[0];
-    const dx = t.clientX - startX;
-    const dy = t.clientY - startY;
-    const dt = Date.now() - startTime;
-    const vx = Math.abs(dx) / dt;
-
-    // Ignore if more vertical than horizontal
-    if (Math.abs(dy) > Math.abs(dx) * 1.2) return;
-    if (Math.abs(dx) < SWIPE_THRESHOLD && vx < VELOCITY_MIN) return;
-
-    const drawerOpen = document.getElementById('drawer').classList.contains('open');
-
-    if (dx > 0 && !drawerOpen) {
-      // Swipe right → open drawer (only if started near left edge)
-      if (startX <= EDGE_ZONE + 20) openDrawer();
-    } else if (dx < 0 && drawerOpen) {
-      // Swipe left → close drawer
-      closeDrawer();
-    }
-
+    const dx=t.clientX-sx, dy=t.clientY-sy, dt=Date.now()-st;
+    if (Math.abs(dy) > Math.abs(dx)*1.2) return;
+    if (Math.abs(dx) < THRESH && Math.abs(dx)/dt < VEL) return;
+    const open = $('drawer').classList.contains('open');
+    if (dx>0 && !open && sx<=EDGE+20) openDrawer();
+    else if (dx<0 && open) closeDrawer();
     active = false;
-  }, { passive: true });
+  }, { passive:true });
 })();
 
 // ════════════════════════════════════════
-// KEYBOARD SHORTCUTS
+// KEYBOARD
 // ════════════════════════════════════════
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeDrawer(); closeProfileModal(); }
+  if (e.key==='Escape') { closeDrawer(); closeProfileModal(); }
 });
 
 // ════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════
-function init() {
+async function init() {
   syncHamburger();
   if (!isLoggedIn()) {
     $('lockedBox').classList.add('visible');
@@ -1536,12 +1229,20 @@ function init() {
   show('chat'); show('inputArea'); show('modeSelectorArea');
   setMode('af24');
   renderDrawerProfile();
-  renderUsageFromCache();
+
+  // Fetch fresh usage on load
+  const usageRes = await edgeCall({ action:'usage_only' });
+  if (usageRes && usageRes.dailyReqUsed !== undefined) saveUsageCache(usageRes);
+
+  renderUsageUI();
   syncLockdownState();
-  $('sendBtn').disabled = true; // disabled until user types
+  $('sendBtn').disabled = true;
 }
 
 document.addEventListener('DOMContentLoaded', init);
+window.addEventListener('storage', e => {
+  if (e.key === 'af_dark_mode') syncTheme();
+});
 </script>
 </body>
 </html>
