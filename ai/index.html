@@ -802,7 +802,7 @@ function loadFromLocalTimeline(suffix) {
     if (!raw) return null;
     const data = JSON.parse(raw);
     if (Date.now() - data.timestamp > CACHE_EXPIRY_MS) {
-      lsDel(getCacheKey(suffix)); // 36 hours limit passed! Auto deleted.
+      lsDel(getCacheKey(suffix)); 
       return null;
     }
     return data.payload;
@@ -1143,7 +1143,6 @@ async function openConv(c) {
 
   if (syncLockdownState()) return;
 
-  // Pehle check karein local cached messages hain ya nahi
   let cachedMsgs = loadFromLocalTimeline('messages_' + _convId);
   if (cachedMsgs && cachedMsgs.length > 0) {
     cachedMsgs.forEach(m => {
@@ -1423,7 +1422,6 @@ async function doSend() {
       saveToLocalTimeline('conversations', _convs);
     }
 
-    // Dynamic current messages stack local sync matrix
     let currentLocalMsgs = loadFromLocalTimeline('messages_' + _convId) || [];
     currentLocalMsgs.push({ role: 'user', content: content, mode: _mode });
     currentLocalMsgs.push({ role: 'assistant', content: res.answer, mode: _mode });
