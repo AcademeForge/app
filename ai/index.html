@@ -1045,39 +1045,48 @@ function newChat(){
 }
 
 function renderAIContent(rawText){
-  const container=document.createElement('div');
-  const parts=rawText.split(/(```[\s\S]*?
-```)/g);
-  parts.forEach(part=>{
-    const codeMatch=part.match(/^```(\w*)\n?([\s\S]*?)```$/);
+  const container = document.createElement('div');
+  // FIX: Regex split mapping code single unified string block line me adjust kar diya hai
+  const parts = rawText.split(/(```[\s\S]*?```)/g);
+  
+  parts.forEach(part => {
+    const codeMatch = part.match(/^```(\w*)\n?([\s\S]*?)```$/);
     if(codeMatch){
-      const lang=(codeMatch[1]||'').trim().toLowerCase()||'plaintext';
-      const code=codeMatch[2];
-      const wrap=document.createElement('div');
-      wrap.className='code-block-wrap';
-      wrap.innerHTML=`<div class="code-block-header"><span class="code-lang-label">${esc(lang)}</span></div>`;
-      const pre=document.createElement('pre');
-      const codeEl=document.createElement('code');
-      if(lang&&lang!=='plaintext') codeEl.className=`language-${lang}`;
-      codeEl.textContent=code;pre.appendChild(codeEl);
-      if(typeof hljs!=='undefined'){try{hljs.highlightElement(codeEl);}catch(e){}}
-      wrap.appendChild(pre);container.appendChild(wrap);
+      const lang = (codeMatch[1] || '').trim().toLowerCase() || 'plaintext';
+      const code = codeMatch[2];
+      const wrap = document.createElement('div');
+      wrap.className = 'code-block-wrap';
+      wrap.innerHTML = `<div class="code-block-header"><span class="code-lang-label">${esc(lang)}</span></div>`;
+      
+      const pre = document.createElement('pre');
+      const codeEl = document.createElement('code');
+      if(lang && lang !== 'plaintext') codeEl.className = `language-${lang}`;
+      codeEl.textContent = code;
+      pre.appendChild(codeEl);
+      
+      if(typeof hljs !== 'undefined'){
+        try { hljs.highlightElement(codeEl); } catch(e) {}
+      }
+      wrap.appendChild(pre);
+      container.appendChild(wrap);
     } else {
       if(!part) return;
-      const segs=part.split(/(`[^`]+`)/g);
-      const paraDiv=document.createElement('div');
-      paraDiv.className='ai-para';
-      segs.forEach(seg=>{
-        const inlineMatch=seg.match(/^`([^`]+)`$/);
+      const segs = part.split(/(`[^`]+`)/g);
+      const paraDiv = document.createElement('div');
+      paraDiv.className = 'ai-para';
+      
+      segs.forEach(seg => {
+        const inlineMatch = seg.match(/^`([^`]+)`$/);
         if(inlineMatch){
-          const code=document.createElement('code');
-          code.className='inline-code';code.textContent=inlineMatch[1];
+          const code = document.createElement('code');
+          code.className = 'inline-code';
+          code.textContent = inlineMatch[1];
           paraDiv.appendChild(code);
         } else {
-          const lines=seg.split('\n');
-          lines.forEach((line,i)=>{
+          const lines = seg.split('\n');
+          lines.forEach((line, i) => {
             if(line) paraDiv.appendChild(document.createTextNode(line));
-            if(i<lines.length-1) paraDiv.appendChild(document.createElement('br'));
+            if(i < lines.length - 1) paraDiv.appendChild(document.createElement('br'));
           });
         }
       });
