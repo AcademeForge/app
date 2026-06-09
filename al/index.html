@@ -733,26 +733,94 @@
         if (event_af_ai.key === "Escape") close_drawer_af_ai();
       });
     }
+function setup_swipe_gesture_af_ai() {
+  let startX_af_ai = 0;
+  let startY_af_ai = 0;
+  let endX_af_ai = 0;
+  let endY_af_ai = 0;
 
-    async function initialize_af_ai() {
-      bind_events_af_ai();
-      set_mode_af_ai("af_proguide_af_ai");
-      element_af_ai("student-label-af_ai").textContent =
-        `${student_name_af_ai()} · ${student_key_af_ai() || "Not signed in"}`;
-      if (!signed_in_af_ai()) {
-        element_af_ai("chat-scroll-af_ai").classList.add("hidden-af_ai");
-        element_af_ai("composer-area-af_ai").classList.add("hidden-af_ai");
-        element_af_ai("mode-tabs-af_ai").classList.add("hidden-af_ai");
-        element_af_ai("locked-af_ai").classList.remove("hidden-af_ai");
-        return;
-      }
-      await Promise.all([refresh_usage_af_ai(), load_conversations_af_ai()]);
-      update_send_state_af_ai();
-      setInterval(() => {
-        render_usage_af_ai();
-      }, 60000);
+  const swipe_threshold_af_ai = 70;
+  const edge_threshold_af_ai = 40;
+
+  const shell_af_ai = element_af_ai("shell-af_ai");
+
+  shell_af_ai.addEventListener("touchstart", (event_af_ai) => {
+    const touch_af_ai = event_af_ai.touches[0];
+
+    startX_af_ai = touch_af_ai.clientX;
+    startY_af_ai = touch_af_ai.clientY;
+
+    endX_af_ai = startX_af_ai;
+    endY_af_ai = startY_af_ai;
+  }, { passive: true });
+
+  shell_af_ai.addEventListener("touchmove", (event_af_ai) => {
+    const touch_af_ai = event_af_ai.touches[0];
+
+    endX_af_ai = touch_af_ai.clientX;
+    endY_af_ai = touch_af_ai.clientY;
+  }, { passive: true });
+
+  shell_af_ai.addEventListener("touchend", () => {
+    const diffX_af_ai = endX_af_ai - startX_af_ai;
+    const diffY_af_ai = Math.abs(endY_af_ai - startY_af_ai);
+
+    // Ignore vertical scrolling
+    if (diffY_af_ai > 50) return;
+
+    const drawer_open_af_ai =
+      element_af_ai("drawer-af_ai").dataset.openAf_ai === "true";
+
+    // Swipe right from left edge => Open drawer
+    if (
+      !drawer_open_af_ai &&
+      startX_af_ai <= edge_threshold_af_ai &&
+      diffX_af_ai > swipe_threshold_af_ai
+    ) {
+      open_drawer_af_ai();
+      return;
     }
 
+    // Swipe left => Close drawer
+    if (
+      drawer_open_af_ai &&
+      diffX_af_ai < -swipe_threshold_af_ai
+    ) {
+      close_drawer_af_ai();
+    }
+  });
+}
+    
+async function initialize_af_ai() {
+  bind_events_af_ai();
+
+  // Enable swipe gestures
+  setup_swipe_gesture_af_ai();
+
+  set_mode_af_ai("af_proguide_af_ai");
+
+  element_af_ai("student-label-af_ai").textContent =
+    `${student_name_af_ai()} · ${student_key_af_ai() || "Not signed in"}`;
+
+  if (!signed_in_af_ai()) {
+    element_af_ai("chat-scroll-af_ai").classList.add("hidden-af_ai");
+    element_af_ai("composer-area-af_ai").classList.add("hidden-af_ai");
+    element_af_ai("mode-tabs-af_ai").classList.add("hidden-af_ai");
+    element_af_ai("locked-af_ai").classList.remove("hidden-af_ai");
+    return;
+  }
+
+  await Promise.all([
+    refresh_usage_af_ai(),
+    load_conversations_af_ai()
+  ]);
+
+  update_send_state_af_ai();
+
+  setInterval(() => {
+    render_usage_af_ai();
+  }, 60000);
+}
     document.addEventListener("DOMContentLoaded", initialize_af_ai);
   </script>
 </body>
