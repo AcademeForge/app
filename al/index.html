@@ -39,7 +39,12 @@
     .drawer-head-af_ai{padding:18px;border-bottom:1px solid var(--line-af_ai)}
     .brand-af_ai{font-weight:800;font-size:18px}
     .student-af_ai{color:var(--muted-af_ai);font-size:12px;margin-top:5px;overflow:hidden;text-overflow:ellipsis}
-    .new-chat-af_ai{width:100%;margin-top:16px;border:1px solid var(--line-af_ai);background:var(--panel-soft-af_ai);border-radius:12px;padding:11px 13px;text-align:left;font-weight:700;cursor:pointer}
+    
+    .drawer-actions-af_ai{display:flex;gap:8px;margin-top:16px;}
+    .new-chat-af_ai{flex:1;border:1px solid var(--line-af_ai);background:var(--panel-soft-af_ai);border-radius:12px;padding:11px 13px;text-align:left;font-weight:700;cursor:pointer}
+    .clear-history-af_ai{border:1px solid rgba(255,90,104,.3);background:rgba(255,90,104,.1);color:#ff5a68;border-radius:12px;padding:11px 13px;font-weight:700;cursor:pointer}
+    .clear-history-af_ai:hover{background:rgba(255,90,104,.2)}
+
     .search-af_ai{margin:12px 14px 6px;width:calc(100% - 28px);border:1px solid var(--line-af_ai);background:var(--panel-soft-af_ai);color:var(--text-af_ai);border-radius:11px;padding:10px 12px;outline:none}
     .conversation-list-af_ai{flex:1;overflow:auto;padding:4px 8px}
     .conversation-empty-af_ai{padding:26px 15px;text-align:center;color:var(--faint-af_ai);font-size:13px;line-height:1.6}
@@ -48,6 +53,8 @@
     .conversation-dot-af_ai{width:8px;height:8px;border-radius:50%;background:var(--blue-af_ai);flex:none}
     .conversation-title-af_ai{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
     .conversation-delete-af_ai{border:0;background:transparent;color:var(--faint-af_ai);font-size:17px;cursor:pointer;padding:2px 5px}
+    .conversation-delete-af_ai:hover{color:var(--red-af_ai)}
+    
     .drawer-usage-af_ai{border-top:1px solid var(--line-af_ai);padding:15px}
     .usage-heading-af_ai{font-size:11px;color:var(--faint-af_ai);font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
     .usage-line-af_ai{display:flex;justify-content:space-between;font-size:12px;margin:7px 0;color:var(--muted-af_ai)}
@@ -122,7 +129,10 @@
       <section class="drawer-head-af_ai">
         <div class="brand-af_ai">AcademeForge AI</div>
         <div class="student-af_ai" id="student-label-af_ai">Student</div>
-        <button class="new-chat-af_ai" id="new-chat-af_ai" type="button">+ New conversation</button>
+        <div class="drawer-actions-af_ai">
+          <button class="new-chat-af_ai" id="new-chat-af_ai" type="button">+ New chat</button>
+          <button class="clear-history-af_ai" id="clear-history-af_ai" type="button" title="Clear all history">🗑 Clear</button>
+        </div>
       </section>
       <input class="search-af_ai" id="search-af_ai" type="search" placeholder="Search conversations">
       <section class="conversation-list-af_ai" id="conversation-list-af_ai"></section>
@@ -421,7 +431,15 @@
       element_af_ai("header-mode-af_ai").textContent = details_af_ai.label_af_ai;
       element_af_ai("input-af_ai").placeholder = details_af_ai.placeholder_af_ai;
       element_af_ai("welcome-kicker-af_ai").textContent = details_af_ai.kicker_af_ai;
-      element_af_ai("welcome-title-af_ai").textContent = details_af_ai.title_af_ai;
+      
+      // Welcome text customization with Student Name
+      const name = student_name_af_ai();
+      if(mode_af_ai === "tapri_af_ai") {
+        element_af_ai("welcome-title-af_ai").textContent = `Hii ${name}, Kya scene hai? Bolo.`;
+      } else {
+        element_af_ai("welcome-title-af_ai").textContent = `Hii ${name}, ${details_af_ai.title_af_ai}`;
+      }
+      
       element_af_ai("welcome-copy-af_ai").textContent = details_af_ai.copy_af_ai;
       render_suggestions_af_ai();
     }
@@ -464,8 +482,18 @@
         toast_af_ai(data_af_ai.error_af_ai, "error");
         return;
       }
-      state_af_ai.conversations_af_ai = Array.isArray(data_af_ai.conversations_af_ai)
-        ? data_af_ai.conversations_af_ai : [];
+      let rawList = Array.isArray(data_af_ai.conversations_af_ai) ? data_af_ai.conversations_af_ai : [];
+      
+      // Keep only top 5 recent chats and auto delete remaining backend backups if any
+      if (rawList.length > 5) {
+        const toDelete = rawList.slice(5);
+        for (let item of toDelete) {
+          await request_af_ai({ action_af_ai: "delete_conversation_af_ai", conversation_id_af_ai: item.conversation_id_af_ai });
+        }
+        rawList = rawList.slice(0, 5);
+      }
+      
+      state_af_ai.conversations_af_ai = rawList;
       state_af_ai.filtered_conversations_af_ai = [...state_af_ai.conversations_af_ai];
       render_conversations_af_ai();
     }
@@ -572,6 +600,21 @@
       render_conversations_af_ai();
     }
 
+    async function clear_all_history_af_ai() {
+      if (!confirm("Are you sure you want to delete all conversations? This cannot be undone.")) return;
+      toast_af_ai("Clearing history...");
+      for (const chat of state_af_ai.conversations_af_ai) {
+        await request_af_ai({
+          action_af_ai: "delete_conversation_af_ai",
+          conversation_id_af_ai: chat.conversation_id_af_ai
+        });
+      }
+      state_af_ai.conversations_af_ai = [];
+      state_af_ai.filtered_conversations_af_ai = [];
+      new_chat_af_ai();
+      toast_af_ai("All history cleared successfully.");
+    }
+
     function update_input_af_ai() {
       const input_af_ai = element_af_ai("input-af_ai");
       input_af_ai.style.height = "auto";
@@ -671,6 +714,16 @@
           updated_at_af_ai: new Date().toISOString()
         });
       }
+
+      // Enforce the 5 recent chats limit immediately when a new chat is added
+      if (state_af_ai.conversations_af_ai.length > 5) {
+        const excessChats = state_af_ai.conversations_af_ai.slice(5);
+        for(let excess of excessChats) {
+          await request_af_ai({ action_af_ai: "delete_conversation_af_ai", conversation_id_af_ai: excess.conversation_id_af_ai });
+        }
+        state_af_ai.conversations_af_ai = state_af_ai.conversations_af_ai.slice(0, 5);
+      }
+
       state_af_ai.conversations_af_ai.sort(
         (left_af_ai, right_af_ai) =>
           new Date(right_af_ai.updated_at_af_ai || 0) - new Date(left_af_ai.updated_at_af_ai || 0)
@@ -684,6 +737,7 @@
       element_af_ai("menu-af_ai").addEventListener("click", open_drawer_af_ai);
       element_af_ai("overlay-af_ai").addEventListener("click", close_drawer_af_ai);
       element_af_ai("new-chat-af_ai").addEventListener("click", new_chat_af_ai);
+      element_af_ai("clear-history-af_ai").addEventListener("click", clear_all_history_af_ai);
       element_af_ai("mode-tabs-af_ai").addEventListener("click", (event_af_ai) => {
         const tab_af_ai = event_af_ai.target.closest(".mode-tab-af_ai");
         if (tab_af_ai) set_mode_af_ai(tab_af_ai.dataset.modeAf_ai);
@@ -733,94 +787,83 @@
         if (event_af_ai.key === "Escape") close_drawer_af_ai();
       });
     }
-function setup_swipe_gesture_af_ai() {
-  let startX_af_ai = 0;
-  let startY_af_ai = 0;
-  let endX_af_ai = 0;
-  let endY_af_ai = 0;
 
-  const swipe_threshold_af_ai = 70;
-  const edge_threshold_af_ai = 40;
+    function setup_swipe_gesture_af_ai() {
+      let startX_af_ai = 0;
+      let startY_af_ai = 0;
+      let endX_af_ai = 0;
+      let endY_af_ai = 0;
 
-  const shell_af_ai = element_af_ai("shell-af_ai");
+      const swipe_threshold_af_ai = 50; 
+      const edge_threshold_af_ai = 60;   
 
-  shell_af_ai.addEventListener("touchstart", (event_af_ai) => {
-    const touch_af_ai = event_af_ai.touches[0];
+      const shell_af_ai = element_af_ai("shell-af_ai");
 
-    startX_af_ai = touch_af_ai.clientX;
-    startY_af_ai = touch_af_ai.clientY;
+      shell_af_ai.addEventListener("touchstart", (event_af_ai) => {
+        const touch_af_ai = event_af_ai.touches[0];
+        startX_af_ai = touch_af_ai.clientX;
+        startY_af_ai = touch_af_ai.clientY;
+        endX_af_ai = startX_af_ai;
+        endY_af_ai = startY_af_ai;
+      }, { passive: true });
 
-    endX_af_ai = startX_af_ai;
-    endY_af_ai = startY_af_ai;
-  }, { passive: true });
+      shell_af_ai.addEventListener("touchmove", (event_af_ai) => {
+        const touch_af_ai = event_af_ai.touches[0];
+        endX_af_ai = touch_af_ai.clientX;
+        endY_af_ai = touch_af_ai.clientY;
+      }, { passive: true });
 
-  shell_af_ai.addEventListener("touchmove", (event_af_ai) => {
-    const touch_af_ai = event_af_ai.touches[0];
+      shell_af_ai.addEventListener("touchend", () => {
+        const diffX_af_ai = endX_af_ai - startX_af_ai;
+        const diffY_af_ai = Math.abs(endY_af_ai - startY_af_ai);
 
-    endX_af_ai = touch_af_ai.clientX;
-    endY_af_ai = touch_af_ai.clientY;
-  }, { passive: true });
+        if (diffY_af_ai > 60) return; // Prevent horizontal triggers during clear vertical scroll
 
-  shell_af_ai.addEventListener("touchend", () => {
-    const diffX_af_ai = endX_af_ai - startX_af_ai;
-    const diffY_af_ai = Math.abs(endY_af_ai - startY_af_ai);
+        const drawer_open_af_ai = element_af_ai("drawer-af_ai").dataset.openAf_ai === "true";
 
-    // Ignore vertical scrolling
-    if (diffY_af_ai > 50) return;
+        // Swipe Left to Right from Edge -> Open Drawer
+        if (!drawer_open_af_ai && startX_af_ai <= edge_threshold_af_ai && diffX_af_ai > swipe_threshold_af_ai) {
+          open_drawer_af_ai();
+          return;
+        }
 
-    const drawer_open_af_ai =
-      element_af_ai("drawer-af_ai").dataset.openAf_ai === "true";
-
-    // Swipe right from left edge => Open drawer
-    if (
-      !drawer_open_af_ai &&
-      startX_af_ai <= edge_threshold_af_ai &&
-      diffX_af_ai > swipe_threshold_af_ai
-    ) {
-      open_drawer_af_ai();
-      return;
+        // Swipe Right to Left anywhere on drawer/shell -> Close Drawer
+        if (drawer_open_af_ai && diffX_af_ai < -swipe_threshold_af_ai) {
+          close_drawer_af_ai();
+        }
+      });
     }
+        
+    async function initialize_af_ai() {
+      bind_events_af_ai();
+      setup_swipe_gesture_af_ai();
+      set_mode_af_ai("af_proguide_af_ai");
 
-    // Swipe left => Close drawer
-    if (
-      drawer_open_af_ai &&
-      diffX_af_ai < -swipe_threshold_af_ai
-    ) {
-      close_drawer_af_ai();
+      element_af_ai("student-label-af_ai").textContent =
+        `${student_name_af_ai()} · ${student_key_af_ai() || "Not signed in"}`;
+
+      if (!signed_in_af_ai()) {
+        element_af_ai("chat-scroll-af_ai").classList.add("hidden-af_ai");
+        element_af_ai("composer-area-af_ai").classList.add("hidden-af_ai");
+        element_af_ai("mode-tabs-af_ai").classList.add("hidden-af_ai");
+        element_af_ai("locked-af_ai").classList.remove("hidden-af_ai");
+        return;
+      }
+
+      await Promise.all([
+        refresh_usage_af_ai(),
+        load_conversations_af_ai()
+      ]);
+
+      // Re-trigger mode setup so the student name updates correctly after async load
+      set_mode_af_ai(state_af_ai.mode_af_ai);
+
+      update_send_state_af_ai();
+
+      setInterval(() => {
+        render_usage_af_ai();
+      }, 60000);
     }
-  });
-}
-    
-async function initialize_af_ai() {
-  bind_events_af_ai();
-
-  // Enable swipe gestures
-  setup_swipe_gesture_af_ai();
-
-  set_mode_af_ai("af_proguide_af_ai");
-
-  element_af_ai("student-label-af_ai").textContent =
-    `${student_name_af_ai()} · ${student_key_af_ai() || "Not signed in"}`;
-
-  if (!signed_in_af_ai()) {
-    element_af_ai("chat-scroll-af_ai").classList.add("hidden-af_ai");
-    element_af_ai("composer-area-af_ai").classList.add("hidden-af_ai");
-    element_af_ai("mode-tabs-af_ai").classList.add("hidden-af_ai");
-    element_af_ai("locked-af_ai").classList.remove("hidden-af_ai");
-    return;
-  }
-
-  await Promise.all([
-    refresh_usage_af_ai(),
-    load_conversations_af_ai()
-  ]);
-
-  update_send_state_af_ai();
-
-  setInterval(() => {
-    render_usage_af_ai();
-  }, 60000);
-}
     document.addEventListener("DOMContentLoaded", initialize_af_ai);
   </script>
 </body>
