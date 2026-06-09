@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#090b12">
+  <title>AcademeForge AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --background-af_ai:#090b12;
+      --panel-af_ai:#111521;
+      --panel-soft-af_ai:#181e2d;
+      --panel-strong-af_ai:#20283a;
+      --line-af_ai:#2a3348;
+      --text-af_ai:#f1f4fb;
+      --muted-af_ai:#929db7;
+      --faint-af_ai:#66718d;
+      --blue-af_ai:#5687ff;
+      --orange-af_ai:#ff7a3d;
+      --purple-af_ai:#ae55f5;
+      --green-af_ai:#23c483;
+      --red-af_ai:#ff5a68;
+      --yellow-af_ai:#f6b94b;
+      --radius-af_ai:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{font-family:Inter,system-ui,sans-serif;background:#030508;color:var(--text-af_ai);overflow:hidden}
+    button,input,textarea{font:inherit}
+    button{color:inherit}
+    .shell-af_ai{width:min(100%,460px);height:100dvh;margin:auto;background:var(--background-af_ai);position:relative;display:flex;flex-direction:column;overflow:hidden}
+    .overlay-af_ai{position:absolute;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(4px);z-index:40;opacity:0;visibility:hidden;transition:.2s}
+    .overlay-af_ai[data-open-af_ai="true"]{opacity:1;visibility:visible}
+    .drawer-af_ai{position:absolute;z-index:50;inset:0 auto 0 0;width:min(84%,340px);background:var(--panel-af_ai);border-right:1px solid var(--line-af_ai);transform:translateX(-102%);transition:transform .25s ease;display:flex;flex-direction:column}
+    .drawer-af_ai[data-open-af_ai="true"]{transform:none}
+    .drawer-head-af_ai{padding:18px;border-bottom:1px solid var(--line-af_ai)}
+    .brand-af_ai{font-weight:800;font-size:18px}
+    .student-af_ai{color:var(--muted-af_ai);font-size:12px;margin-top:5px;overflow:hidden;text-overflow:ellipsis}
+    .new-chat-af_ai{width:100%;margin-top:16px;border:1px solid var(--line-af_ai);background:var(--panel-soft-af_ai);border-radius:12px;padding:11px 13px;text-align:left;font-weight:700;cursor:pointer}
+    .search-af_ai{margin:12px 14px 6px;width:calc(100% - 28px);border:1px solid var(--line-af_ai);background:var(--panel-soft-af_ai);color:var(--text-af_ai);border-radius:11px;padding:10px 12px;outline:none}
+    .conversation-list-af_ai{flex:1;overflow:auto;padding:4px 8px}
+    .conversation-empty-af_ai{padding:26px 15px;text-align:center;color:var(--faint-af_ai);font-size:13px;line-height:1.6}
+    .conversation-row-af_ai{width:100%;display:flex;gap:9px;align-items:center;border:1px solid transparent;background:transparent;border-radius:11px;padding:10px;color:var(--muted-af_ai);cursor:pointer;text-align:left}
+    .conversation-row-af_ai:hover,.conversation-row-af_ai[data-active-af_ai="true"]{background:var(--panel-soft-af_ai);border-color:var(--line-af_ai);color:var(--text-af_ai)}
+    .conversation-dot-af_ai{width:8px;height:8px;border-radius:50%;background:var(--blue-af_ai);flex:none}
+    .conversation-title-af_ai{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+    .conversation-delete-af_ai{border:0;background:transparent;color:var(--faint-af_ai);font-size:17px;cursor:pointer;padding:2px 5px}
+    .drawer-usage-af_ai{border-top:1px solid var(--line-af_ai);padding:15px}
+    .usage-heading-af_ai{font-size:11px;color:var(--faint-af_ai);font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+    .usage-line-af_ai{display:flex;justify-content:space-between;font-size:12px;margin:7px 0;color:var(--muted-af_ai)}
+    .usage-meter-af_ai{height:6px;background:var(--panel-strong-af_ai);border-radius:99px;overflow:hidden}
+    .usage-fill-af_ai{height:100%;width:0;background:var(--blue-af_ai);transition:width .25s}
+    .usage-fill-af_ai[data-tone-af_ai="warning"]{background:var(--yellow-af_ai)}
+    .usage-fill-af_ai[data-tone-af_ai="danger"]{background:var(--red-af_ai)}
+    .usage-reset-af_ai{font-size:11px;color:var(--faint-af_ai);margin-top:12px;line-height:1.5}
+    .header-af_ai{height:64px;display:flex;align-items:center;gap:12px;padding:0 15px;background:var(--panel-af_ai);border-bottom:1px solid var(--line-af_ai);flex:none}
+    .menu-af_ai{width:39px;height:39px;border:1px solid var(--line-af_ai);background:var(--panel-soft-af_ai);border-radius:12px;display:grid;place-items:center;cursor:pointer;font-size:20px}
+    .header-copy-af_ai{flex:1;min-width:0}
+    .header-title-af_ai{font-weight:800;font-size:15px}
+    .header-mode-af_ai{font-size:11px;color:var(--faint-af_ai);margin-top:3px}
+    .free-af_ai{font-size:10px;color:var(--green-af_ai);background:rgba(35,196,131,.1);border:1px solid rgba(35,196,131,.2);padding:5px 9px;border-radius:99px;font-weight:800}
+    .limit-banner-af_ai{display:none;padding:9px 14px;background:rgba(255,90,104,.12);border-bottom:1px solid rgba(255,90,104,.3);color:#ffc2c8;font-size:12px;line-height:1.5}
+    .limit-banner-af_ai[data-visible-af_ai="true"]{display:block}
+    .mode-tabs-af_ai{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:12px 15px 2px;padding:4px;border:1px solid var(--line-af_ai);background:var(--panel-soft-af_ai);border-radius:13px;flex:none}
+    .mode-tab-af_ai{border:0;background:transparent;color:var(--muted-af_ai);padding:9px 4px;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer}
+    .mode-tab-af_ai[data-selected-af_ai="true"]{background:var(--blue-af_ai);color:white}
+    .mode-tab-af_ai[data-mode-af_ai="dev_af_ai"][data-selected-af_ai="true"]{background:var(--orange-af_ai)}
+    .mode-tab-af_ai[data-mode-af_ai="tapri_af_ai"][data-selected-af_ai="true"]{background:var(--purple-af_ai)}
+    .chat-scroll-af_ai{flex:1;overflow:auto;padding:14px 15px 185px;scroll-behavior:smooth}
+    .welcome-af_ai{padding:25px 0 12px}
+    .welcome-kicker-af_ai{color:var(--faint-af_ai);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.09em}
+    .welcome-title-af_ai{font-size:25px;line-height:1.25;font-weight:800;margin:9px 0}
+    .welcome-copy-af_ai{font-size:14px;color:var(--muted-af_ai);line-height:1.6}
+    .suggestions-af_ai{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+    .suggestion-af_ai{border:1px solid var(--line-af_ai);background:var(--panel-soft-af_ai);color:var(--muted-af_ai);padding:9px 13px;border-radius:99px;font-size:12px;cursor:pointer}
+    .messages-af_ai{display:flex;flex-direction:column;gap:12px}
+    .message-row-af_ai{display:flex;gap:9px;align-items:flex-end}
+    .message-row-af_ai[data-role-af_ai="user_af_ai"]{flex-direction:row-reverse}
+    .avatar-af_ai{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--panel-strong-af_ai);font-size:11px;font-weight:800;flex:none}
+    .message-body-af_ai{max-width:84%}
+    .bubble-af_ai{padding:11px 13px;border-radius:15px;border:1px solid var(--line-af_ai);background:var(--panel-soft-af_ai);font-size:13.5px;line-height:1.65;overflow-wrap:anywhere}
+    .message-row-af_ai[data-role-af_ai="user_af_ai"] .bubble-af_ai{background:var(--blue-af_ai);border-color:transparent;color:white;border-bottom-right-radius:4px;white-space:pre-wrap}
+    .message-row-af_ai[data-mode-af_ai="dev_af_ai"][data-role-af_ai="user_af_ai"] .bubble-af_ai{background:var(--orange-af_ai)}
+    .message-row-af_ai[data-mode-af_ai="tapri_af_ai"][data-role-af_ai="user_af_ai"] .bubble-af_ai{background:var(--purple-af_ai)}
+    .message-meta-af_ai{font-size:10px;color:var(--faint-af_ai);margin-top:4px}
+    .message-row-af_ai[data-role-af_ai="user_af_ai"] .message-meta-af_ai{text-align:right}
+    .code-wrap-af_ai{margin:9px 0;border:1px solid #30394f;border-radius:10px;overflow:hidden;background:#080a10}
+    .code-head-af_ai{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:#121622;color:#8e99b4;font-size:10px}
+    .code-copy-af_ai{border:0;background:#252c3e;color:#d9def0;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:10px}
+    .code-pre-af_ai{margin:0;padding:12px;overflow:auto;font:12px/1.6 Consolas,monospace;color:#dce5ff;white-space:pre}
+    .thinking-af_ai{display:flex;align-items:center;gap:5px;padding:12px 15px;background:var(--panel-soft-af_ai);border:1px solid var(--line-af_ai);border-radius:15px;width:max-content}
+    .thinking-dot-af_ai{width:6px;height:6px;border-radius:50%;background:var(--blue-af_ai);animation:pulse-af_ai 1s infinite}
+    .thinking-dot-af_ai:nth-child(2){animation-delay:.15s}.thinking-dot-af_ai:nth-child(3){animation-delay:.3s}
+    @keyframes pulse-af_ai{50%{opacity:.2;transform:translateY(-3px)}}
+    .composer-area-af_ai{position:absolute;z-index:20;left:0;right:0;bottom:0;padding:34px 15px 13px;background:linear-gradient(transparent,var(--background-af_ai) 28%)}
+    .composer-af_ai{display:flex;align-items:flex-end;gap:8px;border:1px solid var(--line-af_ai);background:var(--panel-af_ai);border-radius:17px;padding:10px 10px 10px 13px}
+    .composer-af_ai:focus-within{border-color:var(--blue-af_ai);box-shadow:0 0 0 3px rgba(86,135,255,.1)}
+    .input-af_ai{flex:1;min-height:38px;max-height:120px;resize:none;border:0;outline:0;background:transparent;color:var(--text-af_ai);line-height:1.5;padding:8px 0}
+    .send-af_ai{width:39px;height:39px;border:0;border-radius:11px;background:var(--blue-af_ai);color:white;font-size:17px;cursor:pointer;flex:none}
+    .send-af_ai:disabled{opacity:.35;cursor:not-allowed}
+    .composer-meta-af_ai{display:flex;justify-content:space-between;color:var(--faint-af_ai);font-size:10px;padding:7px 5px 0}
+    .toast-area-af_ai{position:absolute;z-index:90;top:76px;left:14px;right:14px;pointer-events:none}
+    .toast-af_ai{padding:11px 13px;border:1px solid var(--line-af_ai);background:var(--panel-strong-af_ai);border-radius:12px;font-size:12px;box-shadow:0 12px 34px rgba(0,0,0,.35)}
+    .toast-af_ai[data-tone-af_ai="error"]{border-color:rgba(255,90,104,.5);color:#ffc2c8}
+    .locked-af_ai{margin:auto;padding:30px;text-align:center}
+    .locked-title-af_ai{font-size:22px;font-weight:800}
+    .locked-copy-af_ai{color:var(--muted-af_ai);font-size:13px;line-height:1.6;margin-top:10px}
+    .hidden-af_ai{display:none!important}
+    @media(min-width:520px){
+      body{display:grid;place-items:center;background:#030508}
+      .shell-af_ai{height:min(900px,calc(100dvh - 32px));border:8px solid #202637;border-radius:44px;box-shadow:0 30px 90px rgba(0,0,0,.75)}
+    }
+  </style>
+</head>
+<body>
+  <main class="shell-af_ai" id="shell-af_ai">
+    <div class="overlay-af_ai" id="overlay-af_ai" data-open-af_ai="false"></div>
+    <aside class="drawer-af_ai" id="drawer-af_ai" data-open-af_ai="false">
+      <section class="drawer-head-af_ai">
+        <div class="brand-af_ai">AcademeForge AI</div>
+        <div class="student-af_ai" id="student-label-af_ai">Student</div>
+        <button class="new-chat-af_ai" id="new-chat-af_ai" type="button">+ New conversation</button>
+      </section>
+      <input class="search-af_ai" id="search-af_ai" type="search" placeholder="Search conversations">
+      <section class="conversation-list-af_ai" id="conversation-list-af_ai"></section>
+      <section class="drawer-usage-af_ai">
+        <div class="usage-heading-af_ai">Usage</div>
+        <div class="usage-line-af_ai"><span>Session requests</span><strong id="session-request-label-af_ai">-</strong></div>
+        <div class="usage-meter-af_ai"><div class="usage-fill-af_ai" id="session-request-fill-af_ai"></div></div>
+        <div class="usage-line-af_ai"><span>Session tokens</span><strong id="session-token-label-af_ai">-</strong></div>
+        <div class="usage-meter-af_ai"><div class="usage-fill-af_ai" id="session-token-fill-af_ai"></div></div>
+        <div class="usage-line-af_ai"><span>Daily requests</span><strong id="daily-request-label-af_ai">-</strong></div>
+        <div class="usage-meter-af_ai"><div class="usage-fill-af_ai" id="daily-request-fill-af_ai"></div></div>
+        <div class="usage-reset-af_ai" id="usage-reset-af_ai">Loading limits...</div>
+      </section>
+    </aside>
+
+    <header class="header-af_ai">
+      <button class="menu-af_ai" id="menu-af_ai" type="button" aria-label="Open conversations">☰</button>
+      <div class="header-copy-af_ai">
+        <div class="header-title-af_ai">AcademeForge AI</div>
+        <div class="header-mode-af_ai" id="header-mode-af_ai">AF ProGuide 2.4</div>
+      </div>
+      <div class="free-af_ai">Free</div>
+    </header>
+
+    <div class="limit-banner-af_ai" id="limit-banner-af_ai" data-visible-af_ai="false"></div>
+
+    <nav class="mode-tabs-af_ai" id="mode-tabs-af_ai">
+      <button class="mode-tab-af_ai" type="button" data-mode-af_ai="af_proguide_af_ai" data-selected-af_ai="true">AF 2.4</button>
+      <button class="mode-tab-af_ai" type="button" data-mode-af_ai="dev_af_ai" data-selected-af_ai="false">Dev 1.3</button>
+      <button class="mode-tab-af_ai" type="button" data-mode-af_ai="tapri_af_ai" data-selected-af_ai="false">Tapri 7.9</button>
+    </nav>
+
+    <section class="chat-scroll-af_ai" id="chat-scroll-af_ai">
+      <section class="welcome-af_ai" id="welcome-af_ai">
+        <div class="welcome-kicker-af_ai" id="welcome-kicker-af_ai">Student mentor</div>
+        <div class="welcome-title-af_ai" id="welcome-title-af_ai">What are we building today?</div>
+        <div class="welcome-copy-af_ai" id="welcome-copy-af_ai">Ask about coding, careers, projects, interviews, or study strategy.</div>
+        <div class="suggestions-af_ai" id="suggestions-af_ai"></div>
+      </section>
+      <section class="messages-af_ai" id="messages-af_ai"></section>
+    </section>
+
+    <section class="composer-area-af_ai" id="composer-area-af_ai">
+      <div class="composer-af_ai">
+        <textarea class="input-af_ai" id="input-af_ai" maxlength="800" rows="1" placeholder="Ask AF ProGuide anything..."></textarea>
+        <button class="send-af_ai" id="send-af_ai" type="button" disabled>➤</button>
+      </div>
+      <div class="composer-meta-af_ai">
+        <span>AI can make mistakes. Verify important details.</span>
+        <span id="character-count-af_ai">0 / 800</span>
+      </div>
+    </section>
+
+    <section class="locked-af_ai hidden-af_ai" id="locked-af_ai">
+      <div class="locked-title-af_ai">Sign in required</div>
+      <div class="locked-copy-af_ai">Open AcademeForge and sign in as a student before using AI.</div>
+    </section>
+    <div class="toast-area-af_ai" id="toast-area-af_ai"></div>
+  </main>
+
+  <script>
+    const edge_url_af_ai = "https://afooyyydhlwngzssgqih.supabase.co/functions/v1/academe-ai-af_ai";
+    const maximum_characters_af_ai = 800;
+    const element_af_ai = (id_af_ai) => document.getElementById(id_af_ai);
+    const mode_details_af_ai = {
+      af_proguide_af_ai: {
+        label_af_ai: "AF ProGuide 2.4",
+        placeholder_af_ai: "Ask AF ProGuide anything...",
+        kicker_af_ai: "Student mentor",
+        title_af_ai: "What are we building today?",
+        copy_af_ai: "Ask about coding, careers, projects, interviews, or study strategy.",
+        suggestions_af_ai: ["Learn Python", "Build a portfolio", "Prepare for interviews", "Choose a tech career"]
+      },
+      dev_af_ai: {
+        label_af_ai: "Dev 1.3",
+        placeholder_af_ai: "Ask Dev 1.3 anything...",
+        kicker_af_ai: "Founder mode",
+        title_af_ai: "Bring the problem. We will ship.",
+        copy_af_ai: "Get direct help with code, products, startups, architecture, and execution.",
+        suggestions_af_ai: ["Review my product idea", "Debug my code", "Plan an MVP", "Improve my architecture"]
+      },
+      tapri_af_ai: {
+        label_af_ai: "Tapri 7.9",
+        placeholder_af_ai: "Ask Tapri anything...",
+        kicker_af_ai: "Big bro mode",
+        title_af_ai: "Kya scene hai? Bolo.",
+        copy_af_ai: "Career confusion, college pressure, coding, ya self-doubt. Seedhi baat karte hain.",
+        suggestions_af_ai: ["Career mein confused hoon", "Coding kaise seekhun", "Self-doubt se kaise niklu", "College vs job advice"]
+      }
+    };
+
+    const state_af_ai = {
+      mode_af_ai: "af_proguide_af_ai",
+      conversation_id_af_ai: "",
+      conversations_af_ai: [],
+      filtered_conversations_af_ai: [],
+      loading_af_ai: false,
+      usage_af_ai: null,
+      usage_saved_at_af_ai: 0,
+      toast_timer_af_ai: 0
+    };
+
+    function student_key_af_ai() {
+      return localStorage.getItem("af_student_email") ||
+        localStorage.getItem("af_student_mobile") ||
+        localStorage.getItem("af_student_phone") || "";
+    }
+
+    function student_name_af_ai() {
+      return localStorage.getItem("af_student_name") || "Student";
+    }
+
+    function signed_in_af_ai() {
+      return Boolean(student_key_af_ai());
+    }
+
+    function initials_af_ai(value_af_ai) {
+      return String(value_af_ai || "AF").trim().split(/\s+/).slice(0, 2)
+        .map((part_af_ai) => part_af_ai.charAt(0).toUpperCase()).join("");
+    }
+
+    function escape_html_af_ai(value_af_ai) {
+      return String(value_af_ai ?? "").replace(/[&<>"']/g, (character_af_ai) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+      })[character_af_ai]);
+    }
+
+    function format_seconds_af_ai(seconds_af_ai) {
+      const safe_seconds_af_ai = Math.max(0, Number(seconds_af_ai || 0));
+      const hours_af_ai = Math.floor(safe_seconds_af_ai / 3600);
+      const minutes_af_ai = Math.ceil((safe_seconds_af_ai % 3600) / 60);
+      if (hours_af_ai > 0) return `${hours_af_ai}h ${minutes_af_ai}m`;
+      return `${minutes_af_ai}m`;
+    }
+
+    function toast_af_ai(message_af_ai, tone_af_ai = "info") {
+      clearTimeout(state_af_ai.toast_timer_af_ai);
+      element_af_ai("toast-area-af_ai").innerHTML =
+        `<div class="toast-af_ai" data-tone-af_ai="${escape_html_af_ai(tone_af_ai)}">${escape_html_af_ai(message_af_ai)}</div>`;
+      state_af_ai.toast_timer_af_ai = setTimeout(() => {
+        element_af_ai("toast-area-af_ai").innerHTML = "";
+      }, 3500);
+    }
+
+    async function request_af_ai(payload_af_ai) {
+      const controller_af_ai = new AbortController();
+      const timeout_af_ai = setTimeout(() => controller_af_ai.abort(), 60000);
+      try {
+        if (!navigator.onLine) return { error_af_ai: "You are offline." };
+        if (!student_key_af_ai()) return { error_af_ai: "Please sign in again.", status_af_ai: 401 };
+        const response_af_ai = await fetch(edge_url_af_ai, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-af-ai-student-key": student_key_af_ai()
+          },
+          body: JSON.stringify({
+            ...payload_af_ai,
+            student_key_af_ai: student_key_af_ai()
+          }),
+          signal: controller_af_ai.signal
+        });
+        const data_af_ai = await response_af_ai.json().catch(() => ({}));
+        if (!response_af_ai.ok) {
+          return {
+            error_af_ai: data_af_ai.error_af_ai || `Request failed (${response_af_ai.status}).`,
+            ...data_af_ai,
+            status_af_ai: response_af_ai.status
+          };
+        }
+        return data_af_ai;
+      } catch (error_af_ai) {
+        return {
+          error_af_ai: error_af_ai && error_af_ai.name === "AbortError"
+            ? "The request timed out."
+            : "Could not connect to AcademeForge AI."
+        };
+      } finally {
+        clearTimeout(timeout_af_ai);
+      }
+    }
+
+    function save_usage_af_ai(data_af_ai) {
+      if (data_af_ai.session_request_limit_af_ai === undefined) return;
+      state_af_ai.usage_af_ai = {
+        daily_request_used_af_ai: Number(data_af_ai.daily_request_used_af_ai || 0),
+        daily_request_limit_af_ai: Number(data_af_ai.daily_request_limit_af_ai || 20),
+        daily_request_remaining_af_ai: Number(data_af_ai.daily_request_remaining_af_ai || 0),
+        daily_token_used_af_ai: Number(data_af_ai.daily_token_used_af_ai || 0),
+        daily_token_limit_af_ai: Number(data_af_ai.daily_token_limit_af_ai || 30000),
+        daily_token_remaining_af_ai: Number(data_af_ai.daily_token_remaining_af_ai || 0),
+        session_request_used_af_ai: Number(data_af_ai.session_request_used_af_ai || 0),
+        session_request_limit_af_ai: Number(data_af_ai.session_request_limit_af_ai || 10),
+        session_request_remaining_af_ai: Number(data_af_ai.session_request_remaining_af_ai || 0),
+        session_token_used_af_ai: Number(data_af_ai.session_token_used_af_ai || 0),
+        session_token_limit_af_ai: Number(data_af_ai.session_token_limit_af_ai || 15000),
+        session_token_remaining_af_ai: Number(data_af_ai.session_token_remaining_af_ai || 0),
+        session_active_af_ai: Boolean(data_af_ai.session_active_af_ai),
+        session_seconds_remaining_af_ai: Number(data_af_ai.session_seconds_remaining_af_ai || 0)
+      };
+      state_af_ai.usage_saved_at_af_ai = Date.now();
+      render_usage_af_ai();
+    }
+
+    function current_usage_af_ai() {
+      if (!state_af_ai.usage_af_ai) return null;
+      const elapsed_af_ai = Math.floor((Date.now() - state_af_ai.usage_saved_at_af_ai) / 1000);
+      const usage_af_ai = { ...state_af_ai.usage_af_ai };
+      usage_af_ai.session_seconds_remaining_af_ai = Math.max(
+        0,
+        usage_af_ai.session_seconds_remaining_af_ai - elapsed_af_ai
+      );
+      if (usage_af_ai.session_active_af_ai && usage_af_ai.session_seconds_remaining_af_ai === 0) {
+        usage_af_ai.session_active_af_ai = false;
+        usage_af_ai.session_request_used_af_ai = 0;
+        usage_af_ai.session_request_remaining_af_ai = usage_af_ai.session_request_limit_af_ai;
+        usage_af_ai.session_token_used_af_ai = 0;
+        usage_af_ai.session_token_remaining_af_ai = usage_af_ai.session_token_limit_af_ai;
+      }
+      return usage_af_ai;
+    }
+
+    function meter_tone_af_ai(percent_af_ai) {
+      if (percent_af_ai >= 90) return "danger";
+      if (percent_af_ai >= 70) return "warning";
+      return "normal";
+    }
+
+    function set_meter_af_ai(fill_id_af_ai, used_af_ai, limit_af_ai) {
+      const percent_af_ai = limit_af_ai > 0 ? Math.min(100, used_af_ai / limit_af_ai * 100) : 0;
+      const fill_af_ai = element_af_ai(fill_id_af_ai);
+      fill_af_ai.style.width = `${percent_af_ai}%`;
+      fill_af_ai.dataset.toneAf_ai = meter_tone_af_ai(percent_af_ai);
+    }
+
+    function render_usage_af_ai() {
+      const usage_af_ai = current_usage_af_ai();
+      if (!usage_af_ai) return;
+      element_af_ai("session-request-label-af_ai").textContent =
+        `${usage_af_ai.session_request_remaining_af_ai} left / ${usage_af_ai.session_request_limit_af_ai}`;
+      element_af_ai("session-token-label-af_ai").textContent =
+        `${usage_af_ai.session_token_remaining_af_ai.toLocaleString()} left`;
+      element_af_ai("daily-request-label-af_ai").textContent =
+        `${usage_af_ai.daily_request_remaining_af_ai} left / ${usage_af_ai.daily_request_limit_af_ai}`;
+      set_meter_af_ai("session-request-fill-af_ai", usage_af_ai.session_request_used_af_ai, usage_af_ai.session_request_limit_af_ai);
+      set_meter_af_ai("session-token-fill-af_ai", usage_af_ai.session_token_used_af_ai, usage_af_ai.session_token_limit_af_ai);
+      set_meter_af_ai("daily-request-fill-af_ai", usage_af_ai.daily_request_used_af_ai, usage_af_ai.daily_request_limit_af_ai);
+
+      const session_limited_af_ai = usage_af_ai.session_active_af_ai && (
+        usage_af_ai.session_request_remaining_af_ai <= 0 ||
+        usage_af_ai.session_token_remaining_af_ai <= 0
+      );
+      const daily_limited_af_ai = usage_af_ai.daily_request_remaining_af_ai <= 0 ||
+        usage_af_ai.daily_token_remaining_af_ai <= 0;
+      const limited_af_ai = session_limited_af_ai || daily_limited_af_ai;
+      const banner_af_ai = element_af_ai("limit-banner-af_ai");
+      banner_af_ai.dataset.visibleAf_ai = String(limited_af_ai);
+      if (daily_limited_af_ai) {
+        banner_af_ai.textContent = "Daily AI limit reached. Usage resets tomorrow.";
+        element_af_ai("usage-reset-af_ai").textContent = "Daily limit reached";
+      } else if (session_limited_af_ai) {
+        const remaining_af_ai = format_seconds_af_ai(usage_af_ai.session_seconds_remaining_af_ai);
+        banner_af_ai.textContent = `Session limit reached. New session in ${remaining_af_ai}.`;
+        element_af_ai("usage-reset-af_ai").textContent = `Session resets in ${remaining_af_ai}`;
+      } else {
+        element_af_ai("usage-reset-af_ai").textContent =
+          `${usage_af_ai.daily_token_remaining_af_ai.toLocaleString()} daily tokens remaining`;
+      }
+      element_af_ai("input-af_ai").disabled = limited_af_ai || state_af_ai.loading_af_ai;
+      update_send_state_af_ai();
+    }
+
+    async function refresh_usage_af_ai() {
+      const data_af_ai = await request_af_ai({ action_af_ai: "usage_af_ai" });
+      if (!data_af_ai.error_af_ai) save_usage_af_ai(data_af_ai);
+      return data_af_ai;
+    }
+
+    function open_drawer_af_ai() {
+      element_af_ai("drawer-af_ai").dataset.openAf_ai = "true";
+      element_af_ai("overlay-af_ai").dataset.openAf_ai = "true";
+    }
+
+    function close_drawer_af_ai() {
+      element_af_ai("drawer-af_ai").dataset.openAf_ai = "false";
+      element_af_ai("overlay-af_ai").dataset.openAf_ai = "false";
+    }
+
+    function set_mode_af_ai(mode_af_ai) {
+      if (!mode_details_af_ai[mode_af_ai]) return;
+      state_af_ai.mode_af_ai = mode_af_ai;
+      const details_af_ai = mode_details_af_ai[mode_af_ai];
+      document.querySelectorAll(".mode-tab-af_ai").forEach((tab_af_ai) => {
+        tab_af_ai.dataset.selectedAf_ai = String(tab_af_ai.dataset.modeAf_ai === mode_af_ai);
+      });
+      element_af_ai("header-mode-af_ai").textContent = details_af_ai.label_af_ai;
+      element_af_ai("input-af_ai").placeholder = details_af_ai.placeholder_af_ai;
+      element_af_ai("welcome-kicker-af_ai").textContent = details_af_ai.kicker_af_ai;
+      element_af_ai("welcome-title-af_ai").textContent = details_af_ai.title_af_ai;
+      element_af_ai("welcome-copy-af_ai").textContent = details_af_ai.copy_af_ai;
+      render_suggestions_af_ai();
+    }
+
+    function render_suggestions_af_ai() {
+      const suggestions_af_ai = mode_details_af_ai[state_af_ai.mode_af_ai].suggestions_af_ai;
+      element_af_ai("suggestions-af_ai").innerHTML = suggestions_af_ai.map((suggestion_af_ai) =>
+        `<button class="suggestion-af_ai" type="button" data-suggestion-af_ai="${escape_html_af_ai(suggestion_af_ai)}">${escape_html_af_ai(suggestion_af_ai)}</button>`
+      ).join("");
+    }
+
+    function new_chat_af_ai() {
+      state_af_ai.conversation_id_af_ai = "";
+      element_af_ai("messages-af_ai").innerHTML = "";
+      element_af_ai("welcome-af_ai").classList.remove("hidden-af_ai");
+      render_conversations_af_ai();
+      close_drawer_af_ai();
+      element_af_ai("input-af_ai").focus();
+    }
+
+    function render_conversations_af_ai() {
+      const list_af_ai = element_af_ai("conversation-list-af_ai");
+      if (!state_af_ai.filtered_conversations_af_ai.length) {
+        list_af_ai.innerHTML = `<div class="conversation-empty-af_ai">No conversations yet.<br>Start a new chat.</div>`;
+        return;
+      }
+      list_af_ai.innerHTML = state_af_ai.filtered_conversations_af_ai.map((conversation_af_ai) => {
+        const active_af_ai = conversation_af_ai.conversation_id_af_ai === state_af_ai.conversation_id_af_ai;
+        return `<button class="conversation-row-af_ai" type="button" data-conversation-af_ai="${escape_html_af_ai(conversation_af_ai.conversation_id_af_ai)}" data-active-af_ai="${active_af_ai}">
+          <span class="conversation-dot-af_ai"></span>
+          <span class="conversation-title-af_ai">${escape_html_af_ai(conversation_af_ai.title_af_ai)}</span>
+          <span class="conversation-delete-af_ai" role="button" data-delete-af_ai="${escape_html_af_ai(conversation_af_ai.conversation_id_af_ai)}" aria-label="Delete conversation">×</span>
+        </button>`;
+      }).join("");
+    }
+
+    async function load_conversations_af_ai() {
+      const data_af_ai = await request_af_ai({ action_af_ai: "list_conversations_af_ai" });
+      if (data_af_ai.error_af_ai) {
+        toast_af_ai(data_af_ai.error_af_ai, "error");
+        return;
+      }
+      state_af_ai.conversations_af_ai = Array.isArray(data_af_ai.conversations_af_ai)
+        ? data_af_ai.conversations_af_ai : [];
+      state_af_ai.filtered_conversations_af_ai = [...state_af_ai.conversations_af_ai];
+      render_conversations_af_ai();
+    }
+
+    function render_text_af_ai(text_af_ai) {
+      const parts_af_ai = String(text_af_ai || "").split(/(```[\s\S]*?```)/g);
+      return parts_af_ai.map((part_af_ai) => {
+        const code_match_af_ai = part_af_ai.match(/^```([\w+-]*)\n?([\s\S]*?)```$/);
+        if (code_match_af_ai) {
+          const language_af_ai = code_match_af_ai[1] || "code";
+          const code_af_ai = code_match_af_ai[2];
+          return `<div class="code-wrap-af_ai">
+            <div class="code-head-af_ai"><span>${escape_html_af_ai(language_af_ai)}</span><button class="code-copy-af_ai" type="button" data-code-af_ai="${encodeURIComponent(code_af_ai)}">Copy</button></div>
+            <pre class="code-pre-af_ai">${escape_html_af_ai(code_af_ai)}</pre>
+          </div>`;
+        }
+        return escape_html_af_ai(part_af_ai)
+          .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+          .replace(/`([^`]+)`/g, "<code>$1</code>")
+          .replace(/\n/g, "<br>");
+      }).join("");
+    }
+
+    function append_message_af_ai(role_af_ai, content_af_ai, mode_af_ai) {
+      const row_af_ai = document.createElement("article");
+      row_af_ai.className = "message-row-af_ai";
+      row_af_ai.dataset.roleAf_ai = role_af_ai;
+      row_af_ai.dataset.modeAf_ai = mode_af_ai;
+      const user_af_ai = role_af_ai === "user_af_ai";
+      row_af_ai.innerHTML = `
+        <div class="avatar-af_ai">${user_af_ai ? escape_html_af_ai(initials_af_ai(student_name_af_ai())) : "AI"}</div>
+        <div class="message-body-af_ai">
+          <div class="bubble-af_ai">${user_af_ai ? escape_html_af_ai(content_af_ai) : render_text_af_ai(content_af_ai)}</div>
+          <div class="message-meta-af_ai">${user_af_ai ? escape_html_af_ai(student_name_af_ai()) : escape_html_af_ai(mode_details_af_ai[mode_af_ai]?.label_af_ai || "AcademeForge AI")}</div>
+        </div>`;
+      element_af_ai("messages-af_ai").appendChild(row_af_ai);
+      scroll_bottom_af_ai();
+    }
+
+    function append_thinking_af_ai() {
+      const thinking_af_ai = document.createElement("div");
+      thinking_af_ai.className = "thinking-af_ai";
+      thinking_af_ai.id = "thinking-af_ai";
+      thinking_af_ai.innerHTML = `<span class="thinking-dot-af_ai"></span><span class="thinking-dot-af_ai"></span><span class="thinking-dot-af_ai"></span>`;
+      element_af_ai("messages-af_ai").appendChild(thinking_af_ai);
+      scroll_bottom_af_ai();
+    }
+
+    function remove_thinking_af_ai() {
+      element_af_ai("thinking-af_ai")?.remove();
+    }
+
+    function scroll_bottom_af_ai() {
+      const scroll_af_ai = element_af_ai("chat-scroll-af_ai");
+      scroll_af_ai.scrollTop = scroll_af_ai.scrollHeight;
+    }
+
+    async function open_conversation_af_ai(conversation_id_af_ai) {
+      const conversation_af_ai = state_af_ai.conversations_af_ai.find(
+        (item_af_ai) => item_af_ai.conversation_id_af_ai === conversation_id_af_ai
+      );
+      if (!conversation_af_ai) return;
+      state_af_ai.conversation_id_af_ai = conversation_id_af_ai;
+      set_mode_af_ai(conversation_af_ai.mode_af_ai);
+      element_af_ai("welcome-af_ai").classList.add("hidden-af_ai");
+      element_af_ai("messages-af_ai").innerHTML = "";
+      append_thinking_af_ai();
+      render_conversations_af_ai();
+      close_drawer_af_ai();
+      const data_af_ai = await request_af_ai({
+        action_af_ai: "load_conversation_af_ai",
+        conversation_id_af_ai
+      });
+      remove_thinking_af_ai();
+      if (data_af_ai.error_af_ai) {
+        toast_af_ai(data_af_ai.error_af_ai, "error");
+        return;
+      }
+      (data_af_ai.messages_af_ai || []).forEach((message_af_ai) => {
+        append_message_af_ai(
+          message_af_ai.role_af_ai,
+          message_af_ai.content_af_ai,
+          message_af_ai.mode_af_ai
+        );
+      });
+    }
+
+    async function delete_conversation_af_ai(conversation_id_af_ai) {
+      const data_af_ai = await request_af_ai({
+        action_af_ai: "delete_conversation_af_ai",
+        conversation_id_af_ai
+      });
+      if (data_af_ai.error_af_ai || !data_af_ai.success_af_ai) {
+        toast_af_ai(data_af_ai.error_af_ai || "Delete failed.", "error");
+        return;
+      }
+      state_af_ai.conversations_af_ai = state_af_ai.conversations_af_ai.filter(
+        (item_af_ai) => item_af_ai.conversation_id_af_ai !== conversation_id_af_ai
+      );
+      state_af_ai.filtered_conversations_af_ai = state_af_ai.filtered_conversations_af_ai.filter(
+        (item_af_ai) => item_af_ai.conversation_id_af_ai !== conversation_id_af_ai
+      );
+      if (state_af_ai.conversation_id_af_ai === conversation_id_af_ai) new_chat_af_ai();
+      render_conversations_af_ai();
+    }
+
+    function update_input_af_ai() {
+      const input_af_ai = element_af_ai("input-af_ai");
+      input_af_ai.style.height = "auto";
+      input_af_ai.style.height = `${Math.min(input_af_ai.scrollHeight, 120)}px`;
+      element_af_ai("character-count-af_ai").textContent =
+        `${input_af_ai.value.length} / ${maximum_characters_af_ai}`;
+      update_send_state_af_ai();
+    }
+
+    function update_send_state_af_ai() {
+      const usage_af_ai = current_usage_af_ai();
+      const limited_af_ai = usage_af_ai && (
+        usage_af_ai.daily_request_remaining_af_ai <= 0 ||
+        usage_af_ai.daily_token_remaining_af_ai <= 0 ||
+        (usage_af_ai.session_active_af_ai && (
+          usage_af_ai.session_request_remaining_af_ai <= 0 ||
+          usage_af_ai.session_token_remaining_af_ai <= 0
+        ))
+      );
+      element_af_ai("send-af_ai").disabled = state_af_ai.loading_af_ai ||
+        Boolean(limited_af_ai) ||
+        !element_af_ai("input-af_ai").value.trim();
+    }
+
+    async function send_message_af_ai() {
+      if (state_af_ai.loading_af_ai) return;
+      const input_af_ai = element_af_ai("input-af_ai");
+      const question_af_ai = input_af_ai.value.trim();
+      if (!question_af_ai) return;
+      if (question_af_ai.length > maximum_characters_af_ai) {
+        toast_af_ai(`Maximum ${maximum_characters_af_ai} characters.`, "error");
+        return;
+      }
+
+      const usage_response_af_ai = await refresh_usage_af_ai();
+      if (usage_response_af_ai.error_af_ai) {
+        toast_af_ai(usage_response_af_ai.error_af_ai, "error");
+        return;
+      }
+      const usage_af_ai = current_usage_af_ai();
+      if (usage_af_ai && (
+        usage_af_ai.daily_request_remaining_af_ai <= 0 ||
+        usage_af_ai.daily_token_remaining_af_ai <= 0 ||
+        (usage_af_ai.session_active_af_ai && (
+          usage_af_ai.session_request_remaining_af_ai <= 0 ||
+          usage_af_ai.session_token_remaining_af_ai <= 0
+        ))
+      )) {
+        render_usage_af_ai();
+        return;
+      }
+
+      state_af_ai.loading_af_ai = true;
+      element_af_ai("welcome-af_ai").classList.add("hidden-af_ai");
+      input_af_ai.value = "";
+      update_input_af_ai();
+      append_message_af_ai("user_af_ai", question_af_ai, state_af_ai.mode_af_ai);
+      append_thinking_af_ai();
+
+      const payload_af_ai = {
+        action_af_ai: "ask_af_ai",
+        question_af_ai,
+        mode_af_ai: state_af_ai.mode_af_ai
+      };
+      if (state_af_ai.conversation_id_af_ai) {
+        payload_af_ai.conversation_id_af_ai = state_af_ai.conversation_id_af_ai;
+      }
+      const data_af_ai = await request_af_ai(payload_af_ai);
+      remove_thinking_af_ai();
+      state_af_ai.loading_af_ai = false;
+
+      if (data_af_ai.session_request_limit_af_ai !== undefined) save_usage_af_ai(data_af_ai);
+      if (data_af_ai.error_af_ai) {
+        toast_af_ai(data_af_ai.error_af_ai, "error");
+        update_send_state_af_ai();
+        return;
+      }
+
+      state_af_ai.conversation_id_af_ai = data_af_ai.conversation_id_af_ai;
+      append_message_af_ai(
+        "assistant_af_ai",
+        data_af_ai.answer_af_ai || "No response received.",
+        data_af_ai.mode_af_ai || state_af_ai.mode_af_ai
+      );
+
+      const existing_af_ai = state_af_ai.conversations_af_ai.find(
+        (item_af_ai) => item_af_ai.conversation_id_af_ai === state_af_ai.conversation_id_af_ai
+      );
+      if (existing_af_ai) {
+        existing_af_ai.updated_at_af_ai = new Date().toISOString();
+        existing_af_ai.mode_af_ai = data_af_ai.mode_af_ai;
+      } else {
+        state_af_ai.conversations_af_ai.unshift({
+          conversation_id_af_ai: state_af_ai.conversation_id_af_ai,
+          title_af_ai: data_af_ai.conversation_title_af_ai || question_af_ai.slice(0, 40),
+          mode_af_ai: data_af_ai.mode_af_ai,
+          updated_at_af_ai: new Date().toISOString()
+        });
+      }
+      state_af_ai.conversations_af_ai.sort(
+        (left_af_ai, right_af_ai) =>
+          new Date(right_af_ai.updated_at_af_ai || 0) - new Date(left_af_ai.updated_at_af_ai || 0)
+      );
+      state_af_ai.filtered_conversations_af_ai = [...state_af_ai.conversations_af_ai];
+      render_conversations_af_ai();
+      update_send_state_af_ai();
+    }
+
+    function bind_events_af_ai() {
+      element_af_ai("menu-af_ai").addEventListener("click", open_drawer_af_ai);
+      element_af_ai("overlay-af_ai").addEventListener("click", close_drawer_af_ai);
+      element_af_ai("new-chat-af_ai").addEventListener("click", new_chat_af_ai);
+      element_af_ai("mode-tabs-af_ai").addEventListener("click", (event_af_ai) => {
+        const tab_af_ai = event_af_ai.target.closest(".mode-tab-af_ai");
+        if (tab_af_ai) set_mode_af_ai(tab_af_ai.dataset.modeAf_ai);
+      });
+      element_af_ai("suggestions-af_ai").addEventListener("click", (event_af_ai) => {
+        const suggestion_af_ai = event_af_ai.target.closest(".suggestion-af_ai");
+        if (!suggestion_af_ai) return;
+        element_af_ai("input-af_ai").value = suggestion_af_ai.dataset.suggestionAf_ai;
+        update_input_af_ai();
+        element_af_ai("input-af_ai").focus();
+      });
+      element_af_ai("input-af_ai").addEventListener("input", update_input_af_ai);
+      element_af_ai("input-af_ai").addEventListener("keydown", (event_af_ai) => {
+        if (event_af_ai.key === "Enter" && !event_af_ai.shiftKey) {
+          event_af_ai.preventDefault();
+          send_message_af_ai();
+        }
+      });
+      element_af_ai("send-af_ai").addEventListener("click", send_message_af_ai);
+      element_af_ai("search-af_ai").addEventListener("input", (event_af_ai) => {
+        const query_af_ai = event_af_ai.target.value.trim().toLowerCase();
+        state_af_ai.filtered_conversations_af_ai = query_af_ai
+          ? state_af_ai.conversations_af_ai.filter((item_af_ai) =>
+              String(item_af_ai.title_af_ai).toLowerCase().includes(query_af_ai))
+          : [...state_af_ai.conversations_af_ai];
+        render_conversations_af_ai();
+      });
+      element_af_ai("conversation-list-af_ai").addEventListener("click", (event_af_ai) => {
+        const delete_af_ai = event_af_ai.target.closest("[data-delete-af_ai]");
+        if (delete_af_ai) {
+          event_af_ai.preventDefault();
+          event_af_ai.stopPropagation();
+          delete_conversation_af_ai(delete_af_ai.dataset.deleteAf_ai);
+          return;
+        }
+        const row_af_ai = event_af_ai.target.closest("[data-conversation-af_ai]");
+        if (row_af_ai) open_conversation_af_ai(row_af_ai.dataset.conversationAf_ai);
+      });
+      element_af_ai("messages-af_ai").addEventListener("click", async (event_af_ai) => {
+        const copy_af_ai = event_af_ai.target.closest("[data-code-af_ai]");
+        if (!copy_af_ai) return;
+        await navigator.clipboard.writeText(decodeURIComponent(copy_af_ai.dataset.codeAf_ai));
+        copy_af_ai.textContent = "Copied";
+        setTimeout(() => { copy_af_ai.textContent = "Copy"; }, 1200);
+      });
+      document.addEventListener("keydown", (event_af_ai) => {
+        if (event_af_ai.key === "Escape") close_drawer_af_ai();
+      });
+    }
+
+    async function initialize_af_ai() {
+      bind_events_af_ai();
+      set_mode_af_ai("af_proguide_af_ai");
+      element_af_ai("student-label-af_ai").textContent =
+        `${student_name_af_ai()} · ${student_key_af_ai() || "Not signed in"}`;
+      if (!signed_in_af_ai()) {
+        element_af_ai("chat-scroll-af_ai").classList.add("hidden-af_ai");
+        element_af_ai("composer-area-af_ai").classList.add("hidden-af_ai");
+        element_af_ai("mode-tabs-af_ai").classList.add("hidden-af_ai");
+        element_af_ai("locked-af_ai").classList.remove("hidden-af_ai");
+        return;
+      }
+      await Promise.all([refresh_usage_af_ai(), load_conversations_af_ai()]);
+      update_send_state_af_ai();
+      setInterval(() => {
+        render_usage_af_ai();
+      }, 60000);
+    }
+
+    document.addEventListener("DOMContentLoaded", initialize_af_ai);
+  </script>
+</body>
+</html>
