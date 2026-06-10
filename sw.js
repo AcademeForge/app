@@ -1,8 +1,10 @@
-const CACHE_NAME = "academeforge-v1";
+const CACHE_NAME = "academeforge-v2";
 
 const STATIC_FILES = [
   "/",
-  "/index.html"
+  "/index.html",
+  "/offline/",
+  "/AF%20LOGO%202.jpeg"
 ];
 
 self.addEventListener("install", (event) => {
@@ -31,12 +33,12 @@ self.addEventListener("fetch", (event) => {
 
   const request = event.request;
 
-  // Never touch POST requests
+  // Ignore non-GET
   if (request.method !== "GET") {
     return;
   }
 
-  // Skip Supabase APIs
+  // Ignore APIs
   if (
     request.url.includes("supabase.co") ||
     request.url.includes("/functions/v1/")
@@ -44,27 +46,38 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // HTML pages -> Network First
+  // HTML Navigation -> Network First
   if (request.mode === "navigate") {
 
     event.respondWith(
       fetch(request)
         .then(response => {
 
-          const copy = response.clone();
+          if (response.ok) {
+            const copy = response.clone();
 
-          caches.open(CACHE_NAME)
-            .then(cache => cache.put(request, copy));
+            caches.open(CACHE_NAME)
+              .then(cache => cache.put(request, copy));
+          }
 
           return response;
         })
-        .catch(() => caches.match(request))
+        .catch(async () => {
+
+          const cached = await caches.match(request);
+
+          if (cached) {
+            return cached;
+          }
+
+          return caches.match("/offline/");
+        })
     );
 
     return;
   }
 
-  // Static files -> Cache First
+  // Static Assets -> Cache First
   event.respondWith(
     caches.match(request).then(cached => {
 
@@ -77,18 +90,20 @@ self.addEventListener("fetch", (event) => {
 
           if (
             response &&
-            response.status === 200 &&
-            response.type === "basic"
+            response.ok &&
+            request.method === "GET"
           ) {
 
             const copy = response.clone();
 
             caches.open(CACHE_NAME)
-              .then(cache => cache.put(request, copy));
+              .then(cache => cache.put(request, copy))
+              .catch(() => {});
           }
 
           return response;
-        });
+        })
+        .catch(() => caches.match("/offline/"));
     })
   );
 
