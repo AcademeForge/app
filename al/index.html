@@ -1,6 +1,13 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
+  <script>
+    // Apply theme before paint to prevent flash
+    (function(){
+      var dark = localStorage.getItem('af_dark_mode') !== '0';
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    })();
+  </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#090b12">
@@ -9,15 +16,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
+    /* ── Shared / accent tokens (same in both themes) ── */
     :root {
-      --background-af_ai:#090b12;
-      --panel-af_ai:#111521;
-      --panel-soft-af_ai:#181e2d;
-      --panel-strong-af_ai:#20283a;
-      --line-af_ai:#2a3348;
-      --text-af_ai:#f1f4fb;
-      --muted-af_ai:#929db7;
-      --faint-af_ai:#66718d;
       --blue-af_ai:#5687ff;
       --orange-af_ai:#ff7a3d;
       --purple-af_ai:#ae55f5;
@@ -26,9 +26,49 @@
       --yellow-af_ai:#f6b94b;
       --radius-af_ai:18px;
     }
+    /* ── Dark theme (default) ── */
+    [data-theme="dark"], :root {
+      --background-af_ai:#090b12;
+      --panel-af_ai:#111521;
+      --panel-soft-af_ai:#181e2d;
+      --panel-strong-af_ai:#20283a;
+      --line-af_ai:#2a3348;
+      --text-af_ai:#f1f4fb;
+      --muted-af_ai:#929db7;
+      --faint-af_ai:#66718d;
+      --body-bg-af_ai:#030508;
+      --shell-border-af_ai:#202637;
+      --code-bg-af_ai:#080a10;
+      --code-head-af_ai:#121622;
+      --code-line-af_ai:#30394f;
+      --code-text-af_ai:#dce5ff;
+      --code-meta-af_ai:#8e99b4;
+      --code-btn-bg-af_ai:#252c3e;
+      --code-btn-text-af_ai:#d9def0;
+    }
+    /* ── Light theme ── */
+    [data-theme="light"] {
+      --background-af_ai:#f5f6ff;
+      --panel-af_ai:#ffffff;
+      --panel-soft-af_ai:#eef0fb;
+      --panel-strong-af_ai:#e2e5f6;
+      --line-af_ai:#d4d8f0;
+      --text-af_ai:#0f0e2a;
+      --muted-af_ai:#4b5563;
+      --faint-af_ai:#9ca3af;
+      --body-bg-af_ai:#e8eaf8;
+      --shell-border-af_ai:#c7cbea;
+      --code-bg-af_ai:#f8f9ff;
+      --code-head-af_ai:#eef0fb;
+      --code-line-af_ai:#d4d8f0;
+      --code-text-af_ai:#1e2050;
+      --code-meta-af_ai:#6b7280;
+      --code-btn-bg-af_ai:#e2e5f6;
+      --code-btn-text-af_ai:#374151;
+    }
     *{box-sizing:border-box}
     html,body{height:100%;margin:0}
-    body{font-family:Inter,system-ui,sans-serif;background:#030508;color:var(--text-af_ai);overflow:hidden}
+    body{font-family:Inter,system-ui,sans-serif;background:var(--body-bg-af_ai);color:var(--text-af_ai);overflow:hidden}
     button,input,textarea{font:inherit}
     button{color:inherit}
     .shell-af_ai{width:min(100%,460px);height:100dvh;margin:auto;background:var(--background-af_ai);position:relative;display:flex;flex-direction:column;overflow:hidden}
@@ -94,10 +134,10 @@
     .message-row-af_ai[data-mode-af_ai="tapri_af_ai"][data-role-af_ai="user_af_ai"] .bubble-af_ai{background:var(--purple-af_ai)}
     .message-meta-af_ai{font-size:10px;color:var(--faint-af_ai);margin-top:4px}
     .message-row-af_ai[data-role-af_ai="user_af_ai"] .message-meta-af_ai{text-align:right}
-    .code-wrap-af_ai{margin:9px 0;border:1px solid #30394f;border-radius:10px;overflow:hidden;background:#080a10}
-    .code-head-af_ai{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:#121622;color:#8e99b4;font-size:10px}
-    .code-copy-af_ai{border:0;background:#252c3e;color:#d9def0;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:10px}
-    .code-pre-af_ai{margin:0;padding:12px;overflow:auto;font:12px/1.6 Consolas,monospace;color:#dce5ff;white-space:pre}
+    .code-wrap-af_ai{margin:9px 0;border:1px solid var(--code-line-af_ai);border-radius:10px;overflow:hidden;background:var(--code-bg-af_ai)}
+    .code-head-af_ai{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--code-head-af_ai);color:var(--code-meta-af_ai);font-size:10px}
+    .code-copy-af_ai{border:0;background:var(--code-btn-bg-af_ai);color:var(--code-btn-text-af_ai);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:10px}
+    .code-pre-af_ai{margin:0;padding:12px;overflow:auto;font:12px/1.6 Consolas,monospace;color:var(--code-text-af_ai);white-space:pre}
     .thinking-af_ai{display:flex;align-items:center;gap:5px;padding:12px 15px;background:var(--panel-soft-af_ai);border:1px solid var(--line-af_ai);border-radius:15px;width:max-content}
     .thinking-dot-af_ai{width:6px;height:6px;border-radius:50%;background:var(--blue-af_ai);animation:pulse-af_ai 1s infinite}
     .thinking-dot-af_ai:nth-child(2){animation-delay:.15s}.thinking-dot-af_ai:nth-child(3){animation-delay:.3s}
@@ -117,8 +157,8 @@
     .locked-copy-af_ai{color:var(--muted-af_ai);font-size:13px;line-height:1.6;margin-top:10px}
     .hidden-af_ai{display:none!important}
     @media(min-width:520px){
-      body{display:grid;place-items:center;background:#030508}
-      .shell-af_ai{height:min(900px,calc(100dvh - 32px));border:8px solid #202637;border-radius:44px;box-shadow:0 30px 90px rgba(0,0,0,.75)}
+      body{display:grid;place-items:center;background:var(--body-bg-af_ai)}
+      .shell-af_ai{height:min(900px,calc(100dvh - 32px));border:8px solid var(--shell-border-af_ai);border-radius:44px;box-shadow:0 30px 90px rgba(0,0,0,.75)}
     }
   </style>
 </head>
@@ -861,9 +901,19 @@
       });
     }
 
+    // ── Theme sync ────────────────────────────────────────────────────────────
+    // Reads af_dark_mode from localStorage (set by Settings page).
+    // Default is dark (missing key or any value except '0' = dark).
+
+    function apply_theme_af_ai() {
+      const dark = localStorage.getItem('af_dark_mode') !== '0';
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    }
+
     // ── Init ──────────────────────────────────────────────────────────────────
 
     async function initialize_af_ai() {
+      apply_theme_af_ai();
       bind_events_af_ai();
       setup_swipe_gesture_af_ai();
       set_mode_af_ai("af_proguide_af_ai");
@@ -890,6 +940,11 @@
 
       setInterval(render_usage_af_ai, 60000);
     }
+
+    // Cross-tab sync: when Settings page toggles dark mode, AI page updates instantly
+    window.addEventListener("storage", (e) => {
+      if (e.key === "af_dark_mode") apply_theme_af_ai();
+    });
 
     document.addEventListener("DOMContentLoaded", initialize_af_ai);
   </script>
