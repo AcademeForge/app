@@ -1,4 +1,4 @@
-const CACHE_NAME = "academeforge-v4";
+const CACHE_NAME = "academeforge-v5";
 
 const STATIC_FILES = [
   "/",
@@ -36,12 +36,9 @@ self.addEventListener("fetch", event => {
 
   const request = event.request;
 
-  /* Ignore non-GET requests */
-  if (request.method !== "GET") {
-    return;
-  }
+  if (request.method !== "GET") return;
 
-  /* Ignore Supabase APIs */
+  /* Skip APIs */
   if (
     request.url.includes("supabase.co") ||
     request.url.includes("/functions/v1/")
@@ -49,29 +46,26 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  /* HTML Navigation Requests */
+  /* HTML Pages -> Network First */
   if (request.mode === "navigate") {
 
     event.respondWith(
       fetch(request)
         .then(response => {
 
-          const responseClone = response.clone();
+          const clone = response.clone();
 
           caches.open(CACHE_NAME)
-            .then(cache => {
-              cache.put(request, responseClone);
-            });
+            .then(cache => cache.put(request, clone))
+            .catch(() => {});
 
           return response;
         })
         .catch(async () => {
 
-          const cachedPage = await caches.match(request);
+          const cached = await caches.match(request);
 
-          if (cachedPage) {
-            return cachedPage;
-          }
+          if (cached) return cached;
 
           return caches.match("/offline/index.html");
         })
@@ -80,35 +74,48 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  /* Static Assets */
+  /* Assets -> Cache First */
   event.respondWith(
+
     caches.match(request).then(cached => {
 
-      if (cached) {
-        return cached;
-      }
+      if (cached) return cached;
 
-      return fetch(request)
-        .then(response => {
+      return fetch(request).then(response => {
 
-          if (!response || response.status !== 200) {
-            return response;
-          }
+        /* Only cache valid responses */
+        if (
+          !response ||
+          response.status !== 200 ||
+          response.type === "error"
+        ) {
+          return response;
+        }
 
-          const responseClone = response.clone();
+        try {
+
+          const clone = response.clone();
 
           caches.open(CACHE_NAME)
             .then(cache => {
-              cache.put(request, responseClone);
-            });
+              cache.put(request, clone);
+            })
+            .catch(() => {});
 
-          return response;
-        })
-        .catch(() => {
-          return caches.match(request);
-        });
+        } catch (err) {
+          console.warn("Cache skip:", request.url);
+        }
+
+        return response;
+
+      }).catch(() => {
+
+        return caches.match(request);
+
+      });
 
     })
+
   );
 
 });
