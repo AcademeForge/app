@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Offline • AcademeForge</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Inter,system-ui,sans-serif;
+}
+
+body{
+  min-height:100vh;
+  background:#060816;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+
+.card{
+  width:100%;
+  max-width:420px;
+  text-align:center;
+  background:#0d1025;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:24px;
+  padding:32px;
+}
+
+.logo{
+  width:72px;
+  height:72px;
+  border-radius:16px;
+  margin-bottom:20px;
+}
+
+h1{
+  font-size:28px;
+  margin-bottom:12px;
+}
+
+p{
+  color:#aeb4d3;
+  line-height:1.6;
+  margin-bottom:24px;
+}
+
+button{
+  border:none;
+  outline:none;
+  cursor:pointer;
+  padding:14px 24px;
+  border-radius:14px;
+  font-size:15px;
+  font-weight:600;
+  background:#5865f2;
+  color:white;
+}
+
+button:hover{
+  opacity:.9;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+
+<img
+  class="logo"
+  src="/AF%20LOGO%202.jpeg"
+  alt="AcademeForge"
+>
+
+<h1>You're Offline</h1>
+
+<p>
+Internet connection not detected.
+Reconnect and try again to continue using AcademeForge.
+</p>
+
+<button onclick="location.reload()">
+Retry Connection
+</button>
+
+</div>
+
+<script>
+window.addEventListener("online", () => {
+  location.href = "/";
+});
+</script>
+
+</body>
+</html>
