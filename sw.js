@@ -1,4 +1,4 @@
-const CACHE_NAME = "academeforge-v5";
+const CACHE_NAME = "academeforge-v6";
 
 const STATIC_FILES = [
   "/",
@@ -36,12 +36,15 @@ self.addEventListener("fetch", event => {
 
   const request = event.request;
 
+  /* Only GET requests */
   if (request.method !== "GET") return;
 
-  /* Skip APIs */
+  /* Never cache backend/API */
   if (
     request.url.includes("supabase.co") ||
-    request.url.includes("/functions/v1/")
+    request.url.includes("/functions/v1/") ||
+    request.url.includes("/rest/v1/") ||
+    request.url.includes("/auth/v1/")
   ) {
     return;
   }
@@ -50,17 +53,22 @@ self.addEventListener("fetch", event => {
   if (request.mode === "navigate") {
 
     event.respondWith(
+
       fetch(request)
         .then(response => {
 
-          const clone = response.clone();
+          if (response && response.status === 200) {
 
-          caches.open(CACHE_NAME)
-            .then(cache => cache.put(request, clone))
-            .catch(() => {});
+            const clone = response.clone();
+
+            caches.open(CACHE_NAME)
+              .then(cache => cache.put(request, clone))
+              .catch(() => {});
+          }
 
           return response;
         })
+
         .catch(async () => {
 
           const cached = await caches.match(request);
@@ -69,52 +77,46 @@ self.addEventListener("fetch", event => {
 
           return caches.match("/offline/index.html");
         })
+
     );
 
     return;
   }
 
-  /* Assets -> Cache First */
+  /* Frontend Assets -> Cache First */
   event.respondWith(
 
-    caches.match(request).then(cached => {
+    caches.match(request)
 
-      if (cached) return cached;
+      .then(cached => {
 
-      return fetch(request).then(response => {
-
-        /* Only cache valid responses */
-        if (
-          !response ||
-          response.status !== 200 ||
-          response.type === "error"
-        ) {
-          return response;
+        if (cached) {
+          return cached;
         }
 
-        try {
+        return fetch(request)
 
-          const clone = response.clone();
+          .then(response => {
 
-          caches.open(CACHE_NAME)
-            .then(cache => {
-              cache.put(request, clone);
-            })
-            .catch(() => {});
+            if (
+              !response ||
+              response.status !== 200
+            ) {
+              return response;
+            }
 
-        } catch (err) {
-          console.warn("Cache skip:", request.url);
-        }
+            const clone = response.clone();
 
-        return response;
+            caches.open(CACHE_NAME)
+              .then(cache => cache.put(request, clone))
+              .catch(() => {});
 
-      }).catch(() => {
+            return response;
+          })
 
-        return caches.match(request);
+          .catch(() => caches.match(request));
 
-      });
-
-    })
+      })
 
   );
 
