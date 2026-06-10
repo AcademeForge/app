@@ -235,19 +235,34 @@
       toast_timer_af_ai: 0
     };
 
-    function student_key_af_ai() {
-      return localStorage.getItem("af_student_email") ||
-        localStorage.getItem("af_student_mobile") ||
-        localStorage.getItem("af_student_phone") || "";
+    // ── Auth helpers ──────────────────────────────────────────────────────────
+    // The edge function validates via students_af.active_session_token
+    // sent as:  Authorization: Bearer <token>
+    // The host app must store this token under the key "af_session_token".
+
+    function session_token_af_ai() {
+      return localStorage.getItem("af_session_token") || "";
     }
 
     function student_name_af_ai() {
       return localStorage.getItem("af_student_name") || "Student";
     }
 
-    function signed_in_af_ai() {
-      return Boolean(student_key_af_ai());
+    function student_display_key_af_ai() {
+      // Used only for the drawer label — show email/mobile if available, else mask token
+      const email  = localStorage.getItem("af_student_email") || "";
+      const mobile = localStorage.getItem("af_student_mobile") || localStorage.getItem("af_student_phone") || "";
+      if (email)  return email;
+      if (mobile) return mobile;
+      const token = session_token_af_ai();
+      return token ? `${token.slice(0, 6)}••••` : "Not signed in";
     }
+
+    function signed_in_af_ai() {
+      return Boolean(session_token_af_ai());
+    }
+
+    // ── Utilities ─────────────────────────────────────────────────────────────
 
     function initials_af_ai(value_af_ai) {
       return String(value_af_ai || "AF").trim().split(/\s+/).slice(0, 2)
@@ -277,22 +292,24 @@
       }, 3500);
     }
 
+    // ── API request ───────────────────────────────────────────────────────────
+    // Sends the session token as  Authorization: Bearer <token>
+    // No custom header, no student_key in the body.
+
     async function request_af_ai(payload_af_ai) {
       const controller_af_ai = new AbortController();
       const timeout_af_ai = setTimeout(() => controller_af_ai.abort(), 60000);
       try {
         if (!navigator.onLine) return { error_af_ai: "You are offline." };
-        if (!student_key_af_ai()) return { error_af_ai: "Please sign in again.", status_af_ai: 401 };
+        const token = session_token_af_ai();
+        if (!token) return { error_af_ai: "Please sign in again.", status_af_ai: 401 };
         const response_af_ai = await fetch(edge_url_af_ai, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "x-af-ai-student-key": student_key_af_ai()
+            "Authorization": `Bearer ${token}`
           },
-          body: JSON.stringify({
-            ...payload_af_ai,
-            student_key_af_ai: student_key_af_ai()
-          }),
+          body: JSON.stringify(payload_af_ai),
           signal: controller_af_ai.signal
         });
         const data_af_ai = await response_af_ai.json().catch(() => ({}));
@@ -314,6 +331,8 @@
         clearTimeout(timeout_af_ai);
       }
     }
+
+    // ── Usage ─────────────────────────────────────────────────────────────────
 
     function save_usage_af_ai(data_af_ai) {
       if (data_af_ai.session_request_limit_af_ai === undefined) return;
@@ -411,6 +430,8 @@
       return data_af_ai;
     }
 
+    // ── Drawer ────────────────────────────────────────────────────────────────
+
     function open_drawer_af_ai() {
       element_af_ai("drawer-af_ai").dataset.openAf_ai = "true";
       element_af_ai("overlay-af_ai").dataset.openAf_ai = "true";
@@ -420,6 +441,8 @@
       element_af_ai("drawer-af_ai").dataset.openAf_ai = "false";
       element_af_ai("overlay-af_ai").dataset.openAf_ai = "false";
     }
+
+    // ── Mode ──────────────────────────────────────────────────────────────────
 
     function set_mode_af_ai(mode_af_ai) {
       if (!mode_details_af_ai[mode_af_ai]) return;
@@ -431,15 +454,14 @@
       element_af_ai("header-mode-af_ai").textContent = details_af_ai.label_af_ai;
       element_af_ai("input-af_ai").placeholder = details_af_ai.placeholder_af_ai;
       element_af_ai("welcome-kicker-af_ai").textContent = details_af_ai.kicker_af_ai;
-      
-      // Welcome text customization with Student Name
+
       const name = student_name_af_ai();
-      if(mode_af_ai === "tapri_af_ai") {
+      if (mode_af_ai === "tapri_af_ai") {
         element_af_ai("welcome-title-af_ai").textContent = `Hii ${name}, Kya scene hai? Bolo.`;
       } else {
         element_af_ai("welcome-title-af_ai").textContent = `Hii ${name}, ${details_af_ai.title_af_ai}`;
       }
-      
+
       element_af_ai("welcome-copy-af_ai").textContent = details_af_ai.copy_af_ai;
       render_suggestions_af_ai();
     }
@@ -450,6 +472,8 @@
         `<button class="suggestion-af_ai" type="button" data-suggestion-af_ai="${escape_html_af_ai(suggestion_af_ai)}">${escape_html_af_ai(suggestion_af_ai)}</button>`
       ).join("");
     }
+
+    // ── Conversations ─────────────────────────────────────────────────────────
 
     function new_chat_af_ai() {
       state_af_ai.conversation_id_af_ai = "";
@@ -483,20 +507,22 @@
         return;
       }
       let rawList = Array.isArray(data_af_ai.conversations_af_ai) ? data_af_ai.conversations_af_ai : [];
-      
-      // Keep only top 5 recent chats and auto delete remaining backend backups if any
+
+      // Keep only top 5 recent chats; auto-delete the rest
       if (rawList.length > 5) {
         const toDelete = rawList.slice(5);
-        for (let item of toDelete) {
+        for (const item of toDelete) {
           await request_af_ai({ action_af_ai: "delete_conversation_af_ai", conversation_id_af_ai: item.conversation_id_af_ai });
         }
         rawList = rawList.slice(0, 5);
       }
-      
+
       state_af_ai.conversations_af_ai = rawList;
       state_af_ai.filtered_conversations_af_ai = [...state_af_ai.conversations_af_ai];
       render_conversations_af_ai();
     }
+
+    // ── Message rendering ─────────────────────────────────────────────────────
 
     function render_text_af_ai(text_af_ai) {
       const parts_af_ai = String(text_af_ai || "").split(/(```[\s\S]*?```)/g);
@@ -550,6 +576,8 @@
       const scroll_af_ai = element_af_ai("chat-scroll-af_ai");
       scroll_af_ai.scrollTop = scroll_af_ai.scrollHeight;
     }
+
+    // ── Conversation open / delete ────────────────────────────────────────────
 
     async function open_conversation_af_ai(conversation_id_af_ai) {
       const conversation_af_ai = state_af_ai.conversations_af_ai.find(
@@ -614,6 +642,8 @@
       new_chat_af_ai();
       toast_af_ai("All history cleared successfully.");
     }
+
+    // ── Input / send ──────────────────────────────────────────────────────────
 
     function update_input_af_ai() {
       const input_af_ai = element_af_ai("input-af_ai");
@@ -715,10 +745,10 @@
         });
       }
 
-      // Enforce the 5 recent chats limit immediately when a new chat is added
+      // Enforce 5-chat limit immediately
       if (state_af_ai.conversations_af_ai.length > 5) {
         const excessChats = state_af_ai.conversations_af_ai.slice(5);
-        for(let excess of excessChats) {
+        for (const excess of excessChats) {
           await request_af_ai({ action_af_ai: "delete_conversation_af_ai", conversation_id_af_ai: excess.conversation_id_af_ai });
         }
         state_af_ai.conversations_af_ai = state_af_ai.conversations_af_ai.slice(0, 5);
@@ -732,6 +762,8 @@
       render_conversations_af_ai();
       update_send_state_af_ai();
     }
+
+    // ── Event binding ─────────────────────────────────────────────────────────
 
     function bind_events_af_ai() {
       element_af_ai("menu-af_ai").addEventListener("click", open_drawer_af_ai);
@@ -788,15 +820,16 @@
       });
     }
 
+    // ── Swipe gesture ─────────────────────────────────────────────────────────
+
     function setup_swipe_gesture_af_ai() {
       let startX_af_ai = 0;
       let startY_af_ai = 0;
       let endX_af_ai = 0;
       let endY_af_ai = 0;
 
-      const swipe_threshold_af_ai = 50; 
-      const edge_threshold_af_ai = 60;   
-
+      const swipe_threshold_af_ai = 50;
+      const edge_threshold_af_ai  = 60;
       const shell_af_ai = element_af_ai("shell-af_ai");
 
       shell_af_ai.addEventListener("touchstart", (event_af_ai) => {
@@ -816,31 +849,27 @@
       shell_af_ai.addEventListener("touchend", () => {
         const diffX_af_ai = endX_af_ai - startX_af_ai;
         const diffY_af_ai = Math.abs(endY_af_ai - startY_af_ai);
-
-        if (diffY_af_ai > 60) return; // Prevent horizontal triggers during clear vertical scroll
-
+        if (diffY_af_ai > 60) return;
         const drawer_open_af_ai = element_af_ai("drawer-af_ai").dataset.openAf_ai === "true";
-
-        // Swipe Left to Right from Edge -> Open Drawer
         if (!drawer_open_af_ai && startX_af_ai <= edge_threshold_af_ai && diffX_af_ai > swipe_threshold_af_ai) {
           open_drawer_af_ai();
           return;
         }
-
-        // Swipe Right to Left anywhere on drawer/shell -> Close Drawer
         if (drawer_open_af_ai && diffX_af_ai < -swipe_threshold_af_ai) {
           close_drawer_af_ai();
         }
       });
     }
-        
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+
     async function initialize_af_ai() {
       bind_events_af_ai();
       setup_swipe_gesture_af_ai();
       set_mode_af_ai("af_proguide_af_ai");
 
       element_af_ai("student-label-af_ai").textContent =
-        `${student_name_af_ai()} · ${student_key_af_ai() || "Not signed in"}`;
+        `${student_name_af_ai()} · ${student_display_key_af_ai()}`;
 
       if (!signed_in_af_ai()) {
         element_af_ai("chat-scroll-af_ai").classList.add("hidden-af_ai");
@@ -855,15 +884,13 @@
         load_conversations_af_ai()
       ]);
 
-      // Re-trigger mode setup so the student name updates correctly after async load
+      // Re-trigger mode so the student name updates correctly after async load
       set_mode_af_ai(state_af_ai.mode_af_ai);
-
       update_send_state_af_ai();
 
-      setInterval(() => {
-        render_usage_af_ai();
-      }, 60000);
+      setInterval(render_usage_af_ai, 60000);
     }
+
     document.addEventListener("DOMContentLoaded", initialize_af_ai);
   </script>
 </body>
