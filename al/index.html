@@ -904,10 +904,13 @@
     // Reads af_dark_mode from localStorage (set by Settings page).
     // Default is dark (missing key or any value except '0' = dark).
 
-    function apply_theme_af_ai() {
-      const dark = localStorage.getItem('af_dark_mode') !== '0';
-      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-    }
+  function apply_theme_af_ai() {
+  const dark = localStorage.getItem('af_dark_mode') === '1';
+  document.documentElement.setAttribute(
+    'data-theme',
+    dark ? 'dark' : 'light'
+  );
+}
 
     // ── Init ──────────────────────────────────────────────────────────────────
 
