@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    /* ── Shared / accent tokens (same in both themes) ── */
+    /* ── Shared / accent tokens ── */
     :root {
       --blue-af_ai:#5687ff;
       --orange-af_ai:#ff7a3d;
@@ -25,7 +25,6 @@
       --yellow-af_ai:#f6b94b;
       --radius-af_ai:18px;
     }
-    /* ── Dark theme (default) ── */
     [data-theme="dark"], :root {
       --background-af_ai:#090b12;
       --panel-af_ai:#111521;
@@ -45,7 +44,6 @@
       --code-btn-bg-af_ai:#252c3e;
       --code-btn-text-af_ai:#d9def0;
     }
-    /* ── Light theme ── */
     [data-theme="light"] {
       --background-af_ai:#f5f6ff;
       --panel-af_ai:#ffffff;
@@ -78,12 +76,10 @@
     .drawer-head-af_ai{padding:18px;border-bottom:1px solid var(--line-af_ai)}
     .brand-af_ai{font-weight:800;font-size:18px}
     .student-af_ai{color:var(--muted-af_ai);font-size:12px;margin-top:5px;overflow:hidden;text-overflow:ellipsis}
-    
     .drawer-actions-af_ai{display:flex;gap:8px;margin-top:16px;}
     .new-chat-af_ai{flex:1;border:1px solid var(--line-af_ai);background:var(--panel-soft-af_ai);border-radius:12px;padding:11px 13px;text-align:left;font-weight:700;cursor:pointer}
     .clear-history-af_ai{border:1px solid rgba(255,90,104,.3);background:rgba(255,90,104,.1);color:#ff5a68;border-radius:12px;padding:11px 13px;font-weight:700;cursor:pointer}
     .clear-history-af_ai:hover{background:rgba(255,90,104,.2)}
-
     .search-af_ai{margin:12px 14px 6px;width:calc(100% - 28px);border:1px solid var(--line-af_ai);background:var(--panel-soft-af_ai);color:var(--text-af_ai);border-radius:11px;padding:10px 12px;outline:none}
     .conversation-list-af_ai{flex:1;overflow:auto;padding:4px 8px}
     .conversation-empty-af_ai{padding:26px 15px;text-align:center;color:var(--faint-af_ai);font-size:13px;line-height:1.6}
@@ -93,7 +89,6 @@
     .conversation-title-af_ai{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
     .conversation-delete-af_ai{border:0;background:transparent;color:var(--faint-af_ai);font-size:17px;cursor:pointer;padding:2px 5px}
     .conversation-delete-af_ai:hover{color:var(--red-af_ai)}
-    
     .drawer-usage-af_ai{border-top:1px solid var(--line-af_ai);padding:15px}
     .usage-heading-af_ai{font-size:11px;color:var(--faint-af_ai);font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
     .usage-line-af_ai{display:flex;justify-content:space-between;font-size:12px;margin:7px 0;color:var(--muted-af_ai)}
@@ -155,6 +150,79 @@
     .locked-title-af_ai{font-size:22px;font-weight:800}
     .locked-copy-af_ai{color:var(--muted-af_ai);font-size:13px;line-height:1.6;margin-top:10px}
     .hidden-af_ai{display:none!important}
+
+    /* ── Custom Confirm Modal ── */
+    .modal-overlay-af_ai{
+      position:absolute;inset:0;z-index:100;
+      background:rgba(0,0,0,.55);
+      backdrop-filter:blur(6px);
+      display:flex;align-items:center;justify-content:center;
+      padding:24px;
+      opacity:0;visibility:hidden;
+      transition:opacity .2s ease, visibility .2s ease;
+    }
+    .modal-overlay-af_ai[data-open-af_ai="true"]{
+      opacity:1;visibility:visible;
+    }
+    .modal-card-af_ai{
+      background:var(--panel-af_ai);
+      border:1px solid var(--line-af_ai);
+      border-radius:22px;
+      padding:28px 24px 22px;
+      width:100%;max-width:320px;
+      box-shadow:0 24px 60px rgba(0,0,0,.45);
+      transform:translateY(12px) scale(.97);
+      transition:transform .22s ease;
+    }
+    .modal-overlay-af_ai[data-open-af_ai="true"] .modal-card-af_ai{
+      transform:none;
+    }
+    .modal-icon-af_ai{
+      width:48px;height:48px;
+      border-radius:14px;
+      background:rgba(255,90,104,.12);
+      border:1px solid rgba(255,90,104,.25);
+      display:grid;place-items:center;
+      font-size:22px;
+      margin-bottom:18px;
+    }
+    .modal-title-af_ai{
+      font-size:16px;font-weight:800;
+      color:var(--text-af_ai);
+      margin-bottom:8px;line-height:1.3;
+    }
+    .modal-body-af_ai{
+      font-size:13px;color:var(--muted-af_ai);
+      line-height:1.6;margin-bottom:24px;
+    }
+    .modal-actions-af_ai{
+      display:flex;gap:10px;
+    }
+    .modal-cancel-af_ai{
+      flex:1;
+      border:1px solid var(--line-af_ai);
+      background:var(--panel-soft-af_ai);
+      color:var(--text-af_ai);
+      border-radius:12px;
+      padding:12px;
+      font-weight:700;font-size:13px;
+      cursor:pointer;
+      transition:background .15s;
+    }
+    .modal-cancel-af_ai:hover{background:var(--panel-strong-af_ai)}
+    .modal-confirm-af_ai{
+      flex:1;
+      border:0;
+      background:var(--red-af_ai);
+      color:white;
+      border-radius:12px;
+      padding:12px;
+      font-weight:700;font-size:13px;
+      cursor:pointer;
+      transition:opacity .15s;
+    }
+    .modal-confirm-af_ai:hover{opacity:.88}
+
     @media(min-width:520px){
       body{display:grid;place-items:center;background:var(--body-bg-af_ai)}
       .shell-af_ai{height:min(900px,calc(100dvh - 32px));border:8px solid var(--shell-border-af_ai);border-radius:44px;box-shadow:0 30px 90px rgba(0,0,0,.75)}
@@ -229,6 +297,20 @@
       <div class="locked-title-af_ai">Sign in required</div>
       <div class="locked-copy-af_ai">Open AcademeForge and sign in as a student before using AI.</div>
     </section>
+
+    <!-- ── Custom Confirm Modal ── -->
+    <div class="modal-overlay-af_ai" id="modal-overlay-af_ai" data-open-af_ai="false" role="dialog" aria-modal="true" aria-labelledby="modal-title-af_ai">
+      <div class="modal-card-af_ai">
+        <div class="modal-icon-af_ai">🗑️</div>
+        <div class="modal-title-af_ai" id="modal-title-af_ai">Clear all conversations?</div>
+        <div class="modal-body-af_ai" id="modal-body-af_ai">This will permanently delete all your chat history. This action cannot be undone.</div>
+        <div class="modal-actions-af_ai">
+          <button class="modal-cancel-af_ai" id="modal-cancel-af_ai" type="button">Cancel</button>
+          <button class="modal-confirm-af_ai" id="modal-confirm-af_ai" type="button">Delete all</button>
+        </div>
+      </div>
+    </div>
+
     <div class="toast-area-af_ai" id="toast-area-af_ai"></div>
   </main>
 
@@ -236,6 +318,7 @@
     const edge_url_af_ai = "https://afooyyydhlwngzssgqih.supabase.co/functions/v1/academe-ai-af_ai";
     const maximum_characters_af_ai = 800;
     const element_af_ai = (id_af_ai) => document.getElementById(id_af_ai);
+
     const mode_details_af_ai = {
       af_proguide_af_ai: {
         label_af_ai: "AF ProGuide 2.4",
@@ -271,13 +354,32 @@
       loading_af_ai: false,
       usage_af_ai: null,
       usage_saved_at_af_ai: 0,
-      toast_timer_af_ai: 0
+      toast_timer_af_ai: 0,
+      modal_resolve_af_ai: null
     };
 
+    // ── Custom modal (replaces browser confirm()) ─────────────────────────────
+
+    function show_confirm_modal_af_ai(title_af_ai, body_af_ai) {
+      return new Promise((resolve_af_ai) => {
+        state_af_ai.modal_resolve_af_ai = resolve_af_ai;
+        element_af_ai("modal-title-af_ai").textContent = title_af_ai;
+        element_af_ai("modal-body-af_ai").textContent = body_af_ai;
+        element_af_ai("modal-overlay-af_ai").dataset.openAf_ai = "true";
+        // Focus the cancel button for accessibility
+        setTimeout(() => element_af_ai("modal-cancel-af_ai").focus(), 50);
+      });
+    }
+
+    function close_modal_af_ai(confirmed_af_ai) {
+      element_af_ai("modal-overlay-af_ai").dataset.openAf_ai = "false";
+      if (state_af_ai.modal_resolve_af_ai) {
+        state_af_ai.modal_resolve_af_ai(confirmed_af_ai);
+        state_af_ai.modal_resolve_af_ai = null;
+      }
+    }
+
     // ── Auth helpers ──────────────────────────────────────────────────────────
-    // The edge function validates via students_af.active_session_token
-    // sent as:  Authorization: Bearer <token>
-    // The host app must store this token under the key "af_session_token".
 
     function session_token_af_ai() {
       return localStorage.getItem("af_session_token") || "";
@@ -288,7 +390,6 @@
     }
 
     function student_display_key_af_ai() {
-      // Used only for the drawer label — show email/mobile if available, else mask token
       const email  = localStorage.getItem("af_student_email") || "";
       const mobile = localStorage.getItem("af_student_mobile") || localStorage.getItem("af_student_phone") || "";
       if (email)  return email;
@@ -332,8 +433,6 @@
     }
 
     // ── API request ───────────────────────────────────────────────────────────
-    // Sends the session token as  Authorization: Bearer <token>
-    // No custom header, no student_key in the body.
 
     async function request_af_ai(payload_af_ai) {
       const controller_af_ai = new AbortController();
@@ -547,7 +646,6 @@
       }
       let rawList = Array.isArray(data_af_ai.conversations_af_ai) ? data_af_ai.conversations_af_ai : [];
 
-      // Keep only top 5 recent chats; auto-delete the rest
       if (rawList.length > 5) {
         const toDelete = rawList.slice(5);
         for (const item of toDelete) {
@@ -668,7 +766,12 @@
     }
 
     async function clear_all_history_af_ai() {
-      if (!confirm("Are you sure you want to delete all conversations? This cannot be undone.")) return;
+      // Use custom modal instead of browser confirm()
+      const confirmed_af_ai = await show_confirm_modal_af_ai(
+        "Clear all conversations?",
+        "This will permanently delete all your chat history. This action cannot be undone."
+      );
+      if (!confirmed_af_ai) return;
       toast_af_ai("Clearing history...");
       for (const chat of state_af_ai.conversations_af_ai) {
         await request_af_ai({
@@ -784,7 +887,6 @@
         });
       }
 
-      // Enforce 5-chat limit immediately
       if (state_af_ai.conversations_af_ai.length > 5) {
         const excessChats = state_af_ai.conversations_af_ai.slice(5);
         for (const excess of excessChats) {
@@ -809,6 +911,15 @@
       element_af_ai("overlay-af_ai").addEventListener("click", close_drawer_af_ai);
       element_af_ai("new-chat-af_ai").addEventListener("click", new_chat_af_ai);
       element_af_ai("clear-history-af_ai").addEventListener("click", clear_all_history_af_ai);
+
+      // Modal buttons
+      element_af_ai("modal-cancel-af_ai").addEventListener("click", () => close_modal_af_ai(false));
+      element_af_ai("modal-confirm-af_ai").addEventListener("click", () => close_modal_af_ai(true));
+      // Tap outside modal card to cancel
+      element_af_ai("modal-overlay-af_ai").addEventListener("click", (e_af_ai) => {
+        if (e_af_ai.target === element_af_ai("modal-overlay-af_ai")) close_modal_af_ai(false);
+      });
+
       element_af_ai("mode-tabs-af_ai").addEventListener("click", (event_af_ai) => {
         const tab_af_ai = event_af_ai.target.closest(".mode-tab-af_ai");
         if (tab_af_ai) set_mode_af_ai(tab_af_ai.dataset.modeAf_ai);
@@ -855,20 +966,33 @@
         setTimeout(() => { copy_af_ai.textContent = "Copy"; }, 1200);
       });
       document.addEventListener("keydown", (event_af_ai) => {
-        if (event_af_ai.key === "Escape") close_drawer_af_ai();
+        if (event_af_ai.key === "Escape") {
+          // Close modal first if open, otherwise close drawer
+          if (element_af_ai("modal-overlay-af_ai").dataset.openAf_ai === "true") {
+            close_modal_af_ai(false);
+          } else {
+            close_drawer_af_ai();
+          }
+        }
       });
     }
 
-    // ── Swipe gesture ─────────────────────────────────────────────────────────
+    // ── Swipe gesture (open from anywhere, close by left swipe) ───────────────
 
     function setup_swipe_gesture_af_ai() {
       let startX_af_ai = 0;
       let startY_af_ai = 0;
       let endX_af_ai = 0;
       let endY_af_ai = 0;
+      let is_tracking_af_ai = false;
 
+      // How far from left edge to allow open swipe (px)
+      const open_edge_threshold_af_ai = 80;
+      // Minimum horizontal distance to register as a swipe
       const swipe_threshold_af_ai = 50;
-      const edge_threshold_af_ai  = 60;
+      // Maximum vertical drift before we ignore as a scroll
+      const vertical_max_af_ai = 65;
+
       const shell_af_ai = element_af_ai("shell-af_ai");
 
       shell_af_ai.addEventListener("touchstart", (event_af_ai) => {
@@ -877,40 +1001,54 @@
         startY_af_ai = touch_af_ai.clientY;
         endX_af_ai = startX_af_ai;
         endY_af_ai = startY_af_ai;
+
+        const drawer_open_af_ai = element_af_ai("drawer-af_ai").dataset.openAf_ai === "true";
+        // Track if we're starting from the left edge (for open), or drawer is open (for close)
+        is_tracking_af_ai = drawer_open_af_ai || startX_af_ai <= open_edge_threshold_af_ai;
       }, { passive: true });
 
       shell_af_ai.addEventListener("touchmove", (event_af_ai) => {
+        if (!is_tracking_af_ai) return;
         const touch_af_ai = event_af_ai.touches[0];
         endX_af_ai = touch_af_ai.clientX;
         endY_af_ai = touch_af_ai.clientY;
       }, { passive: true });
 
       shell_af_ai.addEventListener("touchend", () => {
+        if (!is_tracking_af_ai) return;
+        is_tracking_af_ai = false;
+
         const diffX_af_ai = endX_af_ai - startX_af_ai;
         const diffY_af_ai = Math.abs(endY_af_ai - startY_af_ai);
-        if (diffY_af_ai > 60) return;
+
+        // Ignore vertical scrolls
+        if (diffY_af_ai > vertical_max_af_ai) return;
+
         const drawer_open_af_ai = element_af_ai("drawer-af_ai").dataset.openAf_ai === "true";
-        if (!drawer_open_af_ai && startX_af_ai <= edge_threshold_af_ai && diffX_af_ai > swipe_threshold_af_ai) {
+        const modal_open_af_ai = element_af_ai("modal-overlay-af_ai").dataset.openAf_ai === "true";
+
+        // Don't trigger swipe gestures while modal is showing
+        if (modal_open_af_ai) return;
+
+        if (!drawer_open_af_ai && startX_af_ai <= open_edge_threshold_af_ai && diffX_af_ai > swipe_threshold_af_ai) {
+          // Right swipe from left edge → open drawer
           open_drawer_af_ai();
           return;
         }
+
         if (drawer_open_af_ai && diffX_af_ai < -swipe_threshold_af_ai) {
+          // Left swipe while drawer open → close drawer
           close_drawer_af_ai();
         }
       });
     }
 
     // ── Theme sync ────────────────────────────────────────────────────────────
-    // Reads af_dark_mode from localStorage (set by Settings page).
-    // Default is dark (missing key or any value except '0' = dark).
 
-  function apply_theme_af_ai() {
-  const dark = localStorage.getItem('af_dark_mode') === '1';
-  document.documentElement.setAttribute(
-    'data-theme',
-    dark ? 'dark' : 'light'
-  );
-}
+    function apply_theme_af_ai() {
+      const dark = localStorage.getItem('af_dark_mode') === '1';
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    }
 
     // ── Init ──────────────────────────────────────────────────────────────────
 
@@ -936,14 +1074,12 @@
         load_conversations_af_ai()
       ]);
 
-      // Re-trigger mode so the student name updates correctly after async load
       set_mode_af_ai(state_af_ai.mode_af_ai);
       update_send_state_af_ai();
 
       setInterval(render_usage_af_ai, 60000);
     }
 
-    // Cross-tab sync: when Settings page toggles dark mode, AI page updates instantly
     window.addEventListener("storage", (e) => {
       if (e.key === "af_dark_mode") apply_theme_af_ai();
     });
