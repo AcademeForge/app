@@ -1,13 +1,13 @@
-const CACHE_NAME = "academeforge-v2";
+const CACHE_NAME = "academeforge-v3";
 
 const STATIC_FILES = [
   "/",
   "/index.html",
   "/offline/",
-  "/AF%20LOGO%202.jpeg"
+  "/offline/index.html"
 ];
 
-self.addEventListener("install", (event) => {
+self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(STATIC_FILES))
@@ -15,7 +15,7 @@ self.addEventListener("install", (event) => {
   );
 });
 
-self.addEventListener("activate", (event) => {
+self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
@@ -29,16 +29,12 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-self.addEventListener("fetch", (event) => {
+self.addEventListener("fetch", event => {
 
   const request = event.request;
 
-  // Ignore non-GET
-  if (request.method !== "GET") {
-    return;
-  }
+  if (request.method !== "GET") return;
 
-  // Ignore APIs
   if (
     request.url.includes("supabase.co") ||
     request.url.includes("/functions/v1/")
@@ -46,19 +42,16 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // HTML Navigation -> Network First
   if (request.mode === "navigate") {
 
     event.respondWith(
       fetch(request)
         .then(response => {
 
-          if (response.ok) {
-            const copy = response.clone();
+          const copy = response.clone();
 
-            caches.open(CACHE_NAME)
-              .then(cache => cache.put(request, copy));
-          }
+          caches.open(CACHE_NAME)
+            .then(cache => cache.put(request, copy));
 
           return response;
         })
@@ -66,9 +59,7 @@ self.addEventListener("fetch", (event) => {
 
           const cached = await caches.match(request);
 
-          if (cached) {
-            return cached;
-          }
+          if (cached) return cached;
 
           return caches.match("/offline/");
         })
@@ -77,33 +68,24 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Static Assets -> Cache First
   event.respondWith(
     caches.match(request).then(cached => {
 
-      if (cached) {
-        return cached;
-      }
+      if (cached) return cached;
 
       return fetch(request)
         .then(response => {
 
           if (
-            response &&
-            response.ok &&
-            request.method === "GET"
+            response.status === 200 &&
+            response.type === "basic"
           ) {
-
-            const copy = response.clone();
-
             caches.open(CACHE_NAME)
-              .then(cache => cache.put(request, copy))
-              .catch(() => {});
+              .then(cache => cache.put(request, response.clone()));
           }
 
           return response;
-        })
-        .catch(() => caches.match("/offline/"));
+        });
     })
   );
 
