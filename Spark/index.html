@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=390, initial-scale=1.0" />
+<title>AcademeForge</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
+<style>
+  /* ── RESET ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+
+  /* ── CSS VARIABLES (Dark default) ── */
+  :root {
+    --primary:     #3b82f6;
+    --background:  #0f1117;
+    --surface:     #1a1d27;
+    --card:        #1e2130;
+    --text:        #f0f2f8;
+    --muted:       #6b7280;
+    --border:      rgba(255,255,255,0.08);
+    --glow:        rgba(59,130,246,0.35);
+    --glow-int:    0.35;
+    --radius-card: 18px;
+    --trans:       250ms cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ── APPEARANCE MODES ── */
+  body.amoled { --background: #000000; --surface: #0a0a0a; --card: #111111; }
+  body.light  {
+    --background: #f0f4fb; --surface: #ffffff; --card: #ffffff;
+    --text: #111827; --muted: #6b7280; --border: rgba(0,0,0,0.08);
+  }
+
+  /* ── CARD STYLES ── */
+  body.glass .quick-icon-card,
+  body.glass .recent-card {
+    background: rgba(255,255,255,0.05) !important;
+    backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+  }
+  body.neon .quick-icon-card,
+  body.neon .recent-card {
+    border: 1px solid var(--primary) !important;
+    box-shadow: 0 0 8px var(--glow), inset 0 0 4px rgba(255,255,255,0.03) !important;
+  }
+
+  /* ── SEARCH STYLES ── */
+  body.search-pill .search-bar { border-radius: 9999px !important; }
+  body.search-rounded .search-bar { border-radius: 20px !important; }
+  body.search-floating .search-bar {
+    border-radius: 9999px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px var(--border) !important;
+    transform: translateY(-2px);
+  }
+
+  /* ── OUTER SHELL ── */
+  body {
+    background: #080a10;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  #app {
+    width: 390px;
+    min-height: 100vh;
+    max-height: 100vh;
+    background: var(--background);
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: background var(--trans), color var(--trans);
+    color: var(--text);
+    scrollbar-width: none;
+  }
+  #app::-webkit-scrollbar { display: none; }
+
+  /* ── SCROLLABLE CONTENT ── */
+  .scroll-content {
+    padding: 0 0 32px 0;
+    min-height: 100%;
+  }
+
+  /* ── TOP BAR ── */
+  .top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 12px;
+    background: linear-gradient(to bottom, var(--background) 80%, transparent);
+  }
+
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--trans);
+    color: var(--text);
+    outline: none;
+  }
+  .icon-btn:hover, .icon-btn:active {
+    background: var(--card);
+    box-shadow: 0 0 12px var(--glow);
+    transform: scale(0.95);
+  }
+
+  .top-logo {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 60%, white));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── HEADER / BANNER ── */
+  .header {
+    padding: 8px 24px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .banner-wrap {
+    width: 100%;
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+  }
+  .banner-glow {
+    position: absolute;
+    inset: -6px;
+    border-radius: 26px;
+    background: var(--primary);
+    opacity: calc(var(--glow-int) * 0.6);
+    filter: blur(18px);
+    z-index: 0;
+    transition: opacity var(--trans), background var(--trans);
+  }
+  .banner-img {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 20px;
+    display: block;
+    background: linear-gradient(135deg, var(--surface) 0%, color-mix(in srgb, var(--primary) 20%, var(--surface)) 100%);
+  }
+
+  /* Fallback banner content */
+  .banner-fallback {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 160px;
+    border-radius: 20px;
+    background: linear-gradient(135deg,
+      color-mix(in srgb, var(--primary) 30%, var(--surface)),
+      color-mix(in srgb, var(--primary) 10%, var(--background))
+    );
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    overflow: hidden;
+  }
+  .banner-fallback::before {
+    content: '';
+    position: absolute;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+    opacity: 0.15;
+    top: -60px; right: -60px;
+  }
+  .banner-title {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #fff 30%, var(--primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .banner-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  /* ── SEARCH ── */
+  .search-section { padding: 0 20px 24px; }
+
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 14px 18px;
+    transition: all var(--trans);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+    cursor: text;
+  }
+  .search-bar:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--glow), 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  .search-bar input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-size: 15px;
+    letter-spacing: 0.2px;
+  }
+  .search-bar input::placeholder { color: var(--muted); }
+
+  .search-icon-btn {
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 2px;
+    border-radius: 8px;
+    transition: color var(--trans);
+  }
+  .search-icon-btn:hover { color: var(--primary); }
+
+  /* ── QUICK LINKS ── */
+  .quick-section { padding: 0 20px 28px; }
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .quick-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .quick-icon-card {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--trans);
+    color: var(--primary);
+    position: relative;
+    overflow: hidden;
+  }
+  .quick-icon-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--primary);
+    opacity: 0;
+    transition: opacity var(--trans);
+  }
+  .quick-item:hover .quick-icon-card,
+  .quick-item:active .quick-icon-card {
+    box-shadow: 0 0 16px var(--glow);
+    transform: scale(0.93);
+    border-color: var(--primary);
+  }
+  .quick-item:hover .quick-icon-card::after { opacity: 0.12; }
+
+  .quick-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  /* ── RECENT / CONTINUE LEARNING ── */
+  .recent-section { padding: 0 20px 28px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .see-all {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--primary);
+    text-decoration: none;
+    opacity: 0.85;
+  }
+  .see-all:hover { opacity: 1; }
+
+  .recent-cards { display: flex; flex-direction: column; gap: 12px; }
+
+  .recent-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 14px 16px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--trans);
+    position: relative;
+    overflow: hidden;
+  }
+  .recent-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--primary);
+    border-radius: 0 3px 3px 0;
+    transition: background var(--trans);
+  }
+  .recent-card:hover, .recent-card:active {
+    transform: translateX(3px);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 0 12px var(--glow);
+    border-color: var(--primary);
+  }
+
+  .recent-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--primary) 15%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    flex-shrink: 0;
+    transition: background var(--trans);
+  }
+
+  .recent-info { flex: 1; min-width: 0; }
+  .recent-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .recent-meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+
+  .recent-badge {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+    padding: 3px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background var(--trans), color var(--trans), border-color var(--trans);
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    padding: 4px 0 20px;
+    font-size: 11px;
+    color: var(--muted);
+    opacity: 0.6;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── DRAWER OVERLAY ── */
+  .drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px);
+    z-index: 90;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--trans);
+  }
+  .drawer-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* ── DRAWER ── */
+  .drawer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100%;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    z-index: 100;
+    transform: translateX(100%);
+    transition: transform var(--trans);
+    overflow-y: auto;
+    scrollbar-width: none;
+    padding-bottom: 40px;
+  }
+  .drawer::-webkit-scrollbar { display: none; }
+  .drawer.open { transform: translateX(0); }
+
+  .drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 1;
+  }
+  .drawer-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .drawer-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+    padding: 2px 7px;
+    border-radius: 20px;
+  }
+
+  .drawer-section { padding: 20px 20px 0; }
+  .drawer-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  /* Colors */
+  .color-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .color-dot {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all var(--trans);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .color-dot::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    transition: border-color var(--trans);
+  }
+  .color-dot.active::after { border-color: var(--text); }
+  .color-dot:hover { transform: scale(1.15); }
+
+  /* Appearance / Card / Search pill groups */
+  .pill-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+  .pill-opt {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: 9999px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all var(--trans);
+    outline: none;
+  }
+  .pill-opt.active, .pill-opt:hover {
+    background: color-mix(in srgb, var(--primary) 15%, transparent);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  /* Slider */
+  .slider-wrap { margin-bottom: 4px; }
+  .slider-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .slider-val {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--primary);
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--primary);
+    box-shadow: 0 0 6px var(--glow);
+    cursor: pointer;
+    transition: box-shadow var(--trans);
+  }
+  input[type="range"]:hover::-webkit-slider-thumb {
+    box-shadow: 0 0 12px var(--glow);
+  }
+
+  /* Toggles */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .toggle-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .toggle {
+    position: relative;
+    width: 46px;
+    height: 26px;
+    cursor: pointer;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .toggle-track {
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    transition: background var(--trans);
+  }
+  .toggle input:checked ~ .toggle-track { background: var(--primary); }
+  .toggle-thumb {
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    transition: transform var(--trans);
+    pointer-events: none;
+  }
+  .toggle input:checked ~ .toggle-thumb { transform: translateX(20px); }
+
+  .drawer-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 20px 0 0;
+  }
+
+  /* ── FLOATING BANNER ── */
+  @keyframes floatBanner {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-5px); }
+  }
+  .banner-wrap { animation: floatBanner 4s ease-in-out infinite; }
+  body.no-anim .banner-wrap { animation: none; }
+
+  /* ── SEARCH SUGGESTIONS ── */
+  .search-suggestions {
+    position: absolute;
+    left: 20px; right: 20px;
+    top: calc(100% + 6px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+    z-index: 60;
+    display: none;
+  }
+  .search-suggestions.visible { display: block; }
+  .suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 16px;
+    cursor: pointer;
+    transition: background var(--trans);
+    color: var(--text);
+    font-size: 13px;
+  }
+  .suggestion-item:hover { background: var(--card); }
+  .suggestion-item .sug-icon { color: var(--primary); flex-shrink: 0; }
+  .suggestion-item .sug-label { flex: 1; }
+  .suggestion-item .sug-type { font-size: 11px; color: var(--muted); }
+  .search-wrap { position: relative; }
+
+  /* ── COMPACT MODE ── */
+  body.compact .banner-fallback { height: 100px; }
+  body.compact .banner-img { height: 100px; }
+  body.compact .quick-icon-card { width: 48px; height: 48px; }
+  body.compact .quick-label { font-size: 10px; }
+  body.compact .recent-card { padding: 10px 14px; }
+
+  /* ── NO ANIMATIONS ── */
+  body.no-anim *, body.no-anim *::before, body.no-anim *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  /* ── ENTRANCE ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .anim-1 { animation: fadeUp 0.4s ease both 0.05s; }
+  .anim-2 { animation: fadeUp 0.4s ease both 0.12s; }
+  .anim-3 { animation: fadeUp 0.4s ease both 0.20s; }
+  .anim-4 { animation: fadeUp 0.4s ease both 0.28s; }
+  .anim-5 { animation: fadeUp 0.4s ease both 0.36s; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════ APP SHELL ══════════════════════════════════ -->
+<div id="app">
+  <div class="scroll-content">
+
+    <!-- TOP BAR -->
+    <div class="top-bar anim-1">
+      <button class="icon-btn" id="backBtn" aria-label="Back">
+        <i data-lucide="arrow-left" width="18" height="18"></i>
+      </button>
+      <span class="top-logo">AcademeForge</span>
+      <button class="icon-btn" id="menuBtn" aria-label="Customize">
+        <i data-lucide="menu" width="18" height="18"></i>
+      </button>
+    </div>
+
+    <!-- HEADER / BANNER -->
+    <div class="header anim-2">
+      <div class="banner-wrap">
+        <div class="banner-glow"></div>
+        <img
+          class="banner-img"
+          src="/IMG/banner.png"
+          alt="AcademeForge"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+        />
+        <div class="banner-fallback" style="display:none;">
+          <div class="banner-title">AcademeForge</div>
+          <div class="banner-sub">Learn · Build · Excel</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="search-section anim-3">
+      <div class="search-wrap">
+        <div class="search-bar">
+          <button class="search-icon-btn" aria-label="Search">
+            <i data-lucide="search" width="18" height="18"></i>
+          </button>
+          <input type="text" placeholder="Search AcademeForge..." autocomplete="off" />
+          <button class="search-icon-btn" aria-label="Voice search">
+            <i data-lucide="mic" width="18" height="18"></i>
+          </button>
+        </div>
+        <div class="search-suggestions" id="searchSuggestions"></div>
+      </div>
+    </div>
+
+    <!-- QUICK LINKS -->
+    <div class="quick-section anim-4">
+      <div class="section-label">Quick Access</div>
+      <div class="quick-grid" id="quickGrid"></div>
+    </div>
+
+    <!-- CONTINUE LEARNING -->
+    <div class="recent-section anim-5">
+      <div class="section-header">
+        <div class="section-title">Continue Learning</div>
+        <a href="#" class="see-all">See all</a>
+      </div>
+      <div class="recent-cards" id="recentCards"></div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">Powered by AcademeForge</div>
+
+  </div>
+
+  <!-- DRAWER OVERLAY -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+
+  <!-- CUSTOMIZE AF DRAWER -->
+  <div class="drawer" id="drawer" role="dialog" aria-label="Customize AF">
+    <div class="drawer-header">
+      <span class="drawer-title">Customize AF</span>
+      <span class="drawer-badge">BETA</span>
+    </div>
+
+    <!-- 1. Theme Colors -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">Theme Color</div>
+      <div class="color-grid" id="colorGrid"></div>
+    </div>
+    <div class="drawer-divider"></div>
+
+    <!-- 2. Appearance -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">Appearance</div>
+      <div class="pill-group" id="appearanceGroup"></div>
+    </div>
+    <div class="drawer-divider"></div>
+
+    <!-- 3. Card Style -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">Card Style</div>
+      <div class="pill-group" id="cardStyleGroup"></div>
+    </div>
+    <div class="drawer-divider"></div>
+
+    <!-- 4. Search Style -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">Search Style</div>
+      <div class="pill-group" id="searchStyleGroup"></div>
+    </div>
+    <div class="drawer-divider"></div>
+
+    <!-- 5. Glow Intensity -->
+    <div class="drawer-section">
+      <div class="drawer-section-title">Glow Intensity</div>
+      <div class="slider-wrap">
+        <div class="slider-row">
+          <span style="font-size:12px;color:var(--muted)">Intensity</span>
+          <span class="slider-val" id="glowVal">50</span>
+        </div>
+        <input type="range" id="glowSlider" min="0" max="100" value="50" />
+      </div>
+    </div>
+    <div class="drawer-divider"></div>
+
+    <!-- 6. Show Animations -->
+    <div class="drawer-section">
+      <div class="toggle-row">
+        <span class="toggle-label">Show Animations</span>
+        <label class="toggle">
+          <input type="checkbox" id="animToggle" checked />
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+    </div>
+    <div class="drawer-divider"></div>
+
+    <!-- 7. Compact Mode -->
+    <div class="drawer-section" style="margin-top:20px;">
+      <div class="toggle-row">
+        <span class="toggle-label">Compact Mode</span>
+        <label class="toggle">
+          <input type="checkbox" id="compactToggle" />
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ SCRIPTS ══════════════════════════════════ -->
+<script>
+// ── SEARCH ROUTES (internal pages first, else Google) ────────────────────────
+const searchRoutes = {
+  "dashboard":  "#",
+  "courses":    "#",
+  "ai tools":   "#",
+  "notes":      "#",
+  "community":  "#",
+  "blog":       "#",
+  "resources":  "#",
+  "contact":    "#",
+};
+
+function handleSearch(query) {
+  const q = query.trim().toLowerCase();
+  if (!q) return;
+  // Check internal routes (partial match allowed)
+  const matchKey = Object.keys(searchRoutes).find(k => q === k || q.startsWith(k) || k.startsWith(q));
+  if (matchKey) {
+    const url = searchRoutes[matchKey];
+    if (url && url !== "#") window.location.href = url;
+    else showToast(`Opening ${matchKey.charAt(0).toUpperCase() + matchKey.slice(1)}…`);
+  } else {
+    window.open("https://www.google.com/search?q=" + encodeURIComponent(query.trim()), "_blank");
+  }
+}
+
+function showToast(msg) {
+  let t = document.getElementById("af-toast");
+  if (!t) {
+    t = document.createElement("div");
+    t.id = "af-toast";
+    t.style.cssText = `
+      position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(8px);
+      background:var(--surface);border:1px solid var(--border);color:var(--text);
+      font-size:13px;font-weight:500;padding:10px 20px;border-radius:999px;
+      box-shadow:0 4px 24px rgba(0,0,0,0.4);z-index:200;
+      opacity:0;transition:all 250ms ease;pointer-events:none;white-space:nowrap;
+    `;
+    document.getElementById("app").appendChild(t);
+  }
+  t.textContent = msg;
+  requestAnimationFrame(() => {
+    t.style.opacity = "1"; t.style.transform = "translateX(-50%) translateY(0)";
+    setTimeout(() => { t.style.opacity="0"; t.style.transform="translateX(-50%) translateY(8px)"; }, 2000);
+  });
+}
+
+// ── CONFIGURATION ──────────────────────────────────────────────────────────────
+const links = [
+  { label: "Dashboard", href: "#", icon: "layout-dashboard" },
+  { label: "Courses",   href: "#", icon: "book-open" },
+  { label: "AI Tools",  href: "#", icon: "sparkles" },
+  { label: "Notes",     href: "#", icon: "notebook-pen" },
+  { label: "Community", href: "#", icon: "users" },
+  { label: "Blog",      href: "#", icon: "rss" },
+  { label: "Resources", href: "#", icon: "folder-open" },
+  { label: "Contact",   href: "#", icon: "mail" },
+];
+
+const recentItems = [
+  {
+    name: "Latest Course",
+    meta: "Web Dev Bootcamp · 68% complete",
+    badge: "Resume",
+    icon: "play-circle",
+    href: "#",
+  },
+  {
+    name: "AI Toolkit",
+    meta: "6 tools available · Updated today",
+    badge: "New",
+    icon: "cpu",
+    href: "#",
+  },
+  {
+    name: "Study Resources",
+    meta: "42 files · Cheatsheets & guides",
+    badge: "View",
+    icon: "library",
+    href: "#",
+  },
+];
+
+const themes = [
+  { name: "Blue",    primary: "#3b82f6", glow: "rgba(59,130,246,0.35)" },
+  { name: "Purple",  primary: "#a855f7", glow: "rgba(168,85,247,0.35)" },
+  { name: "Emerald", primary: "#10b981", glow: "rgba(16,185,129,0.35)" },
+  { name: "Orange",  primary: "#f97316", glow: "rgba(249,115,22,0.35)" },
+  { name: "Red",     primary: "#ef4444", glow: "rgba(239,68,68,0.35)" },
+  { name: "Pink",    primary: "#ec4899", glow: "rgba(236,72,153,0.35)" },
+  { name: "Cyan",    primary: "#06b6d4", glow: "rgba(6,182,212,0.35)" },
+  { name: "Gold",    primary: "#f59e0b", glow: "rgba(245,158,11,0.35)" },
+];
+
+// ── STATE ───────────────────────────────────────────────────────────────────────
+const state = {
+  theme:       localStorage.getItem("af_theme")      || "Blue",
+  appearance:  localStorage.getItem("af_appearance") || "Dark",
+  cardStyle:   localStorage.getItem("af_card")       || "Default",
+  searchStyle: localStorage.getItem("af_search")     || "Rounded",
+  glowInt:     parseInt(localStorage.getItem("af_glow")   || "50"),
+  animations:  localStorage.getItem("af_anim")       !== "false",
+  compact:     localStorage.getItem("af_compact")    === "true",
+};
+
+// ── APPLY STATE ─────────────────────────────────────────────────────────────────
+function applyState() {
+  const root = document.documentElement;
+  const body = document.body;
+  const themeObj = themes.find(t => t.name === state.theme) || themes[0];
+
+  root.style.setProperty("--primary", themeObj.primary);
+  root.style.setProperty("--glow",    themeObj.glow);
+  root.style.setProperty("--glow-int", (state.glowInt / 100).toFixed(2));
+
+  // Appearance
+  body.classList.remove("amoled", "light");
+  if (state.appearance === "AMOLED") body.classList.add("amoled");
+  else if (state.appearance === "Light") body.classList.add("light");
+
+  // Dark/AMOLED need dark surface vars reset (light mode overrides them)
+  if (state.appearance !== "Light") {
+    root.style.setProperty("--background", state.appearance === "AMOLED" ? "#000000" : "#0f1117");
+    root.style.setProperty("--surface",    state.appearance === "AMOLED" ? "#0a0a0a" : "#1a1d27");
+    root.style.setProperty("--card",       state.appearance === "AMOLED" ? "#111111" : "#1e2130");
+    root.style.setProperty("--text",       "#f0f2f8");
+    root.style.setProperty("--muted",      "#6b7280");
+    root.style.setProperty("--border",     "rgba(255,255,255,0.08)");
+  } else {
+    root.style.setProperty("--background", "#f0f4fb");
+    root.style.setProperty("--surface",    "#ffffff");
+    root.style.setProperty("--card",       "#ffffff");
+    root.style.setProperty("--text",       "#111827");
+    root.style.setProperty("--muted",      "#6b7280");
+    root.style.setProperty("--border",     "rgba(0,0,0,0.08)");
+  }
+
+  // Card style
+  body.classList.remove("glass", "neon");
+  if (state.cardStyle === "Glass") body.classList.add("glass");
+  else if (state.cardStyle === "Neon") body.classList.add("neon");
+
+  // Search style
+  body.classList.remove("search-pill", "search-rounded", "search-floating");
+  if (state.searchStyle === "Pill")     body.classList.add("search-pill");
+  else if (state.searchStyle === "Rounded") body.classList.add("search-rounded");
+  else if (state.searchStyle === "Floating") body.classList.add("search-floating");
+
+  // Animations
+  body.classList.toggle("no-anim", !state.animations);
+
+  // Compact
+  body.classList.toggle("compact", state.compact);
+
+  // Sync drawer UI
+  syncDrawerUI();
+}
+
+function saveState() {
+  localStorage.setItem("af_theme",      state.theme);
+  localStorage.setItem("af_appearance", state.appearance);
+  localStorage.setItem("af_card",       state.cardStyle);
+  localStorage.setItem("af_search",     state.searchStyle);
+  localStorage.setItem("af_glow",       state.glowInt);
+  localStorage.setItem("af_anim",       state.animations);
+  localStorage.setItem("af_compact",    state.compact);
+}
+
+// ── BUILD QUICK LINKS ───────────────────────────────────────────────────────────
+function buildQuickLinks() {
+  const grid = document.getElementById("quickGrid");
+  grid.innerHTML = links.map(l => `
+    <a href="${l.href}" class="quick-item">
+      <div class="quick-icon-card">
+        <i data-lucide="${l.icon}" width="22" height="22"></i>
+      </div>
+      <span class="quick-label">${l.label}</span>
+    </a>
+  `).join("");
+}
+
+// ── BUILD RECENT CARDS ──────────────────────────────────────────────────────────
+function buildRecentCards() {
+  const wrap = document.getElementById("recentCards");
+  wrap.innerHTML = recentItems.map(item => `
+    <a href="${item.href}" class="recent-card">
+      <div class="recent-icon">
+        <i data-lucide="${item.icon}" width="20" height="20"></i>
+      </div>
+      <div class="recent-info">
+        <div class="recent-name">${item.name}</div>
+        <div class="recent-meta">${item.meta}</div>
+      </div>
+      <span class="recent-badge">${item.badge}</span>
+    </a>
+  `).join("");
+}
+
+// ── BUILD DRAWER ────────────────────────────────────────────────────────────────
+function buildDrawer() {
+  // Colors
+  const colorGrid = document.getElementById("colorGrid");
+  colorGrid.innerHTML = themes.map(t => `
+    <div class="color-dot${state.theme === t.name ? " active" : ""}"
+         style="background:${t.primary};"
+         title="${t.name}"
+         data-theme="${t.name}"></div>
+  `).join("");
+
+  colorGrid.querySelectorAll(".color-dot").forEach(dot => {
+    dot.addEventListener("click", () => {
+      state.theme = dot.dataset.theme;
+      saveState(); applyState();
+    });
+  });
+
+  // Appearance
+  buildPillGroup("appearanceGroup", ["Dark","AMOLED","Light"], "appearance");
+  // Card Style
+  buildPillGroup("cardStyleGroup", ["Default","Glass","Neon"], "cardStyle");
+  // Search Style
+  buildPillGroup("searchStyleGroup", ["Rounded","Pill","Floating"], "searchStyle");
+
+  // Glow slider
+  const slider = document.getElementById("glowSlider");
+  const glowVal = document.getElementById("glowVal");
+  slider.value = state.glowInt;
+  glowVal.textContent = state.glowInt;
+  slider.addEventListener("input", () => {
+    state.glowInt = parseInt(slider.value);
+    glowVal.textContent = state.glowInt;
+    saveState(); applyState();
+  });
+
+  // Toggles
+  document.getElementById("animToggle").checked = state.animations;
+  document.getElementById("animToggle").addEventListener("change", e => {
+    state.animations = e.target.checked;
+    saveState(); applyState();
+  });
+  document.getElementById("compactToggle").checked = state.compact;
+  document.getElementById("compactToggle").addEventListener("change", e => {
+    state.compact = e.target.checked;
+    saveState(); applyState();
+  });
+}
+
+function buildPillGroup(id, options, stateKey) {
+  const group = document.getElementById(id);
+  group.innerHTML = options.map(opt => `
+    <button class="pill-opt${state[stateKey] === opt ? " active" : ""}" data-val="${opt}">${opt}</button>
+  `).join("");
+  group.querySelectorAll(".pill-opt").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state[stateKey] = btn.dataset.val;
+      saveState(); applyState();
+    });
+  });
+}
+
+function syncDrawerUI() {
+  // Sync color dots
+  document.querySelectorAll(".color-dot").forEach(dot => {
+    dot.classList.toggle("active", dot.dataset.theme === state.theme);
+  });
+  // Sync pill groups
+  syncPillGroup("appearanceGroup", state.appearance);
+  syncPillGroup("cardStyleGroup",  state.cardStyle);
+  syncPillGroup("searchStyleGroup",state.searchStyle);
+  // Glow
+  const slider = document.getElementById("glowSlider");
+  if (slider) { slider.value = state.glowInt; document.getElementById("glowVal").textContent = state.glowInt; }
+  // Toggles
+  const at = document.getElementById("animToggle");
+  const ct = document.getElementById("compactToggle");
+  if (at) at.checked = state.animations;
+  if (ct) ct.checked = state.compact;
+}
+
+function syncPillGroup(id, val) {
+  document.querySelectorAll(`#${id} .pill-opt`).forEach(b => {
+    b.classList.toggle("active", b.dataset.val === val);
+  });
+}
+
+// ── DRAWER OPEN/CLOSE ───────────────────────────────────────────────────────────
+const drawer        = document.getElementById("drawer");
+const drawerOverlay = document.getElementById("drawerOverlay");
+
+function openDrawer() {
+  drawer.classList.add("open");
+  drawerOverlay.classList.add("open");
+}
+function closeDrawer() {
+  drawer.classList.remove("open");
+  drawerOverlay.classList.remove("open");
+}
+
+document.getElementById("menuBtn").addEventListener("click", openDrawer);
+drawerOverlay.addEventListener("click", closeDrawer);
+
+// Swipe-to-close on drawer
+let touchStartX = 0;
+drawer.addEventListener("touchstart", e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+drawer.addEventListener("touchend", e => {
+  if (e.changedTouches[0].clientX - touchStartX > 60) closeDrawer();
+}, { passive: true });
+
+// ── SMART SEARCH ───────────────────────────────────────────────────────────────
+const searchInput = document.querySelector(".search-bar input");
+const searchBtn   = document.querySelector(".search-bar .search-icon-btn");
+
+// Live suggestions
+const sugBox = document.getElementById("searchSuggestions");
+const internalKeys = Object.keys(searchRoutes);
+
+searchInput.addEventListener("input", () => {
+  const q = searchInput.value.trim().toLowerCase();
+  if (!q) { sugBox.classList.remove("visible"); return; }
+  const matches = internalKeys.filter(k => k.includes(q));
+  let html = matches.slice(0, 4).map(k => `
+    <div class="suggestion-item" data-key="${k}">
+      <span class="sug-icon"><i data-lucide="layout-grid" width="14" height="14"></i></span>
+      <span class="sug-label">${k.charAt(0).toUpperCase()+k.slice(1)}</span>
+      <span class="sug-type">AcademeForge</span>
+    </div>
+  `).join("");
+  if (q.length > 1) {
+    html += `<div class="suggestion-item" data-google="${q}">
+      <span class="sug-icon"><i data-lucide="search" width="14" height="14"></i></span>
+      <span class="sug-label">${q}</span>
+      <span class="sug-type">Google Search</span>
+    </div>`;
+  }
+  sugBox.innerHTML = html;
+  sugBox.classList.toggle("visible", !!html);
+  lucide.createIcons({ nodes: [sugBox] });
+  sugBox.querySelectorAll(".suggestion-item").forEach(el => {
+    el.addEventListener("click", () => {
+      if (el.dataset.google) {
+        handleSearch(el.dataset.google);
+      } else {
+        searchInput.value = el.dataset.key;
+        handleSearch(el.dataset.key);
+      }
+      sugBox.classList.remove("visible");
+    });
+  });
+});
+document.addEventListener("click", e => {
+  if (!e.target.closest(".search-wrap")) sugBox.classList.remove("visible");
+});
+
+searchInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") { sugBox.classList.remove("visible"); handleSearch(searchInput.value); }
+  if (e.key === "Escape") sugBox.classList.remove("visible");
+});
+searchBtn.addEventListener("click", () => handleSearch(searchInput.value));
+
+// Voice search (Web Speech API)
+document.querySelector(".search-bar .search-icon-btn:last-child").addEventListener("click", () => {
+  if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
+    showToast("Voice search not supported in this browser");
+    return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const rec = new SR();
+  rec.lang = "en-US"; rec.interimResults = false;
+  rec.start();
+  showToast("Listening…");
+  rec.onresult = e => {
+    const t = e.results[0][0].transcript;
+    searchInput.value = t;
+    handleSearch(t);
+  };
+  rec.onerror = () => showToast("Voice search failed");
+});
+
+// ── BACK BUTTON ────────────────────────────────────────────────────────────────
+document.getElementById("backBtn").addEventListener("click", () => {
+  window.history.back();
+});
+
+// ── INIT ───────────────────────────────────────────────────────────────────────
+buildQuickLinks();
+buildRecentCards();
+buildDrawer();
+applyState();
+lucide.createIcons();
+</script>
+</body>
+</html>
