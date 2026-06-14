@@ -500,6 +500,20 @@ input[type=range]::-webkit-slider-thumb{
 .anim-5{animation:fadeUp .4s ease both .36s}
 .no-anim .anim-1,.no-anim .anim-2,.no-anim .anim-3,
 .no-anim .anim-4,.no-anim .anim-5{animation:none}
+
+  /* IMPORTANT — Banner Fix */
+.banner-wrap{
+  overflow:hidden !important;
+}
+
+.banner-img{
+  height:auto !important;
+  object-fit:contain !important;
+}
+
+.banner-glow{
+  inset:-6px !important;
+}
 </style>
 </head>
 <body>
@@ -992,6 +1006,38 @@ buildQuickLinks();
 buildRecentCards();
 buildDrawer();
 applyState();
+
+  /* ══════════════════════════════════════════════════
+   IMPORTANT — AUTO FIT BANNER (NO CROPPING)
+══════════════════════════════════════════════════ */
+
+(function () {
+  const banner = document.querySelector(".banner-img");
+  const glow   = document.querySelector(".banner-glow");
+
+  if (!banner) return;
+
+  banner.style.height = "auto";
+  banner.style.objectFit = "contain";
+  banner.style.display = "block";
+
+  banner.onload = function () {
+    const ratio = banner.naturalHeight / banner.naturalWidth;
+    const width = banner.offsetWidth;
+    const realHeight = width * ratio;
+
+    banner.style.height = realHeight + "px";
+
+    if (glow) {
+      glow.style.height = realHeight + "px";
+      glow.style.borderRadius = "24px";
+    }
+  };
+
+  if (banner.complete) {
+    banner.onload();
+  }
+})();
 </script>
 </body>
 </html>
