@@ -977,79 +977,96 @@
       });
     }
 
-    // ── Swipe gesture (open from anywhere, close by left swipe) ───────────────
+ // ── Swipe gesture (open drawer, close drawer, go home) ───────────────
 
-    function setup_swipe_gesture_af_ai() {
-      let startX_af_ai = 0;
-      let startY_af_ai = 0;
-      let endX_af_ai = 0;
-      let endY_af_ai = 0;
-      let is_tracking_af_ai = false;
+function setup_swipe_gesture_af_ai() {
+  let startX_af_ai = 0;
+  let startY_af_ai = 0;
+  let endX_af_ai = 0;
+  let endY_af_ai = 0;
+  let is_tracking_af_ai = false;
 
-      // How far from left edge to allow open swipe (px)
-      const open_edge_threshold_af_ai = 80;
-      // Minimum horizontal distance to register as a swipe
-      const swipe_threshold_af_ai = 50;
-      // Maximum vertical drift before we ignore as a scroll
-      const vertical_max_af_ai = 65;
+  // Open drawer only from left edge
+  const open_edge_threshold_af_ai = 80;
 
-      const shell_af_ai = element_af_ai("shell-af_ai");
+  // Minimum swipe distance
+  const swipe_threshold_af_ai = 50;
 
-      shell_af_ai.addEventListener("touchstart", (event_af_ai) => {
-        const touch_af_ai = event_af_ai.touches[0];
-        startX_af_ai = touch_af_ai.clientX;
-        startY_af_ai = touch_af_ai.clientY;
-        endX_af_ai = startX_af_ai;
-        endY_af_ai = startY_af_ai;
+  // Ignore vertical scrolling
+  const vertical_max_af_ai = 65;
 
-        const drawer_open_af_ai = element_af_ai("drawer-af_ai").dataset.openAf_ai === "true";
-        // Track if we're starting from the left edge (for open), or drawer is open (for close)
-        is_tracking_af_ai = drawer_open_af_ai || startX_af_ai <= open_edge_threshold_af_ai;
-      }, { passive: true });
+  const shell_af_ai = element_af_ai("shell-af_ai");
 
-      shell_af_ai.addEventListener("touchmove", (event_af_ai) => {
-        if (!is_tracking_af_ai) return;
-        const touch_af_ai = event_af_ai.touches[0];
-        endX_af_ai = touch_af_ai.clientX;
-        endY_af_ai = touch_af_ai.clientY;
-      }, { passive: true });
+  shell_af_ai.addEventListener("touchstart", (event_af_ai) => {
+    const touch_af_ai = event_af_ai.touches[0];
 
-      shell_af_ai.addEventListener("touchend", () => {
-        if (!is_tracking_af_ai) return;
-        is_tracking_af_ai = false;
+    startX_af_ai = touch_af_ai.clientX;
+    startY_af_ai = touch_af_ai.clientY;
 
-        const diffX_af_ai = endX_af_ai - startX_af_ai;
-        const diffY_af_ai = Math.abs(endY_af_ai - startY_af_ai);
+    endX_af_ai = startX_af_ai;
+    endY_af_ai = startY_af_ai;
 
-        // Ignore vertical scrolls
-        if (diffY_af_ai > vertical_max_af_ai) return;
+    // Track every swipe
+    is_tracking_af_ai = true;
 
-        const drawer_open_af_ai = element_af_ai("drawer-af_ai").dataset.openAf_ai === "true";
-        const modal_open_af_ai = element_af_ai("modal-overlay-af_ai").dataset.openAf_ai === "true";
+  }, { passive: true });
 
-        // Don't trigger swipe gestures while modal is showing
-        if (modal_open_af_ai) return;
+  shell_af_ai.addEventListener("touchmove", (event_af_ai) => {
+    if (!is_tracking_af_ai) return;
 
-        if (!drawer_open_af_ai && startX_af_ai <= open_edge_threshold_af_ai && diffX_af_ai > swipe_threshold_af_ai) {
-          // Right swipe from left edge → open drawer
-          open_drawer_af_ai();
-          return;
-        }
+    const touch_af_ai = event_af_ai.touches[0];
 
-       // Left swipe
-if (diffX_af_ai < -swipe_threshold_af_ai) {
+    endX_af_ai = touch_af_ai.clientX;
+    endY_af_ai = touch_af_ai.clientY;
 
-  // Drawer open hai → pehle close karo
-  if (drawer_open_af_ai) {
-    close_drawer_af_ai();
-    return;
-  }
+  }, { passive: true });
 
-  // Drawer already closed hai → Home jao
-  window.location.href = "/index.html";
-}
-      });
+  shell_af_ai.addEventListener("touchend", () => {
+
+    if (!is_tracking_af_ai) return;
+    is_tracking_af_ai = false;
+
+    const diffX_af_ai = endX_af_ai - startX_af_ai;
+    const diffY_af_ai = Math.abs(endY_af_ai - startY_af_ai);
+
+    // Ignore vertical scrolling
+    if (diffY_af_ai > vertical_max_af_ai) return;
+
+    const drawer_open_af_ai =
+      element_af_ai("drawer-af_ai").dataset.openAf_ai === "true";
+
+    const modal_open_af_ai =
+      element_af_ai("modal-overlay-af_ai").dataset.openAf_ai === "true";
+
+    // Ignore if modal open
+    if (modal_open_af_ai) return;
+
+    // Right swipe from left edge → open drawer
+    if (
+      !drawer_open_af_ai &&
+      startX_af_ai <= open_edge_threshold_af_ai &&
+      diffX_af_ai > swipe_threshold_af_ai
+    ) {
+      open_drawer_af_ai();
+      return;
     }
+
+    // Left swipe
+    if (diffX_af_ai < -swipe_threshold_af_ai) {
+
+      // Drawer open → close drawer first
+      if (drawer_open_af_ai) {
+        close_drawer_af_ai();
+        return;
+      }
+
+      // Drawer already closed → go home
+      window.location.href = "/index.html";
+    }
+
+  });
+
+}
 
     // ── Theme sync ────────────────────────────────────────────────────────────
 
