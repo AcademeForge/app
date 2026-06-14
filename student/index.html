@@ -821,15 +821,15 @@ window.addEventListener('storage', e => { if(['af_student_logged_in','af_student
 
     const SWIPE_THRESHOLD = 80;
 
-    // Right Swipe → Batches
-    if (diffX > SWIPE_THRESHOLD) {
-      window.location.href = "/batches/index.html";
-    }
+  // Right Swipe → Home
+if (diffX > SWIPE_THRESHOLD) {
+  window.location.href = "/index.html";
+}
 
-    // Left Swipe → Home
-    if (diffX < -SWIPE_THRESHOLD) {
-      window.location.href = "/index.html";
-    }
+// Left Swipe → Batches
+if (diffX < -SWIPE_THRESHOLD) {
+  window.location.href = "/batches/index.html";
+}
 
     isTouch = false;
   }, { passive: true });
