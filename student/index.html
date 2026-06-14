@@ -793,6 +793,140 @@ function init() {
 }
 document.addEventListener('DOMContentLoaded', init);
 window.addEventListener('storage', e => { if(['af_student_logged_in','af_student_name','af_student_mobile'].includes(e.key)) init(); });
+
+  /* ── SWIPE NAVIGATION ── */
+(function () {
+  let startX = 0;
+  let startY = 0;
+  let isTouch = false;
+
+  document.addEventListener("touchstart", function (e) {
+    if (!e.touches || !e.touches.length) return;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    isTouch = true;
+  }, { passive: true });
+
+  document.addEventListener("touchend", function (e) {
+    if (!isTouch || !e.changedTouches || !e.changedTouches.length) return;
+
+    const endX = e.changedTouches[0].clientX;
+    const endY = e.changedTouches[0].clientY;
+
+    const diffX = endX - startX;
+    const diffY = endY - startY;
+
+    // Ignore vertical scroll gestures
+    if (Math.abs(diffY) > Math.abs(diffX)) return;
+
+    const SWIPE_THRESHOLD = 80;
+
+    // Right Swipe → Batches
+    if (diffX > SWIPE_THRESHOLD) {
+      window.location.href = "/batches/index.html";
+    }
+
+    // Left Swipe → Home
+    if (diffX < -SWIPE_THRESHOLD) {
+      window.location.href = "/index.html";
+    }
+
+    isTouch = false;
+  }, { passive: true });
+})();
+
+  /* ── PULL TO REFRESH ── */
+(function () {
+
+  const page = document.getElementById("page");
+
+  const refreshEl = document.createElement("div");
+  refreshEl.innerHTML = `
+    <div id="ptr-circle"></div>
+  `;
+
+  refreshEl.style.cssText = `
+    position:fixed;
+    top:-60px;
+    left:50%;
+    transform:translateX(-50%);
+    width:48px;
+    height:48px;
+    z-index:99999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:.25s ease;
+    pointer-events:none;
+  `;
+
+  document.body.appendChild(refreshEl);
+
+  const style = document.createElement("style");
+  style.textContent = `
+    #ptr-circle{
+      width:36px;
+      height:36px;
+      border:4px solid rgba(79,70,229,.2);
+      border-top-color:#4f46e5;
+      border-radius:50%;
+      animation:ptrSpin .8s linear infinite;
+    }
+    @keyframes ptrSpin{
+      to{transform:rotate(360deg);}
+    }
+  `;
+  document.head.appendChild(style);
+
+  let startY = 0;
+  let pulling = false;
+  let distance = 0;
+  const threshold = 90;
+
+  page.addEventListener("touchstart", e => {
+    if (page.scrollTop > 0) return;
+
+    startY = e.touches[0].clientY;
+    pulling = true;
+  }, { passive:true });
+
+  page.addEventListener("touchmove", e => {
+    if (!pulling) return;
+
+    distance = e.touches[0].clientY - startY;
+
+    if (distance <= 0) return;
+
+    const move = Math.min(distance * 0.5, 100);
+
+    refreshEl.style.top = (-60 + move) + "px";
+
+    if (distance > threshold) {
+      refreshEl.style.top = "12px";
+    }
+  }, { passive:true });
+
+  page.addEventListener("touchend", () => {
+
+    if (!pulling) return;
+
+    if (distance > threshold) {
+
+      refreshEl.style.top = "12px";
+
+      setTimeout(() => {
+        location.reload();
+      }, 400);
+
+    } else {
+      refreshEl.style.top = "-60px";
+    }
+
+    pulling = false;
+    distance = 0;
+  });
+
+})();
 </script>
 </body>
 </html>
