@@ -635,35 +635,71 @@ input[type=range]::-webkit-slider-thumb{
 
 <script>
 /* ══════════════════════════════════════════════════
-   LINK CONFIG — swap href values when URLs are ready
+   LINK CONFIG — AcademeForge Services
 ══════════════════════════════════════════════════ */
 const links = [
-  { label:"Dashboard", href:"#", emoji:"🏠" },
-  { label:"Courses",   href:"#", emoji:"📚" },
-  { label:"AI Tools",  href:"#", emoji:"🤖" },
-  { label:"Notes",     href:"#", emoji:"📝" },
-  { label:"Community", href:"#", emoji:"👥" },
-  { label:"Blog",      href:"#", emoji:"📰" },
-  { label:"Resources", href:"#", emoji:"📁" },
-  { label:"Contact",   href:"#", emoji:"✉️" },
+  { label:"Main Website",         href:"https://academeforge.in",                        emoji:"🌐" },
+  { label:"AI Assistant",         href:"https://ai.academeforge.in",                     emoji:"🤖" },
+  { label:"Articles",             href:"http://Zenopulsky.academeforge.in",              emoji:"📰" },
+  { label:"Test Arena",           href:"https://app.academeforge.in/T/index.html",       emoji:"🎯" },
+  { label:"Sudoku Master",        href:"https://app.academeforge.in/SM/index.html",      emoji:"🧩" },
+  { label:"Certificate Verify",   href:"https://app.academeforge.in/V/index.html",       emoji:"🏆" },
+  { label:"Update App",           href:"https://download.academeforge.in",               emoji:"⬇️" },
+  { label:"Mail Us",              href:"https://info.academeforge.in",                   emoji:"📧" },
 ];
 
 const recentItems = [
-  { name:"Latest Course",   meta:"Web Dev Bootcamp · 68% complete", badge:"Resume",  emoji:"▶️", href:"#" },
-  { name:"AI Toolkit",      meta:"6 tools available · Updated today", badge:"New",   emoji:"⚡", href:"#" },
-  { name:"Study Resources", meta:"42 files · Cheatsheets & guides",  badge:"View",   emoji:"📖", href:"#" },
+  {
+    name:"AI Assistant",
+    meta:"Smart AI tools and productivity features",
+    badge:"Open",
+    emoji:"🤖",
+    href:"https://ai.academeforge.in"
+  },
+  {
+    name:"Latest Articles",
+    meta:"Tutorials, insights and learning resources",
+    badge:"Read",
+    emoji:"📰",
+    href:"http://Zenopulsky.academeforge.in"
+  },
+  {
+    name:"Test Arena",
+    meta:"Practice tests, challenges and assessments",
+    badge:"Launch",
+    emoji:"🎯",
+    href:"https://app.academeforge.in/T/index.html"
+  },
 ];
 
 /* Search routes — internal pages first, else Google (same tab) */
 const searchRoutes = {
-  "dashboard":  "#",
-  "courses":    "#",
-  "ai tools":   "#",
-  "notes":      "#",
-  "community":  "#",
-  "blog":       "#",
-  "resources":  "#",
-  "contact":    "#",
+  "academeforge":             "https://academeforge.in",
+  "website":                  "https://academeforge.in",
+  "home":                     "https://academeforge.in",
+
+  "ai":                       "https://ai.academeforge.in",
+  "ai assistant":             "https://ai.academeforge.in",
+
+  "articles":                 "http://Zenopulsky.academeforge.in",
+  "blog":                     "http://Zenopulsky.academeforge.in",
+
+  "sudoku":                   "https://app.academeforge.in/SM/index.html",
+  "sudoku master":            "https://app.academeforge.in/SM/index.html",
+
+  "test":                     "https://app.academeforge.in/T/index.html",
+  "test arena":               "https://app.academeforge.in/T/index.html",
+
+  "certificate":              "https://app.academeforge.in/V/index.html",
+  "verify certificate":       "https://app.academeforge.in/V/index.html",
+  "certificate verification": "https://app.academeforge.in/V/index.html",
+
+  "download":                 "https://download.academeforge.in",
+  "update app":               "https://download.academeforge.in",
+
+  "mail":                     "https://info.academeforge.in",
+  "contact":                  "https://info.academeforge.in",
+  "support":                  "https://info.academeforge.in"
 };
 
 /* ══════════════════════════════════════════════════
