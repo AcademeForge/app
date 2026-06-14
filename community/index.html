@@ -947,6 +947,147 @@ document.addEventListener('DOMContentLoaded',init);
 window.addEventListener('storage',e=>{
   if(['af_student_email','af_student_mobile','af_student_name'].includes(e.key)) init();
 });
+
+  /* ─────────────────────────────
+   SWIPE + PULL TO REFRESH
+───────────────────────────── */
+(function(){
+
+  const feed = document.getElementById('feed') || document.body;
+
+  /* SWIPE NAVIGATION */
+
+  let startX = 0;
+  let startY = 0;
+
+  document.addEventListener('touchstart', e=>{
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  },{passive:true});
+
+  document.addEventListener('touchend', e=>{
+
+    const endX = e.changedTouches[0].clientX;
+    const endY = e.changedTouches[0].clientY;
+
+    const diffX = endX - startX;
+    const diffY = endY - startY;
+
+    if(Math.abs(diffY) > Math.abs(diffX)) return;
+
+    const threshold = 80;
+
+    // Right Swipe → Settings
+    if(diffX > threshold){
+      window.location.href = "/setting/index.html";
+    }
+
+    // Left Swipe → Batches
+    if(diffX < -threshold){
+      window.location.href = "/batches/index.html";
+    }
+
+  },{passive:true});
+
+
+  /* PULL TO REFRESH */
+
+  const loader = document.createElement('div');
+  loader.id = 'afPullRefresh';
+
+  loader.innerHTML = '<div class="afSpinner"></div>';
+
+  document.body.appendChild(loader);
+
+  const style = document.createElement('style');
+  style.textContent = `
+    #afPullRefresh{
+      position:fixed;
+      top:-70px;
+      left:50%;
+      transform:translateX(-50%);
+      width:50px;
+      height:50px;
+      z-index:999999;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition:top .25s ease;
+      pointer-events:none;
+    }
+
+    .afSpinner{
+      width:38px;
+      height:38px;
+      border-radius:50%;
+      border:4px solid rgba(99,102,241,.18);
+      border-top-color:#6366f1;
+      animation:afSpin .8s linear infinite;
+    }
+
+    @keyframes afSpin{
+      to{transform:rotate(360deg);}
+    }
+  `;
+  document.head.appendChild(style);
+
+  let pulling = false;
+  let pullStartY = 0;
+  let distance = 0;
+
+  feed.addEventListener('touchstart',e=>{
+
+    if(feed.scrollTop > 0) return;
+
+    pullStartY = e.touches[0].clientY;
+    pulling = true;
+
+  },{passive:true});
+
+  feed.addEventListener('touchmove',e=>{
+
+    if(!pulling) return;
+
+    distance = e.touches[0].clientY - pullStartY;
+
+    if(distance <= 0) return;
+
+    const move = Math.min(distance * 0.5,100);
+
+    loader.style.top = (-70 + move) + 'px';
+
+  },{passive:true});
+
+  feed.addEventListener('touchend',()=>{
+
+    if(!pulling) return;
+
+    if(distance > 90){
+
+      loader.style.top = '12px';
+
+      setTimeout(()=>{
+
+        if(typeof nxRefresh === 'function'){
+          nxRefresh();
+        }else{
+          location.reload();
+        }
+
+        loader.style.top = '-70px';
+
+      },300);
+
+    }else{
+      loader.style.top = '-70px';
+    }
+
+    pulling = false;
+    distance = 0;
+
+  });
+
+})();
 </script>
 </body>
 </html>
