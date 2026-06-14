@@ -1,4 +1,4 @@
-const CACHE_NAME = "academeforge-v7";
+const CACHE_NAME = "academeforge-v8";
 
 const STATIC_FILES = [
   "/",
