@@ -762,11 +762,10 @@ loadProfile();
 
     const threshold = 80;
 
-    /* Left Swipe → Community */
-    if(diffX < -threshold){
-      window.location.href = "/community/index.html";
-    }
-
+/* Right Swipe → Community */
+if(diffX > threshold){
+  window.location.href = "/community/index.html";
+}
   },{passive:true});
 
   /* PULL TO REFRESH */
