@@ -545,13 +545,17 @@ input[type=range]::-webkit-slider-thumb{
       <div class="quick-grid" id="quickGrid"></div>
     </div>
 
-    <!-- CONTINUE LEARNING -->
-    <div class="recent-section anim-5">
+    <!-- HISTORY -->
+    <div class="recent-section anim-5" id="historySection">
       <div class="section-header">
-        <div class="section-title">Continue Learning</div>
-        <a href="#" class="see-all">See all</a>
+        <div class="section-title">History</div>
+        <button class="see-all" id="clearHistoryBtn" style="background:none;border:none;cursor:pointer;">Clear all</button>
       </div>
       <div class="recent-cards" id="recentCards"></div>
+      <div class="history-empty" id="historyEmpty" style="display:none">
+        <div style="font-size:36px;margin-bottom:10px">🕓</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.6">No history yet.<br>Visit a page and it'll appear here.</div>
+      </div>
     </div>
 
     <div class="footer">Powered by AcademeForge</div>
