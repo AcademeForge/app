@@ -1036,10 +1036,18 @@
           return;
         }
 
-        if (drawer_open_af_ai && diffX_af_ai < -swipe_threshold_af_ai) {
-          // Left swipe while drawer open → close drawer
-          close_drawer_af_ai();
-        }
+       // Left swipe
+if (diffX_af_ai < -swipe_threshold_af_ai) {
+
+  // Drawer open hai → pehle close karo
+  if (drawer_open_af_ai) {
+    close_drawer_af_ai();
+    return;
+  }
+
+  // Drawer already closed hai → Home jao
+  window.location.href = "/index.html";
+}
       });
     }
 
