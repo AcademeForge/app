@@ -977,16 +977,15 @@ window.addEventListener('storage',e=>{
 
     const threshold = 80;
 
-    // Right Swipe → Settings
-    if(diffX > threshold){
-      window.location.href = "/setting/index.html";
-    }
+  // Right Swipe → Batches
+if(diffX > threshold){
+  window.location.href = "/batches/index.html";
+}
 
-    // Left Swipe → Batches
-    if(diffX < -threshold){
-      window.location.href = "/batches/index.html";
-    }
-
+// Left Swipe → Settings
+if(diffX < -threshold){
+  window.location.href = "/setting/index.html";
+}
   },{passive:true});
 
 
