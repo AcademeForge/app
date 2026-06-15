@@ -469,69 +469,35 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
       </a>
     </div>
 
-    <!-- Support accordion -->
-    <div class="acc-group" id="accSupport" style="margin-bottom:8px;">
-      <button class="acc-trigger" onclick="toggleAcc('accSupport')" type="button">
-        <div class="row-icon">☎️</div>
-        <div class="row-text">
-          <span class="row-title">Support</span>
-          <span class="row-sub">Contact us or track requests</span>
-        </div>
-        <span style="font-size:10.5px;color:var(--tm);font-weight:700;margin-left:auto;padding-right:4px;">2</span>
-        <span class="acc-chev">⌄</span>
-      </button>
-      <div class="acc-body">
-        <div class="acc-divider"></div>
-        <a class="acc-item" href="/setting/" onclick="nav('contact');return false;">
-          <div class="acc-item-icon">☎️</div>
-          <div class="acc-item-text">
-            <span class="acc-item-label">Contact Us</span>
-            <span class="acc-item-sub">Submit a support request</span>
-          </div>
-          <span class="row-arr">›</span>
-        </a>
-        <a class="acc-item" href="/setting/" onclick="nav('contactStatus');return false;">
-          <div class="acc-item-icon">📞</div>
-          <div class="acc-item-text">
-            <span class="acc-item-label">Request Status</span>
-            <span class="acc-item-sub">Track your contact requests</span>
-          </div>
-          <span class="badge plain">Track</span>
-        </a>
-      </div>
+<!-- Support Center -->
+<div class="acc-group" style="margin-bottom:8px;">
+  <a class="acc-item" href="/support/" onclick="nav('supportCenter');return false;">
+    <div class="acc-item-icon">☎️</div>
+
+    <div class="acc-item-text">
+      <span class="acc-item-label">Support Center</span>
+      <span class="acc-item-sub">Contact us and track your requests</span>
     </div>
 
-    <!-- Bug Center accordion -->
-    <div class="acc-group" id="accBug" style="margin-bottom:8px;">
-      <button class="acc-trigger" onclick="toggleAcc('accBug')" type="button">
-        <div class="row-icon">🐞</div>
-        <div class="row-text">
-          <span class="row-title">Bug Center</span>
-          <span class="row-sub">Report issues and track fixes</span>
-        </div>
-        <span style="font-size:10.5px;color:var(--tm);font-weight:700;margin-left:auto;padding-right:4px;">2</span>
-        <span class="acc-chev">⌄</span>
-      </button>
-      <div class="acc-body">
-        <div class="acc-divider"></div>
-        <a class="acc-item" href="/setting/" onclick="nav('bugReport');return false;">
-          <div class="acc-item-icon">🐞</div>
-          <div class="acc-item-text">
-            <span class="acc-item-label">Report a Bug</span>
-            <span class="acc-item-sub">Tell us what went wrong</span>
-          </div>
-          <span class="row-arr">›</span>
-        </a>
-        <a class="acc-item" href="/setting/" onclick="nav('bugStatus');return false;">
-          <div class="acc-item-icon">📌</div>
-          <div class="acc-item-text">
-            <span class="acc-item-label">Bug Report Status</span>
-            <span class="acc-item-sub">Track your reported bugs</span>
-          </div>
-          <span class="badge plain">Track</span>
-        </a>
-      </div>
+    <span class="badge plain">Open</span>
+    <span class="row-arr">›</span>
+  </a>
+</div>
+
+ <!-- Bug Center -->
+<div class="acc-group" style="margin-bottom:8px;">
+  <a class="acc-item" href="/bug/" onclick="nav('bugCenter');return false;">
+    <div class="acc-item-icon">🐞</div>
+
+    <div class="acc-item-text">
+      <span class="acc-item-label">Bug Center</span>
+      <span class="acc-item-sub">Report issues and track fixes</span>
     </div>
+
+    <span class="badge plain">Open</span>
+    <span class="row-arr">›</span>
+  </a>
+</div>
 
     <!-- Language accordion -->
     <div class="acc-group" id="accLang" style="margin-bottom:8px;">
