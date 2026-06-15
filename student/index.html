@@ -780,7 +780,51 @@ function renderNotes(notes) {
   }).join('');
 }
 
-function openVideo(url) { if(!url){showToast('Video not available yet.','warn','Locked');return;} window.open(url,'_blank'); }
+/**
+ * Extracts YouTube video ID from any YouTube URL format.
+ * Supports:
+ *   https://youtu.be/xxxx
+ *   https://youtube.com/watch?v=xxxx
+ *   https://www.youtube.com/watch?v=xxxx
+ *   https://www.youtube.com/embed/xxxx
+ *   https://www.youtube.com/shorts/xxxx
+ *   A raw video ID (11 chars) passed directly
+ */
+function extractYouTubeId(url) {
+  if (!url) return null;
+  const str = String(url).trim();
+
+  // Already a plain video ID (11 alphanumeric chars)
+  if (/^[A-Za-z0-9_-]{11}$/.test(str)) return str;
+
+  // youtu.be/ID
+  const shortMatch = str.match(/youtu\.be\/([A-Za-z0-9_-]{11})/);
+  if (shortMatch) return shortMatch[1];
+
+  // youtube.com/watch?v=ID
+  const watchMatch = str.match(/[?&]v=([A-Za-z0-9_-]{11})/);
+  if (watchMatch) return watchMatch[1];
+
+  // youtube.com/embed/ID  or  youtube.com/shorts/ID
+  const embedMatch = str.match(/(?:embed|shorts)\/([A-Za-z0-9_-]{11})/);
+  if (embedMatch) return embedMatch[1];
+
+  return null;
+}
+
+/**
+ * Opens the AcademeForge Lecture Player for a given YouTube URL or video ID.
+ * Pass optional lecture title to display in the player header.
+ */
+function openVideo(url, title) {
+  if (!url) { showToast('Video not available yet.', 'warn', 'Locked'); return; }
+  const vid = extractYouTubeId(url);
+  if (!vid) { showToast('Invalid video URL.', 'err', 'Error'); return; }
+  const t   = encodeURIComponent(title || 'Lecture');
+  const back = encodeURIComponent(location.href);
+  location.href = '/lecture-player.html?v=' + vid + '&title=' + t + '&back=' + back;
+}
+  
 function openPdf(url)   { if(!url){showToast('PDF not available yet.','warn','Locked');return;} window.open(url,'_blank'); }
 
 /* ── INIT ── */
