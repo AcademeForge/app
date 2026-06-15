@@ -744,7 +744,7 @@ function renderLectures(lectures) {
         <small>${esc(safe(lec.description,'Lecture details will be available soon.'))}</small>
         <span class="duration">⏱ ${esc(safe(lec.duration,'10-15 min'))}</span>
       </div>
-      ${locked?`<button class="content-action locked-action" disabled>Locked</button>`:`<button class="content-action" onclick="openVideo('${lec.video_url}')">Watch</button>`}
+      ${locked?`<button class="content-action locked-action" disabled>Locked</button>`:`<button class="content-action" onclick="openVideo('${lec.video_url}','${esc(lec.title||'')}')">Watch</button>`}
     </div>`;
   }).join('');
 }
