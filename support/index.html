@@ -643,23 +643,33 @@ function showToast(msg, type = 'info', title = '') {
 
 /* ─────────────────────────────────────────
    CACHE
+   NOTE: cache key is namespaced per student_uuid so that switching
+   accounts on the same device/browser never shows a stale list
+   belonging to a previous user.
 ───────────────────────────────────────── */
-function cacheSet(d) {
-  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), d })); } catch(_) {}
+function cacheKeyFor(uuid) {
+  return CACHE_KEY + ':' + (uuid || 'anon');
 }
-function cacheGet() {
+function cacheSet(uuid, d) {
+  try { localStorage.setItem(cacheKeyFor(uuid), JSON.stringify({ ts: Date.now(), d })); } catch(_) {}
+}
+function cacheGet(uuid) {
   try {
-    const r = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+    const r = JSON.parse(localStorage.getItem(cacheKeyFor(uuid)) || 'null');
     if (!r || Date.now() - r.ts > CACHE_TTL) return null;
     return r.d;
   } catch { return null; }
 }
-function cacheClear() {
-  try { localStorage.removeItem(CACHE_KEY); } catch(_) {}
+function cacheClear(uuid) {
+  try { localStorage.removeItem(cacheKeyFor(uuid)); } catch(_) {}
 }
 
 /* ─────────────────────────────────────────
    SESSION
+   `uuid` (af_student_uuid) is the ONLY value sent to the backend to
+   identify "My Requests". It is validated server-side against the
+   af_students table — the client-stored email/name are used purely
+   for pre-filling the submit form, never for authorization.
 ───────────────────────────────────────── */
 function getSession() {
   return {
@@ -863,6 +873,9 @@ function renderStatusList() {
 
 /* ─────────────────────────────────────────
    LOAD STATUS (API)
+   AUTH FIX: identity is established with `student_uuid`, which the
+   backend resolves server-side against af_students. No email or other
+   client-claimed identity is sent or trusted here.
 ───────────────────────────────────────── */
 async function loadStatus(forceRefresh = false) {
   if (isLoading) return;
@@ -870,20 +883,20 @@ async function loadStatus(forceRefresh = false) {
   const session = getSession();
   const content = $('statusContent');
 
-  if (!session.email) {
+  if (!session.uuid) {
     content.innerHTML = `
       <div class="state-box">
         <div class="state-emoji">🔐</div>
         <div class="state-title">Login Required</div>
-        <div class="state-sub">Your session doesn't have account details. Please log in again.</div>
+        <div class="state-sub">Your session doesn't have valid account details. Please log in again.</div>
         <button class="state-btn" onclick="window.location.href='../student/index.html'">Log In</button>
       </div>`;
     return;
   }
 
-  // Serve cache immediately
+  // Serve cache immediately (namespaced to this student_uuid)
   if (!forceRefresh) {
-    const cached = cacheGet();
+    const cached = cacheGet(session.uuid);
     if (cached) {
       allRequests = cached;
       updateSummary(allRequests);
@@ -905,19 +918,29 @@ async function loadStatus(forceRefresh = false) {
   try {
     const requests = await fetchRequests(session);
     allRequests = requests;
-    cacheSet(requests);
+    cacheSet(session.uuid, requests);
     updateSummary(allRequests);
     $('controls').style.display = '';
     currentPage = 1;
     renderStatusList();
   } catch (err) {
-    content.innerHTML = `
-      <div class="state-box">
-        <div class="state-emoji">📡</div>
-        <div class="state-title">Could Not Load Requests</div>
-        <div class="state-sub">${esc(err.message || 'A network error occurred.')}</div>
-        <button class="state-btn" onclick="loadStatus(true)">Try Again</button>
-      </div>`;
+    if (err.code === 401) {
+      content.innerHTML = `
+        <div class="state-box">
+          <div class="state-emoji">🔐</div>
+          <div class="state-title">Session Expired</div>
+          <div class="state-sub">${esc(err.message || 'Please log in again to view your requests.')}</div>
+          <button class="state-btn" onclick="window.location.href='../student/index.html'">Log In Again</button>
+        </div>`;
+    } else {
+      content.innerHTML = `
+        <div class="state-box">
+          <div class="state-emoji">📡</div>
+          <div class="state-title">Could Not Load Requests</div>
+          <div class="state-sub">${esc(err.message || 'A network error occurred.')}</div>
+          <button class="state-btn" onclick="loadStatus(true)">Try Again</button>
+        </div>`;
+    }
     showToast(err.message || 'Failed to load requests.', 'err', 'Error');
   } finally {
     isLoading = false;
@@ -929,14 +952,14 @@ async function silentRefresh(session) {
   try {
     const requests = await fetchRequests(session);
     allRequests = requests;
-    cacheSet(requests);
+    cacheSet(session.uuid, requests);
     updateSummary(allRequests);
     $('controls').style.display = '';
     renderStatusList();
   } catch { /* silent */ }
 }
 
-/** API call with timeout + one retry */
+/** API call with timeout + one retry. Sends student_uuid only. */
 async function fetchRequests(session, attempt = 1) {
   const MAX   = 2;
   const TOMS  = 12000;
@@ -948,15 +971,23 @@ async function fetchRequests(session, attempt = 1) {
       method:  'POST',
       signal:  ctrl.signal,
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ limit: 100, page: 1 }),
+      body:    JSON.stringify({
+        student_uuid: session.uuid,
+        limit: 100,
+        page: 1,
+      }),
     });
     clearTimeout(timer);
 
     let data;
     try { data = await res.json(); } catch { data = {}; }
 
-    if (res.status === 401) throw new Error('Authentication required. Please log in again.');
-    if (res.status === 429) throw new Error('Too many requests. Please wait and try again.');
+    if (res.status === 401) {
+      const e = new Error(data.message || 'Authentication required. Please log in again.');
+      e.code = 401;
+      throw e;
+    }
+    if (res.status === 429) throw new Error(data.message || 'Too many requests. Please wait and try again.');
     if (!res.ok)            throw new Error(data.message || `Server error (${res.status}).`);
     if (!data.success)      throw new Error(data.message || 'Unexpected server response.');
 
@@ -964,6 +995,7 @@ async function fetchRequests(session, attempt = 1) {
 
   } catch (err) {
     clearTimeout(timer);
+    if (err.code === 401) throw err; // don't retry auth failures
     if (err.name === 'AbortError') throw new Error('Request timed out. Please check your connection.');
     if (attempt < MAX) {
       await new Promise(r => setTimeout(r, attempt * 800));
@@ -996,7 +1028,8 @@ function goPage(dir) {
 function setRefreshSpinning(on) { $('refreshBtn').classList.toggle('spinning', on); }
 
 function onRefresh() {
-  cacheClear();
+  const session = getSession();
+  cacheClear(session.uuid);
   currentPage = 1;
   loadStatus(true);
   showToast('Refreshing your requests…', 'info', 'Refreshing');
@@ -1004,6 +1037,11 @@ function onRefresh() {
 
 /* ─────────────────────────────────────────
    SUBMIT CONTACT REQUEST
+   AUTH FIX: student_uuid is sent so the backend can resolve the
+   canonical email server-side. The email field is still shown/edited
+   in the UI for guest/unauthenticated submissions and for display,
+   but if a student_uuid resolves successfully the backend OVERRIDES
+   it with the verified account email.
 ───────────────────────────────────────── */
 async function submitRequest() {
   const btn  = $('submitBtn');
@@ -1044,9 +1082,8 @@ async function submitRequest() {
         mobile_number:       phone || null,
         contact_reason:      reason,
         problem_description: desc,
-        student_id:          session.id         || null,
-        student_identifier:  session.uuid       || null,
-        student_name:        session.name       || name,
+        student_uuid:        session.uuid || null,
+        student_name:        session.name || name,
       }),
     });
 
@@ -1067,7 +1104,7 @@ async function submitRequest() {
     $('descCount').textContent = '0 / 2000';
 
     // Invalidate cache so new entry shows up in status tab
-    cacheClear();
+    cacheClear(session.uuid);
 
     // Auto-switch to status after a beat
     setTimeout(() => { switchTab('status'); }, 2400);
@@ -1123,8 +1160,9 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  // Missing critical identifiers
-  if (!s.uuid && !s.email) {
+  // Missing critical identifier — student_uuid is REQUIRED now
+  // (it's the only value the backend will accept for /status).
+  if (!s.uuid) {
     $('mainPage').classList.add('hidden');
     $('sessionScreen').classList.remove('hidden');
     return;
