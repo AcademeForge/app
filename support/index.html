@@ -883,7 +883,7 @@ async function loadStatus(forceRefresh = false) {
   const session = getSession();
   const content = $('statusContent');
 
-  if (!session.uuid) {
+  if (!session.uuid || !session.email) {
     content.innerHTML = `
       <div class="state-box">
         <div class="state-emoji">🔐</div>
@@ -973,6 +973,7 @@ async function fetchRequests(session, attempt = 1) {
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({
         student_uuid: session.uuid,
+        email: session.email,
         limit: 100,
         page: 1,
       }),
@@ -1160,9 +1161,9 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  // Missing critical identifier — student_uuid is REQUIRED now
-  // (it's the only value the backend will accept for /status).
-  if (!s.uuid) {
+  // Missing critical identifiers — both are REQUIRED now: the backend
+  // verifies /status access using the (student_uuid, email) pair.
+  if (!s.uuid || !s.email) {
     $('mainPage').classList.add('hidden');
     $('sessionScreen').classList.remove('hidden');
     return;
