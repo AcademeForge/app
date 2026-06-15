@@ -447,82 +447,51 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
       </div>
     </div>
 
-    <!-- SECTION: ACCOUNT & SUPPORT -->
-    <div class="sec-label">Account &amp; Support</div>
+<!-- SECTION: ACCOUNT & SUPPORT -->
+<div class="sec-label">Account &amp; Support</div>
 
-    <div class="row-group">
-      <a class="row" href="/v/" style="border-radius:var(--r2) var(--r2) 0 0;">
-        <div class="row-icon">🎖️</div>
-        <div class="row-text">
-          <span class="row-title">Certificate Verification</span>
-          <span class="row-sub">Verify official AF certificates</span>
-        </div>
-        <div class="row-end"><span class="row-arr">›</span></div>
-      </a>
-      <a class="row" href="/About/" style="border-radius:0 0 var(--r2) var(--r2);">
-        <div class="row-icon">ℹ️</div>
-        <div class="row-text">
-          <span class="row-title">About AcademeForge</span>
-          <span class="row-sub">Our story, mission and team</span>
-        </div>
-        <div class="row-end"><span class="row-arr">›</span></div>
-      </a>
+<div class="row-group">
+
+  <!-- Bug Center -->
+  <a class="row" href="/bug/index.html" style="border-radius:var(--r2) var(--r2) 0 0;">
+    <div class="row-icon">🐞</div>
+    <div class="row-text">
+      <span class="row-title">Bug Center</span>
+      <span class="row-sub">Report issues and track fixes</span>
     </div>
-
-<!-- Support Center -->
-<div class="acc-group" style="margin-bottom:8px;">
-  <a class="acc-item" href="/support/index.html" onclick="nav('supportCenter');return false;">
-    <div class="acc-item-icon">☎️</div>
-
-    <div class="acc-item-text">
-      <span class="acc-item-label">Support Center</span>
-      <span class="acc-item-sub">Contact us and track your requests</span>
+    <div class="row-end">
+      <span class="badge plain">Open</span>
+      <span class="row-arr">›</span>
     </div>
-
-    <span class="badge plain">Open</span>
-    <span class="row-arr">›</span>
   </a>
-</div>
 
- <!-- Bug Center -->
-<div class="acc-group" style="margin-bottom:8px;">
-  <a class="acc-item" href="/bug/index.html" onclick="nav('bugCenter');return false;">
-    <div class="acc-item-icon">🐞</div>
-
-    <div class="acc-item-text">
-      <span class="acc-item-label">Bug Center</span>
-      <span class="acc-item-sub">Report issues and track fixes</span>
+  <!-- Support Center -->
+  <a class="row" href="/support/index.html" style="border-radius:0;">
+    <div class="row-icon">☎️</div>
+    <div class="row-text">
+      <span class="row-title">Support Center</span>
+      <span class="row-sub">Contact us and track your requests</span>
     </div>
-
-    <span class="badge plain">Open</span>
-    <span class="row-arr">›</span>
+    <div class="row-end">
+      <span class="badge plain">Open</span>
+      <span class="row-arr">›</span>
+    </div>
   </a>
-</div>
 
-    <!-- Language accordion -->
-    <div class="acc-group" id="accLang" style="margin-bottom:8px;">
-      <button class="acc-trigger" onclick="toggleAcc('accLang')" type="button">
-        <div class="row-icon">🌐</div>
-        <div class="row-text">
-          <span class="row-title">Language</span>
-          <span class="row-sub">Change app language</span>
-        </div>
-        <span style="font-size:10.5px;color:var(--tm);font-weight:700;margin-left:auto;padding-right:4px;" id="langBadge">English</span>
-        <span class="acc-chev">⌄</span>
-      </button>
-      <div class="acc-body">
-        <div class="acc-divider"></div>
-        <a class="acc-item" href="/setting/" onclick="nav('language');return false;">
-          <div class="acc-item-icon">🌐</div>
-          <div class="acc-item-text">
-            <span class="acc-item-label">Change Language</span>
-            <span class="acc-item-sub">English, Hindi, Bhojpuri &amp; more</span>
-          </div>
-          <span class="row-arr">›</span>
-        </a>
-      </div>
+  <!-- About Us -->
+  <a class="row" href="/About/" style="border-radius:0 0 var(--r2) var(--r2);">
+    <div class="row-icon">ℹ️</div>
+    <div class="row-text">
+      <span class="row-title">About AcademeForge</span>
+      <span class="row-sub">Our story, mission and team</span>
     </div>
+    <div class="row-end">
+      <span class="row-arr">›</span>
+    </div>
+  </a>
 
+</div>
+  
     <!-- LOGOUT -->
     <button class="logout-btn" onclick="openLogoutSheet()" type="button">
       <span>↩</span><span>Log Out</span>
