@@ -115,6 +115,22 @@ input{font-family:var(--fb);}
 }
 .tap-zone{height:100%;}
 
+/* ── YouTube branding mask ──
+   Sits above the iframe but below the tap zones / overlays.
+   Purely visual — covers the spot where YouTube renders its
+   watermark / "Watch on YouTube" link so it never shows on screen. */
+.yt-mask{
+  position:absolute;
+  background:#000;
+  pointer-events:none;
+  z-index:6;
+}
+.yt-mask-br{
+  right:0;bottom:0;
+  width:78px;height:48px;
+  border-top-left-radius:10px;
+}
+
 /* Buffering spinner */
 .spinner-wrap{
   position:absolute;inset:0;
@@ -288,6 +304,10 @@ input{font-family:var(--fb);}
 .fs-mode .topbar{display:none;}
 .fs-mode .video-area{flex:1;height:100%;}
 .fs-mode body{overflow:hidden;}
+.fs-mode .controls{
+  background:linear-gradient(to top, rgba(8,7,20,.92), rgba(8,7,20,.55) 70%, transparent);
+  border-top:none;
+}
 
 /* Landscape */
 @media(orientation:landscape) and (max-height:500px){
@@ -319,6 +339,7 @@ input{font-family:var(--fb);}
   position:absolute;inset:0;
   display:none;flex-direction:column;align-items:center;justify-content:center;
   gap:12px;z-index:20;text-align:center;padding:24px;
+  background:var(--bg);
 }
 .player-error.show{display:flex;}
 .player-error-icon{font-size:48px;}
@@ -331,6 +352,27 @@ input{font-family:var(--fb);}
   box-shadow:0 4px 16px rgba(79,70,229,.35);
 }
 .retry-btn:active{transform:scale(.96);}
+
+/* End-of-lecture overlay (hides YouTube's end-screen / suggestions) */
+.end-overlay{
+  position:absolute;inset:0;
+  background:rgba(8,7,20,.96);
+  display:none;
+  flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;z-index:30;text-align:center;padding:24px;
+}
+.end-overlay.show{display:flex;}
+.end-overlay-icon{font-size:46px;}
+.end-overlay h2{font-family:var(--fd);font-size:18px;font-weight:900;color:var(--t1);}
+.end-overlay p{font-size:13px;color:var(--t2);font-weight:600;line-height:1.6;max-width:280px;}
+.end-overlay .replay-btn{
+  margin-top:6px;padding:11px 26px;border-radius:var(--r2);
+  background:linear-gradient(135deg,var(--p),var(--p2));
+  color:#fff;font-size:13px;font-weight:900;
+  box-shadow:0 4px 16px rgba(79,70,229,.35);
+}
+.end-overlay .replay-btn.secondary{background:rgba(129,140,248,.15);box-shadow:none;}
+.end-overlay .replay-btn:active{transform:scale(.96);}
 </style>
 </head>
 <body>
@@ -360,6 +402,9 @@ input{font-family:var(--fb);}
     <div class="tap-zone" id="tzRight"></div>
   </div>
 
+  <!-- YouTube branding mask (covers watermark / "Watch on YouTube" corner link) -->
+  <div class="yt-mask yt-mask-br" aria-hidden="true"></div>
+
   <!-- Buffering -->
   <div class="spinner-wrap" id="spinner">
     <div class="spinner"></div>
@@ -376,7 +421,20 @@ input{font-family:var(--fb);}
     <svg id="centerSvg" width="72" height="72" viewBox="0 0 72 72" fill="none">
       <circle cx="36" cy="36" r="34" fill="rgba(0,0,0,.45)" stroke="rgba(255,255,255,.2)" stroke-width="2"/>
       <polygon id="playIconPath" points="28,22 54,36 28,50" fill="#fff"/>
+      <g id="pauseIconPath" style="display:none">
+        <rect x="25" y="21" width="8" height="30" rx="2" fill="#fff"/>
+        <rect x="39" y="21" width="8" height="30" rx="2" fill="#fff"/>
+      </g>
     </svg>
+  </div>
+
+  <!-- End of lecture -->
+  <div class="end-overlay" id="endOverlay">
+    <div class="end-overlay-icon">✅</div>
+    <h2>Lecture Completed</h2>
+    <p>Great job! You can replay this lecture or head back to the chapter list.</p>
+    <button class="replay-btn" onclick="replayLecture()">↻ Replay</button>
+    <button class="replay-btn secondary" onclick="goBack()">← Back to Chapters</button>
   </div>
 
   <!-- Error -->
@@ -469,7 +527,7 @@ let seekInterval   = null;
 let tapTimer       = null;
 let tapCount       = { left:0, right:0 };
 let isFullscreen   = false;
-const SPEEDS       = [0.5, 0.75, 1, 1.25, 1.5, 2];
+const SPEEDS       = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
 /* ── TOAST ── */
 let toastTimer;
@@ -588,14 +646,11 @@ function setPlayIcon(playing) {
   isPlaying = playing;
 }
 function flashCenterIcon(pausing) {
-  const el  = document.getElementById('centerIcon');
-  const ico = document.getElementById('playIconPath');
-  if (pausing) {
-    ico.setAttribute('points','28,22 35,22 35,50 28,50 M41,22 48,22 48,50 41,50');
-    ico.setAttribute('d','');
-  } else {
-    ico.setAttribute('points','28,22 54,36 28,50');
-  }
+  const el    = document.getElementById('centerIcon');
+  const play  = document.getElementById('playIconPath');
+  const pause = document.getElementById('pauseIconPath');
+  if (pausing) { play.style.display = 'none'; pause.style.display = ''; }
+  else         { play.style.display = '';     pause.style.display = 'none'; }
   el.classList.remove('flash');
   void el.offsetWidth;
   el.classList.add('flash');
@@ -694,6 +749,7 @@ function toggleFullscreen() {
     // Fallback for WebView
     document.body.style.position = 'fixed';
     document.body.style.inset = '0';
+    document.documentElement.classList.add('fs-mode');
     screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(()=>{});
     isFullscreen = true;
     updateFsIcon();
@@ -702,6 +758,7 @@ function toggleFullscreen() {
     if (ex) { ex.call(document); }
     document.body.style.position = '';
     document.body.style.inset = '';
+    document.documentElement.classList.remove('fs-mode');
     screen.orientation && screen.orientation.unlock && screen.orientation.unlock();
     isFullscreen = false;
     updateFsIcon();
@@ -713,8 +770,18 @@ function updateFsIcon() {
     ? '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>'
     : '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>';
 }
-document.addEventListener('fullscreenchange',       () => { isFullscreen = !!document.fullscreenElement;       updateFsIcon(); });
-document.addEventListener('webkitfullscreenchange', () => { isFullscreen = !!document.webkitFullscreenElement; updateFsIcon(); });
+function syncFsState(active) {
+  isFullscreen = !!active;
+  document.documentElement.classList.toggle('fs-mode', isFullscreen);
+  if (!isFullscreen) {
+    document.body.style.position = '';
+    document.body.style.inset = '';
+    screen.orientation && screen.orientation.unlock && screen.orientation.unlock();
+  }
+  updateFsIcon();
+}
+document.addEventListener('fullscreenchange',       () => syncFsState(document.fullscreenElement));
+document.addEventListener('webkitfullscreenchange', () => syncFsState(document.webkitFullscreenElement));
 
 /* ── YOUTUBE PLAYER ── */
 window.onYouTubeIframeAPIReady = function() { initPlayer(); };
@@ -722,6 +789,7 @@ window.onYouTubeIframeAPIReady = function() { initPlayer(); };
 function initPlayer() {
   if (!videoId) { showError('No video ID provided in the URL.'); return; }
   hideError();
+  document.getElementById('endOverlay').classList.remove('show');
   document.getElementById('spinner').classList.add('show');
 
   if (player) {
@@ -773,6 +841,7 @@ function onPlayerStateChange(e) {
     case S.PLAYING:
       setPlayIcon(true);
       document.getElementById('spinner').classList.remove('show');
+      document.getElementById('endOverlay').classList.remove('show');
       startSeekInterval();
       hideError();
       break;
@@ -790,11 +859,19 @@ function onPlayerStateChange(e) {
       updateSeekBar();
       document.getElementById('spinner').classList.remove('show');
       showToast('Lecture completed ✅', 2000);
+      document.getElementById('endOverlay').classList.add('show');
       break;
     case S.UNSTARTED:
     case S.CUED:
       document.getElementById('spinner').classList.remove('show');
       break;
+  }
+}
+
+function replayLecture() {
+  document.getElementById('endOverlay').classList.remove('show');
+  if (player) {
+    try { player.seekTo(0, true); player.playVideo(); } catch(_) {}
   }
 }
 
@@ -815,7 +892,7 @@ function onPlayerError(e) {
   if (window.YT && window.YT.Player) { initPlayer(); return; }
   const s = document.createElement('script');
   s.src = 'https://www.youtube.com/iframe_api';
-  s.onerror = () => showError('YouTube API failed to load. Check your internet connection.');
+  s.onerror = () => showError('Player could not load. Check your internet connection.');
   document.head.appendChild(s);
 })();
 
@@ -830,13 +907,6 @@ document.addEventListener('keydown', e => {
   }
 });
 
-/* ── VISIBILITY ── */
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden && player && isPlaying) {
-    try { /* Let YouTube handle background audio policy */ } catch(_) {}
-  }
-});
-
 /* ── SWIPE BACK ── */
 (function() {
   let sx=0, sy=0;
@@ -848,7 +918,7 @@ document.addEventListener('visibilitychange', () => {
     if (!e.changedTouches.length) return;
     const dx = e.changedTouches[0].clientX - sx;
     const dy = e.changedTouches[0].clientY - sy;
-    if (Math.abs(dx) > Math.abs(dy) && dx > 90 && sx < 60) goBack();
+    if (Math.abs(dx) > Math.abs(dy) && dx > 90 && sx < 60 && !isFullscreen) goBack();
   }, {passive:true});
 })();
 </script>
