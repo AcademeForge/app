@@ -10,27 +10,32 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#4f46e5"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
 <title>My Bug Reports · AcademeForge</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Sora:wght@700;800;900&display=swap" rel="stylesheet"/>
 <style>
 /* ════════════════════════════════════════════════════════
-   DESIGN TOKENS — lightweight (no blur, fewer shadows)
+   DESIGN TOKENS — mirrors contact page exactly
    ════════════════════════════════════════════════════════ */
 :root {
-  --p:#4f46e5;--p2:#3730a3;
+  --p:#4f46e5;--p2:#3730a3;--pl:#818cf8;
   --acc:#06b6d4;--ok:#22c55e;--err:#ef4444;--warn:#f59e0b;
-  --bg:#eef0fb;--surface:#fff;--card:#fff;
-  --inp:#f4f5fb;
-  --grp:rgba(79,70,229,0.06);--grph:rgba(79,70,229,0.12);
+  --bg:#eef0fb;--surface:#fff;--card:rgba(255,255,255,0.90);
+  --nav:rgba(255,255,255,0.95);--inp:#f4f5fb;
+  --grp:rgba(79,70,229,0.07);--grph:rgba(79,70,229,0.13);
   --t1:#0f0e2a;--t2:#4b5563;--tm:#9ca3af;
-  --b1:rgba(79,70,229,0.12);--bc:rgba(79,70,229,0.16);
-  --sh:0 1px 6px rgba(15,14,42,0.06);
-  --r2:12px;--r3:18px;--r4:20px;--rf:9999px;
+  --b1:rgba(79,70,229,0.13);--bc:rgba(79,70,229,0.18);
+  --sh:0 2px 14px rgba(79,70,229,0.09),0 1px 4px rgba(0,0,0,0.05);
+  --she:0 12px 40px rgba(79,70,229,0.15);
+  --shb:0 6px 20px rgba(79,70,229,0.30);
+  --r2:12px;--r3:18px;--r4:24px;--rf:9999px;
   --fd:'Sora',sans-serif;--fb:'Nunito',sans-serif;
-  --hdr-h:56px;--shell:430px;
-  --dur:120ms;
+  --hdr-h:58px;--shell:430px;
+  --dur:180ms;--ease:cubic-bezier(0.22,1,0.36,1);
+  --spring:cubic-bezier(0.34,1.56,0.64,1);
 
   --s-open:#f59e0b;   --s-open-bg:rgba(245,158,11,.10);  --s-open-bd:rgba(245,158,11,.25);
   --s-prog:#3b82f6;   --s-prog-bg:rgba(59,130,246,.10);  --s-prog-bd:rgba(59,130,246,.25);
@@ -38,59 +43,81 @@
   --s-rej:#ef4444;    --s-rej-bg:rgba(239,68,68,.10);    --s-rej-bd:rgba(239,68,68,.25);
   --s-cls:#6b7280;    --s-cls-bg:rgba(107,114,128,.10);  --s-cls-bd:rgba(107,114,128,.25);
 
-  --pr-low:#22c55e;  --pr-low-bg:rgba(34,197,94,.09);
-  --pr-med:#f59e0b;  --pr-med-bg:rgba(245,158,11,.09);
-  --pr-hi:#ef4444;   --pr-hi-bg:rgba(239,68,68,.09);
-  --pr-crit:#7c3aed; --pr-crit-bg:rgba(124,58,237,.09);
+  --pr-low:#22c55e;   --pr-low-bg:rgba(34,197,94,.09);
+  --pr-med:#f59e0b;   --pr-med-bg:rgba(245,158,11,.09);
+  --pr-hi:#ef4444;    --pr-hi-bg:rgba(239,68,68,.09);
+  --pr-crit:#7c3aed;  --pr-crit-bg:rgba(124,58,237,.09);
 }
 
 [data-theme="dark"] {
-  --bg:#0b0a1e;--surface:#100e26;--card:#15122e;
-  --inp:#1a1735;
-  --grp:rgba(129,140,248,0.08);--grph:rgba(129,140,248,0.15);
+  --bg:#0b0a1e;--surface:#100e26;--card:rgba(24,21,52,0.92);
+  --nav:rgba(14,12,34,0.97);--inp:#1a1735;
+  --grp:rgba(129,140,248,0.09);--grph:rgba(129,140,248,0.16);
   --t1:#ede9ff;--t2:#a09dbf;--tm:#635f83;
-  --b1:rgba(129,140,248,0.12);--bc:rgba(129,140,248,0.18);
-  --sh:0 1px 6px rgba(0,0,0,0.25);
+  --b1:rgba(129,140,248,0.13);--bc:rgba(129,140,248,0.20);
+  --sh:0 2px 14px rgba(0,0,0,0.32),0 1px 4px rgba(0,0,0,0.20);
+  --she:0 12px 40px rgba(0,0,0,0.50);
+  --shb:0 6px 20px rgba(79,70,229,0.45);
 }
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html{font-size:15px;-webkit-text-size-adjust:100%;}
+html{font-size:15px;-webkit-text-size-adjust:100%;height:100%;height:100dvh;}
 body{
   font-family:var(--fb);background:var(--bg);color:var(--t1);
-  display:flex;justify-content:center;min-height:100vh;
+  height:100%;height:100dvh;display:flex;justify-content:center;
+  overflow:hidden;transition:background .18s,color .18s;
 }
 button{font-family:var(--fb);cursor:pointer;border:none;background:none;color:inherit;}
 a{text-decoration:none;color:inherit;}
 input,select,textarea{font-family:var(--fb);}
 
 .shell{
-  width:100%;max-width:var(--shell);min-height:100vh;
+  width:100%;max-width:var(--shell);height:100%;height:100dvh;
   background:var(--surface);display:flex;flex-direction:column;
+  overflow:hidden;box-shadow:0 0 0 1px var(--b1),var(--she);
+  transition:background .18s;
 }
 @media(min-width:700px){
-  body{padding:24px 0;min-height:100vh;}
-  .shell{border-radius:20px;box-shadow:0 4px 24px rgba(79,70,229,.10);min-height:calc(100vh - 48px);}
+  body{padding:28px 0 44px;height:auto;min-height:100dvh;overflow-y:auto;}
+  .shell{
+    border-radius:36px;height:calc(100dvh - 72px);max-height:900px;overflow:hidden;
+    box-shadow:0 0 0 1px var(--bc),0 32px 80px rgba(0,0,0,.20),0 8px 24px rgba(79,70,229,.14);
+  }
 }
 
 /* ── Header ── */
 .hdr{
   position:sticky;top:0;z-index:100;height:var(--hdr-h);
-  background:var(--surface);border-bottom:1px solid var(--b1);
-  display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;
+  background:var(--nav);backdrop-filter:blur(18px) saturate(160%);
+  -webkit-backdrop-filter:blur(18px) saturate(160%);
+  border-bottom:1px solid var(--b1);display:flex;align-items:center;
+  padding:0 14px;gap:10px;flex-shrink:0;transition:background .18s;
 }
-.hdr-back,.hdr-refresh{
-  width:32px;height:32px;border-radius:10px;background:var(--grp);
+.hdr-back{
+  width:34px;height:34px;border-radius:10px;background:var(--grp);
   border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;
-  font-size:16px;transition:background var(--dur);
+  font-size:18px;transition:transform var(--dur) var(--spring),background var(--dur);
 }
-.hdr-back:hover,.hdr-refresh:hover{background:var(--grph);}
+.hdr-back:hover{background:var(--grph);}
+.hdr-back:active{transform:scale(.92);}
 .hdr-title{flex:1;font-family:var(--fd);font-size:15px;font-weight:800;color:var(--t1);}
+.hdr-refresh{
+  width:34px;height:34px;border-radius:10px;background:var(--grp);
+  border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;
+  font-size:16px;transition:transform var(--dur) var(--spring),background var(--dur);
+}
+.hdr-refresh:hover{background:var(--grph);}
+.hdr-refresh:active{transform:scale(.92);}
 .hdr-refresh.spinning{animation:spin .7s linear infinite;}
 
 /* ── Page ── */
 .page{
-  flex:1;padding:14px 13px 28px;
+  flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;
+  overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;
+  padding:14px 13px 28px;
 }
+.page::-webkit-scrollbar{width:2px;}
+.page::-webkit-scrollbar-thumb{background:var(--bc);border-radius:99px;}
 
 /* ── Tabs ── */
 .tab-bar{
@@ -99,15 +126,17 @@ input,select,textarea{font-family:var(--fb);}
 }
 .tab-btn{
   flex:1;padding:9px 6px;border-radius:var(--r2);font-size:12px;font-weight:800;
-  color:var(--tm);transition:background var(--dur),color var(--dur);text-align:center;
+  color:var(--tm);transition:background var(--dur),color var(--dur),transform var(--dur) var(--spring);
+  text-align:center;
 }
 .tab-btn.active{background:var(--surface);color:var(--p);box-shadow:var(--sh);}
+.tab-btn:active{transform:scale(.96);}
 
 /* ── Summary strip ── */
 .summary-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
 .sum-cell{
   background:var(--card);border:1px solid var(--bc);border-radius:var(--r3);
-  padding:11px 8px;text-align:center;
+  padding:11px 8px;text-align:center;box-shadow:var(--sh);
 }
 .sum-cell .num{font-family:var(--fd);font-size:20px;font-weight:900;color:var(--p);line-height:1;}
 .sum-cell .lbl{font-size:9.5px;font-weight:800;color:var(--tm);text-transform:uppercase;letter-spacing:.05em;margin-top:3px;}
@@ -127,21 +156,31 @@ input,select,textarea{font-family:var(--fb);}
   border:1.5px solid var(--bc);color:var(--t1);font-size:12px;font-weight:700;
   outline:none;-webkit-appearance:none;appearance:none;cursor:pointer;
 }
+.fs-sel:focus{border-color:var(--p);}
 
 /* ── Skeleton ── */
 .skeleton-card{
   border-radius:var(--r4);background:var(--card);border:1px solid var(--bc);
-  height:120px;margin-bottom:10px;
+  height:155px;margin-bottom:10px;overflow:hidden;position:relative;
+}
+.skeleton-card::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.13) 50%,transparent 100%);
+  animation:shimmer 1.3s ease infinite;
+}
+[data-theme="dark"] .skeleton-card::after{
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.06) 50%,transparent 100%);
 }
 
 /* ── Report card ── */
 .report-card{
   border-radius:var(--r4);background:var(--card);border:1px solid var(--bc);
   box-shadow:var(--sh);overflow:hidden;margin-bottom:10px;
+  animation:up .28s var(--ease) both;
 }
 .rc-head{
   display:flex;align-items:center;justify-content:space-between;
-  padding:12px 14px 9px;border-bottom:1px solid var(--b1);gap:8px;
+  padding:13px 16px 10px;border-bottom:1px solid var(--b1);gap:8px;
 }
 .rc-cat{font-family:var(--fd);font-size:12px;font-weight:800;color:var(--t1);display:flex;align-items:center;gap:6px;}
 .rc-cat-icon{font-size:17px;}
@@ -149,8 +188,10 @@ input,select,textarea{font-family:var(--fb);}
 .rc-copy{
   font-size:12px;color:var(--p);padding:3px 7px;border-radius:6px;
   background:rgba(79,70,229,.08);border:1px solid rgba(79,70,229,.16);
+  transition:transform var(--dur) var(--spring);
 }
-.rc-body{padding:11px 14px;display:flex;flex-direction:column;gap:8px;}
+.rc-copy:active{transform:scale(.9);}
+.rc-body{padding:12px 16px;display:flex;flex-direction:column;gap:8px;}
 .rc-badges{display:flex;flex-wrap:wrap;gap:6px;}
 .badge{font-size:10.5px;font-weight:800;padding:4px 10px;border-radius:var(--rf);letter-spacing:.03em;flex-shrink:0;}
 .badge.s-open{color:var(--s-open);background:var(--s-open-bg);border:1px solid var(--s-open-bd);}
@@ -175,31 +216,44 @@ input,select,textarea{font-family:var(--fb);}
 .flag.solved{color:var(--ok);background:rgba(34,197,94,.09);border:1px solid rgba(34,197,94,.22);}
 .flag.pending{color:var(--warn);background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.22);}
 
+/* ── Info banner ── */
+.info-banner{
+  display:flex;gap:10px;align-items:flex-start;background:rgba(6,182,212,.08);
+  border:1px solid rgba(6,182,212,.22);border-radius:var(--r3);padding:12px 14px;
+  margin-bottom:14px;animation:up .24s var(--ease) both;
+}
+.info-banner-icon{font-size:19px;flex-shrink:0;line-height:1.3;}
+.info-banner p{font-size:12px;font-weight:700;color:var(--t2);line-height:1.6;}
+.info-banner strong{display:block;font-size:12.5px;color:var(--t1);margin-bottom:3px;}
+
 /* ── Submit form ── */
 .form-card{
   border-radius:var(--r4);background:var(--card);border:1px solid var(--bc);
   box-shadow:var(--sh);overflow:hidden;margin-bottom:12px;
+  animation:up .28s var(--ease) both;
 }
-.form-card-head{display:flex;align-items:center;gap:10px;padding:14px 16px 12px;border-bottom:1px solid var(--b1);}
+.form-card-head{display:flex;align-items:center;gap:10px;padding:15px 18px 13px;border-bottom:1px solid var(--b1);}
 .form-card-icon{
-  width:36px;height:36px;border-radius:11px;flex-shrink:0;
+  width:38px;height:38px;border-radius:11px;flex-shrink:0;
   background:linear-gradient(135deg,var(--p),var(--acc));
-  display:flex;align-items:center;justify-content:center;font-size:17px;
+  display:flex;align-items:center;justify-content:center;font-size:18px;
 }
 .form-card-title{font-family:var(--fd);font-size:13.5px;font-weight:800;color:var(--t1);}
 .form-card-sub{font-size:11px;color:var(--tm);font-weight:600;margin-top:1px;}
-.form-body{padding:16px;display:flex;flex-direction:column;gap:13px;}
+.form-body{padding:16px 18px;display:flex;flex-direction:column;gap:13px;}
 .f-field{display:flex;flex-direction:column;gap:5px;}
 .f-label{font-size:11px;font-weight:800;color:var(--t1);text-transform:uppercase;letter-spacing:.05em;}
 .f-req{color:var(--err);margin-left:2px;}
 .f-input,.f-select,.f-textarea{
   width:100%;padding:11px 13px;border-radius:var(--r2);background:var(--inp);
   border:1.5px solid var(--bc);color:var(--t1);font-size:13.5px;font-weight:700;
-  outline:none;transition:border-color var(--dur);
+  outline:none;transition:border-color var(--dur),box-shadow var(--dur);
 }
-.f-input:focus,.f-select:focus,.f-textarea:focus{border-color:var(--p);}
+.f-input:focus,.f-select:focus,.f-textarea:focus{
+  border-color:var(--p);box-shadow:0 0 0 3px rgba(79,70,229,.12);
+}
 .f-input::placeholder,.f-textarea::placeholder{color:var(--tm);}
-.f-textarea{resize:vertical;min-height:90px;line-height:1.55;}
+.f-textarea{resize:vertical;min-height:100px;line-height:1.55;}
 .f-select{-webkit-appearance:none;appearance:none;cursor:pointer;}
 .f-hint{font-size:10.5px;color:var(--tm);font-weight:600;}
 .f-row{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
@@ -207,40 +261,49 @@ input,select,textarea{font-family:var(--fb);}
 .f-msg.ok{color:var(--ok);}
 .f-msg.err{color:var(--err);}
 .submit-btn{
-  width:100%;padding:13px;border-radius:var(--r2);
+  width:100%;padding:14px;border-radius:var(--r2);
   background:linear-gradient(135deg,var(--p),var(--p2));
-  color:#fff;font-weight:900;font-size:14px;
-  transition:opacity var(--dur);
+  color:#fff;font-weight:900;font-size:14px;box-shadow:var(--shb);
+  transition:transform var(--dur) var(--spring),opacity var(--dur);
 }
-.submit-btn:active{opacity:.85;}
-.submit-btn:disabled{opacity:.6;cursor:not-allowed;}
+.submit-btn:active{transform:scale(.98);}
+.submit-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
 
-/* ── States ── */
-.state-box{text-align:center;padding:36px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;}
-.state-emoji{font-size:44px;line-height:1;}
-.state-title{font-family:var(--fd);font-size:16px;font-weight:900;color:var(--t1);}
+/* ── State boxes ── */
+.state-box{text-align:center;padding:40px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.state-emoji{font-size:48px;line-height:1;}
+.state-title{font-family:var(--fd);font-size:17px;font-weight:900;color:var(--t1);}
 .state-sub{font-size:13px;color:var(--tm);font-weight:700;max-width:280px;text-align:center;line-height:1.5;}
 .state-btn{
-  margin-top:6px;padding:10px 22px;border-radius:var(--rf);
+  margin-top:6px;padding:11px 22px;border-radius:var(--rf);
   background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;
-  font-weight:900;font-size:13px;
+  font-weight:900;font-size:13px;box-shadow:var(--shb);
+  transition:transform var(--dur) var(--spring);
 }
+.state-btn:active{transform:scale(.96);}
 
 /* ── Pagination ── */
 .pag-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px;}
 .pag-btn{
   padding:9px 18px;border-radius:var(--rf);font-size:12px;font-weight:800;
   background:var(--grp);border:1px solid var(--b1);color:var(--t1);
+  transition:transform var(--dur) var(--spring),background var(--dur);
 }
-.pag-btn:disabled{opacity:.4;cursor:not-allowed;}
+.pag-btn:hover{background:var(--grph);}
+.pag-btn:active{transform:scale(.95);}
+.pag-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
 .pag-info{font-size:12px;font-weight:700;color:var(--tm);}
+
+/* ── Session screen ── */
+.session-screen{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;}
 
 /* ── Toast ── */
 .toast-wrap{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:999999;width:min(92vw,400px);pointer-events:none;}
 .toast{
   display:flex;align-items:flex-start;gap:10px;background:var(--surface);
   color:var(--t1);border:1px solid var(--bc);border-radius:14px;
-  padding:11px 13px;box-shadow:0 4px 18px rgba(0,0,0,.12);pointer-events:auto;
+  padding:11px 13px;box-shadow:0 4px 22px rgba(0,0,0,.14);pointer-events:auto;
+  animation:toastIn .22s var(--ease) both;
 }
 .toast.ok{border-left:3px solid var(--ok);}
 .toast.info{border-left:3px solid var(--p);}
@@ -250,7 +313,11 @@ input,select,textarea{font-family:var(--fb);}
 .toast-body p:last-child{font-size:11px;color:var(--t2);margin-top:1px;}
 .toast-x{font-size:16px;color:var(--tm);cursor:pointer;margin-left:auto;}
 
+/* ── Animations ── */
+@keyframes up{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@keyframes shimmer{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
 @keyframes spin{to{transform:rotate(360deg);}}
+@keyframes toastIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
 .hidden{display:none!important;}
 </style>
 </head>
@@ -268,11 +335,22 @@ input,select,textarea{font-family:var(--fb);}
 
     <div class="tab-bar" id="tabBar">
       <button class="tab-btn active" id="tabSubmit" onclick="switchTab('submit')">🐛 Report a Bug</button>
-      <button class="tab-btn" id="tabStatus" onclick="switchTab('status')">📋 My Reports</button>
+      <button class="tab-btn"        id="tabStatus" onclick="switchTab('status')">📋 My Reports</button>
     </div>
 
-    <!-- SUBMIT PANEL -->
+    <!-- ══════════════════════════════════════
+         SUBMIT PANEL
+    ══════════════════════════════════════ -->
     <div id="panelSubmit">
+
+      <div class="info-banner">
+        <span class="info-banner-icon">🐛</span>
+        <div>
+          <strong>Found a bug? Let us know.</strong>
+          <p>Your report helps us improve AcademeForge for everyone. We review every submission.</p>
+        </div>
+      </div>
+
       <div class="form-card">
         <div class="form-card-head">
           <div class="form-card-icon">🐛</div>
@@ -342,14 +420,16 @@ input,select,textarea{font-family:var(--fb);}
       </div>
     </div><!-- /panelSubmit -->
 
-    <!-- STATUS PANEL -->
+    <!-- ══════════════════════════════════════
+         STATUS PANEL
+    ══════════════════════════════════════ -->
     <div id="panelStatus" class="hidden">
 
       <div class="summary-strip" id="summaryStrip" style="display:none;">
         <div class="sum-cell"><div class="num" id="sumTotal">0</div><div class="lbl">Total</div></div>
-        <div class="sum-cell"><div class="num" id="sumOpen" style="color:var(--s-open)">0</div><div class="lbl">Open</div></div>
-        <div class="sum-cell"><div class="num" id="sumProg" style="color:var(--s-prog)">0</div><div class="lbl">In Progress</div></div>
-        <div class="sum-cell"><div class="num" id="sumRes" style="color:var(--s-res)">0</div><div class="lbl">Resolved</div></div>
+        <div class="sum-cell"><div class="num" id="sumOpen"  style="color:var(--s-open)">0</div><div class="lbl">Open</div></div>
+        <div class="sum-cell"><div class="num" id="sumProg"  style="color:var(--s-prog)">0</div><div class="lbl">In Progress</div></div>
+        <div class="sum-cell"><div class="num" id="sumRes"   style="color:var(--s-res)">0</div><div class="lbl">Resolved</div></div>
       </div>
 
       <div class="controls" id="controls" style="display:none;">
@@ -385,9 +465,9 @@ input,select,textarea{font-family:var(--fb);}
 
   </div><!-- /mainPage -->
 
-  <!-- SESSION EXPIRED -->
-  <div id="sessionScreen" class="state-box hidden" style="flex:1;display:flex;align-items:center;justify-content:center;">
-    <div>
+  <!-- ── SESSION EXPIRED ── -->
+  <div id="sessionScreen" class="session-screen hidden">
+    <div class="state-box">
       <div class="state-emoji">🔐</div>
       <div class="state-title">Session Expired</div>
       <div class="state-sub">We couldn't find your account details. Please log in again to continue.</div>
@@ -402,34 +482,32 @@ input,select,textarea{font-family:var(--fb);}
 <script>
 'use strict';
 
-/* CONFIG */
-const API_BASE = 'https://afooyyydhlwngzssgqih.supabase.co/functions/v1/bug-reports-unified';
+/* ─────────────────────────────────────────
+   CONFIG
+───────────────────────────────────────── */
+const API_BASE  = 'https://afooyyydhlwngzssgqih.supabase.co/functions/v1/bug-reports-unified';
 const SUBMIT_URL = API_BASE;
 const STATUS_URL = API_BASE + '/status';
 
-const CACHE_KEY = 'af_bug_reports_cache_v1';
-const CACHE_TTL = 10 * 60 * 1000;
+const CACHE_KEY  = 'af_bug_reports_cache_v1';
+const CACHE_TTL  = 10 * 60 * 1000; // 10 minutes
 const PAGE_LIMIT = 20;
 
-/* STATE */
-let currentTab   = 'submit';
-let allReports   = [];
+/* ─────────────────────────────────────────
+   STATE
+───────────────────────────────────────── */
+let currentTab  = 'submit';
+let allReports  = [];
 let filteredList = [];
-let currentPage  = 1;
-let isLoading    = false;
+let currentPage = 1;
+let isLoading   = false;
 
-/* UTILS */
-const $  = id => document.getElementById(id);
+/* ─────────────────────────────────────────
+   UTILS
+───────────────────────────────────────── */
+const $   = id => document.getElementById(id);
 const esc = t  => String(t || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-function fmtDate(iso) {
-  if (!iso) return '—';
-  try {
-    return new Date(iso).toLocaleString('en-IN', {
-      day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', hour12:true,
-    });
-  } catch { return iso; }
-}
 function relTime(iso) {
   if (!iso) return '';
   const diff = Date.now() - new Date(iso).getTime();
@@ -440,66 +518,77 @@ function relTime(iso) {
   if (h < 24) return `${h}h ago`;
   const d = Math.floor(h / 24);
   if (d < 30) return `${d}d ago`;
-  return fmtDate(iso).split(',')[0];
+  try {
+    return new Date(iso).toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  } catch { return iso; }
 }
 
-/* THEME */
+/* ─────────────────────────────────────────
+   THEME
+───────────────────────────────────────── */
 function syncTheme() {
-  const dark = localStorage.getItem('af_dark_mode') === '1';
-  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  document.documentElement.setAttribute('data-theme',
+    localStorage.getItem('af_dark_mode') === '1' ? 'dark' : 'light');
 }
 syncTheme();
 window.addEventListener('storage', e => { if (e.key === 'af_dark_mode') syncTheme(); });
 
-/* TOAST */
-let _toastTimer = null;
+/* ─────────────────────────────────────────
+   TOAST
+───────────────────────────────────────── */
+let _tt = null;
 function showToast(msg, type = 'info', title = '') {
   const wrap = $('toastWrap');
   wrap.innerHTML = '';
-  if (_toastTimer) { clearTimeout(_toastTimer); _toastTimer = null; }
-  const labels = { ok: 'Done', info: 'Info', err: 'Error', warn: 'Notice' };
-  const div = document.createElement('div');
-  div.className = 'toast ' + type;
-  div.innerHTML = `<div class="toast-body"><p>${title || labels[type] || 'Info'}</p><p>${esc(msg)}</p></div>
+  if (_tt) { clearTimeout(_tt); _tt = null; }
+  const labels = { ok:'Done', info:'Info', err:'Error', warn:'Notice' };
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.innerHTML = `<div class="toast-body"><p>${title || labels[type] || 'Info'}</p><p>${esc(msg)}</p></div>
     <span class="toast-x" onclick="this.parentElement.remove()">×</span>`;
-  wrap.appendChild(div);
-  _toastTimer = setTimeout(() => div && div.remove(), 3200);
+  wrap.appendChild(el);
+  _tt = setTimeout(() => el && el.remove(), 3200);
 }
 
-/* CACHE — namespaced per student_uuid */
+/* ─────────────────────────────────────────
+   CACHE — namespaced per student_uuid
+   (same pattern as contact page)
+───────────────────────────────────────── */
 function cacheKeyFor(uuid) { return CACHE_KEY + ':' + (uuid || 'anon'); }
 function cacheSet(uuid, data) {
   try { localStorage.setItem(cacheKeyFor(uuid), JSON.stringify({ ts: Date.now(), data })); } catch(_) {}
 }
 function cacheGet(uuid) {
   try {
-    const raw = localStorage.getItem(cacheKeyFor(uuid));
-    if (!raw) return null;
-    const obj = JSON.parse(raw);
-    if (Date.now() - obj.ts > CACHE_TTL) return null;
-    return obj.data;
+    const r = JSON.parse(localStorage.getItem(cacheKeyFor(uuid)) || 'null');
+    if (!r || Date.now() - r.ts > CACHE_TTL) return null;
+    return r.data;
   } catch { return null; }
 }
 function cacheClear(uuid) {
   try { localStorage.removeItem(cacheKeyFor(uuid)); } catch(_) {}
 }
 
-/* SESSION
-   Both `uuid` and `email` are sent to /status. The backend validates their
-   format and uses the pair to determine ownership of bug reports — no JWT
-   is used, matching the existing AcademeForge session model. */
+/* ─────────────────────────────────────────
+   SESSION
+   Both uuid AND email are sent to /status — identical to contact page.
+   The backend requires both (resolveIdentity) and uses the pair to
+   determine ownership without a JWT.
+───────────────────────────────────────── */
 function getSession() {
   return {
-    loggedIn:  localStorage.getItem('af_student_logged_in') === 'true',
-    uuid:      localStorage.getItem('af_student_uuid')  || '',
-    id:        localStorage.getItem('af_student_id')    || '',
-    email:     localStorage.getItem('af_student_email') || '',
-    name:      localStorage.getItem('af_student_name')  || '',
-    mobile:    localStorage.getItem('af_student_mobile') || localStorage.getItem('af_student_phone') || '',
+    loggedIn: localStorage.getItem('af_student_logged_in') === 'true',
+    uuid:     localStorage.getItem('af_student_uuid')   || '',
+    id:       localStorage.getItem('af_student_id')     || '',
+    email:    localStorage.getItem('af_student_email')  || '',
+    name:     localStorage.getItem('af_student_name')   || '',
+    mobile:   localStorage.getItem('af_student_mobile') || localStorage.getItem('af_student_phone') || '',
   };
 }
 
-/* TAB SWITCHING */
+/* ─────────────────────────────────────────
+   TAB SWITCH
+───────────────────────────────────────── */
 function switchTab(tab) {
   currentTab = tab;
   $('tabSubmit').classList.toggle('active', tab === 'submit');
@@ -511,44 +600,52 @@ function switchTab(tab) {
   if (tab === 'status') loadStatus(false);
 }
 
-/* COPY ID */
+/* ─────────────────────────────────────────
+   COPY ID
+───────────────────────────────────────── */
 function copyId(id) {
   navigator.clipboard.writeText(id).then(() => {
     showToast('Report ID copied to clipboard.', 'ok', 'Copied!');
   }).catch(() => {
-    showToast('Could not copy. Please copy manually: ' + id, 'warn', 'Manual copy');
+    showToast('Please copy manually: ' + id, 'warn', 'Copy manually');
   });
 }
 
-/* META */
+/* ─────────────────────────────────────────
+   CATEGORY META
+───────────────────────────────────────── */
 const CAT_META = {
-  login:        { icon: '🔐', label: 'Login' },
-  navigation:   { icon: '🧭', label: 'Navigation' },
-  dark_mode:    { icon: '🌙', label: 'Dark Mode' },
-  notification: { icon: '🔔', label: 'Notification' },
-  payment:      { icon: '💳', label: 'Payment' },
-  ui:           { icon: '🎨', label: 'UI / Design' },
-  performance:  { icon: '⚡', label: 'Performance' },
-  other:        { icon: '🔧', label: 'Other' },
+  login:        { icon:'🔐', label:'Login' },
+  navigation:   { icon:'🧭', label:'Navigation' },
+  dark_mode:    { icon:'🌙', label:'Dark Mode' },
+  notification: { icon:'🔔', label:'Notification' },
+  payment:      { icon:'💳', label:'Payment' },
+  ui:           { icon:'🎨', label:'UI / Design' },
+  performance:  { icon:'⚡', label:'Performance' },
+  other:        { icon:'🔧', label:'Other' },
 };
-function catLabel(cat) { return CAT_META[cat] || { icon: '🐛', label: cat || 'Unknown' }; }
+function catMeta(cat) { return CAT_META[cat] || { icon:'🐛', label: cat || 'Unknown' }; }
 
 const STATUS_LABEL = {
-  open: 'Open', in_progress: 'In Progress', resolved: 'Resolved', rejected: 'Rejected', closed: 'Closed',
+  open:'Open', in_progress:'In Progress', resolved:'Resolved',
+  rejected:'Rejected', closed:'Closed',
 };
 const PRIORITY_LABEL = {
-  low: 'Low Priority', medium: 'Medium Priority', high: 'High Priority', critical: 'Critical',
+  low:'Low Priority', medium:'Medium Priority', high:'High Priority', critical:'Critical',
 };
 
-/* RENDER CARD */
-function renderCard(r) {
-  const cat   = catLabel(r.category);
-  const sKey  = (r.status || 'open').toLowerCase().replace(/\s+/g,'_');
-  const prKey = (r.priority || 'medium').toLowerCase();
+/* ─────────────────────────────────────────
+   RENDER CARD (mirrors contact renderCard structure)
+───────────────────────────────────────── */
+function renderCard(r, idx) {
+  const cat    = catMeta(r.category);
+  const sKey   = (r.status || 'open').toLowerCase().replace(/\s+/g,'_');
+  const prKey  = (r.priority || 'medium').toLowerCase();
   const shortId = (r.id || '').toString().slice(0, 8).toUpperCase();
+  const delay   = Math.min(idx * 0.04, 0.4);
 
   return `
-  <div class="report-card">
+  <div class="report-card" style="animation-delay:${delay}s;">
     <div class="rc-head">
       <div class="rc-cat"><span class="rc-cat-icon">${esc(cat.icon)}</span>${esc(cat.label)}</div>
       <div class="rc-id">
@@ -568,29 +665,34 @@ function renderCard(r) {
       </div>
       <div class="rc-meta">
         <span class="rc-meta-item">📅 ${esc(relTime(r.created_at))}</span>
-        ${r.updated_at && r.updated_at !== r.created_at ? `<span class="rc-meta-item">🔄 Updated ${esc(relTime(r.updated_at))}</span>` : ''}
+        ${r.updated_at && r.updated_at !== r.created_at
+          ? `<span class="rc-meta-item">🔄 Updated ${esc(relTime(r.updated_at))}</span>`
+          : ''}
       </div>
     </div>
   </div>`;
 }
 
 function renderSkeletons(n = 3) {
-  let html = '';
-  for (let i = 0; i < n; i++) html += `<div class="skeleton-card"></div>`;
-  return html;
+  let h = '';
+  for (let i = 0; i < n; i++)
+    h += `<div class="skeleton-card" style="height:${150 + (i % 2)*25}px;animation-delay:${i*.07}s;"></div>`;
+  return h;
 }
 
-/* FILTER / SEARCH / SORT */
+/* ─────────────────────────────────────────
+   FILTER / SEARCH / SORT (client-side)
+───────────────────────────────────────── */
 function applyFilters() {
-  const query  = ($('searchInp').value || '').toLowerCase().trim();
+  const q      = ($('searchInp').value || '').toLowerCase().trim();
   const status = $('filterSel').value;
   const order  = $('sortSel').value;
 
   filteredList = allReports.filter(r => {
     if (status && r.status !== status) return false;
-    if (query) {
-      const haystack = [r.category, r.status, r.priority, r.status_note].join(' ').toLowerCase();
-      if (!haystack.includes(query)) return false;
+    if (q) {
+      const hay = [r.category, r.status, r.priority, r.status_note].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
     }
     return true;
   });
@@ -623,7 +725,7 @@ function renderStatusList() {
         <div class="state-title">${hasData ? 'No Matches Found' : 'No Reports Yet'}</div>
         <div class="state-sub">${hasData
           ? 'Try changing your filter or search term.'
-          : 'You haven\'t submitted any bug reports yet. Switch to "Report a Bug" to get started!'
+          : "You haven't submitted any bug reports yet."
         }</div>
         ${!hasData ? `<button class="state-btn" onclick="switchTab('submit')">Report a Bug →</button>` : ''}
       </div>`;
@@ -636,7 +738,7 @@ function renderStatusList() {
   const start = (currentPage - 1) * PAGE_LIMIT;
   const slice = filteredList.slice(start, start + PAGE_LIMIT);
 
-  content.innerHTML = slice.map(r => renderCard(r)).join('');
+  content.innerHTML = slice.map((r, i) => renderCard(r, i)).join('');
 
   if (filteredList.length > PAGE_LIMIT) {
     $('pagRow').classList.remove('hidden');
@@ -648,13 +750,18 @@ function renderStatusList() {
   }
 }
 
-/* LOAD STATUS — auth via (student_uuid, email) pair */
+/* ─────────────────────────────────────────
+   LOAD STATUS
+   Auth: sends { student_uuid, email } — identical to contact page.
+   Backend (resolveIdentity) requires BOTH a valid UUID and valid email.
+───────────────────────────────────────── */
 async function loadStatus(forceRefresh = false) {
   if (isLoading) return;
 
   const session = getSession();
   const content = $('statusContent');
 
+  // Both uuid AND email are required (mirrors contact page check)
   if (!session.uuid || !session.email) {
     content.innerHTML = `
       <div class="state-box">
@@ -666,6 +773,7 @@ async function loadStatus(forceRefresh = false) {
     return;
   }
 
+  // Serve cache immediately (namespaced to this student_uuid)
   if (!forceRefresh) {
     const cached = cacheGet(session.uuid);
     if (cached) {
@@ -729,28 +837,32 @@ async function silentRefresh(session) {
   } catch { /* silent */ }
 }
 
-/** API call with timeout + one retry. Sends student_uuid + email only. */
+/**
+ * API call with timeout + one retry.
+ * Sends { student_uuid, email } — IDENTICAL to contact page fetchRequests.
+ * Backend resolveIdentity() requires both fields to be valid.
+ */
 async function fetchReports(session, attempt = 1) {
-  const MAX_ATTEMPTS = 2;
-  const TIMEOUT_MS   = 12000;
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const MAX   = 2;
+  const TOMS  = 12000;
+  const ctrl  = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), TOMS);
 
   try {
     const res = await fetch(STATUS_URL, {
       method:  'POST',
-      signal:  controller.signal,
+      signal:  ctrl.signal,
       headers: { 'Content-Type': 'application/json' },
+      // Send both uuid AND email — same payload shape as contact page
       body: JSON.stringify({
         student_uuid: session.uuid,
-        email: session.email,
-        limit: 100,
-        page: 1,
+        email:        session.email,
+        limit:        100,
+        page:         1,
       }),
     });
-
     clearTimeout(timer);
+
     let data;
     try { data = await res.json(); } catch { data = {}; }
 
@@ -759,17 +871,18 @@ async function fetchReports(session, attempt = 1) {
       e.code = 401;
       throw e;
     }
-    if (res.status === 429) throw new Error(data.message || 'Too many requests. Please wait a moment and try again.');
+    if (res.status === 429) throw new Error(data.message || 'Too many requests. Please wait and try again.');
     if (!res.ok)            throw new Error(data.message || `Server error (${res.status}).`);
     if (!data.success)      throw new Error(data.message || 'Unexpected server response.');
 
+    // Backend returns `reports` (not `requests` like contact page)
     return Array.isArray(data.reports) ? data.reports : [];
 
   } catch (err) {
     clearTimeout(timer);
     if (err.code === 401) throw err;
     if (err.name === 'AbortError') throw new Error('Request timed out. Please check your connection.');
-    if (attempt < MAX_ATTEMPTS) {
+    if (attempt < MAX) {
       await new Promise(r => setTimeout(r, attempt * 800));
       return fetchReports(session, attempt + 1);
     }
@@ -777,11 +890,13 @@ async function fetchReports(session, attempt = 1) {
   }
 }
 
-/* FILTER / SEARCH / SORT HANDLERS */
-let _searchDebounce = null;
+/* ─────────────────────────────────────────
+   FILTER / SEARCH / SORT HANDLERS
+───────────────────────────────────────── */
+let _debounce = null;
 function onSearch() {
-  clearTimeout(_searchDebounce);
-  _searchDebounce = setTimeout(() => { currentPage = 1; renderStatusList(); }, 200);
+  clearTimeout(_debounce);
+  _debounce = setTimeout(() => { currentPage = 1; renderStatusList(); }, 200);
 }
 function onFilter() { currentPage = 1; renderStatusList(); }
 function onSort()   { currentPage = 1; renderStatusList(); }
@@ -789,11 +904,14 @@ function onSort()   { currentPage = 1; renderStatusList(); }
 function goPage(dir) {
   currentPage = Math.max(1, currentPage + dir);
   renderStatusList();
-  $('statusContent').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  $('statusContent').scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
-/* REFRESH */
+/* ─────────────────────────────────────────
+   REFRESH
+───────────────────────────────────────── */
 function setRefreshSpinning(on) { $('refreshBtn').classList.toggle('spinning', on); }
+
 function onRefresh() {
   const session = getSession();
   cacheClear(session.uuid);
@@ -802,7 +920,11 @@ function onRefresh() {
   showToast('Refreshing your reports…', 'info', 'Refreshing');
 }
 
-/* SUBMIT REPORT — sends student_uuid so the row can be tied to this account */
+/* ─────────────────────────────────────────
+   SUBMIT REPORT
+   Sends student_uuid so the row is tied to this account and can be
+   retrieved by the (uuid + email) pair on /status.
+───────────────────────────────────────── */
 async function submitReport() {
   const btn = $('submitBtn');
   const msg = $('submitMsg');
@@ -819,33 +941,33 @@ async function submitReport() {
     msg.textContent = text;
   };
 
-  if (!name || name.length < 2)  { setMsg('err', 'Please enter your full name (min. 2 characters).'); return; }
-  if (!email || !email.includes('@')) { setMsg('err', 'Please enter a valid email address.'); return; }
-  if (!category)                 { setMsg('err', 'Please select a bug category.'); return; }
-  if (description.length < 10)  { setMsg('err', 'Description must be at least 10 characters.'); return; }
+  if (!name || name.length < 2)        { setMsg('err', 'Please enter your full name (min. 2 characters).'); return; }
+  if (!email || !email.includes('@'))  { setMsg('err', 'Please enter a valid email address.'); return; }
+  if (!category)                        { setMsg('err', 'Please select a bug category.'); return; }
+  if (description.length < 10)         { setMsg('err', 'Description must be at least 10 characters.'); return; }
 
   btn.disabled = true;
   setMsg('', 'Submitting your report…');
 
   try {
     const session = getSession();
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 15000);
+    const ctrl    = new AbortController();
+    const timer   = setTimeout(() => ctrl.abort(), 15000);
 
     const res = await fetch(SUBMIT_URL, {
       method:  'POST',
-      signal:  controller.signal,
+      signal:  ctrl.signal,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        reporterName:    name,
-        reporterEmail:   email,
+        reporterName:      name,
+        reporterEmail:     email,
         category,
         priority,
         description,
-        stepsToReproduce: steps,
-        pageUrl:         location.href,
-        activeSection:   'bug-reports',
-        student_uuid:    session.uuid || null,
+        stepsToReproduce:  steps,
+        pageUrl:           location.href,
+        activeSection:     'bug-reports',
+        student_uuid:      session.uuid || null,
         deviceInfo: {
           userAgent:        navigator.userAgent,
           language:         navigator.language,
@@ -865,31 +987,32 @@ async function submitReport() {
 
     if (!res.ok || !data.ok) throw new Error(data.error || `Submission failed (${res.status}).`);
 
-    setMsg('ok', `✓ Report submitted! ID: #${(data.reportId || '').toString().slice(0,8).toUpperCase()}`);
+    const shortId = (data.reportId || '').toString().slice(0, 8).toUpperCase();
+    setMsg('ok', `✓ Report submitted! ID: #${shortId}`);
     showToast('Your bug report has been submitted. Thank you!', 'ok', 'Submitted!');
 
     $('fDescription').value = '';
-    $('fSteps').value = '';
-    $('fCategory').value = '';
+    $('fSteps').value       = '';
+    $('fCategory').value    = '';
     $('descCount').textContent = '0 / 1200';
 
     cacheClear(session.uuid);
-
     setTimeout(() => { switchTab('status'); }, 2200);
 
   } catch (err) {
-    if (err.name === 'AbortError') {
-      setMsg('err', 'Request timed out. Please check your connection and try again.');
-    } else {
-      setMsg('err', err.message || 'Submission failed. Please try again.');
-    }
+    setMsg('err',
+      err.name === 'AbortError'
+        ? 'Request timed out. Please check your connection and try again.'
+        : (err.message || 'Submission failed. Please try again.'));
     showToast(err.message || 'Submission failed.', 'err', 'Error');
   } finally {
     btn.disabled = false;
   }
 }
 
-/* DESCRIPTION COUNTER */
+/* ─────────────────────────────────────────
+   DESCRIPTION COUNTER
+───────────────────────────────────────── */
 function initDescCounter() {
   const ta  = $('fDescription');
   const cnt = $('descCount');
@@ -903,25 +1026,26 @@ function initDescCounter() {
 
 function goBack() { window.history.back(); }
 
-/* INIT */
+/* ─────────────────────────────────────────
+   INIT
+───────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
-  const session = getSession();
+  const s = getSession();
 
-  if (!session.loggedIn) {
+  if (!s.loggedIn) {
     window.location.href = '../student/index.html';
     return;
   }
 
-  // Both uuid and email are required — they're the only values the
-  // backend accepts for /status.
-  if (!session.uuid || !session.email) {
+  // Both uuid AND email required — same guard as contact page
+  if (!s.uuid || !s.email) {
     $('mainPage').classList.add('hidden');
     $('sessionScreen').classList.remove('hidden');
     return;
   }
 
-  if (session.name)  $('fName').value  = session.name;
-  if (session.email) $('fEmail').value = session.email;
+  if (s.name)  $('fName').value  = s.name;
+  if (s.email) $('fEmail').value = s.email;
 
   initDescCounter();
   switchTab('submit');
