@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- ── Immediate theme flash prevention ── -->
+<script>
+!function(){
+  document.documentElement.setAttribute('data-theme',
+    localStorage.getItem('af_dark_mode')==='1'?'dark':'light');
+}();
+</script>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#4f46e5"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>Contact Support · AcademeForge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Sora:wght@700;800;900&display=swap" rel="stylesheet"/>
+<style>
+/* ════════════════════════════════════════════════════════
+   DESIGN TOKENS — mirrors AcademeForge profile page exactly
+   ════════════════════════════════════════════════════════ */
+:root {
+  --p:#4f46e5;--p2:#3730a3;--pl:#818cf8;
+  --acc:#06b6d4;--ok:#22c55e;--err:#ef4444;--warn:#f59e0b;
+  --bg:#eef0fb;--surface:#fff;--card:rgba(255,255,255,0.90);
+  --nav:rgba(255,255,255,0.95);--inp:#f4f5fb;
+  --grp:rgba(79,70,229,0.07);--grph:rgba(79,70,229,0.13);
+  --t1:#0f0e2a;--t2:#4b5563;--tm:#9ca3af;
+  --b1:rgba(79,70,229,0.13);--bc:rgba(79,70,229,0.18);
+  --sh:0 2px 14px rgba(79,70,229,0.09),0 1px 4px rgba(0,0,0,0.05);
+  --she:0 12px 40px rgba(79,70,229,0.15);
+  --shb:0 6px 20px rgba(79,70,229,0.30);
+  --r2:12px;--r3:18px;--r4:24px;--rf:9999px;
+  --fd:'Sora',sans-serif;--fb:'Nunito',sans-serif;
+  --nav-h:64px;--hdr-h:58px;--shell:430px;
+  --dur:180ms;--ease:cubic-bezier(0.22,1,0.36,1);
+  --spring:cubic-bezier(0.34,1.56,0.64,1);
+
+  /* Status palette */
+  --s-open:#f59e0b;   --s-open-bg:rgba(245,158,11,.10);  --s-open-bd:rgba(245,158,11,.25);
+  --s-prog:#3b82f6;   --s-prog-bg:rgba(59,130,246,.10);  --s-prog-bd:rgba(59,130,246,.25);
+  --s-res:#22c55e;    --s-res-bg:rgba(34,197,94,.10);    --s-res-bd:rgba(34,197,94,.25);
+  --s-rej:#ef4444;    --s-rej-bg:rgba(239,68,68,.10);    --s-rej-bd:rgba(239,68,68,.25);
+  --s-cls:#6b7280;    --s-cls-bg:rgba(107,114,128,.10);  --s-cls-bd:rgba(107,114,128,.25);
+}
+
+[data-theme="dark"] {
+  --bg:#0b0a1e;--surface:#100e26;--card:rgba(24,21,52,0.92);
+  --nav:rgba(14,12,34,0.97);--inp:#1a1735;
+  --grp:rgba(129,140,248,0.09);--grph:rgba(129,140,248,0.16);
+  --t1:#ede9ff;--t2:#a09dbf;--tm:#635f83;
+  --b1:rgba(129,140,248,0.13);--bc:rgba(129,140,248,0.20);
+  --sh:0 2px 14px rgba(0,0,0,0.32),0 1px 4px rgba(0,0,0,0.20);
+  --she:0 12px 40px rgba(0,0,0,0.50);
+  --shb:0 6px 20px rgba(79,70,229,0.45);
+}
+
+/* ── Reset ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{font-size:15px;-webkit-text-size-adjust:100%;height:100%;height:100dvh;}
+body{
+  font-family:var(--fb);background:var(--bg);color:var(--t1);
+  height:100%;height:100dvh;display:flex;justify-content:center;
+  overflow:hidden;transition:background .18s,color .18s;
+}
+button{font-family:var(--fb);cursor:pointer;border:none;background:none;color:inherit;}
+a{text-decoration:none;color:inherit;}
+input,select,textarea{font-family:var(--fb);}
+html,body,*{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-touch-callout:none;}
+input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
+
+/* ── Shell ── */
+.shell{
+  width:100%;max-width:var(--shell);height:100%;height:100dvh;
+  background:var(--surface);display:flex;flex-direction:column;
+  overflow:hidden;box-shadow:0 0 0 1px var(--b1),var(--she);
+  transition:background .18s;
+}
+@media(min-width:700px){
+  body{padding:28px 0 44px;height:auto;min-height:100dvh;overflow-y:auto;}
+  .shell{
+    border-radius:36px;height:calc(100dvh - 72px);max-height:900px;overflow:hidden;
+    box-shadow:0 0 0 1px var(--bc),0 32px 80px rgba(0,0,0,.20),0 8px 24px rgba(79,70,229,.14);
+  }
+}
+
+/* ── Header ── */
+.hdr{
+  position:sticky;top:0;z-index:100;height:var(--hdr-h);
+  background:var(--nav);backdrop-filter:blur(18px) saturate(160%);
+  -webkit-backdrop-filter:blur(18px) saturate(160%);
+  border-bottom:1px solid var(--b1);display:flex;align-items:center;
+  padding:0 14px;gap:10px;flex-shrink:0;transition:background .18s;
+}
+.hdr-back{
+  width:34px;height:34px;border-radius:10px;background:var(--grp);
+  border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;
+  font-size:18px;transition:transform var(--dur) var(--spring),background var(--dur);
+}
+.hdr-back:hover{background:var(--grph);}
+.hdr-back:active{transform:scale(.92);}
+.hdr-title{flex:1;font-family:var(--fd);font-size:15px;font-weight:800;color:var(--t1);}
+.hdr-refresh{
+  width:34px;height:34px;border-radius:10px;background:var(--grp);
+  border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;
+  font-size:16px;transition:transform var(--dur) var(--spring),background var(--dur);
+}
+.hdr-refresh:hover{background:var(--grph);}
+.hdr-refresh:active{transform:scale(.92);}
+.hdr-refresh.spinning{animation:spin .7s linear infinite;}
+
+/* ── Page ── */
+.page{
+  flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;
+  overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;
+  padding:14px 13px calc(var(--nav-h) + 28px + env(safe-area-inset-bottom,0px));
+}
+.page::-webkit-scrollbar{width:2px;}
+.page::-webkit-scrollbar-thumb{background:var(--bc);border-radius:99px;}
+
+/* ── Tab bar ── */
+.tab-bar{
+  display:flex;gap:6px;background:var(--grp);border:1px solid var(--b1);
+  border-radius:var(--r3);padding:5px;margin-bottom:14px;
+}
+.tab-btn{
+  flex:1;padding:9px 6px;border-radius:var(--r2);font-size:12px;font-weight:800;
+  color:var(--tm);transition:background var(--dur),color var(--dur),transform var(--dur) var(--spring);
+  text-align:center;
+}
+.tab-btn.active{background:var(--surface);color:var(--p);box-shadow:var(--sh);}
+.tab-btn:active{transform:scale(.96);}
+
+/* ── Summary strip ── */
+.summary-strip{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;
+}
+.sum-cell{
+  background:var(--card);border:1px solid var(--bc);border-radius:var(--r3);
+  padding:11px 8px;text-align:center;box-shadow:var(--sh);
+}
+.sum-cell .num{font-family:var(--fd);font-size:20px;font-weight:900;color:var(--p);line-height:1;}
+.sum-cell .lbl{font-size:9.5px;font-weight:800;color:var(--tm);text-transform:uppercase;letter-spacing:.05em;margin-top:3px;}
+
+/* ── Controls ── */
+.controls{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
+.search-row{
+  display:flex;align-items:center;gap:8px;background:var(--inp);
+  border:1.5px solid var(--bc);border-radius:var(--rf);padding:9px 14px;
+}
+.search-row input{flex:1;background:none;border:none;outline:none;color:var(--t1);font-size:13px;font-weight:700;}
+.search-row input::placeholder{color:var(--tm);}
+.search-icon{font-size:15px;color:var(--tm);flex-shrink:0;}
+.filter-sort{display:flex;gap:8px;}
+.fs-sel{
+  flex:1;padding:9px 10px;border-radius:var(--rf);background:var(--inp);
+  border:1.5px solid var(--bc);color:var(--t1);font-size:12px;font-weight:700;
+  outline:none;-webkit-appearance:none;appearance:none;cursor:pointer;
+}
+.fs-sel:focus{border-color:var(--p);}
+
+/* ── Skeleton ── */
+.skeleton-card{
+  border-radius:var(--r4);background:var(--card);border:1px solid var(--bc);
+  height:155px;margin-bottom:10px;overflow:hidden;position:relative;
+}
+.skeleton-card::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.13) 50%,transparent 100%);
+  animation:shimmer 1.3s ease infinite;
+}
+[data-theme="dark"] .skeleton-card::after{
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.06) 50%,transparent 100%);
+}
+
+/* ── Request card ── */
+.req-card{
+  border-radius:var(--r4);background:var(--card);border:1px solid var(--bc);
+  box-shadow:var(--sh);overflow:hidden;margin-bottom:10px;
+  animation:up .28s var(--ease) both;
+}
+.rc-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 16px 10px;border-bottom:1px solid var(--b1);gap:8px;
+}
+.rc-reason{
+  font-family:var(--fd);font-size:12px;font-weight:800;color:var(--t1);
+  display:flex;align-items:center;gap:6px;
+}
+.rc-reason-icon{font-size:17px;}
+.rc-id{font-size:9.5px;font-weight:700;color:var(--tm);font-family:monospace;display:flex;align-items:center;gap:5px;}
+.rc-copy{
+  font-size:12px;color:var(--p);padding:3px 7px;border-radius:6px;
+  background:rgba(79,70,229,.08);border:1px solid rgba(79,70,229,.16);
+  transition:transform var(--dur) var(--spring);
+}
+.rc-copy:active{transform:scale(.9);}
+.rc-body{padding:12px 16px;display:flex;flex-direction:column;gap:8px;}
+.rc-desc{
+  font-size:12px;font-weight:700;color:var(--t2);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  line-height:1.55;
+}
+.rc-badges{display:flex;flex-wrap:wrap;gap:6px;}
+.badge{
+  font-size:10.5px;font-weight:800;padding:4px 10px;
+  border-radius:var(--rf);letter-spacing:.03em;flex-shrink:0;
+}
+.badge.s-open       {color:var(--s-open);background:var(--s-open-bg);border:1px solid var(--s-open-bd);}
+.badge.s-in_progress{color:var(--s-prog);background:var(--s-prog-bg);border:1px solid var(--s-prog-bd);}
+.badge.s-resolved   {color:var(--s-res); background:var(--s-res-bg); border:1px solid var(--s-res-bd);}
+.badge.s-rejected   {color:var(--s-rej); background:var(--s-rej-bg); border:1px solid var(--s-rej-bd);}
+.badge.s-closed     {color:var(--s-cls); background:var(--s-cls-bg); border:1px solid var(--s-cls-bd);}
+.badge.grey{color:var(--tm);background:var(--grp);border:1px solid var(--b1);}
+.rc-note{
+  font-size:12px;font-weight:700;color:var(--t2);background:var(--grp);
+  border-radius:var(--r2);padding:8px 11px;border-left:3px solid var(--p);line-height:1.5;
+}
+.rc-flags{display:flex;gap:6px;flex-wrap:wrap;}
+.flag{font-size:10px;font-weight:800;padding:3px 8px;border-radius:var(--rf);}
+.flag.read   {color:var(--ok);  background:rgba(34,197,94,.09); border:1px solid rgba(34,197,94,.22);}
+.flag.unread {color:var(--tm);  background:var(--grp);          border:1px solid var(--b1);}
+.flag.solved {color:var(--ok);  background:rgba(34,197,94,.09); border:1px solid rgba(34,197,94,.22);}
+.flag.pending{color:var(--warn);background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.22);}
+.rc-meta{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.rc-meta-item{font-size:10.5px;color:var(--tm);font-weight:700;display:flex;align-items:center;gap:4px;}
+
+/* ── Info banner ── */
+.info-banner{
+  display:flex;gap:10px;align-items:flex-start;background:rgba(6,182,212,.08);
+  border:1px solid rgba(6,182,212,.22);border-radius:var(--r3);padding:12px 14px;
+  margin-bottom:14px;animation:up .24s var(--ease) both;
+}
+.info-banner-icon{font-size:19px;flex-shrink:0;line-height:1.3;}
+.info-banner p{font-size:12px;font-weight:700;color:var(--t2);line-height:1.6;}
+.info-banner strong{display:block;font-size:12.5px;color:var(--t1);margin-bottom:3px;}
+
+/* ── Submit form card ── */
+.form-card{
+  border-radius:var(--r4);background:var(--card);border:1px solid var(--bc);
+  box-shadow:var(--sh);overflow:hidden;margin-bottom:12px;
+  animation:up .28s var(--ease) both;
+}
+.form-card-head{
+  display:flex;align-items:center;gap:10px;padding:15px 18px 13px;
+  border-bottom:1px solid var(--b1);
+}
+.form-card-icon{
+  width:38px;height:38px;border-radius:11px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--p),var(--acc));
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+}
+.form-card-title{font-family:var(--fd);font-size:13.5px;font-weight:800;color:var(--t1);}
+.form-card-sub{font-size:11px;color:var(--tm);font-weight:600;margin-top:1px;}
+.form-body{padding:16px 18px;display:flex;flex-direction:column;gap:13px;}
+.f-field{display:flex;flex-direction:column;gap:5px;}
+.f-label{font-size:11px;font-weight:800;color:var(--t1);text-transform:uppercase;letter-spacing:.05em;}
+.f-req{color:var(--err);margin-left:2px;}
+.f-input,.f-select,.f-textarea{
+  width:100%;padding:11px 13px;border-radius:var(--r2);background:var(--inp);
+  border:1.5px solid var(--bc);color:var(--t1);font-size:13.5px;font-weight:700;
+  outline:none;transition:border-color var(--dur),box-shadow var(--dur);
+}
+.f-input:focus,.f-select:focus,.f-textarea:focus{
+  border-color:var(--p);box-shadow:0 0 0 3px rgba(79,70,229,.12);
+}
+.f-input::placeholder,.f-textarea::placeholder{color:var(--tm);}
+.f-textarea{resize:vertical;min-height:110px;line-height:1.55;}
+.f-select{-webkit-appearance:none;appearance:none;cursor:pointer;}
+.f-hint{font-size:10.5px;color:var(--tm);font-weight:600;}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.f-msg{font-size:12px;font-weight:700;min-height:14px;}
+.f-msg.ok{color:var(--ok);}
+.f-msg.err{color:var(--err);}
+
+/* ── Submit button ── */
+.submit-btn{
+  width:100%;padding:14px;border-radius:var(--r2);
+  background:linear-gradient(135deg,var(--p),var(--p2));
+  color:#fff;font-weight:900;font-size:14px;box-shadow:var(--shb);
+  transition:transform var(--dur) var(--spring),opacity var(--dur);
+}
+.submit-btn:active{transform:scale(.98);}
+.submit-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+
+/* ── State boxes ── */
+.state-box{
+  text-align:center;padding:40px 20px;display:flex;flex-direction:column;
+  align-items:center;gap:10px;
+}
+.state-emoji{font-size:48px;line-height:1;}
+.state-title{font-family:var(--fd);font-size:17px;font-weight:900;color:var(--t1);}
+.state-sub{font-size:13px;color:var(--tm);font-weight:700;max-width:280px;text-align:center;line-height:1.5;}
+.state-btn{
+  margin-top:6px;padding:11px 22px;border-radius:var(--rf);
+  background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;
+  font-weight:900;font-size:13px;box-shadow:var(--shb);
+  transition:transform var(--dur) var(--spring);
+}
+.state-btn:active{transform:scale(.96);}
+
+/* ── Pagination ── */
+.pag-row{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;margin-top:6px;
+}
+.pag-btn{
+  padding:9px 18px;border-radius:var(--rf);font-size:12px;font-weight:800;
+  background:var(--grp);border:1px solid var(--b1);color:var(--t1);
+  transition:transform var(--dur) var(--spring),background var(--dur);
+}
+.pag-btn:hover{background:var(--grph);}
+.pag-btn:active{transform:scale(.95);}
+.pag-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.pag-info{font-size:12px;font-weight:700;color:var(--tm);}
+
+/* ── Session screen ── */
+.session-screen{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;}
+
+/* ── Bottom nav ── */
+.bnav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:var(--shell);z-index:999;height:var(--nav-h);
+  background:var(--nav);backdrop-filter:blur(18px) saturate(160%);
+  -webkit-backdrop-filter:blur(18px) saturate(160%);border-top:1px solid var(--b1);
+  display:flex;align-items:center;padding:0 4px;
+  padding-bottom:env(safe-area-inset-bottom,0px);transition:background .18s;
+}
+.bnav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;height:100%;border-radius:var(--r2);padding:7px 4px;position:relative;
+}
+.bnav-btn::before{
+  content:'';position:absolute;top:7px;left:50%;transform:translateX(-50%);
+  width:0;height:2px;background:var(--p);border-radius:99px;
+  transition:width .18s var(--spring);
+}
+.bnav-btn.active::before{width:24px;}
+.bnav-icon{font-size:20px;line-height:1;transition:transform var(--dur) var(--spring);}
+.bnav-btn.active .bnav-icon{transform:scale(1.10);}
+.bnav-btn:active .bnav-icon{transform:scale(.90);}
+.bnav-label{font-size:10px;font-weight:700;color:var(--tm);transition:color var(--dur);}
+.bnav-btn.active .bnav-label{color:var(--p);}
+
+/* ── Toast ── */
+.toast-wrap{
+  position:fixed;left:50%;bottom:calc(var(--nav-h) + 12px);
+  transform:translateX(-50%);z-index:999999;
+  width:min(92vw,400px);pointer-events:none;
+}
+.toast{
+  display:flex;align-items:flex-start;gap:10px;background:var(--surface);
+  color:var(--t1);border:1px solid var(--bc);border-radius:14px;
+  padding:11px 13px;box-shadow:0 4px 22px rgba(0,0,0,.14);
+  pointer-events:auto;animation:toastIn .22s var(--ease) both;
+}
+.toast.ok{border-left:3px solid var(--ok);}
+.toast.info{border-left:3px solid var(--p);}
+.toast.err{border-left:3px solid var(--err);}
+.toast.warn{border-left:3px solid var(--warn);}
+.toast-body p:first-child{font-size:12px;font-weight:800;}
+.toast-body p:last-child{font-size:11px;color:var(--t2);margin-top:1px;}
+.toast-x{font-size:16px;color:var(--tm);cursor:pointer;margin-left:auto;}
+
+/* ── Animations ── */
+@keyframes up{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@keyframes shimmer{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes toastIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.hidden{display:none!important;}
+</style>
+</head>
+<body>
+
+<div class="shell" id="shell">
+
+  <!-- ── HEADER ── -->
+  <header class="hdr">
+    <button class="hdr-back" onclick="goBack()" aria-label="Go back">←</button>
+    <span class="hdr-title" id="hdrTitle">Contact Support</span>
+    <button class="hdr-refresh hidden" id="refreshBtn" onclick="onRefresh()" aria-label="Refresh">↻</button>
+  </header>
+
+  <!-- ── MAIN PAGE ── -->
+  <div class="page" id="mainPage">
+
+    <!-- Tab bar -->
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tabSubmit" onclick="switchTab('submit')">📩 New Request</button>
+      <button class="tab-btn"        id="tabStatus" onclick="switchTab('status')">📋 My Requests</button>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SUBMIT PANEL
+    ══════════════════════════════════════ -->
+    <div id="panelSubmit">
+
+      <!-- Info banner -->
+      <div class="info-banner">
+        <span class="info-banner-icon">💡</span>
+        <div>
+          <strong>Need help? We're here.</strong>
+          <p>Fill in the form below and our support team will get back to you. Typical response time is 24–48 hours on working days.</p>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-card-head">
+          <div class="form-card-icon">🎧</div>
+          <div>
+            <div class="form-card-title">Submit a Support Request</div>
+            <div class="form-card-sub">Tell us what you need help with</div>
+          </div>
+        </div>
+        <div class="form-body">
+
+          <!-- Name + Phone -->
+          <div class="f-row">
+            <div class="f-field">
+              <label class="f-label">Full Name<span class="f-req">*</span></label>
+              <input id="fName" class="f-input" type="text" placeholder="Your full name"
+                maxlength="100" autocomplete="name"/>
+            </div>
+            <div class="f-field">
+              <label class="f-label">Phone</label>
+              <input id="fPhone" class="f-input" type="tel" inputmode="numeric"
+                placeholder="Mobile number" maxlength="18" autocomplete="tel"/>
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="f-field">
+            <label class="f-label">Registered Email<span class="f-req">*</span></label>
+            <input id="fEmail" class="f-input" type="email" placeholder="you@example.com"
+              maxlength="120" autocomplete="email"/>
+            <span class="f-hint">Use the email linked to your AcademeForge account.</span>
+          </div>
+
+          <!-- Contact Reason -->
+          <div class="f-field">
+            <label class="f-label">Reason for Contact<span class="f-req">*</span></label>
+            <select id="fReason" class="f-select">
+              <option value="">Select a reason…</option>
+              <option value="course_access">Course Access Issue</option>
+              <option value="payment_issue">Payment Problem</option>
+              <option value="technical_problem">Technical Problem</option>
+              <option value="account_issue">Account Issue</option>
+              <option value="refund_request">Refund Request</option>
+              <option value="batch_query">Batch / Schedule Query</option>
+              <option value="certificate">Certificate Request</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <!-- Description -->
+          <div class="f-field">
+            <label class="f-label">Describe Your Issue<span class="f-req">*</span></label>
+            <textarea id="fDesc" class="f-textarea" rows="5"
+              placeholder="Please describe your problem in detail. Include any relevant order IDs, batch names, or error messages. (10–2000 chars)"
+              maxlength="2000"></textarea>
+            <span class="f-hint" id="descCount">0 / 2000</span>
+          </div>
+
+          <div id="submitMsg" class="f-msg"></div>
+          <button id="submitBtn" class="submit-btn" onclick="submitRequest()">Submit Request</button>
+
+        </div>
+      </div>
+
+    </div><!-- /panelSubmit -->
+
+    <!-- ══════════════════════════════════════
+         STATUS PANEL
+    ══════════════════════════════════════ -->
+    <div id="panelStatus" class="hidden">
+
+      <!-- Summary strip -->
+      <div class="summary-strip" id="summaryStrip" style="display:none;">
+        <div class="sum-cell">
+          <div class="num" id="sumTotal">0</div>
+          <div class="lbl">Total</div>
+        </div>
+        <div class="sum-cell">
+          <div class="num" id="sumOpen"  style="color:var(--s-open)">0</div>
+          <div class="lbl">Open</div>
+        </div>
+        <div class="sum-cell">
+          <div class="num" id="sumProg"  style="color:var(--s-prog)">0</div>
+          <div class="lbl">In Progress</div>
+        </div>
+        <div class="sum-cell">
+          <div class="num" id="sumRes"   style="color:var(--s-res)">0</div>
+          <div class="lbl">Resolved</div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls" id="controls" style="display:none;">
+        <div class="search-row">
+          <span class="search-icon">🔍</span>
+          <input id="searchInp" type="text" placeholder="Search by reason or status…"
+            oninput="onSearch()" aria-label="Search requests"/>
+        </div>
+        <div class="filter-sort">
+          <select id="filterSel" class="fs-sel" onchange="onFilter()" aria-label="Filter by status">
+            <option value="">All Statuses</option>
+            <option value="open">Open</option>
+            <option value="in_progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+            <option value="closed">Closed</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <select id="sortSel" class="fs-sel" onchange="onSort()" aria-label="Sort requests">
+            <option value="desc">Newest First</option>
+            <option value="asc">Oldest First</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div id="statusContent"></div>
+
+      <!-- Pagination -->
+      <div class="pag-row hidden" id="pagRow">
+        <button class="pag-btn" id="pagPrev" onclick="goPage(-1)" disabled>← Prev</button>
+        <span class="pag-info" id="pagInfo"></span>
+        <button class="pag-btn" id="pagNext" onclick="goPage(1)">Next →</button>
+      </div>
+
+    </div><!-- /panelStatus -->
+
+  </div><!-- /mainPage -->
+
+  <!-- ── SESSION EXPIRED ── -->
+  <div id="sessionScreen" class="session-screen hidden">
+    <div class="state-box">
+      <div class="state-emoji">🔐</div>
+      <div class="state-title">Session Expired</div>
+      <div class="state-sub">We couldn't find your account details. Please log in again to continue.</div>
+      <button class="state-btn" onclick="window.location.href='../student/index.html'">Log In Again</button>
+    </div>
+  </div>
+
+  <!-- ── BOTTOM NAV ── -->
+  <nav class="bnav">
+    <button class="bnav-btn" onclick="window.location.href='../index.html'">
+      <span class="bnav-icon">🏠</span><span class="bnav-label">Home</span>
+    </button>
+    <button class="bnav-btn" onclick="window.location.href='../profile/index.html'">
+      <span class="bnav-icon">🎓</span><span class="bnav-label">Student</span>
+    </button>
+    <button class="bnav-btn" onclick="window.location.href='../batches/index.html'">
+      <span class="bnav-icon">📚</span><span class="bnav-label">Batches</span>
+    </button>
+    <button class="bnav-btn" onclick="window.location.href='../community/index.html'">
+      <span class="bnav-icon">💬</span><span class="bnav-label">Community</span>
+    </button>
+    <button class="bnav-btn active" onclick="window.location.href='../setting/index.html'">
+      <span class="bnav-icon">⚙️</span><span class="bnav-label">Settings</span>
+    </button>
+  </nav>
+
+</div><!-- /shell -->
+
+<!-- ── TOAST ── -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ─────────────────────────────────────────
+   CONFIG — update to your deployed URL
+───────────────────────────────────────── */
+const API_BASE   = 'https://afooyyydhlwngzssgqih.supabase.co/functions/v1/contact-requests-unified';
+const SUBMIT_URL = API_BASE;
+const STATUS_URL = API_BASE + '/status';
+
+const CACHE_KEY = 'af_contact_requests_cache_v1';
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+const PAGE_LIMIT = 20;
+
+/* ─────────────────────────────────────────
+   STATE
+───────────────────────────────────────── */
+let currentTab   = 'submit';
+let allRequests  = [];   // full fetched list
+let filteredList = [];   // after filter + search + sort
+let currentPage  = 1;
+let isLoading    = false;
+
+/* ─────────────────────────────────────────
+   UTILS
+───────────────────────────────────────── */
+const $   = id => document.getElementById(id);
+const esc = t  => String(t || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+function relTime(iso) {
+  if (!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1)  return 'just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  if (d < 30) return `${d}d ago`;
+  try {
+    return new Date(iso).toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  } catch { return iso; }
+}
+
+/* ─────────────────────────────────────────
+   THEME
+───────────────────────────────────────── */
+function syncTheme() {
+  document.documentElement.setAttribute('data-theme',
+    localStorage.getItem('af_dark_mode') === '1' ? 'dark' : 'light');
+}
+syncTheme();
+window.addEventListener('storage', e => { if (e.key === 'af_dark_mode') syncTheme(); });
+
+/* ─────────────────────────────────────────
+   TOAST
+───────────────────────────────────────── */
+let _tt = null;
+function showToast(msg, type = 'info', title = '') {
+  const wrap = $('toastWrap');
+  wrap.innerHTML = '';
+  if (_tt) { clearTimeout(_tt); _tt = null; }
+  const labels = { ok:'Done', info:'Info', err:'Error', warn:'Notice' };
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.innerHTML = `<div class="toast-body"><p>${title || labels[type]}</p><p>${esc(msg)}</p></div>
+    <span class="toast-x" onclick="this.parentElement.remove()">×</span>`;
+  wrap.appendChild(el);
+  _tt = setTimeout(() => el && el.remove(), 3200);
+}
+
+/* ─────────────────────────────────────────
+   CACHE
+───────────────────────────────────────── */
+function cacheSet(d) {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), d })); } catch(_) {}
+}
+function cacheGet() {
+  try {
+    const r = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+    if (!r || Date.now() - r.ts > CACHE_TTL) return null;
+    return r.d;
+  } catch { return null; }
+}
+function cacheClear() {
+  try { localStorage.removeItem(CACHE_KEY); } catch(_) {}
+}
+
+/* ─────────────────────────────────────────
+   SESSION
+───────────────────────────────────────── */
+function getSession() {
+  return {
+    loggedIn:  localStorage.getItem('af_student_logged_in') === 'true',
+    uuid:      localStorage.getItem('af_student_uuid')   || '',
+    id:        localStorage.getItem('af_student_id')     || '',
+    email:     localStorage.getItem('af_student_email')  || '',
+    name:      localStorage.getItem('af_student_name')   || '',
+    mobile:    localStorage.getItem('af_student_mobile') || localStorage.getItem('af_student_phone') || '',
+  };
+}
+
+/* ─────────────────────────────────────────
+   TAB SWITCH
+───────────────────────────────────────── */
+function switchTab(tab) {
+  currentTab = tab;
+  $('tabSubmit').classList.toggle('active', tab === 'submit');
+  $('tabStatus').classList.toggle('active', tab === 'status');
+  $('panelSubmit').classList.toggle('hidden', tab !== 'submit');
+  $('panelStatus').classList.toggle('hidden', tab !== 'status');
+  $('refreshBtn').classList.toggle('hidden', tab !== 'status');
+  $('hdrTitle').textContent = tab === 'submit' ? 'Contact Support' : 'My Requests';
+  if (tab === 'status') loadStatus(false);
+}
+
+/* ─────────────────────────────────────────
+   REASON META
+───────────────────────────────────────── */
+const REASON_META = {
+  course_access:      { icon: '📚', label: 'Course Access' },
+  payment_issue:      { icon: '💳', label: 'Payment Issue' },
+  technical_problem:  { icon: '⚙️', label: 'Technical Problem' },
+  account_issue:      { icon: '👤', label: 'Account Issue' },
+  refund_request:     { icon: '💰', label: 'Refund Request' },
+  batch_query:        { icon: '🗓️', label: 'Batch Query' },
+  certificate:        { icon: '🎓', label: 'Certificate' },
+  other:              { icon: '💬', label: 'Other' },
+};
+
+function reasonMeta(key) {
+  return REASON_META[key] || { icon: '📩', label: key || 'Request' };
+}
+
+const STATUS_LABEL = {
+  open: 'Open', in_progress: 'In Progress',
+  resolved: 'Resolved', rejected: 'Rejected', closed: 'Closed',
+};
+
+/* ─────────────────────────────────────────
+   COPY REQUEST ID
+───────────────────────────────────────── */
+function copyId(id) {
+  navigator.clipboard.writeText(id).then(() => {
+    showToast('Request ID copied to clipboard.', 'ok', 'Copied!');
+  }).catch(() => {
+    showToast('Please copy manually: ' + id, 'warn', 'Copy manually');
+  });
+}
+
+/* ─────────────────────────────────────────
+   RENDER ONE REQUEST CARD
+───────────────────────────────────────── */
+function renderCard(r, idx) {
+  const rm     = reasonMeta(r.contact_reason);
+  const sKey   = (r.status || 'open').toLowerCase();
+  const shortId = (r.id || '').toString().slice(0, 8).toUpperCase();
+  const delay   = Math.min(idx * 0.04, 0.4);
+  const desc    = (r.problem_description || '').trim();
+
+  return `
+  <div class="req-card" style="animation-delay:${delay}s;">
+    <div class="rc-head">
+      <div class="rc-reason">
+        <span class="rc-reason-icon">${esc(rm.icon)}</span>
+        ${esc(rm.label)}
+      </div>
+      <div class="rc-id">
+        <span>#${esc(shortId)}</span>
+        <button class="rc-copy" onclick="copyId('${esc(r.id || '')}')" aria-label="Copy ID">⎘</button>
+      </div>
+    </div>
+    <div class="rc-body">
+      ${desc ? `<div class="rc-desc">${esc(desc)}</div>` : ''}
+      <div class="rc-badges">
+        <span class="badge s-${sKey}">${esc(STATUS_LABEL[sKey] || sKey)}</span>
+      </div>
+      ${r.status_note
+        ? `<div class="rc-note">💬 ${esc(r.status_note)}</div>`
+        : ''}
+      <div class="rc-flags">
+        <span class="flag ${r.team_read ? 'read' : 'unread'}">
+          ${r.team_read ? '✓ Seen by Team' : '⏳ Awaiting Review'}
+        </span>
+        <span class="flag ${r.request_solved ? 'solved' : 'pending'}">
+          ${r.request_solved ? '✅ Resolved' : '🔄 Being Processed'}
+        </span>
+      </div>
+      <div class="rc-meta">
+        <span class="rc-meta-item">📅 ${esc(relTime(r.created_at))}</span>
+        ${r.updated_at && r.updated_at !== r.created_at
+          ? `<span class="rc-meta-item">🔄 Updated ${esc(relTime(r.updated_at))}</span>`
+          : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ─────────────────────────────────────────
+   SKELETONS
+───────────────────────────────────────── */
+function renderSkeletons(n = 3) {
+  let h = '';
+  for (let i = 0; i < n; i++)
+    h += `<div class="skeleton-card" style="height:${150 + (i % 2)*25}px;animation-delay:${i*.07}s;"></div>`;
+  return h;
+}
+
+/* ─────────────────────────────────────────
+   FILTER / SEARCH / SORT (client-side)
+───────────────────────────────────────── */
+function applyFilters() {
+  const q      = ($('searchInp').value || '').toLowerCase().trim();
+  const status = $('filterSel').value;
+  const order  = $('sortSel').value;
+
+  filteredList = allRequests.filter(r => {
+    if (status && r.status !== status) return false;
+    if (q) {
+      const hay = [r.contact_reason, r.status, r.status_note, r.problem_description]
+        .join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  filteredList.sort((a, b) => {
+    const ta = new Date(a.created_at).getTime();
+    const tb = new Date(b.created_at).getTime();
+    return order === 'asc' ? ta - tb : tb - ta;
+  });
+}
+
+/* ─────────────────────────────────────────
+   UPDATE SUMMARY
+───────────────────────────────────────── */
+function updateSummary(requests) {
+  if (!requests || !requests.length) {
+    $('summaryStrip').style.display = 'none';
+    return;
+  }
+  $('summaryStrip').style.display = '';
+  $('sumTotal').textContent = requests.length;
+  $('sumOpen').textContent  = requests.filter(r => r.status === 'open').length;
+  $('sumProg').textContent  = requests.filter(r => r.status === 'in_progress').length;
+  $('sumRes').textContent   = requests.filter(r => r.status === 'resolved').length;
+}
+
+/* ─────────────────────────────────────────
+   RENDER STATUS LIST
+───────────────────────────────────────── */
+function renderStatusList() {
+  const content = $('statusContent');
+  applyFilters();
+
+  if (!filteredList.length) {
+    const hasData = allRequests.length > 0;
+    content.innerHTML = `
+      <div class="state-box">
+        <div class="state-emoji">${hasData ? '🔍' : '📭'}</div>
+        <div class="state-title">${hasData ? 'No Matches' : 'No Requests Yet'}</div>
+        <div class="state-sub">${hasData
+          ? 'Try adjusting your filter or search term.'
+          : 'You haven\'t submitted any support requests yet.'
+        }</div>
+        ${!hasData
+          ? `<button class="state-btn" onclick="switchTab('submit')">Contact Support →</button>`
+          : ''}
+      </div>`;
+    $('pagRow').classList.add('hidden');
+    return;
+  }
+
+  // Client-side pagination of filtered list
+  const totalPages = Math.ceil(filteredList.length / PAGE_LIMIT);
+  if (currentPage > totalPages) currentPage = totalPages;
+  const start = (currentPage - 1) * PAGE_LIMIT;
+  const slice = filteredList.slice(start, start + PAGE_LIMIT);
+
+  content.innerHTML = slice.map((r, i) => renderCard(r, i)).join('');
+
+  if (filteredList.length > PAGE_LIMIT) {
+    $('pagRow').classList.remove('hidden');
+    $('pagPrev').disabled = currentPage <= 1;
+    $('pagNext').disabled = currentPage >= totalPages;
+    $('pagInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+  } else {
+    $('pagRow').classList.add('hidden');
+  }
+}
+
+/* ─────────────────────────────────────────
+   LOAD STATUS (API)
+───────────────────────────────────────── */
+async function loadStatus(forceRefresh = false) {
+  if (isLoading) return;
+
+  const session = getSession();
+  const content = $('statusContent');
+
+  if (!session.email) {
+    content.innerHTML = `
+      <div class="state-box">
+        <div class="state-emoji">🔐</div>
+        <div class="state-title">Login Required</div>
+        <div class="state-sub">Your session doesn't have account details. Please log in again.</div>
+        <button class="state-btn" onclick="window.location.href='../student/index.html'">Log In</button>
+      </div>`;
+    return;
+  }
+
+  // Serve cache immediately
+  if (!forceRefresh) {
+    const cached = cacheGet();
+    if (cached) {
+      allRequests = cached;
+      updateSummary(allRequests);
+      $('controls').style.display = '';
+      renderStatusList();
+      silentRefresh(session); // background refresh
+      return;
+    }
+  }
+
+  // Show skeletons
+  isLoading = true;
+  content.innerHTML = renderSkeletons(3);
+  $('controls').style.display = 'none';
+  $('summaryStrip').style.display = 'none';
+  $('pagRow').classList.add('hidden');
+  setRefreshSpinning(true);
+
+  try {
+    const requests = await fetchRequests(session);
+    allRequests = requests;
+    cacheSet(requests);
+    updateSummary(allRequests);
+    $('controls').style.display = '';
+    currentPage = 1;
+    renderStatusList();
+  } catch (err) {
+    content.innerHTML = `
+      <div class="state-box">
+        <div class="state-emoji">📡</div>
+        <div class="state-title">Could Not Load Requests</div>
+        <div class="state-sub">${esc(err.message || 'A network error occurred.')}</div>
+        <button class="state-btn" onclick="loadStatus(true)">Try Again</button>
+      </div>`;
+    showToast(err.message || 'Failed to load requests.', 'err', 'Error');
+  } finally {
+    isLoading = false;
+    setRefreshSpinning(false);
+  }
+}
+
+async function silentRefresh(session) {
+  try {
+    const requests = await fetchRequests(session);
+    allRequests = requests;
+    cacheSet(requests);
+    updateSummary(allRequests);
+    $('controls').style.display = '';
+    renderStatusList();
+  } catch { /* silent */ }
+}
+
+/** API call with timeout + one retry */
+async function fetchRequests(session, attempt = 1) {
+  const MAX   = 2;
+  const TOMS  = 12000;
+  const ctrl  = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), TOMS);
+
+  try {
+    const res = await fetch(STATUS_URL, {
+      method:  'POST',
+      signal:  ctrl.signal,
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ limit: 100, page: 1 }),
+    });
+    clearTimeout(timer);
+
+    let data;
+    try { data = await res.json(); } catch { data = {}; }
+
+    if (res.status === 401) throw new Error('Authentication required. Please log in again.');
+    if (res.status === 429) throw new Error('Too many requests. Please wait and try again.');
+    if (!res.ok)            throw new Error(data.message || `Server error (${res.status}).`);
+    if (!data.success)      throw new Error(data.message || 'Unexpected server response.');
+
+    return Array.isArray(data.requests) ? data.requests : [];
+
+  } catch (err) {
+    clearTimeout(timer);
+    if (err.name === 'AbortError') throw new Error('Request timed out. Please check your connection.');
+    if (attempt < MAX) {
+      await new Promise(r => setTimeout(r, attempt * 800));
+      return fetchRequests(session, attempt + 1);
+    }
+    throw err;
+  }
+}
+
+/* ─────────────────────────────────────────
+   FILTER / SEARCH / SORT HANDLERS
+───────────────────────────────────────── */
+let _debounce = null;
+function onSearch() {
+  clearTimeout(_debounce);
+  _debounce = setTimeout(() => { currentPage = 1; renderStatusList(); }, 200);
+}
+function onFilter() { currentPage = 1; renderStatusList(); }
+function onSort()   { currentPage = 1; renderStatusList(); }
+
+function goPage(dir) {
+  currentPage = Math.max(1, currentPage + dir);
+  renderStatusList();
+  $('statusContent').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ─────────────────────────────────────────
+   REFRESH
+───────────────────────────────────────── */
+function setRefreshSpinning(on) { $('refreshBtn').classList.toggle('spinning', on); }
+
+function onRefresh() {
+  cacheClear();
+  currentPage = 1;
+  loadStatus(true);
+  showToast('Refreshing your requests…', 'info', 'Refreshing');
+}
+
+/* ─────────────────────────────────────────
+   SUBMIT CONTACT REQUEST
+───────────────────────────────────────── */
+async function submitRequest() {
+  const btn  = $('submitBtn');
+  const msg  = $('submitMsg');
+
+  const name   = ($('fName').value  || '').trim();
+  const email  = ($('fEmail').value || '').trim().toLowerCase();
+  const phone  = ($('fPhone').value || '').trim();
+  const reason = $('fReason').value;
+  const desc   = ($('fDesc').value  || '').trim();
+
+  // Client-side validation (mirrors server rules)
+  const setMsg = (type, text) => {
+    msg.className = 'f-msg' + (type ? ' ' + type : '');
+    msg.textContent = text;
+  };
+
+  if (name.length < 2)               { setMsg('err', 'Please enter your full name (min. 2 characters).'); return; }
+  if (!email || !email.includes('@')) { setMsg('err', 'Please enter a valid registered email address.');   return; }
+  if (!reason)                        { setMsg('err', 'Please select a reason for contact.');               return; }
+  if (desc.length < 10)              { setMsg('err', 'Please describe your issue (min. 10 characters).'); return; }
+
+  btn.disabled = true;
+  setMsg('', 'Submitting…');
+
+  try {
+    const session = getSession();
+    const ctrl    = new AbortController();
+    const timer   = setTimeout(() => ctrl.abort(), 15000);
+
+    const res = await fetch(SUBMIT_URL, {
+      method:  'POST',
+      signal:  ctrl.signal,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        full_name:           name,
+        email:               email,
+        mobile_number:       phone || null,
+        contact_reason:      reason,
+        problem_description: desc,
+        student_id:          session.id         || null,
+        student_identifier:  session.uuid       || null,
+        student_name:        session.name       || name,
+      }),
+    });
+
+    clearTimeout(timer);
+    let data;
+    try { data = await res.json(); } catch { data = {}; }
+
+    if (!res.ok || !data.success) throw new Error(data.message || `Submission failed (${res.status}).`);
+
+    const shortId = (data.requestId || '').toString().slice(0, 8).toUpperCase();
+    setMsg('ok', `✓ Request submitted! ID: #${shortId} — We'll respond within 24–48 hours.`);
+    showToast('Your support request has been submitted!', 'ok', 'Submitted!');
+
+    // Clear form (keep name + email for convenience)
+    $('fReason').value = '';
+    $('fDesc').value   = '';
+    $('fPhone').value  = '';
+    $('descCount').textContent = '0 / 2000';
+
+    // Invalidate cache so new entry shows up in status tab
+    cacheClear();
+
+    // Auto-switch to status after a beat
+    setTimeout(() => { switchTab('status'); }, 2400);
+
+  } catch (err) {
+    setMsg('err',
+      err.name === 'AbortError'
+        ? 'Request timed out. Please check your connection.'
+        : (err.message || 'Submission failed. Please try again.'));
+    showToast(err.message || 'Submission failed.', 'err', 'Error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* ─────────────────────────────────────────
+   DESCRIPTION CHARACTER COUNTER
+───────────────────────────────────────── */
+function initDescCounter() {
+  const ta  = $('fDesc');
+  const cnt = $('descCount');
+  if (!ta || !cnt) return;
+  ta.addEventListener('input', () => {
+    const len = ta.value.length;
+    cnt.textContent    = `${len} / 2000`;
+    cnt.style.color    = len > 1800 ? 'var(--err)' : 'var(--tm)';
+  });
+}
+
+/* ─────────────────────────────────────────
+   NAV + SECURITY
+───────────────────────────────────────── */
+function goBack() { window.history.back(); }
+
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  if (
+    e.key === 'F12' ||
+    (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key.toUpperCase())) ||
+    (e.ctrlKey && e.key.toUpperCase() === 'U')
+  ) e.preventDefault();
+});
+
+/* ─────────────────────────────────────────
+   INIT
+───────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  const s = getSession();
+
+  // Auth gate
+  if (!s.loggedIn) {
+    window.location.href = '../student/index.html';
+    return;
+  }
+
+  // Missing critical identifiers
+  if (!s.uuid && !s.email) {
+    $('mainPage').classList.add('hidden');
+    $('sessionScreen').classList.remove('hidden');
+    return;
+  }
+
+  // Pre-fill form from session
+  if (s.name)   $('fName').value  = s.name;
+  if (s.email)  $('fEmail').value = s.email;
+  if (s.mobile) $('fPhone').value = s.mobile;
+
+  initDescCounter();
+  switchTab('submit');
+});
+</script>
+
+</body>
+</html>
