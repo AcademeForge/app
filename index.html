@@ -725,72 +725,40 @@ function startBanner(){
   },{passive:true});
 })();
 
-/* ── INTERACTIVE PAGE SWIPE ───────────────────────────── */
-(function () {
-  const page = document.getElementById('afPage');
-  if (!page) return;
+/* ── PAGE SWIPE NAV ──────────────────────────────────────── */
+(function(){
+  const page=$('afPage');
+  if(!page) return;
 
-  let startX = 0;
-  let startY = 0;
-  let currentX = 0;
-  let dragging = false;
+  let sx=0,sy=0,st=0;
 
-  page.style.willChange = 'transform';
+  page.addEventListener('touchstart',e=>{
+    sx=e.changedTouches[0].clientX;
+    sy=e.changedTouches[0].clientY;
+    st=Date.now();
+  },{passive:true});
 
-  page.addEventListener('touchstart', (e) => {
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-    dragging = true;
-    page.style.transition = 'none';
-  }, { passive: true });
+  page.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-sx;
+    const dy=e.changedTouches[0].clientY-sy;
+    const dt=Date.now()-st;
 
-  page.addEventListener('touchmove', (e) => {
-    if (!dragging) return;
+    if(Math.abs(dy)>Math.abs(dx)) return;
+    if(Math.abs(dx)<90||dt>600) return;
 
-    const dx = e.touches[0].clientX - startX;
-    const dy = e.touches[0].clientY - startY;
+    if(e.target.closest('.af-banner')||e.target.closest('.af-ticker')) return;
 
-    if (Math.abs(dy) > Math.abs(dx)) return;
-
-    currentX = dx;
-
-    page.style.transform = `translateX(${dx}px)`;
-  }, { passive: true });
-
-  page.addEventListener('touchend', () => {
-    if (!dragging) return;
-    dragging = false;
-
-    const threshold = window.innerWidth * 0.25;
-
-    page.style.transition = 'transform 0.25s ease';
-
-    // Left swipe
-    if (currentX < -threshold) {
-      page.style.transform = `translateX(-100vw)`;
-
-      setTimeout(() => {
-        window.location.href = '/student/index.html';
-      }, 250);
-
-      return;
+    // Left Swipe → Student
+    if(dx < 0){
+      window.location.href='/student/index.html';
     }
 
-    // Right swipe
-    if (currentX > threshold) {
-      page.style.transform = `translateX(100vw)`;
-
-      setTimeout(() => {
-        window.location.href = '/al/';
-      }, 250);
-
-      return;
+    // Right Swipe → AcademeForge AI
+    if(dx > 0){
+      window.location.href='/al/';
     }
 
-    page.style.transform = 'translateX(0)';
-    currentX = 0;
-  }, { passive: true });
-
+  },{passive:true});
 })();
 
 /* ── TOAST ───────────────────────────────────────────────── */
