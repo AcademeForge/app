@@ -3,10 +3,10 @@
 <head>
 <script>
 (function(){
-  if(localStorage.getItem('af_dark_mode')==='1')
-    document.documentElement.setAttribute('data-theme','dark');
-  else
-    document.documentElement.setAttribute('data-theme','dark'); /* default AMOLED */
+  /* Batches wale logic ke sath dark/light mode sync kiya gaya hai */
+  var dark = localStorage.getItem('af_dark_mode');
+  document.documentElement.setAttribute('data-theme', dark === '0' ? 'light' : 'dark');
+  
   if(sessionStorage.getItem('af_splash_shown'))
     document.documentElement.classList.add('no-splash');
 })();
@@ -305,6 +305,8 @@ html.no-splash #afSplash { display: none !important; }
     border-bottom: 1px solid var(--border);
     display: flex; align-items: center; padding: 0 28px; gap: 16px;
   }
+  [data-theme="light"] .dt-header { background: rgba(255,255,255,.90); }
+  
   .dt-brand { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
   .dt-brand-logo {
     width: 42px; height: 42px; border-radius: 12px; object-fit: cover; flex-shrink: 0;
@@ -387,6 +389,7 @@ html.no-splash #afSplash { display: none !important; }
     width: 100%; text-align: left;
   }
   .dt-nav-item:hover { background: rgba(255,255,255,.04); color: var(--text-primary); border-color: var(--border); }
+  [data-theme="light"] .dt-nav-item:hover { background: rgba(79,70,229,.04); }
   .dt-nav-item.active {
     background: rgba(124,58,237,.14);
     color: var(--primary-light);
@@ -700,7 +703,6 @@ html.no-splash #afSplash { display: none !important; }
 </head>
 <body>
 
-<!-- SPLASH -->
 <div id="afSplash">
   <div class="sp-ring">
     <img src="/IMG/AF LOGO 1.jpeg" alt="AF" onerror="this.style.display='none'"/>
@@ -710,9 +712,6 @@ html.no-splash #afSplash { display: none !important; }
   <div class="sp-bar-wrap"><div class="sp-bar"></div></div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     MOBILE SHELL (< 768px)
-══════════════════════════════════════════════ -->
 <div class="af-shell" id="afShell">
   <header class="af-topbar">
     <div class="af-brand">
@@ -737,7 +736,6 @@ html.no-splash #afSplash { display: none !important; }
   </header>
 
   <div class="af-page" id="afPage">
-    <!-- BANNER -->
     <div class="af-banner" id="afBanner">
       <div class="af-slide active" id="slide0">
         <img src="/IMG/banner1.png" alt="Banner 1"
@@ -758,7 +756,6 @@ html.no-splash #afSplash { display: none !important; }
       </div>
     </div>
 
-    <!-- TICKER -->
     <div class="af-ticker">
       <div class="af-ticker-track">
         <span>🔔 Beta version — Contents of AF Nexus are being updated...</span>
@@ -827,12 +824,8 @@ html.no-splash #afSplash { display: none !important; }
   </nav>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     DESKTOP LAYOUT (≥ 768px)
-══════════════════════════════════════════════ -->
 <div class="dt-layout">
 
-  <!-- HEADER -->
   <header class="dt-header">
     <div class="dt-brand">
       <img src="/IMG/AF LOGO 1.jpeg" alt="AF" class="dt-brand-logo"
@@ -857,7 +850,6 @@ html.no-splash #afSplash { display: none !important; }
 
   <div class="dt-body-wrap">
 
-    <!-- SIDEBAR -->
     <aside class="dt-sidebar">
       <div class="dt-nav-section">
         <span class="dt-nav-label-text">Navigation</span>
@@ -889,10 +881,8 @@ html.no-splash #afSplash { display: none !important; }
       </div>
     </aside>
 
-    <!-- MAIN -->
     <main class="dt-main">
 
-      <!-- TICKER -->
       <div class="dt-ticker" aria-label="Updates">
         <div class="dt-ticker-mask-l"></div>
         <div class="dt-ticker-mask-r"></div>
@@ -904,7 +894,6 @@ html.no-splash #afSplash { display: none !important; }
         </div>
       </div>
 
-      <!-- HERO BANNER -->
       <section class="dt-banner-section">
         <div class="dt-banner" id="dtBanner">
           <div class="dt-slide active" id="dtSlide0">
@@ -927,13 +916,11 @@ html.no-splash #afSplash { display: none !important; }
         </div>
       </section>
 
-      <!-- QUICK ACCESS -->
       <section class="dt-quick-section">
         <span class="dt-sec-label">Quick Access</span>
         <div class="dt-quick-grid" id="dtQuickRow"></div>
       </section>
 
-      <!-- FEATURED -->
       <section class="dt-featured-section">
         <span class="dt-sec-label">Featured</span>
         <button class="dt-featured-card" onclick="window.location.href='/T/index.html'" type="button">
@@ -946,7 +933,6 @@ html.no-splash #afSplash { display: none !important; }
         </button>
       </section>
 
-      <!-- LEARNING TOOLS -->
       <section class="dt-tools-section">
         <span class="dt-sec-label">Learning Tools</span>
         <div class="dt-tools-grid">
@@ -974,7 +960,6 @@ html.no-splash #afSplash { display: none !important; }
         </div>
       </section>
 
-      <!-- FOOTER -->
       <footer class="dt-footer">
         <strong>Developed by Devraj Kumar</strong> &nbsp;·&nbsp; Made with ❤️ in India
       </footer>
@@ -983,13 +968,10 @@ html.no-splash #afSplash { display: none !important; }
   </div>
 </div>
 
-<!-- PULL LOADER -->
 <div id="afPullLoader"><div class="af-pull-spin"></div></div>
 
-<!-- TOAST -->
 <div class="af-toast-wrap" id="afToastWrap"></div>
 
-<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
@@ -1320,6 +1302,10 @@ window.addEventListener('storage',e=>{
     renderQuickCards();
     renderDesktopQuickCards();
     handleStreakOnAuthChange();
+  }
+  /* Cross-page real-time theme changing logic support */
+  if (e.key === 'af_dark_mode') {
+    document.documentElement.setAttribute('data-theme', e.newValue === '0' ? 'light' : 'dark');
   }
 });
 
