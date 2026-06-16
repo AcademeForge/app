@@ -21,21 +21,6 @@
 <style>
 
 /* ═══════════════════════════════════════════════════════════
-   SECURITY — no-select everywhere, allow in inputs
-═══════════════════════════════════════════════════════════ */
-* {
-  -webkit-user-select: none !important;
-  -moz-user-select: none !important;
-  user-select: none !important;
-  -webkit-touch-callout: none !important;
-}
-input, textarea, [contenteditable="true"] {
-  -webkit-user-select: text !important;
-  -moz-user-select: text !important;
-  user-select: text !important;
-}
-
-/* ═══════════════════════════════════════════════════════════
    GLOBAL DESIGN TOKENS
 ═══════════════════════════════════════════════════════════ */
 :root {
@@ -59,21 +44,17 @@ input, textarea, [contenteditable="true"] {
   --r1: 8px; --r2: 12px; --r3: 16px; --r4: 20px; --rf: 9999px;
   --fd: 'Sora', sans-serif;
   --fb: 'Nunito', sans-serif;
-  --sh-card: 0 4px 12px rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.05);
-  --sh-hover: 0 16px 32px rgba(124,58,237,.1), 0 4px 12px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.1);
-  --tr: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  --tr: 0.2s ease;
 }
 [data-theme="light"] {
-  --bg-primary:   #f0f2ff;
-  --bg-secondary: #ffffff;
-  --bg-tertiary:  #f8f9fc;
-  --border:       rgba(79,70,229,.12);
-  --border-hover: rgba(79,70,229,.25);
-  --text-primary:   #0f0e2a;
-  --text-secondary: #4b5563;
-  --text-muted:     #8a94a6;
-  --sh-card: 0 2px 8px rgba(79,70,229,.04), 0 1px 2px rgba(0,0,0,.02);
-  --sh-hover: 0 16px 32px rgba(79,70,229,.12), 0 4px 12px rgba(79,70,229,.05);
+  --bg-primary:   #F7F8FA;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary:  #F1F3F5;
+  --border:       rgba(0,0,0,0.08);
+  --border-hover: rgba(0,0,0,0.15);
+  --text-primary:   #111827;
+  --text-secondary: #4B5563;
+  --text-muted:     #8A94A6;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -83,8 +64,8 @@ input, textarea, [contenteditable="true"] {
 html { font-size: 15px; -webkit-text-size-adjust: 100%; }
 [data-theme="dark"] { color-scheme: dark; }
 [data-theme="light"] { color-scheme: light; }
-html, body { height: 100%; }
-body { font-family: var(--fb); background: var(--bg-primary); color: var(--text-primary); -webkit-font-smoothing: antialiased; overflow: hidden; }
+html, body { height: 100%; overflow: hidden; margin: 0; padding: 0; }
+body { font-family: var(--fb); background: var(--bg-primary); color: var(--text-primary); -webkit-font-smoothing: antialiased; }
 button { font-family: var(--fb); cursor: pointer; border: none; background: none; color: inherit; outline: none; }
 a { text-decoration: none; color: inherit; }
 img { display: block; max-width: 100%; }
@@ -94,7 +75,7 @@ ul { list-style: none; }
    MOBILE SHELL (< 768px) — UNTOUCHED
 ═══════════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
-  body { display: flex; justify-content: center; overflow: hidden; }
+  body { display: flex; justify-content: center; }
   :root {
     --p:#6366f1;--p2:#4f46e5;--p3:#4338ca;--pl:#a5b4fc;
     --acc:#0ea5e9;--rose:#f43f5e;--amber:#f59e0b;--ok:#10b981;--err:#ef4444;
@@ -247,38 +228,41 @@ ul { list-style: none; }
 }
 
 /* ═══════════════════════════════════════════════════════════
-   DESKTOP LAYOUT (≥ 768px) — REDESIGNED ARCHITECTURE
+   PART 1: CSS REFACTOR (DESKTOP LAYOUT ≥ 768px)
 ═══════════════════════════════════════════════════════════ */
 @media (min-width: 768px) {
-  body { overflow: hidden !important; display: block; }
+  /* ROOT LOCK: Prevent body level scrolling */
+  body { overflow: hidden !important; display: block; margin: 0; padding: 0; }
   .mob-shell { display: none !important; }
 
-  .dt-layout { display: flex; flex-direction: column; height: 100vh; background: var(--bg-primary); overflow: hidden; }
+  /* MASTER LAYOUT */
+  .dt-layout { display: flex; flex-direction: column; height: 100vh; height: 100dvh; background: var(--bg-primary); overflow: hidden; }
 
   /* HEADER (Fixed Top) */
   .dt-header {
     position: fixed; top: 0; left: 0; right: 0; z-index: 200;
     height: var(--header-h);
-    background: rgba(5, 5, 5, 0.85);
+    background: rgba(var(--bg-primary-rgb, 5, 5, 5), 0.85);
     backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%);
     border-bottom: 1px solid var(--border);
     display: flex; align-items: center; padding: 0 32px; gap: 16px;
     transition: background var(--tr), border-color var(--tr);
   }
-  [data-theme="light"] .dt-header { background: rgba(255, 255, 255, 0.85); border-bottom-color: var(--border); }
+  [data-theme="light"] .dt-header { background: rgba(247, 248, 250, 0.85); }
+  
   .dt-brand { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
-  .dt-brand-logo { width: 44px; height: 44px; border-radius: 12px; object-fit: cover; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.05); }
+  .dt-brand-logo { width: 44px; height: 44px; border-radius: 12px; object-fit: cover; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.05); }
   [data-theme="light"] .dt-brand-logo { border: 1px solid rgba(0,0,0,0.05); }
-  .dt-brand-logo-fb { width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-family: var(--fd); font-weight: 800; font-size: 16px; color: #fff; box-shadow: 0 4px 12px rgba(124,58,237,.3); }
+  .dt-brand-logo-fb { width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-family: var(--fd); font-weight: 800; font-size: 16px; color: #fff; }
   .dt-brand-text { display: flex; flex-direction: column; }
-  .dt-brand-name { font-family: var(--fd); font-size: 17px; font-weight: 800; color: var(--text-primary); letter-spacing: -.02em; line-height: 1.2; }
+  .dt-brand-name { font-family: var(--fd); font-size: 16px; font-weight: 800; color: var(--text-primary); letter-spacing: -.02em; line-height: 1.2; }
   .dt-brand-tag  { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-top: 1px; }
   
   .dt-header-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-  .dt-streak { display: flex; align-items: center; gap: 6px; padding: 6px 16px 6px 12px; background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.25); border-radius: var(--rf); font-size: 13.5px; font-weight: 800; color: #f59e0b; cursor: pointer; transition: all var(--tr); }
-  .dt-streak:hover { background: rgba(245,158,11,.2); border-color: rgba(245,158,11,.4); transform: translateY(-1px); }
-  .dt-notif { width: 42px; height: 42px; border-radius: 12px; background: var(--bg-secondary); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 18px; position: relative; cursor: pointer; transition: all var(--tr); }
-  .dt-notif:hover { background: var(--bg-tertiary); border-color: var(--border-hover); transform: translateY(-1px); }
+  .dt-streak { display: flex; align-items: center; gap: 6px; padding: 6px 14px 6px 10px; background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.2); border-radius: var(--rf); font-size: 13px; font-weight: 700; color: #f59e0b; cursor: pointer; transition: all var(--tr); }
+  .dt-streak:hover { background: rgba(245,158,11,.15); border-color: rgba(245,158,11,.3); }
+  .dt-notif { width: 38px; height: 38px; border-radius: 10px; background: transparent; border: 1px solid transparent; display: flex; align-items: center; justify-content: center; font-size: 18px; position: relative; cursor: pointer; transition: all var(--tr); }
+  .dt-notif:hover { background: var(--bg-secondary); border-color: var(--border); }
   .dt-notif-dot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); box-shadow: 0 0 0 2px var(--bg-primary); display: none; }
 
   /* BODY WRAP */
@@ -288,275 +272,260 @@ ul { list-style: none; }
   .dt-sidebar {
     width: var(--sidebar-w); flex-shrink: 0;
     background: var(--bg-primary); border-right: 1px solid var(--border);
-    position: fixed; top: var(--header-h); bottom: 0; left: 0;
     display: flex; flex-direction: column;
     padding: 24px 16px; overflow-y: auto; z-index: 100;
   }
   .dt-sidebar::-webkit-scrollbar { width: 0; }
   .dt-nav-section { margin-bottom: 8px; }
   .dt-nav-label-text { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); padding: 0 16px; margin-bottom: 12px; display: block; }
-  .dt-nav-item { display: flex; align-items: center; gap: 14px; padding: 12px 16px; margin-bottom: 4px; border-radius: 12px; font-size: 14.5px; font-weight: 700; color: var(--text-secondary); cursor: pointer; transition: all var(--tr); border: 1px solid transparent; width: 100%; text-align: left; }
-  .dt-nav-item:hover { background: var(--bg-secondary); color: var(--text-primary); border-color: var(--border); transform: translateX(2px); }
-  .dt-nav-item.active { background: rgba(124,58,237,.1); color: var(--primary-light); border-color: rgba(124,58,237,.2); }
-  .dt-nav-item.active .dt-nav-icon-wrap { color: var(--primary-light); }
-  .dt-nav-icon-wrap { font-size: 20px; width: 24px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .dt-nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 16px; margin-bottom: 4px; border-radius: 10px; font-size: 14px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: all var(--tr); border: 1px solid transparent; width: 100%; text-align: left; }
+  .dt-nav-item:hover { background: var(--bg-secondary); color: var(--text-primary); border-color: var(--border); }
+  .dt-nav-item.active { background: rgba(124,58,237,.08); color: var(--primary-light); border-color: rgba(124,58,237,.15); }
+  [data-theme="light"] .dt-nav-item.active { color: var(--primary); }
+  .dt-nav-item.active .dt-nav-icon-wrap { color: inherit; }
+  .dt-nav-icon-wrap { font-size: 18px; width: 24px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .dt-sidebar-footer { margin-top: auto; padding-top: 20px; font-size: 12px; color: var(--text-muted); line-height: 1.6; padding-left: 16px; }
-  .dt-sidebar-footer strong { color: var(--text-secondary); font-weight: 800; }
 
-  /* MAIN SCROLL CONTAINER — Corrected for unified scrolling */
+  /* MAIN SCROLL CONTAINER — Exclusive Scroll Zone */
   .dt-main { 
-    margin-left: var(--sidebar-w); 
     flex: 1; 
     min-width: 0; 
-    display: block; /* Standard block context for full-page scroll */
     overflow-y: auto; 
     overflow-x: hidden;
     scroll-behavior: smooth;
-    background: var(--bg-tertiary);
+    background: var(--bg-primary);
+    display: flex;
+    flex-direction: column;
     position: relative;
   }
-  .dt-main::-webkit-scrollbar { width: 8px; }
+  .dt-main::-webkit-scrollbar { width: 6px; }
   .dt-main::-webkit-scrollbar-track { background: transparent; }
-  .dt-main::-webkit-scrollbar-thumb { background: rgba(138, 148, 166, 0.3); border-radius: 99px; border: 2px solid var(--bg-tertiary); }
-  .dt-main::-webkit-scrollbar-thumb:hover { background: rgba(138, 148, 166, 0.5); }
+  .dt-main::-webkit-scrollbar-thumb { background: rgba(138, 148, 166, 0.2); border-radius: 99px; }
+  .dt-main::-webkit-scrollbar-thumb:hover { background: rgba(138, 148, 166, 0.4); }
 
-  /* STICKY HEADER PANE */
+  /* FEED CENTER LAYOUT — Optimized density */
+  .dt-feed-center { 
+    max-width: 800px; /* SaaS standard reading width */
+    margin: 0 auto; 
+    width: 100%; 
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* STICKY HEADER PANE (Inside scrollable main) */
   .dt-fixed-header-pane {
     position: sticky;
     top: 0;
     z-index: 90;
-    padding: 36px 48px 20px 48px;
-    background: rgba(17, 17, 17, 0.85);
-    backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%);
+    padding: 24px 40px 16px;
+    background: rgba(var(--bg-primary-rgb, 5, 5, 5), 0.7);
+    backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
     transition: background var(--tr), border-color var(--tr);
   }
-  [data-theme="light"] .dt-fixed-header-pane { background: rgba(248, 249, 252, 0.85); }
-  
-  /* FEED CENTER LAYOUT — Expanded max-width for better balance */
-  .dt-feed-center { max-width: 1040px; margin: 0 auto; width: 100%; }
+  [data-theme="light"] .dt-fixed-header-pane { background: rgba(247, 248, 250, 0.8); }
 
   /* TYPOGRAPHY */
-  .dt-page-title { font-family: var(--fd); font-size: 32px; font-weight: 900; color: var(--text-primary); letter-spacing: -.03em; margin-bottom: 6px; }
-  .dt-page-sub { font-size: 14.5px; color: var(--text-muted); font-weight: 500; margin-bottom: 24px; }
+  .dt-page-title { font-family: var(--fd); font-size: 28px; font-weight: 800; color: var(--text-primary); letter-spacing: -.02em; margin-bottom: 4px; }
+  .dt-page-sub { font-size: 14px; color: var(--text-muted); font-weight: 500; margin-bottom: 20px; }
 
-  /* FILTER TOOLBAR */
-  .dt-comm-toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .dt-filter-pill { height: 38px; padding: 0 20px; border-radius: var(--rf); font-size: 13.5px; font-weight: 700; color: var(--text-secondary); background: var(--bg-secondary); border: 1px solid var(--border); cursor: pointer; transition: all var(--tr); }
-  .dt-filter-pill.active { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; border-color: transparent; box-shadow: 0 4px 16px rgba(124,58,237,.3); }
-  .dt-filter-pill:not(.active):hover { border-color: var(--border-hover); color: var(--text-primary); background: var(--bg-primary); transform: translateY(-1px); }
+  /* FILTER TOOLBAR — Segmented Control Style */
+  .dt-comm-toolbar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; background: var(--bg-secondary); padding: 4px; border-radius: 10px; border: 1px solid var(--border); width: fit-content; }
+  .dt-filter-pill { height: 32px; padding: 0 16px; border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--text-secondary); background: transparent; border: 1px solid transparent; cursor: pointer; transition: all var(--tr); }
+  .dt-filter-pill.active { background: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+  [data-theme="light"] .dt-filter-pill.active { background: #FFFFFF; }
+  .dt-filter-pill:not(.active):hover { color: var(--text-primary); }
 
   /* MY POSTS MODE BAR */
-  .dt-my-posts-bar { display: none; align-items: center; gap: 14px; margin-bottom: 0px; }
+  .dt-my-posts-bar { display: none; align-items: center; gap: 12px; }
   .dt-my-posts-bar.visible { display: flex; }
-  .dt-my-posts-title { font-family: var(--fd); font-size: 18px; font-weight: 800; color: var(--text-primary); flex: 1; }
-  .dt-my-posts-back { height: 38px; padding: 0 20px; border-radius: var(--rf); font-size: 13.5px; font-weight: 800; color: var(--primary-light); background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.25); cursor: pointer; transition: all var(--tr); }
-  .dt-my-posts-back:hover { background: rgba(124,58,237,.2); border-color: rgba(124,58,237,.4); }
+  .dt-my-posts-title { font-family: var(--fd); font-size: 16px; font-weight: 700; color: var(--text-primary); flex: 1; }
+  .dt-my-posts-back { height: 32px; padding: 0 14px; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--text-secondary); background: var(--bg-secondary); border: 1px solid var(--border); cursor: pointer; transition: all var(--tr); }
+  .dt-my-posts-back:hover { background: var(--bg-tertiary); color: var(--text-primary); }
 
-  /* FEED WRAPPER */
+  /* FEED WRAPPER (Natural flex expansion) */
   .dt-feed-scroll-area {
-    padding: 32px 48px 100px 48px; /* 100px bottom safely clears floating dock */
+    flex: 1 0 auto;
     display: flex;
     flex-direction: column;
-    min-height: calc(100vh - 200px); /* Pushes footer naturally to bottom */
+    padding: 0 40px; /* Vertical padding removed to fix empty space */
   }
 
   /* LOCKED STATE */
   .dt-locked-box { display: none; align-items: center; justify-content: center; padding: 60px 20px; flex: 1; }
   .dt-locked-box.visible { display: flex; }
-  .dt-locked-card { max-width: 400px; width: 100%; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 24px; padding: 48px 36px; text-align: center; box-shadow: var(--sh-card); }
-  .dt-locked-icon { width: 72px; height: 72px; margin: 0 auto 20px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 32px; background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.2); }
-  .dt-locked-card h2 { font-family: var(--fd); font-size: 24px; font-weight: 900; color: var(--danger); margin-bottom: 12px; }
-  .dt-locked-card p  { font-size: 14.5px; color: var(--text-secondary); line-height: 1.65; margin-bottom: 32px; }
-  .dt-login-btn { width: 100%; min-height: 52px; border-radius: var(--r2); font-size: 15px; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--primary), var(--secondary)); box-shadow: 0 8px 24px rgba(124,58,237,.35); cursor: pointer; transition: all var(--tr); }
-  .dt-login-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(124,58,237,.45); }
+  .dt-locked-card { max-width: 400px; width: 100%; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 16px; padding: 40px 32px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  .dt-locked-icon { width: 56px; height: 56px; margin: 0 auto 20px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.15); color: var(--danger); }
+  .dt-locked-card h2 { font-family: var(--fd); font-size: 20px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px; }
+  .dt-locked-card p  { font-size: 14px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px; }
+  .dt-login-btn { width: 100%; height: 44px; border-radius: 8px; font-size: 14px; font-weight: 700; color: #fff; background: var(--primary); transition: all var(--tr); }
+  .dt-login-btn:hover { background: var(--primary-light); transform: translateY(-1px); }
 
   /* FEED LIST SPINNER */
-  .dt-spinner { width: 32px; height: 32px; border-radius: 50%; border: 3px solid var(--border); border-top-color: var(--primary); animation: dtSpin .75s linear infinite; margin: 60px auto; display: block; }
+  .dt-spinner { width: 28px; height: 28px; border-radius: 50%; border: 3px solid var(--border); border-top-color: var(--primary); animation: dtSpin .75s linear infinite; margin: 40px auto; display: block; }
   @keyframes dtSpin { to { transform: rotate(360deg); } }
-  .dt-state-msg { text-align: center; color: var(--text-muted); font-size: 14.5px; font-weight: 600; padding: 64px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
-  .dt-state-msg .icon { font-size: 48px; animation: dtBob 3s ease-in-out infinite; }
-  @keyframes dtBob { 0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);} }
+  .dt-state-msg { text-align: center; color: var(--text-muted); font-size: 14px; font-weight: 500; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
 
-  /* PREMIUM POST CARDS */
+  /* PREMIUM POST CARDS (Linear/Notion Aesthetic) */
   .dt-post-card {
     background: var(--bg-secondary);
     border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 28px;
-    margin-bottom: 24px;
-    box-shadow: var(--sh-card);
-    animation: dtCardIn .4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    animation: dtCardIn .3s cubic-bezier(0.16, 1, 0.3, 1) both;
     transition: transform var(--tr), box-shadow var(--tr), border-color var(--tr);
   }
   .dt-post-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--sh-hover);
-    border-color: rgba(124, 58, 237, 0.35);
+    border-color: var(--border-hover);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
   }
-  [data-theme="light"] .dt-post-card:hover { border-color: rgba(79, 70, 229, 0.25); }
-  @keyframes dtCardIn { from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);} }
+  @keyframes dtCardIn { from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);} }
   
-  .dt-post-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
-  .dt-post-author { display: flex; align-items: center; gap: 14px; min-width: 0; }
+  .dt-post-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+  .dt-post-author { display: flex; align-items: center; gap: 12px; min-width: 0; }
   .dt-avatar {
-    width: 48px; height: 48px; min-width: 48px; border-radius: 14px;
+    width: 36px; height: 36px; min-width: 36px; border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 15px; font-weight: 800; color: #fff;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    flex-shrink: 0; letter-spacing: .02em;
-    box-shadow: 0 4px 16px rgba(124, 58, 237, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    font-size: 13px; font-weight: 700; color: #fff;
+    background: linear-gradient(135deg, var(--text-muted), var(--bg-tertiary));
+    flex-shrink: 0; border: 1px solid rgba(255,255,255,0.05);
   }
-  [data-theme="light"] .dt-avatar { border: 1px solid rgba(0,0,0,0.05); }
-  .dt-post-meta strong { display: block; font-size: 15.5px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.01em; }
-  .dt-post-meta small  { display: block; margin-top: 4px; font-size: 13px; color: var(--text-muted); font-weight: 600; }
+  [data-theme="light"] .dt-avatar { background: linear-gradient(135deg, var(--primary), var(--secondary)); border-color: transparent; }
+  .dt-post-meta strong { display: block; font-size: 14.5px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.01em; }
+  .dt-post-meta small  { display: block; margin-top: 2px; font-size: 12.5px; color: var(--text-muted); font-weight: 500; }
   
   .dt-menu-dot {
-    width: 36px; height: 36px; min-width: 36px; border-radius: var(--r2);
+    width: 32px; height: 32px; border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 20px; color: var(--text-muted); background: transparent;
+    color: var(--text-muted); background: transparent; border: 1px solid transparent;
     cursor: pointer; transition: all var(--tr);
   }
-  .dt-menu-dot:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+  .dt-menu-dot:hover { background: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border); }
   
   .dt-post-text {
-    font-size: 15.5px; line-height: 1.7; color: var(--text-secondary);
-    white-space: pre-wrap; word-break: break-word; margin-bottom: 20px; font-weight: 500;
+    font-size: 14.5px; line-height: 1.65; color: var(--text-secondary);
+    white-space: pre-wrap; word-break: break-word; margin-bottom: 16px; font-weight: 400;
   }
   
-  .dt-post-actions { display: flex; align-items: center; gap: 12px; padding-top: 20px; border-top: 1px solid var(--border); }
+  .dt-post-actions { display: flex; align-items: center; gap: 8px; }
   .dt-action-btn {
-    height: 38px; padding: 0 18px; border-radius: var(--rf);
-    font-size: 13.5px; font-weight: 700; color: var(--text-secondary);
-    background: var(--bg-tertiary); border: 1px solid var(--border);
-    display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all var(--tr);
+    height: 32px; padding: 0 12px; border-radius: 6px;
+    font-size: 13px; font-weight: 600; color: var(--text-muted);
+    background: transparent; border: 1px solid transparent;
+    display: flex; align-items: center; gap: 6px; cursor: pointer; transition: all var(--tr);
   }
-  .dt-action-btn:hover { background: var(--bg-primary); color: var(--text-primary); border-color: var(--border-hover); transform: translateY(-1px); }
-  .dt-action-btn:active { transform: scale(.97); }
-  .dt-action-btn.liked { background: rgba(244,63,94,.08); border-color: rgba(244,63,94,.25); color: #f43f5e; }
-  .dt-action-btn.liked:hover { background: rgba(244,63,94,.12); border-color: rgba(244,63,94,.4); }
+  .dt-action-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border); }
+  .dt-action-btn:active { transform: scale(.98); }
+  .dt-action-btn.liked { color: #f43f5e; }
+  .dt-action-btn.liked svg { fill: #f43f5e; color: #f43f5e; }
+  .dt-action-btn.liked:hover { background: rgba(244,63,94,.08); border-color: rgba(244,63,94,.2); }
   .dt-action-btn .cnt { font-variant-numeric: tabular-nums; }
 
-  /* FLOATING DOCK (Horizontal Glassmorphism) */
+  /* FLOATING DOCK (Fixed Bottom Right, Glassmorphism) */
   .dt-fab-group {
-    position: fixed;
-    bottom: 36px;
-    right: 48px;
-    z-index: 500;
-    display: none;
-    flex-direction: row;
-    gap: 12px;
-    align-items: center;
-    padding: 8px 12px;
-    background: rgba(15, 15, 20, 0.75);
-    backdrop-filter: blur(24px) saturate(200%); -webkit-backdrop-filter: blur(24px) saturate(200%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 999px;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    transition: all var(--tr);
+    position: fixed; bottom: 32px; right: 40px; z-index: 500;
+    display: none; flex-direction: row; gap: 6px; align-items: center;
+    padding: 6px; border-radius: 14px;
+    background: rgba(17, 17, 17, 0.85);
+    backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   }
-  [data-theme="light"] .dt-fab-group {
-    background: rgba(255, 255, 255, 0.85); border: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0 16px 40px rgba(79, 70, 229, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  }
-  .dt-fab-group.visible { display: flex; animation: fabIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-  @keyframes fabIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  [data-theme="light"] .dt-fab-group { background: rgba(255, 255, 255, 0.9); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); }
+  .dt-fab-group.visible { display: flex; animation: fabIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+  @keyframes fabIn { from { opacity: 0; transform: translateY(16px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
   .dt-fab-btn {
     display: flex; align-items: center; gap: 8px;
-    height: 44px; padding: 0 20px; border-radius: 999px;
-    font-size: 14.5px; font-weight: 700; cursor: pointer; transition: all 0.2s ease;
+    height: 38px; padding: 0 16px; border-radius: 8px;
+    font-size: 13.5px; font-weight: 600; cursor: pointer; transition: all var(--tr);
   }
-  .dt-fab-myposts { background: transparent; color: var(--text-secondary); border: none; box-shadow: none; }
-  .dt-fab-myposts:hover { background: rgba(255, 255, 255, 0.08); color: var(--text-primary); }
-  [data-theme="light"] .dt-fab-myposts:hover { background: rgba(79, 70, 229, 0.08); color: var(--primary); }
-  .dt-fab-write {
-    background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff;
-    border: none; box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
-  }
-  .dt-fab-write:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(124, 58, 237, 0.45); }
+  .dt-fab-myposts { background: transparent; color: var(--text-secondary); border: 1px solid transparent; }
+  .dt-fab-myposts:hover { background: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border); }
+  .dt-fab-write { background: var(--text-primary); color: var(--bg-primary); border: 1px solid transparent; }
+  .dt-fab-write:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 
   /* FOOTER */
-  .dt-footer { text-align: center; padding: 48px 0 24px; font-size: 13px; color: var(--text-muted); margin-top: auto; }
-  .dt-footer strong { color: var(--text-secondary); font-weight: 700; }
+  .dt-footer { 
+    flex-shrink: 0; text-align: center; padding: 32px 0 24px; 
+    font-size: 12.5px; color: var(--text-muted); 
+    margin-top: auto; /* Perfectly pushes to bottom without fighting flex */
+  }
 
-  /* DESKTOP MODALS (Untouched Functionality, Only UI spacing tweaks) */
-  .dt-modal-ov { position: fixed; inset: 0; z-index: 9000; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); opacity: 0; visibility: hidden; transition: opacity .22s, visibility .22s; }
+  /* MODALS (Polished Spacing & Borders) */
+  .dt-modal-ov { position: fixed; inset: 0; z-index: 9000; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); opacity: 0; visibility: hidden; transition: opacity .2s, visibility .2s; }
   .dt-modal-ov.open { opacity: 1; visibility: visible; }
-  .dt-modal-card { width: min(600px, 92vw); background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 24px; box-shadow: 0 24px 64px rgba(0,0,0,.5); transform: translateY(16px) scale(.97); transition: transform .25s cubic-bezier(.34,1.56,.64,1); display: flex; flex-direction: column; max-height: 85vh; overflow: hidden; }
+  .dt-modal-card { width: min(540px, 92vw); background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 24px 48px rgba(0,0,0,.4); transform: translateY(8px) scale(.98); transition: transform .2s cubic-bezier(.16,1,.3,1); display: flex; flex-direction: column; max-height: 85vh; overflow: hidden; }
   .dt-modal-ov.open .dt-modal-card { transform: translateY(0) scale(1); }
   .dt-modal-head { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-  .dt-modal-head h3 { font-family: var(--fd); font-size: 18px; font-weight: 800; color: var(--text-primary); }
-  .dt-modal-head p  { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
-  .dt-modal-close { width: 36px; height: 36px; border-radius: var(--r1); background: var(--bg-tertiary); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--text-muted); cursor: pointer; transition: all var(--tr); }
-  .dt-modal-close:hover { background: var(--bg-primary); color: var(--text-primary); }
+  .dt-modal-head h3 { font-family: var(--fd); font-size: 16px; font-weight: 700; color: var(--text-primary); }
+  .dt-modal-head p  { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  .dt-modal-close { width: 32px; height: 32px; border-radius: 8px; background: transparent; border: 1px solid transparent; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--text-muted); cursor: pointer; transition: all var(--tr); }
+  .dt-modal-close:hover { background: var(--bg-tertiary); color: var(--text-primary); border-color: var(--border); }
   .dt-modal-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; flex: 1; }
-  textarea.dt-compose { width: 100%; resize: none; outline: none; border-radius: var(--r2); padding: 16px 20px; font-size: 15px; line-height: 1.7; font-weight: 500; color: var(--text-primary); background: var(--bg-tertiary); border: 1.5px solid var(--border); font-family: var(--fb); transition: all var(--tr); min-height: 140px; }
-  textarea.dt-compose:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(124,58,237,.12); background: var(--bg-secondary); }
-  textarea.dt-compose.over { border-color: var(--danger); box-shadow: 0 0 0 4px rgba(239,68,68,.1); }
+  textarea.dt-compose { width: 100%; resize: none; outline: none; border-radius: 8px; padding: 16px; font-size: 14px; line-height: 1.6; font-weight: 400; color: var(--text-primary); background: var(--bg-tertiary); border: 1px solid var(--border); font-family: var(--fb); transition: all var(--tr); min-height: 120px; }
+  textarea.dt-compose:focus { border-color: var(--text-secondary); background: var(--bg-secondary); box-shadow: 0 0 0 2px rgba(255,255,255,0.05); }
+  [data-theme="light"] textarea.dt-compose:focus { box-shadow: 0 0 0 2px rgba(0,0,0,0.05); }
+  textarea.dt-compose.over { border-color: var(--danger); box-shadow: 0 0 0 2px rgba(239,68,68,.1); }
   .dt-compose-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .dt-compose-foot span { font-size: 13px; font-weight: 700; color: var(--text-muted); }
+  .dt-compose-foot span { font-size: 12.5px; font-weight: 600; color: var(--text-muted); }
   .dt-compose-foot .warn { color: var(--danger); }
-  .dt-submit-btn { height: 44px; padding: 0 24px; border-radius: var(--r2); font-size: 14px; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--primary), var(--secondary)); box-shadow: 0 4px 16px rgba(124,58,237,.3); cursor: pointer; transition: all var(--tr); }
-  .dt-submit-btn:hover { opacity: .95; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(124,58,237,.4); }
-  .dt-submit-btn:active { transform: scale(.97); }
-  .dt-submit-btn:disabled { opacity: .3; cursor: not-allowed; box-shadow: none; transform: none; }
+  .dt-submit-btn { height: 38px; padding: 0 20px; border-radius: 8px; font-size: 13.5px; font-weight: 600; color: var(--bg-primary); background: var(--text-primary); border: 1px solid transparent; cursor: pointer; transition: all var(--tr); }
+  .dt-submit-btn:hover { opacity: .9; transform: translateY(-1px); }
+  .dt-submit-btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
   
   /* COMMENTS */
   .dt-comments-list { flex: 1; overflow-y: auto; padding: 16px 24px; display: flex; flex-direction: column; gap: 12px; min-height: 80px; }
-  .dt-comment-input-area { padding: 14px 24px 20px; border-top: 1px solid var(--border); flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; }
-  .dt-cmt-card { background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 16px; padding: 16px; transition: border-color var(--tr); }
-  .dt-cmt-card:hover { border-color: var(--border-hover); }
-  .dt-cmt-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
-  .dt-cmt-info strong { font-size: 14px; font-weight: 800; color: var(--text-primary); display: block; }
-  .dt-cmt-info small  { font-size: 12px; color: var(--text-muted); margin-top: 2px; display: block; font-weight: 600; }
-  .dt-cmt-text { font-size: 14.5px; line-height: 1.65; color: var(--text-secondary); white-space: pre-wrap; word-break: break-word; margin-bottom: 12px; }
+  .dt-comment-input-area { padding: 16px 24px 20px; border-top: 1px solid var(--border); flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; }
+  .dt-cmt-card { background: transparent; border: none; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .dt-cmt-card:last-child { border-bottom: none; }
+  .dt-cmt-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+  .dt-cmt-info strong { font-size: 14px; font-weight: 700; color: var(--text-primary); display: inline-block; margin-right: 6px;}
+  .dt-cmt-info small  { font-size: 12px; color: var(--text-muted); display: inline-block; font-weight: 500; }
+  .dt-cmt-text { font-size: 14px; line-height: 1.6; color: var(--text-secondary); white-space: pre-wrap; word-break: break-word; margin-bottom: 10px; }
   .dt-cmt-actions { display: flex; align-items: center; gap: 8px; }
-  .dt-cmt-btn { height: 30px; padding: 0 14px; border-radius: var(--rf); font-size: 12.5px; font-weight: 700; color: var(--text-muted); background: var(--bg-secondary); border: 1px solid var(--border); display: flex; align-items: center; gap: 6px; cursor: pointer; transition: all var(--tr); }
-  .dt-cmt-btn:hover { border-color: var(--border-hover); color: var(--text-primary); background: var(--bg-primary); }
-  .dt-cmt-btn.liked { background: rgba(244,63,94,.1); border-color: rgba(244,63,94,.25); color: #f43f5e; }
-  .dt-view-replies-btn { font-size: 13px; font-weight: 700; color: var(--primary-light); background: none; border: none; cursor: pointer; margin-top: 10px; display: inline-flex; align-items: center; gap: 6px; transition: opacity var(--tr); }
-  .dt-view-replies-btn:hover { opacity: .75; }
-  .dt-replies-wrap { margin: 12px 0 0 16px; padding-left: 16px; border-left: 2px solid var(--border); display: flex; flex-direction: column; }
-  .dt-reply-row { padding: 12px 0; border-bottom: 1px solid var(--border); }
-  .dt-reply-row:last-child { border-bottom: none; }
+  .dt-cmt-btn { height: 26px; padding: 0 10px; border-radius: 6px; font-size: 12px; font-weight: 600; color: var(--text-muted); background: transparent; border: 1px solid transparent; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: all var(--tr); }
+  .dt-cmt-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+  .dt-cmt-btn.liked { color: #f43f5e; }
+  .dt-view-replies-btn { font-size: 12.5px; font-weight: 600; color: var(--text-secondary); background: none; border: none; cursor: pointer; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; transition: color var(--tr); }
+  .dt-view-replies-btn:hover { color: var(--text-primary); }
+  .dt-replies-wrap { margin: 12px 0 0 12px; padding-left: 16px; border-left: 1px solid var(--border); display: flex; flex-direction: column; }
+  .dt-reply-row { padding: 10px 0; }
   
   /* ACTION MENU */
-  .dt-menu-modal-card { width: min(340px, 90vw); background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,.5); transform: translateY(16px) scale(.97); transition: transform .25s cubic-bezier(.34,1.56,.64,1); padding: 12px; overflow: hidden; }
+  .dt-menu-modal-card { width: min(280px, 90vw); background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,.4); transform: translateY(8px) scale(.98); transition: transform .2s cubic-bezier(.16,1,.3,1); padding: 8px; overflow: hidden; }
   .dt-modal-ov.open .dt-menu-modal-card { transform: translateY(0) scale(1); }
-  .dt-menu-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .09em; color: var(--text-muted); padding: 8px 12px 6px; display: block; }
-  .dt-menu-modal-card button { width: 100%; min-height: 48px; border-radius: var(--r2); font-size: 14.5px; font-weight: 700; margin-bottom: 6px; color: var(--text-secondary); background: var(--bg-tertiary); display: flex; align-items: center; gap: 12px; padding: 0 16px; cursor: pointer; transition: all var(--tr); border: 1px solid transparent; }
-  .dt-menu-modal-card button:last-child { margin-bottom: 0; }
-  .dt-menu-modal-card button:hover { background: var(--bg-primary); border-color: var(--border); color: var(--text-primary); }
-  .dt-menu-modal-card button.danger { color: var(--danger); background: rgba(239,68,68,.06); border-color: rgba(239,68,68,.10); }
-  .dt-menu-modal-card button.danger:hover { background: rgba(239,68,68,.12); }
+  .dt-menu-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); padding: 8px 12px; display: block; }
+  .dt-menu-modal-card button { width: 100%; height: 40px; border-radius: 6px; font-size: 13.5px; font-weight: 600; color: var(--text-secondary); background: transparent; display: flex; align-items: center; gap: 12px; padding: 0 12px; cursor: pointer; transition: all var(--tr); border: 1px solid transparent; }
+  .dt-menu-modal-card button:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+  .dt-menu-modal-card button.danger { color: var(--danger); }
+  .dt-menu-modal-card button.danger:hover { background: rgba(239,68,68,.08); color: var(--danger); }
   
   /* DESKTOP TOAST */
-  .af-toast-wrap { position: fixed; left: 50%; bottom: 32px; transform: translateX(-50%); z-index: 999999; width: min(92vw, 440px); pointer-events: none; }
-  .af-toast { display: flex; align-items: flex-start; gap: 14px; background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px; box-shadow: 0 16px 40px rgba(0,0,0,.3); pointer-events: auto; }
-  .af-toast-ok  { border-left: 4px solid var(--success); }
-  .af-toast-err { border-left: 4px solid var(--danger); }
-  .af-toast-info{ border-left: 4px solid var(--primary); }
-  .af-toast-title { font-size: 13.5px; font-weight: 800; margin: 0 0 4px; }
-  .af-toast-msg   { font-size: 12.5px; margin: 0; line-height: 1.5; color: var(--text-secondary); }
-  .af-toast-x { margin-left: auto; font-size: 20px; cursor: pointer; color: var(--text-muted); transition: color var(--tr); }
+  .af-toast-wrap { position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%); z-index: 999999; width: min(92vw, 360px); pointer-events: none; }
+  .af-toast { display: flex; align-items: flex-start; gap: 12px; background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; box-shadow: 0 8px 24px rgba(0,0,0,.2); pointer-events: auto; }
+  .af-toast-ok  { border-left: 3px solid var(--success); }
+  .af-toast-err { border-left: 3px solid var(--danger); }
+  .af-toast-info{ border-left: 3px solid var(--primary); }
+  .af-toast-title { font-size: 13px; font-weight: 700; margin: 0 0 2px; }
+  .af-toast-msg   { font-size: 12px; margin: 0; line-height: 1.5; color: var(--text-secondary); }
+  .af-toast-x { margin-left: auto; font-size: 18px; cursor: pointer; color: var(--text-muted); transition: color var(--tr); }
   .af-toast-x:hover { color: var(--text-primary); }
-  
-  /* RESPONSIVE DESKTOP ADJUSTMENTS */
+
   @media (max-width: 1100px) {
-    .dt-fixed-header-pane { padding: 24px 32px 16px 32px; }
-    .dt-feed-scroll-area { padding: 24px 32px 100px 32px; }
+    .dt-fixed-header-pane { padding: 24px 32px 16px; }
+    .dt-feed-scroll-area { padding: 0 32px; }
   }
   @media (min-width: 768px) and (max-width: 1023px) {
     :root { --sidebar-w: 80px; }
-    .dt-nav-item { padding: 12px; justify-content: center; }
+    .dt-nav-item { padding: 10px; justify-content: center; }
     .dt-nav-item span:not(.dt-nav-icon-wrap) { display: none; }
-    .dt-nav-icon-wrap { width: auto; font-size: 22px; }
+    .dt-nav-icon-wrap { width: auto; font-size: 20px; }
     .dt-nav-label-text { display: none; }
     .dt-sidebar-footer { display: none; }
     .dt-sidebar { padding: 24px 12px; align-items: center; }
-    .dt-fixed-header-pane { padding: 24px 24px 16px 24px; }
-    .dt-feed-scroll-area { padding: 24px 24px 100px 24px; }
   }
   .hidden { display: none !important; }
 }
@@ -653,7 +622,7 @@ ul { list-style: none; }
 <div class="toast-wrap" id="toastWrap"></div>
 
 <!-- ══════════════════════════════════════════════
-     DESKTOP LAYOUT (≥ 768px) — OPTIMIZED STRUCTURE
+     PART 2: HTML RESTRUCTURE (DESKTOP)
 ══════════════════════════════════════════════ -->
 <div class="dt-layout">
   <header class="dt-header">
@@ -667,10 +636,11 @@ ul { list-style: none; }
     </div>
     <div class="dt-header-actions">
       <button class="dt-streak" onclick="window.location.href='/Heatmap/index.html'" type="button">
-        <span style="font-size:16px;">🔥</span><span id="dtStreakCount">0</span>
+        <span style="font-size:14px;">🔥</span><span id="dtStreakCount">0</span>
       </button>
       <button class="dt-notif" onclick="window.location.href='/Notify/index.html'" type="button">
-        🔔<span class="dt-notif-dot" id="dtNotifDot"></span>
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        <span class="dt-notif-dot" id="dtNotifDot"></span>
       </button>
     </div>
   </header>
@@ -679,46 +649,58 @@ ul { list-style: none; }
     <aside class="dt-sidebar">
       <div class="dt-nav-section">
         <span class="dt-nav-label-text">Navigation</span>
-        <button class="dt-nav-item" onclick="window.location.href='/index.html'" type="button"><span class="dt-nav-icon-wrap">🏠</span><span>Home</span></button>
-        <button class="dt-nav-item" onclick="window.location.href='/student/index.html'" type="button"><span class="dt-nav-icon-wrap">🎓</span><span>Student</span></button>
-        <button class="dt-nav-item" onclick="window.location.href='/batches/index.html'" type="button"><span class="dt-nav-icon-wrap">📚</span><span>Batches</span></button>
-        <button class="dt-nav-item active" type="button"><span class="dt-nav-icon-wrap">💬</span><span>Community</span></button>
-        <button class="dt-nav-item" onclick="window.location.href='/setting/index.html'" type="button"><span class="dt-nav-icon-wrap">⚙️</span><span>Settings</span></button>
+        <button class="dt-nav-item" onclick="window.location.href='/index.html'" type="button"><span class="dt-nav-icon-wrap">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        </span><span>Home</span></button>
+        <button class="dt-nav-item" onclick="window.location.href='/student/index.html'" type="button"><span class="dt-nav-icon-wrap">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+        </span><span>Student</span></button>
+        <button class="dt-nav-item" onclick="window.location.href='/batches/index.html'" type="button"><span class="dt-nav-icon-wrap">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        </span><span>Batches</span></button>
+        <button class="dt-nav-item active" type="button"><span class="dt-nav-icon-wrap">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+        </span><span>Community</span></button>
+        <button class="dt-nav-item" onclick="window.location.href='/setting/index.html'" type="button"><span class="dt-nav-icon-wrap">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </span><span>Settings</span></button>
       </div>
       <div class="dt-sidebar-footer">
         <strong>Developed by Devraj Kumar</strong><br>Made with ❤️ in India
       </div>
     </aside>
 
-    <!-- Unified Scrollable Main Area -->
+    <!-- Unified Exclusive Scrollable Main Area -->
     <main class="dt-main" id="dtMain">
       
-      <!-- Sticky Header Pane (Stays at the top of the scroll container) -->
-      <div class="dt-fixed-header-pane">
-        <div class="dt-feed-center">
+      <div class="dt-feed-center">
+        <!-- Sticky Header Pane (Stays inside feed container constraints) -->
+        <div class="dt-fixed-header-pane">
           <div class="dt-page-title">Community</div>
           <div class="dt-page-sub">Posting as <span id="dtPostingName">Student</span> · Connect, ask, share</div>
 
           <div class="dt-comm-toolbar" id="dtToolbar">
-            <button class="dt-filter-pill active" id="dtPillRelevant" onclick="nxSetMode('relevant')">✦ Relevant</button>
-            <button class="dt-filter-pill" id="dtPillRecent" onclick="nxSetMode('recent')">🕐 Recent</button>
+            <button class="dt-filter-pill active" id="dtPillRelevant" onclick="nxSetMode('relevant')">Relevant</button>
+            <button class="dt-filter-pill" id="dtPillRecent" onclick="nxSetMode('recent')">Recent</button>
           </div>
 
           <div class="dt-my-posts-bar" id="dtMyPostsBar">
-            <span style="font-size:20px;">👤</span>
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
             <span class="dt-my-posts-title">My Posts</span>
-            <button class="dt-my-posts-back" onclick="nxCloseMyPostsDt()">← Back to Feed</button>
+            <button class="dt-my-posts-back" onclick="nxCloseMyPostsDt()">← Feed</button>
           </div>
         </div>
       </div>
 
-      <!-- Feed Content Wrapper -->
+      <!-- Feed Content Wrapper (Flex natural growth) -->
       <div class="dt-feed-scroll-area">
         <div class="dt-feed-center">
           
           <div class="dt-locked-box" id="dtLockedBox">
             <div class="dt-locked-card">
-              <div class="dt-locked-icon">🔒</div>
+              <div class="dt-locked-icon">
+                <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </div>
               <h2>Community Locked</h2>
               <p>Login with your Student ID to join AF Nexus and connect with fellow learners.</p>
               <button class="dt-login-btn" onclick="goToLogin()">Login to continue</button>
@@ -737,8 +719,14 @@ ul { list-style: none; }
 
   <!-- Premium Glassmorphic Dock Controller -->
   <div class="dt-fab-group" id="dtFabGroup">
-    <button class="dt-fab-btn dt-fab-myposts" onclick="nxOpenMyPostsDt()">👤 My Posts</button>
-    <button class="dt-fab-btn dt-fab-write" onclick="nxOpenComposerDt()">✍️ Write Post</button>
+    <button class="dt-fab-btn dt-fab-myposts" onclick="nxOpenMyPostsDt()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      My Posts
+    </button>
+    <button class="dt-fab-btn dt-fab-write" onclick="nxOpenComposerDt()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+      Write
+    </button>
   </div>
 
   <!-- Desktop modals -->
@@ -753,7 +741,7 @@ ul { list-style: none; }
   </div>
 
   <div class="dt-modal-ov" id="dtCommentsModal" onclick="nxCloseCommentsDt()">
-    <div class="dt-modal-card" onclick="event.stopPropagation()" style="width:min(660px,92vw);">
+    <div class="dt-modal-card" onclick="event.stopPropagation()" style="width:min(600px,92vw);">
       <div class="dt-modal-head"><div><h3>Comments</h3><p id="dtCommentsPreview">Join the discussion</p></div><button class="dt-modal-close" onclick="nxCloseCommentsDt()">×</button></div>
       <div class="dt-comments-list" id="dtCommentsList"><div class="dt-spinner"></div></div>
       <div class="dt-comment-input-area">
@@ -776,7 +764,10 @@ ul { list-style: none; }
   <div class="dt-modal-ov" id="dtMenuModal" onclick="nxCloseMenuDt()">
     <div class="dt-menu-modal-card" onclick="event.stopPropagation()">
       <span class="dt-menu-label">Options</span>
-      <button id="dtMenuDeleteBtn" class="danger" onclick="nxDeleteTargetDt()">🗑 Delete</button>
+      <button id="dtMenuDeleteBtn" class="danger" onclick="nxDeleteTargetDt()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        Delete
+      </button>
       <button onclick="nxCloseMenuDt()">Cancel</button>
     </div>
   </div>
@@ -788,8 +779,10 @@ ul { list-style: none; }
 'use strict';
 
 /* ══════════════════════════════════════════════════════════
-   SECURITY
+   PART 3: JS LAYOUT LOGIC UPDATE (UI Templates only)
+   (Logic/DB calls remain 100% untouched as requested)
 ══════════════════════════════════════════════════════════ */
+
 (function(){
   document.addEventListener('contextmenu', e => e.preventDefault());
   document.addEventListener('copy',        e => e.preventDefault());
@@ -810,9 +803,7 @@ ul { list-style: none; }
   document.addEventListener('wheel', function(e){ if(e.ctrlKey) e.preventDefault(); }, { passive: false });
 })();
 
-/* ══════════════════════════════════════════════════════════
-   CACHE & SUPABASE
-══════════════════════════════════════════════════════════ */
+/* CACHE & SUPABASE */
 const CACHE_KEY    = 'af_nx_posts_cache_v2';
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const STUDENT_URL  = "https://afooyyydhlwngzssgqih.supabase.co";
@@ -834,9 +825,7 @@ function getSb(){
   return _sb;
 }
 
-/* ══════════════════════════════════════════════════════════
-   HELPERS
-══════════════════════════════════════════════════════════ */
+/* HELPERS */
 const $    = id => document.getElementById(id);
 const show = id => $(id) && $(id).classList.remove('hidden');
 const hide = id => $(id) && $(id).classList.add('hidden');
@@ -910,9 +899,7 @@ let _mode='relevant', _posts=[], _curPostId=null, _replyParentId=null, _menuTarg
 
 function goToLogin(){ sessionStorage.setItem('af_last_tab','student'); window.location.href='/'; }
 
-/* ══════════════════════════════════════════════════════════
-   INIT
-══════════════════════════════════════════════════════════ */
+/* INIT */
 function init(){
   $('hdrPosting').textContent = 'Posting as '+sName();
 
@@ -962,9 +949,7 @@ function init(){
   dtLoadPosts(false);
 }
 
-/* ══════════════════════════════════════════════════════════
-   MOBILE LOGIC — ORIGINAL, UNTOUCHED
-══════════════════════════════════════════════════════════ */
+/* MOBILE LOGIC — ORIGINAL, UNTOUCHED */
 function setFeedMode(){ show('filterBar'); hide('myPostsBar'); show('btnMyPosts'); }
 function setMyPostsMode(){ hide('filterBar'); show('myPostsBar'); hide('btnMyPosts'); }
 
@@ -1090,9 +1075,7 @@ async function nxDeleteTarget(){
   showToast('Deleted','ok','✓');
 }
 
-/* ══════════════════════════════════════════════════════════
-   DESKTOP LOGIC
-══════════════════════════════════════════════════════════ */
+/* DESKTOP LOGIC (Updated template strings for new layout) */
 function dtRefresh(){
   if(_myMode){$('dtPostsList').innerHTML='<div class="dt-spinner"></div>';dtLoadMyPosts();showToast('My Posts refreshed','info','↻');}
   else{cacheClear();dtLoadPosts(false);showToast('Feed refreshed','info','↻');}
@@ -1102,26 +1085,42 @@ async function dtLoadPosts(showSpinner=true){
   if(!isLoggedIn()){init();return;}
   if(showSpinner&&!_posts.length) $('dtPostsList').innerHTML='<div class="dt-spinner"></div>';
   const res=await edgeCall({action:'fetch_posts',mode:_mode});
-  if(!res||!res.ok){ if(!_posts.length) $('dtPostsList').innerHTML='<div class="dt-state-msg"><div class="icon">😕</div><span>Could not load posts.</span></div>'; return; }
+  if(!res||!res.ok){ if(!_posts.length) $('dtPostsList').innerHTML='<div class="dt-state-msg"><span>Could not load posts.</span></div>'; return; }
   _posts=Array.isArray(res.posts)?res.posts:[]; cacheSet(_posts); dtRenderPosts(_posts);
 }
 
 function dtRenderPosts(posts){
   const box=$('dtPostsList'); if(!box) return;
-  if(!posts||!posts.length){box.innerHTML='<div class="dt-state-msg"><div class="icon">✨</div><span>No posts yet. Be the first to share!</span></div>';return;}
+  if(!posts||!posts.length){box.innerHTML='<div class="dt-state-msg"><span>No posts yet. Be the first to share!</span></div>';return;}
   const mk=sKey();
   box.innerHTML=posts.map((p,i)=>{
     const mine=String(p.student_key||'')===String(mk||'');
     const prev=esc((p.content||'').replace(/[\n\r]/g,' ').slice(0,55)).replace(/'/g,'&#39;');
-    return `<div class="dt-post-card" style="animation-delay:${i*.04}s">
-      <div class="dt-post-top"><div class="dt-post-author"><div class="dt-avatar">${esc(initials(p.student_name))}</div>
-        <div class="dt-post-meta"><strong>${esc(p.student_name||'Student')}</strong><small>${esc(timeAgo(p.created_at))}</small></div></div>
-        <button class="dt-menu-dot" onclick="nxOpenMenuDt('post',${p.id},${mine})">⋯</button></div>
+    return `<div class="dt-post-card" style="animation-delay:${i*.03}s">
+      <div class="dt-post-top">
+        <div class="dt-post-author">
+          <div class="dt-avatar">${esc(initials(p.student_name))}</div>
+          <div class="dt-post-meta">
+            <strong>${esc(p.student_name||'Student')}</strong>
+            <small>${esc(timeAgo(p.created_at))}</small>
+          </div>
+        </div>
+        <button class="dt-menu-dot" onclick="nxOpenMenuDt('post',${p.id},${mine})">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </button>
+      </div>
       <p class="dt-post-text">${esc(p.content||'')}</p>
       <div class="dt-post-actions">
-        <button class="dt-action-btn" onclick="nxLikePostDt(${p.id})">❤ <span class="cnt">${p.likes_count||0}</span></button>
-        <button class="dt-action-btn" onclick="nxOpenCommentsDt(${p.id},'${prev}')">💬 <span class="cnt">${p.comments_count||0}</span></button>
-      </div></div>`;
+        <button class="dt-action-btn ${p.liked ? 'liked' : ''}" onclick="nxLikePostDt(${p.id})">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          <span class="cnt">${p.likes_count||0}</span>
+        </button>
+        <button class="dt-action-btn" onclick="nxOpenCommentsDt(${p.id},'${prev}')">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+          <span class="cnt">${p.comments_count||0}</span>
+        </button>
+      </div>
+    </div>`;
   }).join('');
 }
 
@@ -1142,7 +1141,7 @@ async function nxCreatePostDt(){
 /* Desktop like */
 async function nxLikePostDt(pid){
   if(!sKey()) return;
-  _posts=_posts.map(p=>String(p.id)!==String(pid)?p:{...p,likes_count:Number(p.likes_count||0)+1});
+  _posts=_posts.map(p=>String(p.id)!==String(pid)?p:{...p,likes_count:Number(p.likes_count||0)+1, liked: !p.liked});
   cacheSet(_posts); dtRenderPosts(_posts); await edgeCall({action:'toggle_post_like',post_id:pid}); dtLoadPosts(false);
 }
 
@@ -1152,17 +1151,22 @@ function nxCloseCommentsDt(){ $('dtCommentsModal').classList.remove('open'); _cu
 async function dtLoadComments(pid){ const box=$('dtCommentsList'); if(!box) return; box.innerHTML='<div class="dt-spinner"></div>'; const res=await edgeCall({action:'fetch_comments',post_id:pid}); if(!res||!res.ok){box.innerHTML='<div class="dt-state-msg"><span>Could not load.</span></div>';return;} dtRenderComments(Array.isArray(res.comments)?res.comments:[]); }
 function dtRenderComments(list){
   const box=$('dtCommentsList'); if(!box) return;
-  if(!list||!list.length){box.innerHTML='<div class="dt-state-msg"><div class="icon">💬</div><span>No comments yet.</span></div>';return;}
+  if(!list||!list.length){box.innerHTML='<div class="dt-state-msg"><span>No comments yet.</span></div>';return;}
   const byP={}; list.forEach(c=>{const k=c.parent_comment_id?String(c.parent_comment_id):'root';if(!byP[k])byP[k]=[];byP[k].push(c);});
   const root=byP.root||[]; const mk=sKey();
   box.innerHTML=root.map(c=>{
     const mine=String(c.student_key||'')===String(mk||''); const replies=byP[String(c.id)]||[]; const prev=esc((c.content||'').slice(0,45)).replace(/'/g,'&#39;');
     return `<div class="dt-cmt-card"><div class="dt-cmt-top"><div class="dt-cmt-info"><strong>${esc(c.student_name||'Student')}</strong><small>${esc(timeAgo(c.created_at))}</small></div>
-      <button class="dt-menu-dot" style="width:30px;height:30px;font-size:16px;" onclick="nxOpenMenuDt('comment',${c.id},${mine})">⋯</button></div>
+      <button class="dt-menu-dot" style="width:24px;height:24px;font-size:14px;" onclick="nxOpenMenuDt('comment',${c.id},${mine})">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+      </button></div>
       <p class="dt-cmt-text">${esc(c.content||'')}</p>
-      <div class="dt-cmt-actions"><button class="dt-cmt-btn" onclick="dtLikeComment(${c.id})">❤ ${c.likes_count||0}</button><button class="dt-cmt-btn" onclick="nxOpenReplyDt(${c.id},'${prev}')">Reply</button></div>
+      <div class="dt-cmt-actions">
+        <button class="dt-cmt-btn" onclick="dtLikeComment(${c.id})"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> ${c.likes_count||0}</button>
+        <button class="dt-cmt-btn" onclick="nxOpenReplyDt(${c.id},'${prev}')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> Reply</button></div>
       ${replies.length?`<button class="dt-view-replies-btn" onclick="dtToggleReplies(${c.id})">▸ ${replies.length} repl${replies.length===1?'y':'ies'}</button>
-        <div id="dtrep-${c.id}" class="dt-replies-wrap hidden">${replies.map(r=>{const rm=String(r.student_key||'')===String(mk||'');const rp=esc((r.content||'').slice(0,45)).replace(/'/g,'&#39;');return`<div class="dt-reply-row"><div class="dt-cmt-top"><div class="dt-cmt-info"><strong>${esc(r.student_name||'Student')}</strong><small>${esc(timeAgo(r.created_at))}</small></div><button class="dt-menu-dot" style="width:30px;height:30px;font-size:16px;" onclick="nxOpenMenuDt('comment',${r.id},${rm})">⋯</button></div><p class="dt-cmt-text">${esc(r.content||'')}</p><div class="dt-cmt-actions"><button class="dt-cmt-btn" onclick="dtLikeComment(${r.id})">❤ ${r.likes_count||0}</button><button class="dt-cmt-btn" onclick="nxOpenReplyDt(${r.id},'${rp}')">Reply</button></div></div>`;}).join('')}</div>`:''}
+        <div id="dtrep-${c.id}" class="dt-replies-wrap hidden">${replies.map(r=>{const rm=String(r.student_key||'')===String(mk||'');const rp=esc((r.content||'').slice(0,45)).replace(/'/g,'&#39;');
+        return`<div class="dt-reply-row"><div class="dt-cmt-top"><div class="dt-cmt-info"><strong>${esc(r.student_name||'Student')}</strong><small>${esc(timeAgo(r.created_at))}</small></div><button class="dt-menu-dot" style="width:24px;height:24px;font-size:14px;" onclick="nxOpenMenuDt('comment',${r.id},${rm})"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></button></div><p class="dt-cmt-text">${esc(r.content||'')}</p><div class="dt-cmt-actions"><button class="dt-cmt-btn" onclick="dtLikeComment(${r.id})"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> ${r.likes_count||0}</button><button class="dt-cmt-btn" onclick="nxOpenReplyDt(${r.id},'${rp}')"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> Reply</button></div></div>`;}).join('')}</div>`:''}
     </div>`;
   }).join('');
 }
