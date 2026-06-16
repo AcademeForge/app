@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+!function(){
+  document.documentElement.setAttribute('data-theme',
+    localStorage.getItem('af_dark_mode')==='1'?'dark':'light');
+}();
+</script>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#4f46e5"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>Timezy · Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Sora:wght@700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --p:#4f46e5;--p2:#3730a3;--pl:#818cf8;
+  --acc:#06b6d4;--ok:#22c55e;--err:#ef4444;--warn:#f59e0b;
+  --high:#ef4444;--med:#f59e0b;--low:#22c55e;
+  --bg:#eef0fb;--surface:#fff;--card:rgba(255,255,255,0.90);
+  --nav:rgba(255,255,255,0.95);--inp:#f4f5fb;
+  --grp:rgba(79,70,229,0.07);--grph:rgba(79,70,229,0.13);
+  --t1:#0f0e2a;--t2:#4b5563;--tm:#9ca3af;
+  --b1:rgba(79,70,229,0.13);--bc:rgba(79,70,229,0.18);
+  --sh:0 2px 14px rgba(79,70,229,0.09),0 1px 4px rgba(0,0,0,0.05);
+  --she:0 12px 40px rgba(79,70,229,0.15);
+  --shb:0 6px 20px rgba(79,70,229,0.30);
+  --r2:12px;--r3:18px;--r4:24px;--rf:9999px;
+  --fd:'Sora',sans-serif;--fb:'Nunito',sans-serif;
+  --nav-h:64px;--shell:430px;
+  --dur:180ms;--ease:cubic-bezier(0.22,1,0.36,1);--spring:cubic-bezier(0.34,1.56,0.64,1);
+}
+[data-theme="dark"]{
+  --bg:#0b0a1e;--surface:#100e26;--card:rgba(24,21,52,0.92);
+  --nav:rgba(14,12,34,0.97);--inp:#1a1735;
+  --grp:rgba(129,140,248,0.09);--grph:rgba(129,140,248,0.16);
+  --t1:#ede9ff;--t2:#a09dbf;--tm:#635f83;
+  --b1:rgba(129,140,248,0.13);--bc:rgba(129,140,248,0.20);
+  --sh:0 2px 14px rgba(0,0,0,0.32),0 1px 4px rgba(0,0,0,0.20);
+  --she:0 12px 40px rgba(0,0,0,0.50);
+  --shb:0 6px 20px rgba(79,70,229,0.45);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{font-size:15px;-webkit-text-size-adjust:100%;height:100%;height:100dvh;}
+body{font-family:var(--fb);background:var(--bg);color:var(--t1);height:100%;height:100dvh;display:flex;justify-content:center;overflow:hidden;transition:background .18s,color .18s;}
+button{font-family:var(--fb);cursor:pointer;border:none;background:none;color:inherit;}
+a{text-decoration:none;color:inherit;}
+html,body,*{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-touch-callout:none;}
+input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
+.shell{width:100%;max-width:var(--shell);height:100%;height:100dvh;background:var(--surface);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 0 0 1px var(--b1),var(--she);transition:background .18s;}
+@media(min-width:700px){
+  body{padding:28px 0 44px;height:auto;min-height:100dvh;overflow-y:auto;}
+  .shell{border-radius:36px;height:calc(100dvh - 72px);max-height:900px;overflow:hidden;box-shadow:0 0 0 1px var(--bc),0 32px 80px rgba(0,0,0,.20),0 8px 24px rgba(79,70,229,.14);}
+}
+.hdr{position:sticky;top:0;z-index:100;height:58px;background:var(--nav);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;transition:background .18s;}
+.hdr-logo{display:flex;align-items:center;gap:8px;flex:1;}
+.hdr-logo-icon{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--p),var(--acc));display:flex;align-items:center;justify-content:center;font-size:16px;}
+.hdr-logo-text{font-family:var(--fd);font-size:16px;font-weight:900;color:var(--t1);}
+.hdr-logo-badge{font-size:9px;font-weight:800;color:var(--pl);background:rgba(79,70,229,.12);border:1px solid rgba(79,70,229,.2);padding:2px 6px;border-radius:var(--rf);letter-spacing:.06em;text-transform:uppercase;}
+.page{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;padding:14px 13px calc(var(--nav-h)+28px+env(safe-area-inset-bottom,0px));}
+.page::-webkit-scrollbar{width:2px;}
+.page::-webkit-scrollbar-thumb{background:var(--bc);border-radius:99px;}
+
+/* ── LOGIN REQUIRED ── */
+.login-required{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;height:100%;padding:32px 24px;text-align:center;}
+.lr-icon{width:72px;height:72px;border-radius:24px;background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;font-size:32px;}
+.lr-title{font-family:var(--fd);font-size:22px;font-weight:900;color:var(--t1);}
+.lr-sub{font-size:13.5px;color:var(--t2);font-weight:600;line-height:1.6;max-width:280px;}
+.lr-btn{padding:14px 28px;border-radius:var(--r2);background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;font-weight:900;font-size:14px;box-shadow:var(--shb);transition:transform var(--dur) var(--spring);}
+.lr-btn:active{transform:scale(.97);}
+
+/* ── GREETING HERO ── */
+.greeting-hero{border-radius:var(--r4);padding:0;background:linear-gradient(135deg,var(--p) 0%,#6366f1 50%,var(--acc) 100%);overflow:hidden;margin-bottom:14px;position:relative;box-shadow:var(--shb);animation:up .32s var(--ease) both;}
+.gh-inner{padding:22px 20px 20px;position:relative;z-index:1;}
+.gh-bg{position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='160' cy='40' r='80' fill='white' fill-opacity='0.05'/%3E%3Ccircle cx='20' cy='160' r='60' fill='white' fill-opacity='0.04'/%3E%3C/svg%3E") right top no-repeat;background-size:cover;}
+.gh-time{font-size:11px;font-weight:800;color:rgba(255,255,255,0.7);letter-spacing:.09em;text-transform:uppercase;margin-bottom:6px;}
+.gh-greeting{font-family:var(--fd);font-size:24px;font-weight:900;color:#fff;line-height:1.2;margin-bottom:4px;}
+.gh-name{font-family:var(--fd);font-size:17px;font-weight:800;color:rgba(255,255,255,0.88);margin-bottom:2px;}
+.gh-email{font-size:12px;color:rgba(255,255,255,0.6);font-weight:600;margin-bottom:16px;}
+.gh-tagline{font-size:13px;color:rgba(255,255,255,0.80);font-weight:700;padding:10px 14px;background:rgba(255,255,255,0.12);border-radius:var(--r2);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.15);}
+.gh-avatar{position:absolute;top:18px;right:18px;width:52px;height:52px;border-radius:16px;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:18px;font-weight:900;color:#fff;backdrop-filter:blur(8px);}
+
+/* ── QUICK STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;}
+.stat-card{border-radius:var(--r3);background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);padding:14px 16px;display:flex;flex-direction:column;gap:4px;animation:up .34s var(--ease) .04s both;}
+.stat-icon{font-size:20px;margin-bottom:4px;}
+.stat-val{font-family:var(--fd);font-size:26px;font-weight:900;color:var(--t1);line-height:1;}
+.stat-label{font-size:11px;font-weight:800;color:var(--tm);text-transform:uppercase;letter-spacing:.07em;}
+.stat-card.highlight{background:linear-gradient(135deg,rgba(79,70,229,.08),rgba(6,182,212,.06));border-color:rgba(79,70,229,.25);}
+
+/* ── PROGRESS BAR ── */
+.progress-card{border-radius:var(--r3);background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);padding:16px 18px;margin-bottom:14px;animation:up .35s var(--ease) .06s both;}
+.progress-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.progress-title{font-family:var(--fd);font-size:13px;font-weight:800;color:var(--t1);}
+.progress-pct{font-family:var(--fd);font-size:20px;font-weight:900;color:var(--p);}
+.progress-bar-bg{height:8px;background:var(--grp);border-radius:var(--rf);overflow:hidden;border:1px solid var(--b1);}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--p),var(--acc));border-radius:var(--rf);transition:width .6s var(--ease);}
+.progress-sub{margin-top:8px;font-size:11px;color:var(--tm);font-weight:700;}
+
+/* ── SECTION LABEL ── */
+.sec-label{font-family:var(--fd);font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--tm);margin:0 2px 8px;}
+
+/* ── RECENT TASKS ── */
+.recent-card{border-radius:var(--r4);background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);overflow:hidden;margin-bottom:14px;animation:up .36s var(--ease) .08s both;}
+.card-head{padding:14px 18px 12px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:10px;}
+.card-head-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--p),var(--acc));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.card-head-title{font-family:var(--fd);font-size:13.5px;font-weight:800;color:var(--t1);}
+.card-head-sub{font-size:11px;color:var(--tm);font-weight:600;margin-top:1px;}
+.task-list{padding:10px;display:flex;flex-direction:column;gap:7px;}
+.task-item{display:flex;align-items:center;gap:11px;padding:12px 13px;border-radius:var(--r2);background:var(--grp);border:1px solid var(--b1);transition:transform var(--dur) var(--spring);}
+.task-item:active{transform:scale(.99);}
+.task-check{width:22px;height:22px;border-radius:7px;border:2px solid var(--bc);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all var(--dur);}
+.task-check.done{background:var(--ok);border-color:var(--ok);color:#fff;}
+.task-body{flex:1;min-width:0;}
+.task-title{font-size:13px;font-weight:800;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.task-title.done{color:var(--tm);text-decoration:line-through;}
+.task-meta{display:flex;align-items:center;gap:6px;margin-top:3px;}
+.priority-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.priority-dot.high{background:var(--high);}
+.priority-dot.medium{background:var(--med);}
+.priority-dot.low{background:var(--low);}
+.task-due{font-size:10.5px;color:var(--tm);font-weight:700;}
+.empty-msg{text-align:center;font-size:13px;color:var(--tm);font-weight:700;padding:22px 12px;}
+.loading-skeleton{display:flex;flex-direction:column;gap:8px;padding:10px;}
+.skel{height:62px;border-radius:var(--r2);background:linear-gradient(90deg,var(--grp) 25%,var(--grph) 50%,var(--grp) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+/* ── NAV BUTTONS ── */
+.nav-btns{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;animation:up .37s var(--ease) .10s both;}
+.nav-btn{border-radius:var(--r3);padding:16px 14px;border:1px solid var(--bc);background:var(--card);box-shadow:var(--sh);display:flex;flex-direction:column;align-items:flex-start;gap:4px;transition:transform var(--dur) var(--spring),box-shadow var(--dur);}
+.nav-btn:hover{box-shadow:var(--she);}
+.nav-btn:active{transform:scale(.97);}
+.nav-btn-icon{font-size:22px;margin-bottom:2px;}
+.nav-btn-label{font-family:var(--fd);font-size:13px;font-weight:800;color:var(--t1);}
+.nav-btn-sub{font-size:11px;color:var(--tm);font-weight:600;}
+.nav-btn.accent{background:linear-gradient(135deg,var(--p),var(--p2));border-color:transparent;box-shadow:var(--shb);}
+.nav-btn.accent .nav-btn-label,.nav-btn.accent .nav-btn-sub{color:#fff;}
+
+/* ── BOTTOM NAV ── */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:var(--shell);z-index:999;height:var(--nav-h);background:var(--nav);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);border-top:1px solid var(--b1);display:flex;align-items:center;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px);transition:background .18s;}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:100%;border-radius:var(--r2);padding:7px 4px;position:relative;}
+.bnav-btn::before{content:'';position:absolute;top:7px;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--p);border-radius:99px;transition:width .18s var(--spring);}
+.bnav-btn.active::before{width:24px;}
+.bnav-icon{font-size:20px;line-height:1;transition:transform var(--dur) var(--spring);}
+.bnav-btn.active .bnav-icon{transform:scale(1.10);}
+.bnav-btn:active .bnav-icon{transform:scale(.90);}
+.bnav-label{font-size:10px;font-weight:700;color:var(--tm);transition:color var(--dur);}
+.bnav-btn.active .bnav-label{color:var(--p);}
+
+/* TOAST */
+.toast-wrap{position:fixed;left:50%;bottom:calc(var(--nav-h)+12px);transform:translateX(-50%);z-index:999999;width:min(92vw,400px);pointer-events:none;}
+.toast{display:flex;align-items:flex-start;gap:10px;background:var(--surface);color:var(--t1);border:1px solid var(--bc);border-radius:14px;padding:11px 13px;box-shadow:0 4px 22px rgba(0,0,0,.14);pointer-events:auto;animation:toastIn .22s var(--ease) both;}
+.toast.ok{border-left:3px solid var(--ok);}
+.toast.info{border-left:3px solid var(--p);}
+.toast.err{border-left:3px solid var(--err);}
+.toast-body p:first-child{font-size:12px;font-weight:800;}
+.toast-body p:last-child{font-size:11px;color:var(--t2);margin-top:1px;}
+.toast-x{font-size:16px;color:var(--tm);cursor:pointer;margin-left:auto;}
+
+@keyframes up{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+@keyframes toastIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.hidden{display:none!important;}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="hdr">
+    <div class="hdr-logo">
+      <div class="hdr-logo-icon">⏱</div>
+      <span class="hdr-logo-text">Timezy</span>
+      <span class="hdr-logo-badge">Tasks</span>
+    </div>
+  </header>
+
+  <!-- LOGIN REQUIRED -->
+  <div id="loginRequired" class="login-required hidden">
+    <div class="lr-icon">🔒</div>
+    <div class="lr-title">Login Required</div>
+    <div class="lr-sub">You must login to AcademeForge before using Task Management.</div>
+    <button class="lr-btn" onclick="window.location.href='../student/index.html'">Go To Login</button>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div id="mainContent" class="page hidden">
+
+    <!-- GREETING HERO -->
+    <div class="greeting-hero">
+      <div class="gh-bg"></div>
+      <div class="gh-inner">
+        <div class="gh-time" id="ghTime">Morning</div>
+        <div class="gh-greeting" id="ghGreeting">Good Morning,</div>
+        <div class="gh-name" id="ghName">Loading…</div>
+        <div class="gh-email" id="ghEmail"></div>
+        <div class="gh-tagline" id="ghTagline">Ready to crush your tasks today? 🚀</div>
+        <div class="gh-avatar" id="ghAvatar">?</div>
+      </div>
+    </div>
+
+    <!-- QUICK STATS -->
+    <div class="stats-grid">
+      <div class="stat-card highlight">
+        <div class="stat-icon">📋</div>
+        <div class="stat-val" id="statTotal">—</div>
+        <div class="stat-label">Total Tasks</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-val" id="statDone">—</div>
+        <div class="stat-label">Completed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-val" id="statPending">—</div>
+        <div class="stat-label">Pending</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🔴</div>
+        <div class="stat-val" id="statHigh">—</div>
+        <div class="stat-label">High Priority</div>
+      </div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="progress-card">
+      <div class="progress-head">
+        <span class="progress-title">Today's Progress</span>
+        <span class="progress-pct" id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div class="progress-sub" id="progressSub">Loading your task data…</div>
+    </div>
+
+    <!-- NAV BUTTONS -->
+    <div class="nav-btns">
+      <button class="nav-btn accent" onclick="window.location.href='../dashboard/index.html'">
+        <div class="nav-btn-icon">✏️</div>
+        <div class="nav-btn-label">Dashboard</div>
+        <div class="nav-btn-sub">Manage all tasks</div>
+      </button>
+      <button class="nav-btn" onclick="window.location.href='../planner/index.html'">
+        <div class="nav-btn-icon">📅</div>
+        <div class="nav-btn-label">Planner</div>
+        <div class="nav-btn-sub">Calendar view</div>
+      </button>
+    </div>
+
+    <!-- RECENT TASKS -->
+    <div class="sec-label">Recent Tasks</div>
+    <div class="recent-card">
+      <div class="card-head">
+        <div class="card-head-icon">🕐</div>
+        <div>
+          <div class="card-head-title">Latest Activity</div>
+          <div class="card-head-sub">Your 5 most recent tasks</div>
+        </div>
+      </div>
+      <div id="recentList">
+        <div class="loading-skeleton">
+          <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /mainContent -->
+
+  <nav class="bnav">
+    <button class="bnav-btn active" onclick="window.location.href='../home/index.html'">
+      <span class="bnav-icon">🏠</span><span class="bnav-label">Home</span>
+    </button>
+    <button class="bnav-btn" onclick="window.location.href='../dashboard/index.html'">
+      <span class="bnav-icon">✏️</span><span class="bnav-label">Tasks</span>
+    </button>
+    <button class="bnav-btn" onclick="window.location.href='../planner/index.html'">
+      <span class="bnav-icon">📅</span><span class="bnav-label">Planner</span>
+    </button>
+  </nav>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+'use strict';
+const SUPABASE_URL = "https://afooyyydhlwngzssgqih.supabase.co";
+const FN_URL = SUPABASE_URL + "/functions/v1/timezy-tasks-af";
+const TASKS_CACHE_KEY = 'af_timezy_home_v1';
+const CACHE_TTL = 10 * 60 * 1000;
+
+function cacheGet(k){try{const r=localStorage.getItem(k);if(!r)return null;const o=JSON.parse(r);if(Date.now()-o.ts>CACHE_TTL)return null;return o.data;}catch{return null;}}
+function cacheSet(k,d){try{localStorage.setItem(k,JSON.stringify({ts:Date.now(),data:d}));}catch{}}
+
+const $ = id => document.getElementById(id);
+const esc = t => String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const safe = (v,fb='') => (v===null||v===undefined||v==='') ? fb : v;
+
+function syncTheme(){
+  document.documentElement.setAttribute('data-theme', localStorage.getItem('af_dark_mode')==='1'?'dark':'light');
+}
+syncTheme();
+window.addEventListener('storage', e=>{ if(e.key==='af_dark_mode') syncTheme(); });
+
+let _tt=null;
+function showToast(msg,type='info',title=''){
+  const w=$('toastWrap');w.innerHTML='';
+  if(_tt){clearTimeout(_tt);_tt=null;}
+  const labels={ok:'Done',info:'Info',err:'Error'};
+  const el=document.createElement('div');
+  el.className='toast '+type;
+  el.innerHTML=`<div class="toast-body"><p>${title||labels[type]}</p><p>${msg}</p></div><span class="toast-x" onclick="this.parentElement.remove()">×</span>`;
+  w.appendChild(el);
+  _tt=setTimeout(()=>el&&el.remove(),2800);
+}
+
+function getGreeting(){
+  const h=new Date().getHours();
+  if(h>=5&&h<12)  return['Good Morning','🌅'];
+  if(h>=12&&h<17) return['Good Afternoon','☀️'];
+  if(h>=17&&h<21) return['Good Evening','🌆'];
+  return['Good Night','🌙'];
+}
+
+function getTagline(){
+  const h=new Date().getHours();
+  if(h>=5&&h<12)  return"Ready to crush your tasks today? 🚀";
+  if(h>=12&&h<17) return"Keep going, you're doing great! 💪";
+  if(h>=17&&h<21) return"Wind down, review what you've done ✨";
+  return"Rest well, tomorrow will be productive 🌙";
+}
+
+function loadProfile(){
+  const name   = safe(localStorage.getItem('af_student_name'),'Student');
+  const email  = safe(localStorage.getItem('af_student_email'),'');
+  const initials = name.trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join('');
+  const [greeting, emoji] = getGreeting();
+
+  $('ghTime').textContent  = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
+  $('ghGreeting').textContent = greeting + ',';
+  $('ghName').textContent  = name;
+  $('ghEmail').textContent = email;
+  $('ghAvatar').textContent = initials||'S';
+  $('ghTagline').textContent = getTagline();
+}
+
+function renderStats(tasks){
+  const total = tasks.length;
+  const done  = tasks.filter(t=>t.completed).length;
+  const pend  = total - done;
+  const high  = tasks.filter(t=>t.priority==='high'&&!t.completed).length;
+  const pct   = total ? Math.round((done/total)*100) : 0;
+
+  $('statTotal').textContent  = total;
+  $('statDone').textContent   = done;
+  $('statPending').textContent= pend;
+  $('statHigh').textContent   = high;
+  $('progressPct').textContent= pct+'%';
+  $('progressFill').style.width = pct+'%';
+  $('progressSub').textContent = total
+    ? `${done} of ${total} tasks completed · ${pend} remaining`
+    : 'No tasks yet — create your first task!';
+}
+
+function formatDue(d){
+  if(!d) return null;
+  const dt = new Date(d), now = new Date();
+  const diff = Math.round((dt-now)/(1000*60*60*24));
+  if(diff===0) return'Today';
+  if(diff===1) return'Tomorrow';
+  if(diff===-1) return'Yesterday';
+  if(diff<0) return`${Math.abs(diff)}d ago`;
+  return`In ${diff}d`;
+}
+
+function renderRecent(tasks){
+  const box=$('recentList');
+  const recent=tasks.slice(0,5);
+  if(!recent.length){
+    box.innerHTML='<p class="empty-msg">No tasks yet.<br>Head to Dashboard to create your first task!</p>';
+    return;
+  }
+  box.innerHTML=`<div class="task-list">${recent.map(t=>`
+    <div class="task-item">
+      <div class="task-check${t.completed?' done':''}">
+        ${t.completed?'✓':''}
+      </div>
+      <div class="task-body">
+        <div class="task-title${t.completed?' done':''}">${esc(t.title)}</div>
+        <div class="task-meta">
+          <div class="priority-dot ${t.priority||'medium'}"></div>
+          <span class="task-due">${t.priority||'medium'} priority${t.due_date?' · '+formatDue(t.due_date):''}</span>
+        </div>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+async function loadTasks(){
+  const uuid = localStorage.getItem('af_student_uuid')||'';
+  if(!uuid){renderStats([]);$('recentList').innerHTML='<p class="empty-msg">Session not found. Please login.</p>';return;}
+
+  const cached = cacheGet(TASKS_CACHE_KEY);
+  if(cached){ renderStats(cached); renderRecent(cached); return; }
+
+  try{
+    const res = await fetch(FN_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'get_tasks',student_uuid:uuid})});
+    const data = await res.json();
+    if(!data.ok) throw new Error(data.message||'Failed');
+    cacheSet(TASKS_CACHE_KEY, data.tasks);
+    renderStats(data.tasks);
+    renderRecent(data.tasks);
+  }catch(e){
+    console.error(e);
+    $('recentList').innerHTML='<p class="empty-msg">Could not load tasks. Check your connection.</p>';
+    renderStats([]);
+  }
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  if(localStorage.getItem('af_student_logged_in')!=='true'){
+    $('loginRequired').classList.remove('hidden');
+    return;
+  }
+  $('mainContent').classList.remove('hidden');
+  loadProfile();
+  loadTasks();
+});
+</script>
+</body>
+</html>
