@@ -3,8 +3,9 @@
 <head>
 <script>
 !function(){
-  document.documentElement.setAttribute('data-theme',
-    localStorage.getItem('af_dark_mode')==='1'?'dark':'light');
+  var dark = localStorage.getItem('af_dark_mode');
+  // null/undefined → default dark (match Settings behavior)
+  document.documentElement.setAttribute('data-theme', dark === '0' ? 'light' : 'dark');
 }();
 </script>
 <meta charset="UTF-8"/>
@@ -15,180 +16,525 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Sora:wght@700;800;900&display=swap" rel="stylesheet"/>
 <style>
-:root{
-  --p:#4f46e5;--p2:#3730a3;--pl:#818cf8;
-  --acc:#06b6d4;--ok:#22c55e;--err:#ef4444;--warn:#f59e0b;
-  --bg:#f0f2ff;--surface:#fff;--card:rgba(255,255,255,.9);
-  --nav:rgba(255,255,255,.95);--inp:#f4f5fb;
-  --grp:rgba(79,70,229,.06);--grph:rgba(79,70,229,.10);
-  --t1:#0f0e2a;--t2:#4b5563;--tm:#9ca3af;
-  --b1:rgba(79,70,229,.12);--bc:rgba(79,70,229,.15);--bi:#d1d5db;
-  --sh:0 2px 12px rgba(79,70,229,.08),0 1px 3px rgba(0,0,0,.05);
-  --she:0 12px 40px rgba(79,70,229,.15);
-  --shb:0 4px 16px rgba(79,70,229,.28);
-  --r1:8px;--r2:12px;--r3:16px;--r4:24px;--rf:9999px;
-  --fd:'Sora',sans-serif;--fb:'Nunito',sans-serif;
-  --nav-h:60px;--hdr-h:52px;--shell:430px;
+/* ═══════════════════════════════════════════════════════════
+   DESIGN TOKENS — Desktop (≥768px) uses Settings system
+   Mobile (<768px) keeps its original tokens untouched
+═══════════════════════════════════════════════════════════ */
+:root {
+  /* Desktop tokens — matches Settings exactly */
+  --bg-primary:   #050505;
+  --bg-secondary: #0B0B0F;
+  --bg-tertiary:  #121218;
+  --border:       #1D1D26;
+  --border-hover: #2D2D3A;
+
+  --primary:        #7C3AED;
+  --primary-light:  #A855F7;
+  --secondary:      #2563EB;
+  --secondary-light:#3B82F6;
+  --success:        #10B981;
+  --warning:        #F59E0B;
+  --danger:         #EF4444;
+
+  --text-primary:   #FFFFFF;
+  --text-secondary: #B8B8C7;
+  --text-muted:     #7A7A8C;
+
+  --sidebar-w: 260px;
+  --header-h:  72px;
+  --nav-h:     60px;
+  --r1: 8px; --r2: 12px; --r3: 16px; --r4: 20px; --rf: 9999px;
+
+  --fd: 'Sora', sans-serif;
+  --fb: 'Nunito', sans-serif;
+
+  --sh-card: 0 1px 3px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+  --sh-hover: 0 4px 24px rgba(124,58,237,.18), 0 1px 3px rgba(0,0,0,.5);
+  --shb: 0 4px 16px rgba(79,70,229,.40);
+  --tr: 0.22s ease;
 }
-[data-theme="dark"]{
-  --bg:#0c0b1d;--surface:#120f2a;--card:rgba(30,27,60,.9);
-  --nav:rgba(18,15,42,.98);--inp:#1e1b3c;
-  --grp:rgba(129,140,248,.08);--grph:rgba(129,140,248,.14);
-  --t1:#f0eeff;--t2:#a5a3c2;--tm:#6b6a8a;
-  --b1:rgba(129,140,248,.12);--bc:rgba(129,140,248,.18);--bi:rgba(129,140,248,.20);
-  --sh:0 2px 12px rgba(0,0,0,.28);--she:0 12px 40px rgba(0,0,0,.45);
-  --shb:0 4px 16px rgba(79,70,229,.40);
+
+[data-theme="light"] {
+  --bg-primary:   #f0f2ff;
+  --bg-secondary: #fff;
+  --bg-tertiary:  #f4f5fb;
+  --border:       rgba(79,70,229,.12);
+  --border-hover: rgba(79,70,229,.25);
+  --text-primary:   #0f0e2a;
+  --text-secondary: #4b5563;
+  --text-muted:     #9ca3af;
+  --sh-card: 0 1px 3px rgba(79,70,229,.06), 0 4px 16px rgba(79,70,229,.05);
+  --sh-hover: 0 4px 24px rgba(79,70,229,.14), 0 1px 3px rgba(79,70,229,.08);
+  --shb: 0 4px 16px rgba(79,70,229,.28);
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html{font-size:15px;-webkit-text-size-adjust:100%;height:100%;height:100dvh;}
-body{font-family:var(--fb);background:var(--bg);color:var(--t1);height:100%;height:100dvh;display:flex;justify-content:center;overflow:hidden;}
-button{font-family:var(--fb);cursor:pointer;border:none;background:none;color:inherit;}
-a{text-decoration:none;color:inherit;}
-input,textarea,select{font-family:var(--fb);}
-.shell{width:100%;max-width:var(--shell);height:100%;height:100dvh;background:var(--surface);display:flex;flex-direction:column;position:relative;overflow:hidden;box-shadow:0 0 0 1px var(--b1);}
-@media(min-width:700px){body{padding:24px 0 40px;height:auto;min-height:100dvh;overflow-y:auto;}.shell{border-radius:32px;height:calc(100dvh - 64px);max-height:880px;}}
-.hdr{position:sticky;top:0;z-index:100;height:var(--hdr-h);background:var(--nav);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;}
-.hdr-title{font-family:var(--fd);font-size:15px;font-weight:800;color:var(--t1);flex:1;}
-.hdr-logout{height:30px;padding:0 12px;border-radius:var(--rf);font-size:11px;font-weight:800;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);color:var(--err);}
-.hdr-logout:active{opacity:.7;}
-.page{flex:1;overflow-y:scroll;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;padding:14px 12px calc(var(--nav-h) + 20px + env(safe-area-inset-bottom,0px));min-height:0;-webkit-transform:translateZ(0);transform:translateZ(0);}
-.page::-webkit-scrollbar{width:2px;}
-.page::-webkit-scrollbar-thumb{background:var(--bc);border-radius:99px;}
-.hidden{display:none!important;}
 
-/* AUTH CARD */
-.auth-card{border-radius:var(--r4);background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);padding:22px 18px;position:relative;overflow:hidden;}
-.auth-card::before{content:'';position:absolute;inset:-80px -90px auto auto;width:190px;height:190px;border-radius:50%;background:rgba(79,70,229,.08);pointer-events:none;}
-.auth-card::after{content:'';position:absolute;inset:auto auto -95px -90px;width:210px;height:210px;border-radius:50%;background:rgba(6,182,212,.07);pointer-events:none;}
-.auth-icon{position:relative;z-index:1;width:64px;height:64px;border-radius:20px;margin:0 auto 12px;display:grid;place-items:center;font-size:30px;background:linear-gradient(135deg,rgba(79,70,229,.12),rgba(6,182,212,.10));border:1px solid var(--b1);}
-.auth-title{position:relative;z-index:1;font-family:var(--fd);font-size:22px;font-weight:900;text-align:center;color:var(--t1);letter-spacing:-.03em;margin-bottom:4px;}
-.auth-sub{position:relative;z-index:1;font-size:13px;color:var(--t2);text-align:center;line-height:1.6;margin-bottom:16px;font-weight:600;}
-.tab-row{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:5px;border-radius:var(--r3);background:var(--inp);border:1px solid var(--b1);margin-bottom:16px;}
-.tab-btn{min-height:40px;padding:10px;border-radius:var(--r2);font-size:13px;font-weight:800;color:var(--t2);}
-.tab-btn.active{background:linear-gradient(135deg,var(--ok),#16a34a);color:#fff;}
-.tab-btn:active{transform:scale(.98);}
-.form-box{position:relative;z-index:1;}
-.form-label{display:block;font-size:12.5px;font-weight:800;color:var(--t1);margin:12px 0 5px;}
-.form-input{width:100%;min-height:46px;padding:12px 13px;border-radius:var(--r2);border:1px solid var(--bc);background:var(--inp);color:var(--t1);font-size:13.5px;font-weight:700;outline:none;}
-.form-input:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(79,70,229,.10);background:var(--surface);}
-.form-input::placeholder{color:var(--tm);font-weight:600;}
-.main-btn{width:100%;min-height:48px;padding:13px;border-radius:var(--r2);margin-top:14px;font-size:14px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--ok),#16a34a);}
-.main-btn:active{transform:scale(.985);}
-.main-btn.primary-btn{background:linear-gradient(135deg,var(--p),var(--p2));box-shadow:var(--shb);}
-.danger-btn{width:100%;min-height:44px;padding:11px;border-radius:var(--r2);margin-top:10px;font-size:13px;font-weight:900;color:#fff;background:linear-gradient(135deg,#7f1d1d,#b91c1c);}
-.danger-btn:active{transform:scale(.985);}
-.otp-area{margin-top:12px;}
-.msg-box{display:none;margin-top:12px;padding:11px 13px;border-radius:var(--r2);font-size:13px;font-weight:800;line-height:1.45;}
-.msg-box.ok{display:block;background:rgba(34,197,94,.10);color:#166534;border:1px solid rgba(34,197,94,.18);}
-.msg-box.err{display:block;background:rgba(239,68,68,.10);color:#991b1b;border:1px solid rgba(239,68,68,.18);}
-.msg-box.info{display:block;background:rgba(79,70,229,.08);color:var(--p);border:1px solid var(--b1);}
-.auth-note{position:relative;z-index:1;margin-top:16px;padding:12px 14px;border-radius:var(--r2);background:linear-gradient(135deg,rgba(219,234,254,.9),rgba(220,252,231,.8));border:1px solid var(--b1);font-size:12.5px;font-weight:700;color:var(--t1);line-height:1.6;}
-.auth-note b{color:#166534;}
-[data-theme="dark"] .auth-note{background:linear-gradient(135deg,rgba(30,64,175,.18),rgba(22,101,52,.16));color:#bfdbfe;}
-[data-theme="dark"] .auth-note b{color:#86efac;}
+/* ═══════════════════════════════════════════════════════════
+   RESET
+═══════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { font-size: 15px; -webkit-text-size-adjust: 100%; }
+[data-theme="dark"]  { color-scheme: dark; }
+[data-theme="light"] { color-scheme: light; }
+html, body { height: 100%; }
+body { font-family: var(--fb); -webkit-font-smoothing: antialiased; }
+button { font-family: var(--fb); cursor: pointer; border: none; background: none; color: inherit; }
+a { text-decoration: none; color: inherit; }
+*, body, html { -webkit-user-select: none; -moz-user-select: none; user-select: none; -webkit-touch-callout: none; }
+input, textarea, select { -webkit-user-select: text; -moz-user-select: text; user-select: text; font-family: var(--fb); }
+.hidden { display: none !important; }
 
-/* DASHBOARD */
-.dash-card{border-radius:var(--r4);background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);padding:18px 16px;margin-bottom:12px;}
-.dash-welcome{font-size:12.5px;color:var(--ok);font-weight:800;margin-bottom:4px;}
-.dash-sub{font-size:12.5px;color:var(--t2);line-height:1.6;font-weight:600;margin-bottom:14px;}
-.back-mini{display:inline-flex;align-items:center;gap:5px;padding:8px 13px;border-radius:var(--r2);font-size:12px;font-weight:800;background:rgba(79,70,229,.08);border:1px solid var(--b1);color:var(--p);margin-bottom:12px;}
-.back-mini:active{transform:scale(.96);}
+/* ═══════════════════════════════════════════════════════════
+   MOBILE SHELL (<768px) — ORIGINAL, UNTOUCHED
+═══════════════════════════════════════════════════════════ */
+@media (max-width: 767px) {
+  :root {
+    --p:#4f46e5;--p2:#3730a3;--pl:#818cf8;
+    --acc:#06b6d4;--ok:#22c55e;--err:#ef4444;--warn:#f59e0b;
+    --bg:#f0f2ff;--surface:#fff;--card:rgba(255,255,255,.9);
+    --nav:rgba(255,255,255,.95);--inp:#f4f5fb;
+    --grp:rgba(79,70,229,.06);--grph:rgba(79,70,229,.10);
+    --t1:#0f0e2a;--t2:#4b5563;--tm:#9ca3af;
+    --b1:rgba(79,70,229,.12);--bc:rgba(79,70,229,.15);--bi:#d1d5db;
+    --sh:0 2px 12px rgba(79,70,229,.08),0 1px 3px rgba(0,0,0,.05);
+    --she:0 12px 40px rgba(79,70,229,.15);
+    --shb:0 4px 16px rgba(79,70,229,.28);
+    --r1:8px;--r2:12px;--r3:16px;--r4:24px;--rf:9999px;
+    --shell:430px;
+  }
+  [data-theme="dark"] {
+    --bg:#0c0b1d;--surface:#120f2a;--card:rgba(30,27,60,.9);
+    --nav:rgba(18,15,42,.98);--inp:#1e1b3c;
+    --grp:rgba(129,140,248,.08);--grph:rgba(129,140,248,.14);
+    --t1:#f0eeff;--t2:#a5a3c2;--tm:#6b6a8a;
+    --b1:rgba(129,140,248,.12);--bc:rgba(129,140,248,.18);--bi:rgba(129,140,248,.20);
+    --sh:0 2px 12px rgba(0,0,0,.28);--she:0 12px 40px rgba(0,0,0,.45);
+    --shb:0 4px 16px rgba(79,70,229,.40);
+  }
 
-/* COURSE CARDS */
-.course-grid{display:grid;gap:10px;}
-.course-card{width:100%;border-radius:var(--r3);padding:14px;background:var(--card);border:1px solid var(--bc);display:flex;align-items:flex-start;gap:12px;text-align:left;cursor:pointer;box-shadow:var(--sh);}
-.course-card:active{transform:scale(.985);}
-.course-icon{width:48px;height:48px;min-width:48px;border-radius:var(--r2);display:grid;place-items:center;font-size:24px;background:linear-gradient(135deg,rgba(79,70,229,.10),rgba(6,182,212,.08));border:1px solid var(--b1);flex-shrink:0;}
-.course-body h3{font-size:15px;font-weight:900;color:var(--t1);line-height:1.25;margin-bottom:4px;}
-.course-body p{font-size:12px;color:var(--t2);line-height:1.5;font-weight:600;}
-.no-course{text-align:center;padding:20px 16px;}
-.no-course-icon{font-size:40px;margin-bottom:10px;}
-.no-course h2{font-size:17px;font-weight:900;color:var(--err);margin-bottom:6px;}
-.no-course p{font-size:12.5px;color:var(--t2);font-weight:700;line-height:1.6;margin-bottom:4px;}
+  body { background: var(--bg); color: var(--t1); display: flex; justify-content: center; overflow: hidden; height: 100dvh; }
 
-/* COURSE DETAIL */
-.course-detail-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;}
-.course-detail-icon{width:56px;height:56px;min-width:56px;border-radius:var(--r3);display:grid;place-items:center;font-size:30px;background:linear-gradient(135deg,rgba(79,70,229,.10),rgba(6,182,212,.08));border:1px solid var(--b1);}
-.course-detail-head h2{font-size:20px;font-weight:900;color:var(--t1);line-height:1.2;}
-.course-detail-head p{font-size:12px;color:var(--t2);margin-top:4px;font-weight:600;line-height:1.5;}
-.info-box{border-radius:var(--r2);background:var(--card);border:1px solid var(--bc);padding:12px 14px 12px 18px;margin-bottom:10px;box-shadow:var(--sh);position:relative;overflow:hidden;}
-.info-box::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;border-radius:99px;background:linear-gradient(180deg,var(--p),var(--acc));}
-.info-box h3{font-size:13px;font-weight:900;color:var(--t1);margin-bottom:6px;}
-.info-box p,.info-box li{font-size:12px;color:var(--t2);line-height:1.7;font-weight:600;}
-.info-box ul{padding-left:16px;}
-.info-box li{list-style:disc;}
+  .dt-layout { display: none !important; }
 
-/* LEARNING */
-.learning-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.learning-btn{border-radius:var(--r3);padding:16px 12px;background:var(--card);border:1px solid var(--bc);cursor:pointer;text-align:center;box-shadow:var(--sh);}
-.learning-btn:active{transform:scale(.985);}
-.learning-btn span{display:block;font-size:30px;margin-bottom:6px;}
-.learning-btn strong{display:block;font-size:14px;font-weight:900;color:var(--t1);}
-.learning-btn small{display:block;margin-top:4px;font-size:11px;color:var(--t2);font-weight:600;line-height:1.4;}
+  .mob-shell {
+    width: 100%; max-width: var(--shell); height: 100%; height: 100dvh;
+    background: var(--surface); display: flex; flex-direction: column;
+    position: relative; overflow: hidden; box-shadow: 0 0 0 1px var(--b1);
+  }
 
-/* CHAPTER / CONTENT */
-.chapter-list,.content-list{display:grid;gap:8px;}
-.chapter-item,.content-item{border-radius:var(--r2);padding:12px;background:var(--card);border:1px solid var(--bc);display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:var(--sh);}
-.chapter-item{cursor:pointer;}
-.chapter-item:active{transform:scale(.985);}
-.chapter-main strong{display:block;font-size:13px;font-weight:900;color:var(--t1);line-height:1.3;}
-.chapter-main small{display:block;font-size:11px;color:var(--t2);margin-top:3px;font-weight:600;line-height:1.4;}
-.chapter-status{white-space:nowrap;padding:5px 9px;border-radius:var(--rf);font-size:10.5px;font-weight:900;flex-shrink:0;}
-.locked .chapter-status{background:rgba(239,68,68,.10);color:var(--err);}
-.unlocked .chapter-status{background:rgba(34,197,94,.10);color:var(--ok);}
-.content-main strong{display:block;font-size:13px;font-weight:900;color:var(--t1);line-height:1.3;}
-.content-main small{display:block;font-size:11px;color:var(--t2);margin-top:3px;font-weight:600;}
-.duration{display:inline-block;margin-top:4px;color:var(--ok);font-size:11px;font-weight:900;}
-.content-action{border-radius:var(--r1);padding:8px 11px;flex-shrink:0;background:linear-gradient(135deg,var(--ok),#16a34a);color:#fff;font-size:11.5px;font-weight:900;}
-.content-action:disabled,.locked-action{background:rgba(239,68,68,.10);color:var(--err);cursor:not-allowed;}
+  /* HDR */
+  .hdr { position: sticky; top: 0; z-index: 100; height: 52px; background: var(--nav); border-bottom: 1px solid var(--b1); display: flex; align-items: center; padding: 0 14px; gap: 10px; flex-shrink: 0; }
+  .hdr-title { font-family: var(--fd); font-size: 15px; font-weight: 800; color: var(--t1); flex: 1; }
+  .hdr-logout { height: 30px; padding: 0 12px; border-radius: var(--rf); font-size: 11px; font-weight: 800; background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.18); color: var(--err); }
+  .hdr-logout:active { opacity: .7; }
 
-/* CACHE BAR */
-.cache-bar{display:flex;align-items:center;justify-content:space-between;padding:5px 14px;background:rgba(79,70,229,.04);border-bottom:1px solid var(--b1);font-size:10.5px;color:var(--tm);font-weight:600;flex-shrink:0;}
-.cache-bar button{font-size:10.5px;color:var(--p);font-weight:800;background:none;border:none;cursor:pointer;padding:0;}
+  /* PAGE */
+  .mob-page { flex: 1; overflow-y: scroll; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; padding: 14px 12px calc(var(--nav-h) + 20px + env(safe-area-inset-bottom,0px)); min-height: 0; -webkit-transform: translateZ(0); transform: translateZ(0); }
+  .mob-page::-webkit-scrollbar { width: 2px; }
+  .mob-page::-webkit-scrollbar-thumb { background: var(--bc); border-radius: 99px; }
 
-/* STATE */
-.loading-text{padding:12px;border-radius:var(--r2);font-size:12.5px;font-weight:800;background:rgba(79,70,229,.07);color:var(--p);}
-.empty-text{padding:12px;border-radius:var(--r2);font-size:12.5px;font-weight:700;background:var(--grp);color:var(--t2);text-align:center;}
-.error-text{padding:12px;border-radius:var(--r2);font-size:12.5px;font-weight:800;background:rgba(239,68,68,.08);color:var(--err);}
+  /* AUTH CARD */
+  .auth-card { border-radius: var(--r4); background: var(--card); border: 1px solid var(--bc); box-shadow: var(--sh); padding: 22px 18px; position: relative; overflow: hidden; }
+  .auth-card::before { content: ''; position: absolute; inset: -80px -90px auto auto; width: 190px; height: 190px; border-radius: 50%; background: rgba(79,70,229,.08); pointer-events: none; }
+  .auth-card::after  { content: ''; position: absolute; inset: auto auto -95px -90px; width: 210px; height: 210px; border-radius: 50%; background: rgba(6,182,212,.07); pointer-events: none; }
+  .auth-icon  { position: relative; z-index: 1; width: 64px; height: 64px; border-radius: 20px; margin: 0 auto 12px; display: grid; place-items: center; font-size: 30px; background: linear-gradient(135deg,rgba(79,70,229,.12),rgba(6,182,212,.10)); border: 1px solid var(--b1); }
+  .auth-title { position: relative; z-index: 1; font-family: var(--fd); font-size: 22px; font-weight: 900; text-align: center; color: var(--t1); letter-spacing: -.03em; margin-bottom: 4px; }
+  .auth-sub   { position: relative; z-index: 1; font-size: 13px; color: var(--t2); text-align: center; line-height: 1.6; margin-bottom: 16px; font-weight: 600; }
+  .tab-row  { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 5px; border-radius: var(--r3); background: var(--inp); border: 1px solid var(--b1); margin-bottom: 16px; }
+  .tab-btn  { min-height: 40px; padding: 10px; border-radius: var(--r2); font-size: 13px; font-weight: 800; color: var(--t2); }
+  .tab-btn.active { background: linear-gradient(135deg, var(--ok), #16a34a); color: #fff; }
+  .tab-btn:active { transform: scale(.98); }
+  .form-box   { position: relative; z-index: 1; }
+  .form-label { display: block; font-size: 12.5px; font-weight: 800; color: var(--t1); margin: 12px 0 5px; }
+  .form-input { width: 100%; min-height: 46px; padding: 12px 13px; border-radius: var(--r2); border: 1px solid var(--bc); background: var(--inp); color: var(--t1); font-size: 13.5px; font-weight: 700; outline: none; }
+  .form-input:focus { border-color: var(--p); box-shadow: 0 0 0 3px rgba(79,70,229,.10); background: var(--surface); }
+  .form-input::placeholder { color: var(--tm); font-weight: 600; }
+  .main-btn   { width: 100%; min-height: 48px; padding: 13px; border-radius: var(--r2); margin-top: 14px; font-size: 14px; font-weight: 900; color: #fff; background: linear-gradient(135deg, var(--ok), #16a34a); }
+  .main-btn:active { transform: scale(.985); }
+  .main-btn.primary-btn { background: linear-gradient(135deg, var(--p), var(--p2)); box-shadow: var(--shb); }
+  .danger-btn { width: 100%; min-height: 44px; padding: 11px; border-radius: var(--r2); margin-top: 10px; font-size: 13px; font-weight: 900; color: #fff; background: linear-gradient(135deg, #7f1d1d, #b91c1c); }
+  .danger-btn:active { transform: scale(.985); }
+  .otp-area { margin-top: 12px; }
+  .msg-box { display: none; margin-top: 12px; padding: 11px 13px; border-radius: var(--r2); font-size: 13px; font-weight: 800; line-height: 1.45; }
+  .msg-box.ok   { display: block; background: rgba(34,197,94,.10); color: #166534; border: 1px solid rgba(34,197,94,.18); }
+  .msg-box.err  { display: block; background: rgba(239,68,68,.10); color: #991b1b; border: 1px solid rgba(239,68,68,.18); }
+  .msg-box.info { display: block; background: rgba(79,70,229,.08); color: var(--p); border: 1px solid var(--b1); }
+  .auth-note { position: relative; z-index: 1; margin-top: 16px; padding: 12px 14px; border-radius: var(--r2); background: linear-gradient(135deg,rgba(219,234,254,.9),rgba(220,252,231,.8)); border: 1px solid var(--b1); font-size: 12.5px; font-weight: 700; color: var(--t1); line-height: 1.6; }
+  .auth-note b { color: #166534; }
+  [data-theme="dark"] .auth-note { background: linear-gradient(135deg,rgba(30,64,175,.18),rgba(22,101,52,.16)); color: #bfdbfe; }
+  [data-theme="dark"] .auth-note b { color: #86efac; }
 
-/* NAV */
-.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:var(--shell);z-index:999;height:var(--nav-h);background:var(--nav);border-top:1px solid var(--b1);display:flex;align-items:center;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px);}
-.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:100%;border-radius:var(--r2);padding:6px 4px;position:relative;}
-.bnav-btn::before{content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--p);border-radius:99px;transition:width .15s ease;}
-.bnav-btn.active::before{width:24px;}
-.bnav-icon{font-size:20px;line-height:1;}
-.bnav-btn.active .bnav-icon{transform:scale(1.08);}
-.bnav-label{font-size:10px;font-weight:700;color:var(--tm);}
-.bnav-btn.active .bnav-label{color:var(--p);}
+  /* DASHBOARD */
+  .dash-card { border-radius: var(--r4); background: var(--card); border: 1px solid var(--bc); box-shadow: var(--sh); padding: 18px 16px; margin-bottom: 12px; }
+  .dash-welcome { font-size: 12.5px; color: var(--ok); font-weight: 800; margin-bottom: 4px; }
+  .dash-sub { font-size: 12.5px; color: var(--t2); line-height: 1.6; font-weight: 600; margin-bottom: 14px; }
+  .back-mini { display: inline-flex; align-items: center; gap: 5px; padding: 8px 13px; border-radius: var(--r2); font-size: 12px; font-weight: 800; background: rgba(79,70,229,.08); border: 1px solid var(--b1); color: var(--p); margin-bottom: 12px; }
+  .back-mini:active { transform: scale(.96); }
 
-/* TOAST */
-.toast-wrap{position:fixed;left:50%;bottom:calc(var(--nav-h) + 12px);transform:translateX(-50%);z-index:99999;width:min(90vw,380px);pointer-events:none;}
-.toast{display:flex;align-items:flex-start;gap:10px;background:var(--surface);color:var(--t1);border:1px solid var(--bc);border-radius:12px;padding:10px 12px;box-shadow:0 4px 20px rgba(0,0,0,.12);pointer-events:auto;}
-.toast-ok{border-left:3px solid var(--ok);}
-.toast-info{border-left:3px solid var(--p);}
-.toast-err{border-left:3px solid var(--err);}
-.toast-warn{border-left:3px solid var(--warn);}
-.toast-body p:first-child{font-size:12px;font-weight:800;}
-.toast-body p:last-child{font-size:11px;color:var(--t2);margin-top:1px;}
-.toast-x{font-size:16px;color:var(--tm);cursor:pointer;margin-left:auto;}
-html,body,*{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-touch-callout:none;}
-input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
+  /* COURSE CARDS */
+  .course-grid { display: grid; gap: 10px; }
+  .course-card { width: 100%; border-radius: var(--r3); padding: 14px; background: var(--card); border: 1px solid var(--bc); display: flex; align-items: flex-start; gap: 12px; text-align: left; cursor: pointer; box-shadow: var(--sh); }
+  .course-card:active { transform: scale(.985); }
+  .course-icon { width: 48px; height: 48px; min-width: 48px; border-radius: var(--r2); display: grid; place-items: center; font-size: 24px; background: linear-gradient(135deg,rgba(79,70,229,.10),rgba(6,182,212,.08)); border: 1px solid var(--b1); flex-shrink: 0; }
+  .course-body h3 { font-size: 15px; font-weight: 900; color: var(--t1); line-height: 1.25; margin-bottom: 4px; }
+  .course-body p  { font-size: 12px; color: var(--t2); line-height: 1.5; font-weight: 600; }
+  .no-course { text-align: center; padding: 20px 16px; }
+  .no-course-icon { font-size: 40px; margin-bottom: 10px; }
+  .no-course h2   { font-size: 17px; font-weight: 900; color: var(--err); margin-bottom: 6px; }
+  .no-course p    { font-size: 12.5px; color: var(--t2); font-weight: 700; line-height: 1.6; margin-bottom: 4px; }
+
+  /* COURSE DETAIL */
+  .course-detail-head { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
+  .course-detail-icon { width: 56px; height: 56px; min-width: 56px; border-radius: var(--r3); display: grid; place-items: center; font-size: 30px; background: linear-gradient(135deg,rgba(79,70,229,.10),rgba(6,182,212,.08)); border: 1px solid var(--b1); }
+  .course-detail-head h2 { font-size: 20px; font-weight: 900; color: var(--t1); line-height: 1.2; }
+  .course-detail-head p  { font-size: 12px; color: var(--t2); margin-top: 4px; font-weight: 600; line-height: 1.5; }
+  .info-box { border-radius: var(--r2); background: var(--card); border: 1px solid var(--bc); padding: 12px 14px 12px 18px; margin-bottom: 10px; box-shadow: var(--sh); position: relative; overflow: hidden; }
+  .info-box::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; border-radius: 99px; background: linear-gradient(180deg, var(--p), var(--acc)); }
+  .info-box h3 { font-size: 13px; font-weight: 900; color: var(--t1); margin-bottom: 6px; }
+  .info-box p, .info-box li { font-size: 12px; color: var(--t2); line-height: 1.7; font-weight: 600; }
+  .info-box ul { padding-left: 16px; }
+  .info-box li { list-style: disc; }
+
+  /* LEARNING */
+  .learning-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .learning-btn { border-radius: var(--r3); padding: 16px 12px; background: var(--card); border: 1px solid var(--bc); cursor: pointer; text-align: center; box-shadow: var(--sh); }
+  .learning-btn:active { transform: scale(.985); }
+  .learning-btn span   { display: block; font-size: 30px; margin-bottom: 6px; }
+  .learning-btn strong { display: block; font-size: 14px; font-weight: 900; color: var(--t1); }
+  .learning-btn small  { display: block; margin-top: 4px; font-size: 11px; color: var(--t2); font-weight: 600; line-height: 1.4; }
+
+  /* CHAPTERS / CONTENT */
+  .chapter-list, .content-list { display: grid; gap: 8px; }
+  .chapter-item, .content-item { border-radius: var(--r2); padding: 12px; background: var(--card); border: 1px solid var(--bc); display: flex; align-items: center; justify-content: space-between; gap: 10px; box-shadow: var(--sh); }
+  .chapter-item { cursor: pointer; }
+  .chapter-item:active { transform: scale(.985); }
+  .chapter-main strong { display: block; font-size: 13px; font-weight: 900; color: var(--t1); line-height: 1.3; }
+  .chapter-main small  { display: block; font-size: 11px; color: var(--t2); margin-top: 3px; font-weight: 600; line-height: 1.4; }
+  .chapter-status { white-space: nowrap; padding: 5px 9px; border-radius: var(--rf); font-size: 10.5px; font-weight: 900; flex-shrink: 0; }
+  .locked .chapter-status   { background: rgba(239,68,68,.10); color: var(--err); }
+  .unlocked .chapter-status { background: rgba(34,197,94,.10); color: var(--ok); }
+  .content-main strong { display: block; font-size: 13px; font-weight: 900; color: var(--t1); line-height: 1.3; }
+  .content-main small  { display: block; font-size: 11px; color: var(--t2); margin-top: 3px; font-weight: 600; }
+  .duration { display: inline-block; margin-top: 4px; color: var(--ok); font-size: 11px; font-weight: 900; }
+  .content-action { border-radius: var(--r1); padding: 8px 11px; flex-shrink: 0; background: linear-gradient(135deg, var(--ok), #16a34a); color: #fff; font-size: 11.5px; font-weight: 900; }
+  .content-action:disabled, .locked-action { background: rgba(239,68,68,.10); color: var(--err); cursor: not-allowed; }
+
+  /* CACHE BAR */
+  .cache-bar { display: flex; align-items: center; justify-content: space-between; padding: 5px 14px; background: rgba(79,70,229,.04); border-bottom: 1px solid var(--b1); font-size: 10.5px; color: var(--tm); font-weight: 600; flex-shrink: 0; }
+  .cache-bar button { font-size: 10.5px; color: var(--p); font-weight: 800; background: none; border: none; cursor: pointer; padding: 0; }
+
+  /* STATE */
+  .loading-text { padding: 12px; border-radius: var(--r2); font-size: 12.5px; font-weight: 800; background: rgba(79,70,229,.07); color: var(--p); }
+  .empty-text   { padding: 12px; border-radius: var(--r2); font-size: 12.5px; font-weight: 700; background: var(--grp); color: var(--t2); text-align: center; }
+  .error-text   { padding: 12px; border-radius: var(--r2); font-size: 12.5px; font-weight: 800; background: rgba(239,68,68,.08); color: var(--err); }
+
+  /* NAV */
+  .mob-bnav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: var(--shell); z-index: 999; height: var(--nav-h); background: var(--nav); border-top: 1px solid var(--b1); display: flex; align-items: center; padding: 0 4px; padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .mob-bnav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; height: 100%; border-radius: var(--r2); padding: 6px 4px; position: relative; }
+  .mob-bnav-btn::before { content: ''; position: absolute; top: 6px; left: 50%; transform: translateX(-50%); width: 0; height: 2px; background: var(--p); border-radius: 99px; transition: width .15s ease; }
+  .mob-bnav-btn.active::before { width: 24px; }
+  .mob-bnav-icon { font-size: 20px; line-height: 1; }
+  .mob-bnav-btn.active .mob-bnav-icon { transform: scale(1.08); }
+  .mob-bnav-label { font-size: 10px; font-weight: 700; color: var(--tm); }
+  .mob-bnav-btn.active .mob-bnav-label { color: var(--p); }
+
+  /* TOAST */
+  .toast-wrap { position: fixed; left: 50%; bottom: calc(var(--nav-h) + 12px); transform: translateX(-50%); z-index: 99999; width: min(90vw, 380px); pointer-events: none; }
+  .toast { display: flex; align-items: flex-start; gap: 10px; background: var(--surface); color: var(--t1); border: 1px solid var(--bc); border-radius: 12px; padding: 10px 12px; box-shadow: 0 4px 20px rgba(0,0,0,.12); pointer-events: auto; }
+  .toast-ok   { border-left: 3px solid var(--ok); }
+  .toast-info { border-left: 3px solid var(--p); }
+  .toast-err  { border-left: 3px solid var(--err); }
+  .toast-warn { border-left: 3px solid var(--warn); }
+  .toast-body p:first-child { font-size: 12px; font-weight: 800; }
+  .toast-body p:last-child  { font-size: 11px; color: var(--t2); margin-top: 1px; }
+  .toast-x { font-size: 16px; color: var(--tm); cursor: pointer; margin-left: auto; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DESKTOP LAYOUT (≥768px) — matches Settings exactly
+═══════════════════════════════════════════════════════════ */
+@media (min-width: 768px) {
+  body { background: var(--bg-primary); color: var(--text-primary); overflow: auto; display: block; }
+
+  .mob-shell { display: none !important; }
+
+  /* ── SHARED DESKTOP SHELL ── */
+  .dt-layout { display: flex; flex-direction: column; min-height: 100vh; background: var(--bg-primary); }
+
+  .dt-header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    height: var(--header-h);
+    background: rgba(5,5,5,.92);
+    backdrop-filter: blur(20px) saturate(160%); -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 28px; gap: 16px;
+    transition: background var(--tr);
+  }
+  [data-theme="light"] .dt-header { background: rgba(255,255,255,.92); }
+  .dt-brand { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+  .dt-brand-logo { width: 42px; height: 42px; border-radius: 12px; object-fit: cover; flex-shrink: 0; border: 1px solid var(--border); }
+  .dt-brand-logo-fb { width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0; background: linear-gradient(135deg,var(--primary),var(--secondary)); display: flex; align-items: center; justify-content: center; font-family: var(--fd); font-weight: 800; font-size: 16px; color: #fff; border: 1px solid rgba(124,58,237,.4); }
+  .dt-brand-text { display: flex; flex-direction: column; }
+  .dt-brand-name { font-family: var(--fd); font-size: 16px; font-weight: 800; color: var(--text-primary); letter-spacing: -.01em; }
+  .dt-brand-tag  { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-top: 1px; }
+  .dt-header-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .dt-logout-hdr {
+    display: flex; align-items: center; gap: 6px;
+    height: 36px; padding: 0 14px; border-radius: var(--rf);
+    font-size: 12px; font-weight: 800;
+    background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.18); color: var(--danger);
+    transition: background var(--tr), border-color var(--tr);
+  }
+  .dt-logout-hdr:hover { background: rgba(239,68,68,.14); border-color: rgba(239,68,68,.3); }
+
+  .dt-body-wrap { display: flex; margin-top: var(--header-h); min-height: calc(100vh - var(--header-h)); }
+
+  /* ── SIDEBAR ── */
+  .dt-sidebar {
+    width: var(--sidebar-w); flex-shrink: 0;
+    background: var(--bg-secondary); border-right: 1px solid var(--border);
+    position: fixed; top: var(--header-h); bottom: 0; left: 0;
+    display: flex; flex-direction: column; padding: 20px 12px; overflow-y: auto; z-index: 100;
+    transition: background var(--tr), border-color var(--tr);
+  }
+  .dt-sidebar::-webkit-scrollbar { width: 0; }
+  .dt-nav-section { margin-bottom: 4px; }
+  .dt-nav-label-text { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); padding: 0 12px; margin-bottom: 4px; display: block; }
+  .dt-nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: var(--r2); font-size: 14px; font-weight: 700; color: var(--text-secondary); cursor: pointer; transition: background var(--tr), color var(--tr); border: 1px solid transparent; width: 100%; text-align: left; }
+  .dt-nav-item:hover { background: rgba(255,255,255,.04); color: var(--text-primary); border-color: var(--border); }
+  [data-theme="light"] .dt-nav-item:hover { background: rgba(79,70,229,.04); }
+  .dt-nav-item.active { background: rgba(124,58,237,.14); color: var(--primary-light); border-color: rgba(124,58,237,.25); }
+  .dt-nav-item.active .dt-nav-icon-wrap { color: var(--primary-light); }
+  .dt-nav-icon-wrap { font-size: 18px; width: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .dt-sidebar-footer { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); font-size: 11.5px; color: var(--text-muted); line-height: 1.6; padding-left: 2px; }
+  .dt-sidebar-footer strong { color: var(--text-secondary); font-weight: 700; }
+
+  /* ── MAIN ── */
+  .dt-main { margin-left: var(--sidebar-w); flex: 1; min-width: 0; padding: 32px 36px 60px; }
+  .dt-page-title { font-family: var(--fd); font-size: 26px; font-weight: 900; color: var(--text-primary); letter-spacing: -.02em; margin-bottom: 4px; }
+  .dt-page-sub   { font-size: 13px; color: var(--text-muted); font-weight: 500; margin-bottom: 28px; }
+
+  /* ── AUTH CARD (desktop) ── */
+  .dt-auth-wrap {
+    max-width: 480px; margin: 0 auto;
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    border-radius: 24px; box-shadow: var(--sh-card); padding: 36px 32px;
+    position: relative; overflow: hidden;
+  }
+  .dt-auth-wrap::before { content: ''; position: absolute; inset: -80px -90px auto auto; width: 200px; height: 200px; border-radius: 50%; background: rgba(124,58,237,.07); pointer-events: none; }
+  .dt-auth-wrap::after  { content: ''; position: absolute; inset: auto auto -95px -80px; width: 210px; height: 210px; border-radius: 50%; background: rgba(37,99,235,.06); pointer-events: none; }
+  .dt-auth-icon  { position: relative; z-index: 1; width: 72px; height: 72px; border-radius: 20px; margin: 0 auto 14px; display: grid; place-items: center; font-size: 34px; background: linear-gradient(135deg,rgba(124,58,237,.12),rgba(37,99,235,.10)); border: 1px solid var(--border); }
+  .dt-auth-title { position: relative; z-index: 1; font-family: var(--fd); font-size: 26px; font-weight: 900; text-align: center; color: var(--text-primary); letter-spacing: -.03em; margin-bottom: 6px; }
+  .dt-auth-sub   { position: relative; z-index: 1; font-size: 13.5px; color: var(--text-secondary); text-align: center; line-height: 1.6; margin-bottom: 22px; font-weight: 500; }
+
+  .dt-tab-row { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 6px; border-radius: 16px; background: var(--bg-tertiary); border: 1px solid var(--border); margin-bottom: 20px; }
+  .dt-tab-btn { min-height: 42px; padding: 10px; border-radius: 11px; font-size: 13px; font-weight: 800; color: var(--text-secondary); transition: background var(--tr), color var(--tr); }
+  .dt-tab-btn.active { background: linear-gradient(135deg, var(--success), #059669); color: #fff; }
+  .dt-tab-btn:hover:not(.active) { background: rgba(124,58,237,.08); color: var(--text-primary); }
+
+  .dt-form-label { display: block; font-size: 12.5px; font-weight: 800; color: var(--text-primary); margin: 14px 0 6px; letter-spacing: .01em; }
+  .dt-form-input {
+    width: 100%; min-height: 48px; padding: 13px 14px;
+    border-radius: 12px; border: 1px solid var(--border);
+    background: var(--bg-tertiary); color: var(--text-primary);
+    font-size: 14px; font-weight: 600; outline: none;
+    transition: border-color var(--tr), box-shadow var(--tr), background var(--tr);
+  }
+  .dt-form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,.12); background: var(--bg-secondary); }
+  .dt-form-input::placeholder { color: var(--text-muted); font-weight: 500; }
+
+  .dt-main-btn {
+    width: 100%; min-height: 50px; padding: 14px;
+    border-radius: 12px; margin-top: 16px;
+    font-size: 14px; font-weight: 900; color: #fff;
+    background: linear-gradient(135deg, var(--success), #059669);
+    transition: opacity var(--tr), transform var(--tr);
+  }
+  .dt-main-btn:hover { opacity: .9; }
+  .dt-main-btn:active { transform: scale(.985); }
+  .dt-main-btn.primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); box-shadow: var(--shb); }
+  .dt-danger-btn {
+    width: 100%; min-height: 46px; padding: 12px;
+    border-radius: 12px; margin-top: 10px;
+    font-size: 13px; font-weight: 900; color: #fff;
+    background: linear-gradient(135deg, #7f1d1d, #b91c1c);
+    transition: opacity var(--tr);
+  }
+  .dt-danger-btn:hover { opacity: .85; }
+
+  .dt-otp-area { margin-top: 14px; }
+  .dt-msg-box { display: none; margin-top: 14px; padding: 12px 14px; border-radius: 11px; font-size: 13px; font-weight: 700; line-height: 1.5; }
+  .dt-msg-box.ok   { display: block; background: rgba(16,185,129,.10); color: #065f46; border: 1px solid rgba(16,185,129,.2); }
+  .dt-msg-box.err  { display: block; background: rgba(239,68,68,.10); color: #991b1b; border: 1px solid rgba(239,68,68,.2); }
+  .dt-msg-box.info { display: block; background: rgba(124,58,237,.08); color: var(--primary-light); border: 1px solid rgba(124,58,237,.18); }
+  .dt-auth-note { position: relative; z-index: 1; margin-top: 18px; padding: 13px 15px; border-radius: 12px; background: rgba(37,99,235,.08); border: 1px solid rgba(37,99,235,.18); font-size: 12.5px; font-weight: 600; color: var(--text-secondary); line-height: 1.7; }
+  .dt-auth-note b { color: var(--primary-light); }
+  [data-theme="light"] .dt-auth-note { background: rgba(219,234,254,.7); border-color: rgba(37,99,235,.18); color: #1e40af; }
+  [data-theme="light"] .dt-auth-note b { color: #4f46e5; }
+
+  /* ── COURSES (desktop) ── */
+  .dt-welcome { font-family: var(--fd); font-size: 15px; font-weight: 800; color: var(--success); margin-bottom: 6px; }
+  .dt-welcome-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 22px; font-weight: 500; }
+  .dt-course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+  .dt-course-card {
+    border-radius: 18px; padding: 18px; background: var(--bg-secondary);
+    border: 1px solid var(--border); display: flex; align-items: flex-start; gap: 14px;
+    text-align: left; cursor: pointer; box-shadow: var(--sh-card);
+    transition: transform var(--tr), box-shadow var(--tr), border-color var(--tr);
+  }
+  .dt-course-card:hover { transform: translateY(-2px); box-shadow: var(--sh-hover); border-color: var(--border-hover); }
+  .dt-course-card:active { transform: translateY(0); opacity: .9; }
+  .dt-course-icon { width: 52px; height: 52px; min-width: 52px; border-radius: 14px; display: grid; place-items: center; font-size: 26px; background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.18); flex-shrink: 0; }
+  .dt-course-body h3 { font-size: 15px; font-weight: 800; color: var(--text-primary); line-height: 1.3; margin-bottom: 5px; font-family: var(--fd); }
+  .dt-course-body p  { font-size: 12px; color: var(--text-secondary); line-height: 1.6; font-weight: 500; }
+
+  /* ── NO COURSE (desktop) ── */
+  .dt-no-course {
+    max-width: 440px; margin: 0 auto; text-align: center;
+    padding: 48px 32px; background: var(--bg-secondary);
+    border: 1px solid var(--border); border-radius: 24px; box-shadow: var(--sh-card);
+  }
+  .dt-no-course-icon { font-size: 56px; margin-bottom: 14px; }
+  .dt-no-course h2   { font-family: var(--fd); font-size: 22px; font-weight: 900; color: var(--danger); margin-bottom: 8px; }
+  .dt-no-course p    { font-size: 13px; color: var(--text-secondary); line-height: 1.7; font-weight: 500; margin-bottom: 4px; }
+
+  /* ── COURSE DETAIL (desktop) ── */
+  .dt-back-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px; border-radius: 10px;
+    font-size: 13px; font-weight: 800;
+    background: rgba(124,58,237,.08); border: 1px solid rgba(124,58,237,.18);
+    color: var(--primary-light); margin-bottom: 16px;
+    transition: background var(--tr);
+  }
+  .dt-back-btn:hover { background: rgba(124,58,237,.14); }
+
+  .dt-detail-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .dt-detail-header {
+    grid-column: 1 / -1;
+    display: flex; gap: 18px; align-items: flex-start;
+    padding: 24px; background: var(--bg-secondary);
+    border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--sh-card);
+    margin-bottom: 0;
+  }
+  .dt-detail-icon { width: 64px; height: 64px; min-width: 64px; border-radius: 16px; display: grid; place-items: center; font-size: 34px; background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.18); }
+  .dt-detail-header h2 { font-family: var(--fd); font-size: 22px; font-weight: 900; color: var(--text-primary); line-height: 1.2; margin-bottom: 6px; }
+  .dt-detail-header p  { font-size: 13px; color: var(--text-secondary); line-height: 1.6; font-weight: 500; }
+
+  .dt-info-box {
+    border-radius: 16px; background: var(--bg-secondary);
+    border: 1px solid var(--border); padding: 18px 18px 18px 22px;
+    box-shadow: var(--sh-card); position: relative; overflow: hidden;
+  }
+  .dt-info-box::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; border-radius: 99px; background: linear-gradient(180deg, var(--primary), var(--secondary)); }
+  .dt-info-box h3 { font-size: 13px; font-weight: 900; color: var(--text-primary); margin-bottom: 8px; font-family: var(--fd); }
+  .dt-info-box p, .dt-info-box li { font-size: 12.5px; color: var(--text-secondary); line-height: 1.8; font-weight: 500; }
+  .dt-info-box ul { padding-left: 18px; }
+  .dt-info-box li { list-style: disc; }
+
+  /* ── LEARNING CHOICE (desktop) ── */
+  .dt-learning-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 600px; }
+  .dt-learning-btn {
+    border-radius: 20px; padding: 28px 20px;
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    cursor: pointer; text-align: center; box-shadow: var(--sh-card);
+    transition: transform var(--tr), box-shadow var(--tr), border-color var(--tr);
+  }
+  .dt-learning-btn:hover { transform: translateY(-2px); box-shadow: var(--sh-hover); border-color: var(--border-hover); }
+  .dt-learning-btn:active { transform: translateY(0); opacity: .9; }
+  .dt-learning-btn span   { display: block; font-size: 40px; margin-bottom: 10px; }
+  .dt-learning-btn strong { display: block; font-size: 16px; font-weight: 900; color: var(--text-primary); font-family: var(--fd); }
+  .dt-learning-btn small  { display: block; margin-top: 5px; font-size: 12px; color: var(--text-muted); font-weight: 500; line-height: 1.5; }
+
+  /* ── CHAPTERS (desktop) ── */
+  .dt-chapter-list, .dt-content-list { display: grid; gap: 8px; }
+  .dt-chapter-item {
+    border-radius: 14px; padding: 14px 18px;
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    box-shadow: var(--sh-card); cursor: pointer;
+    transition: background var(--tr), border-color var(--tr), transform var(--tr);
+  }
+  .dt-chapter-item:hover { background: rgba(124,58,237,.06); border-color: var(--border-hover); transform: translateX(2px); }
+  .dt-chapter-item.locked:hover  { background: rgba(239,68,68,.04); }
+  .dt-chapter-item:active { transform: translateX(0); opacity: .9; }
+  .dt-chapter-main strong { display: block; font-size: 14px; font-weight: 800; color: var(--text-primary); line-height: 1.3; }
+  .dt-chapter-main small  { display: block; font-size: 12px; color: var(--text-muted); margin-top: 3px; font-weight: 500; line-height: 1.5; }
+  .dt-chapter-status { white-space: nowrap; padding: 5px 12px; border-radius: var(--rf); font-size: 11px; font-weight: 800; flex-shrink: 0; }
+  .dt-chapter-item.locked .dt-chapter-status   { background: rgba(239,68,68,.10); color: var(--danger); }
+  .dt-chapter-item.unlocked .dt-chapter-status { background: rgba(16,185,129,.10); color: var(--success); }
+
+  .dt-content-item {
+    border-radius: 14px; padding: 14px 18px;
+    background: var(--bg-secondary); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    box-shadow: var(--sh-card);
+  }
+  .dt-content-main strong { display: block; font-size: 14px; font-weight: 800; color: var(--text-primary); line-height: 1.3; }
+  .dt-content-main small  { display: block; font-size: 12px; color: var(--text-muted); margin-top: 3px; font-weight: 500; }
+  .dt-duration { display: inline-block; margin-top: 5px; color: var(--success); font-size: 11.5px; font-weight: 800; }
+  .dt-content-action {
+    border-radius: 10px; padding: 9px 16px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--success), #059669);
+    color: #fff; font-size: 12px; font-weight: 800;
+    transition: opacity var(--tr);
+  }
+  .dt-content-action:hover { opacity: .85; }
+  .dt-content-action:disabled, .dt-locked-action { background: rgba(239,68,68,.10); color: var(--danger); cursor: not-allowed; }
+
+  /* ── STATE (desktop) ── */
+  .dt-loading-text { padding: 14px 18px; border-radius: 12px; font-size: 13px; font-weight: 700; background: rgba(124,58,237,.07); color: var(--primary-light); }
+  .dt-empty-text   { padding: 14px 18px; border-radius: 12px; font-size: 13px; font-weight: 600; background: rgba(124,58,237,.04); color: var(--text-muted); text-align: center; }
+  .dt-error-text   { padding: 14px 18px; border-radius: 12px; font-size: 13px; font-weight: 700; background: rgba(239,68,68,.07); color: var(--danger); }
+
+  /* ── CACHE BAR (desktop) ── */
+  .dt-cache-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 18px; background: rgba(124,58,237,.04); border: 1px solid rgba(124,58,237,.12); border-radius: 10px; font-size: 11.5px; color: var(--text-muted); font-weight: 600; margin-bottom: 14px; }
+  .dt-cache-bar button { font-size: 11.5px; color: var(--primary-light); font-weight: 800; background: none; border: none; cursor: pointer; padding: 0; }
+  .dt-cache-bar button:hover { opacity: .7; }
+
+  /* ── TOAST (desktop) ── */
+  .af-toast-wrap { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 999999; width: min(92vw, 420px); pointer-events: none; }
+  .af-toast { display: flex; align-items: flex-start; gap: 12px; background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border); border-radius: 14px; padding: 11px 13px; box-shadow: var(--sh-card); pointer-events: auto; }
+  .af-toast-ok   { border-left: 4px solid var(--success); }
+  .af-toast-err  { border-left: 4px solid var(--danger); }
+  .af-toast-info { border-left: 4px solid var(--primary); }
+  .af-toast-warn { border-left: 4px solid var(--warning); }
+  .af-toast-title { font-size: 12px; font-weight: 700; margin: 0 0 2px; }
+  .af-toast-msg   { font-size: 11.5px; margin: 0; line-height: 1.4; color: var(--text-secondary); }
+  .af-toast-x { margin-left: auto; font-size: 17px; cursor: pointer; color: var(--text-muted); }
+
+  /* Responsive tweaks */
+  @media (max-width: 1100px) { :root { --sidebar-w: 220px; } .dt-main { padding: 24px 20px 60px; } }
+  @media (max-width: 1023px) {
+    :root { --sidebar-w: 68px; }
+    .dt-nav-item { padding: 10px; justify-content: center; }
+    .dt-nav-item span:not(.dt-nav-icon-wrap) { display: none; }
+    .dt-nav-icon-wrap { width: auto; }
+    .dt-nav-label-text, .dt-sidebar-footer { display: none; }
+    .dt-sidebar { padding: 16px 8px; align-items: center; }
+    .dt-main { padding: 20px 16px 60px; }
+    .dt-detail-layout { grid-template-columns: 1fr; }
+  }
+  @media (min-width: 1600px) { .dt-main { padding: 36px 52px 72px; } }
+}
 </style>
 </head>
 <body>
-<div class="shell">
+
+<!-- ══════════════════════════════════════════════
+     MOBILE SHELL (<768px) — ORIGINAL UNTOUCHED
+══════════════════════════════════════════════ -->
+<div class="mob-shell">
   <header class="hdr">
     <span class="hdr-title" id="hdrTitle">Student 🎓</span>
     <button class="hdr-logout hidden" id="hdrLogout" onclick="doLogout()">Logout</button>
   </header>
 
-  <!-- Cache status bar (shows when serving from cache) -->
   <div class="cache-bar hidden" id="cacheBar">
     <span id="cacheMsg">Loaded from cache</span>
     <button onclick="forceRefreshCourses()">↻ Refresh</button>
   </div>
 
-  <div class="page" id="page">
+  <div class="mob-page" id="mobPage">
 
     <!-- AUTH -->
     <div id="panelAuth" class="auth-card">
@@ -316,307 +662,619 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
       </div>
     </div>
 
-  </div>
+  </div><!-- /mob-page -->
 
-  <nav class="bnav">
-    <button class="bnav-btn" onclick="window.location.href='/index.html'"><span class="bnav-icon">🏠</span><span class="bnav-label">Home</span></button>
-    <button class="bnav-btn active"><span class="bnav-icon">🎓</span><span class="bnav-label">Student</span></button>
-    <button class="bnav-btn" onclick="window.location.href='/batches/index.html'"><span class="bnav-icon">📚</span><span class="bnav-label">Batches</span></button>
-    <button class="bnav-btn" onclick="window.location.href='/community/index.html'"><span class="bnav-icon">💬</span><span class="bnav-label">Community</span></button>
-    <button class="bnav-btn" onclick="window.location.href='/setting/index.html'"><span class="bnav-icon">⚙️</span><span class="bnav-label">Settings</span></button>
+  <nav class="mob-bnav">
+    <button class="mob-bnav-btn" onclick="window.location.href='/index.html'"><span class="mob-bnav-icon">🏠</span><span class="mob-bnav-label">Home</span></button>
+    <button class="mob-bnav-btn active"><span class="mob-bnav-icon">🎓</span><span class="mob-bnav-label">Student</span></button>
+    <button class="mob-bnav-btn" onclick="window.location.href='/batches/index.html'"><span class="mob-bnav-icon">📚</span><span class="mob-bnav-label">Batches</span></button>
+    <button class="mob-bnav-btn" onclick="window.location.href='/community/index.html'"><span class="mob-bnav-icon">💬</span><span class="mob-bnav-label">Community</span></button>
+    <button class="mob-bnav-btn" onclick="window.location.href='/setting/index.html'"><span class="mob-bnav-icon">⚙️</span><span class="mob-bnav-label">Settings</span></button>
   </nav>
-</div>
-
+</div><!-- /mob-shell -->
 <div class="toast-wrap" id="toastWrap"></div>
+
+
+<!-- ══════════════════════════════════════════════
+     DESKTOP LAYOUT (≥768px) — matches Settings
+══════════════════════════════════════════════ -->
+<div class="dt-layout">
+
+  <!-- HEADER -->
+  <header class="dt-header">
+    <div class="dt-brand">
+      <img src="/IMG/AF LOGO 1.jpeg" alt="AF" class="dt-brand-logo"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
+      <div class="dt-brand-logo-fb" style="display:none;" aria-hidden="true">AF</div>
+      <div class="dt-brand-text">
+        <div class="dt-brand-name">AcademeForge</div>
+        <div class="dt-brand-tag">Learning Beyond the Classroom</div>
+      </div>
+    </div>
+    <div class="dt-header-actions">
+      <button class="dt-logout-hdr hidden" id="dtHdrLogout" onclick="doLogout()">↩ Logout</button>
+    </div>
+  </header>
+
+  <div class="dt-body-wrap">
+
+    <!-- SIDEBAR -->
+    <aside class="dt-sidebar">
+      <div class="dt-nav-section">
+        <span class="dt-nav-label-text">Navigation</span>
+        <button class="dt-nav-item" onclick="window.location.href='/index.html'" type="button">
+          <span class="dt-nav-icon-wrap">🏠</span><span>Home</span>
+        </button>
+        <button class="dt-nav-item active" type="button">
+          <span class="dt-nav-icon-wrap">🎓</span><span>Student</span>
+        </button>
+        <button class="dt-nav-item" onclick="window.location.href='/batches/index.html'" type="button">
+          <span class="dt-nav-icon-wrap">📚</span><span>Batches</span>
+        </button>
+        <button class="dt-nav-item" onclick="window.location.href='/community/index.html'" type="button">
+          <span class="dt-nav-icon-wrap">💬</span><span>Community</span>
+        </button>
+        <button class="dt-nav-item" onclick="window.location.href='/setting/index.html'" type="button">
+          <span class="dt-nav-icon-wrap">⚙️</span><span>Settings</span>
+        </button>
+      </div>
+      <div class="dt-sidebar-footer">
+        <strong>Developed by Devraj Kumar</strong><br>
+        Made with ❤️ in India
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="dt-main" id="dtMain">
+
+      <!-- DT: AUTH -->
+      <div id="dtPanelAuth">
+        <div class="dt-page-title">Student 🎓</div>
+        <div class="dt-page-sub">Login with your verified Student ID to access your courses.</div>
+
+        <div class="dt-auth-wrap">
+          <div class="dt-auth-icon">🎓</div>
+          <h2 class="dt-auth-title">Student ID Access</h2>
+          <p class="dt-auth-sub">Login with your verified Student ID to access courses, batches, and community features.</p>
+
+          <div class="dt-tab-row">
+            <button class="dt-tab-btn active" id="dtTabLogin" onclick="dtSwitchMode('login')">Login</button>
+            <button class="dt-tab-btn" id="dtTabCreate" onclick="dtSwitchMode('create')">Create ID</button>
+          </div>
+
+          <!-- Login Form -->
+          <div id="dtBoxLogin">
+            <label class="dt-form-label">Student ID / Phone Number</label>
+            <input id="dtLoginPhone" class="dt-form-input" type="tel" placeholder="Enter your phone number"/>
+            <label class="dt-form-label">Password</label>
+            <input id="dtLoginPassword" class="dt-form-input" type="password" placeholder="Enter password"/>
+            <button class="dt-main-btn primary" onclick="doLogin()">Login</button>
+            <button class="dt-danger-btn" onclick="dtSwitchMode('forgot')">Forgot Password?</button>
+          </div>
+
+          <!-- Create Form -->
+          <div id="dtBoxCreate" class="hidden">
+            <label class="dt-form-label">Full Name</label>
+            <input id="dtCreateName" class="dt-form-input" type="text" placeholder="Enter your full name"/>
+            <label class="dt-form-label">Phone Number</label>
+            <input id="dtCreatePhone" class="dt-form-input" type="tel" placeholder="Enter phone number"/>
+            <label class="dt-form-label">Email Address</label>
+            <input id="dtCreateEmail" class="dt-form-input" type="email" placeholder="Enter email address"/>
+            <label class="dt-form-label">Create Password</label>
+            <input id="dtCreatePassword" class="dt-form-input" type="password" placeholder="Create password"/>
+            <button class="dt-main-btn primary" onclick="sendCreateOtp()">Send Email OTP</button>
+            <div id="dtCreateOtpArea" class="dt-otp-area hidden">
+              <label class="dt-form-label">Email OTP</label>
+              <input id="dtCreateOtp" class="dt-form-input" type="text" maxlength="6" placeholder="Enter OTP sent to your email"/>
+              <button class="dt-main-btn primary" onclick="verifyCreateOtp()">Verify OTP & Create ID</button>
+            </div>
+            <p style="margin-top:12px;font-size:12px;color:var(--text-muted);font-weight:500;text-align:center;">Your phone number will be used as your Student ID.</p>
+          </div>
+
+          <!-- Forgot Form -->
+          <div id="dtBoxForgot" class="hidden">
+            <label class="dt-form-label">Student ID / Phone / Email</label>
+            <input id="dtForgotLogin" class="dt-form-input" type="text" placeholder="Enter your Student ID, phone, or email"/>
+            <button class="dt-main-btn primary" onclick="findStudentForReset()">Send Email OTP</button>
+            <div id="dtForgotOtpArea" class="dt-otp-area hidden">
+              <label class="dt-form-label">Email OTP</label>
+              <input id="dtForgotOtp" class="dt-form-input" type="text" maxlength="6" placeholder="Enter OTP sent to your email"/>
+              <button class="dt-main-btn primary" onclick="verifyForgotOtp()">Verify OTP</button>
+            </div>
+            <div id="dtResetPasswordArea" class="hidden">
+              <label class="dt-form-label">New Password</label>
+              <input id="dtNewPassword" class="dt-form-input" type="password" placeholder="Create new password"/>
+              <button class="dt-main-btn primary" onclick="resetPassword()">Reset Password</button>
+            </div>
+            <button class="dt-danger-btn" onclick="dtSwitchMode('login')">Back to Login</button>
+            <p style="margin-top:12px;font-size:12px;color:var(--text-muted);font-weight:500;text-align:center;">We'll verify your registered email before allowing password reset.</p>
+          </div>
+
+          <div id="dtAuthMsg" class="dt-msg-box"></div>
+          <div class="dt-auth-note">If you face any issue, email us at <b>academeforge@gmail.com</b> with your name and WhatsApp number.</div>
+        </div>
+      </div>
+
+      <!-- DT: COURSES -->
+      <div id="dtPanelCourses" class="hidden">
+        <div class="dt-page-title" id="dtWelcomeText">Welcome Student 🎓</div>
+        <div class="dt-page-sub">Your enrolled programs are ready to explore.</div>
+        <div class="dt-cache-bar hidden" id="dtCacheBar">
+          <span id="dtCacheMsg">Loaded from cache</span>
+          <button onclick="forceRefreshCourses()">↻ Refresh</button>
+        </div>
+        <div class="dt-course-grid" id="dtCourseCards"></div>
+      </div>
+
+      <!-- DT: NO COURSE -->
+      <div id="dtPanelNoCourse" class="hidden">
+        <div class="dt-page-title">Student 🎓</div>
+        <div class="dt-page-sub">Your enrollment status</div>
+        <div class="dt-no-course">
+          <div class="dt-no-course-icon">😬</div>
+          <h2>Not Enrolled Yet</h2>
+          <p id="dtNoCourseMsg">You are not enrolled in any batch.</p>
+          <p>Please enroll from the Batches section.</p>
+          <button class="dt-main-btn" style="margin-top:20px;max-width:280px;margin-left:auto;margin-right:auto;display:block;" onclick="window.location.href='/batches/index.html'">Browse Batches</button>
+          <button class="dt-danger-btn" style="max-width:280px;margin-left:auto;margin-right:auto;display:block;" onclick="doLogout()">Logout</button>
+        </div>
+      </div>
+
+      <!-- DT: COURSE DETAIL -->
+      <div id="dtPanelCourseDetail" class="hidden">
+        <button class="dt-back-btn" onclick="dtShowPanel('courses')">← Back to Courses</button>
+        <div class="dt-page-title" id="dtDetailPageTitle">Course Details 📘</div>
+        <div class="dt-page-sub">Review your course information before continuing</div>
+
+        <div class="dt-detail-layout">
+          <div class="dt-detail-header">
+            <div class="dt-detail-icon" id="dtDetailIcon">📘</div>
+            <div>
+              <h2 id="dtDetailTitle">Course Name</h2>
+              <p id="dtDetailIntro">Course intro will appear here.</p>
+            </div>
+          </div>
+          <div class="dt-info-box"><h3>📌 Course Details</h3><p id="dtDetailDetails"></p></div>
+          <div class="dt-info-box"><h3>🧾 Course Syllabus</h3><ul id="dtDetailSyllabus"></ul></div>
+          <div class="dt-info-box" style="grid-column:1/-1"><h3>🏫 Facilities</h3><ul id="dtDetailFacilities"></ul></div>
+        </div>
+        <div style="margin-top:20px;">
+          <button class="dt-main-btn primary" style="max-width:260px;" onclick="startLearning()">Continue Learning →</button>
+        </div>
+      </div>
+
+      <!-- DT: LEARNING CHOICE -->
+      <div id="dtPanelLearning" class="hidden">
+        <button class="dt-back-btn" onclick="dtShowPanel('courseDetail')">← Back to Course</button>
+        <div class="dt-page-title" id="dtLearningTitle">Start Learning 🎯</div>
+        <div class="dt-page-sub">Select what you want to access.</div>
+        <div class="dt-learning-grid">
+          <button class="dt-learning-btn" onclick="openLearningMode('lectures')"><span>🎥</span><strong>Lectures</strong><small>Chapter-wise video lecture list</small></button>
+          <button class="dt-learning-btn" onclick="openLearningMode('notes')"><span>📝</span><strong>Notes</strong><small>Chapter-wise study notes list</small></button>
+        </div>
+      </div>
+
+      <!-- DT: CHAPTERS -->
+      <div id="dtPanelChapters" class="hidden">
+        <button class="dt-back-btn" onclick="dtShowPanel('learning')">← Back</button>
+        <div class="dt-page-title" id="dtChapterModeTitle">Lectures 🎥</div>
+        <div class="dt-page-sub">Select a chapter to continue.</div>
+        <div class="dt-chapter-list" id="dtChapterList"></div>
+      </div>
+
+      <!-- DT: CONTENT -->
+      <div id="dtPanelContent" class="hidden">
+        <button class="dt-back-btn" onclick="dtShowPanel('chapters')">← Back to Chapters</button>
+        <div class="dt-page-title" id="dtContentTitle">Chapter Content 📄</div>
+        <div class="dt-page-sub" id="dtContentSubtitle">Select and study one by one.</div>
+        <div class="dt-content-list" id="dtContentList"></div>
+      </div>
+
+    </main>
+  </div><!-- /dt-body-wrap -->
+</div><!-- /dt-layout -->
+
+<div class="af-toast-wrap" id="afToastWrap"></div>
 
 <script>
 'use strict';
 
-/* ── CACHE CONFIG ── */
+/* ═══════════════════════════════════════════════
+   CACHE CONFIG
+═══════════════════════════════════════════════ */
 const COURSES_KEY   = 'af_student_courses_v1';
 const CHAPTERS_PFX  = 'af_chapters_v1_';
 const LECTURES_PFX  = 'af_lectures_v1_';
 const NOTES_PFX     = 'af_notes_v1_';
-const CACHE_TTL     = 20 * 60 * 1000; // 20 min
+const CACHE_TTL     = 20 * 60 * 1000;
 
 const STUDENT_URL = "https://afooyyydhlwngzssgqih.supabase.co";
 const STUDENT_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb295eXlkaGx3bmd6c3NncWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDQxMjgsImV4cCI6MjA5NDIyMDEyOH0.KG0XO0oP_2MpewHoIwTtbrKg5FkyOYRUtVzLH1MSJiE";
 
-/* ── HELPERS ── */
+/* ═══════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════ */
 const $ = id => document.getElementById(id);
 const esc = t => String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const safe = (v,fb) => (v===null||v===undefined||v==='')?fb||'':v;
 const cleanPhone = v => String(v||'').trim().replace(/\D/g,'');
+const isDesktop  = () => window.innerWidth >= 768;
 
-/* ── THEME ── */
+/* ═══════════════════════════════════════════════
+   GLOBAL THEME — single source of truth
+   af_dark_mode: '1' = dark | '0' = light | null = default dark
+═══════════════════════════════════════════════ */
+function applyTheme(dark) {
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+}
+
 window.addEventListener('storage', e => {
-  if (e.key === 'af_dark_mode')
-    document.documentElement.setAttribute('data-theme', e.newValue==='1'?'dark':'light');
+  if (e.key === 'af_dark_mode') applyTheme(e.newValue !== '0');
 });
 
-/* ── CACHE ── */
+/* ═══════════════════════════════════════════════
+   CACHE UTILS
+═══════════════════════════════════════════════ */
 function cacheGet(key) {
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    const obj = JSON.parse(raw);
-    if (Date.now() - obj.ts > CACHE_TTL) return null;
-    return obj.data;
-  } catch(_) { return null; }
+  try { const r=localStorage.getItem(key); if(!r) return null; const o=JSON.parse(r); if(Date.now()-o.ts>CACHE_TTL) return null; return o.data; } catch(_) { return null; }
 }
-function cacheSet(key, data) {
-  try { localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch(_) {}
+function cacheSet(key,data) {
+  try { localStorage.setItem(key,JSON.stringify({ts:Date.now(),data})); } catch(_) {}
 }
 function cacheTimestamp(key) {
-  try { const r = localStorage.getItem(key); if(!r) return 0; return JSON.parse(r).ts||0; } catch(_) { return 0; }
+  try { const r=localStorage.getItem(key); if(!r) return 0; return JSON.parse(r).ts||0; } catch(_) { return 0; }
 }
 function cacheClear(prefix) {
-  try {
-    Object.keys(localStorage).filter(k => k.startsWith(prefix)||k===prefix).forEach(k => localStorage.removeItem(k));
-  } catch(_) {}
+  try { Object.keys(localStorage).filter(k=>k.startsWith(prefix)||k===prefix).forEach(k=>localStorage.removeItem(k)); } catch(_) {}
 }
 
-/* ── SUPABASE (lazy) ── */
+/* ═══════════════════════════════════════════════
+   SUPABASE (lazy)
+═══════════════════════════════════════════════ */
 let _sb = null;
 async function getSb() {
   if (_sb) return _sb;
-  if (typeof supabase === 'undefined') await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
+  if (typeof supabase==='undefined') await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
   _sb = supabase.createClient(STUDENT_URL, STUDENT_KEY);
   return _sb;
 }
 function loadScript(src) {
-  return new Promise((res, rej) => {
+  return new Promise((res,rej) => {
     if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
-    const s = document.createElement('script');
-    s.src = src; s.onload = res; s.onerror = rej;
-    document.head.appendChild(s);
+    const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s);
   });
 }
 async function edgeCall(fn, payload) {
   try {
     if (!navigator.onLine) return { ok:false, message:'No internet connection.' };
-    const sb = await getSb();
-    const { data, error } = await sb.functions.invoke(fn, { body: payload||{} });
-    if (error) return { ok:false, message: error.message||'Request failed.' };
-    return data || { ok:false, message:'Empty response.' };
-  } catch(e) { return { ok:false, message: e.message||'Request failed.' }; }
+    const sb=await getSb();
+    const { data, error }=await sb.functions.invoke(fn,{body:payload||{}});
+    if (error) return { ok:false, message:error.message||'Request failed.' };
+    return data||{ ok:false, message:'Empty response.' };
+  } catch(e) { return { ok:false, message:e.message||'Request failed.' }; }
 }
 
-/* ── TOAST ── */
-let _tt = null;
+/* ═══════════════════════════════════════════════
+   TOAST — unified for both layouts
+═══════════════════════════════════════════════ */
+let _tt=null, _tdt=null;
 function showToast(msg, type='info', title='') {
-  const w = $('toastWrap'); w.innerHTML = '';
-  if (_tt) { clearTimeout(_tt); _tt = null; }
-  const labels = { ok:'Done', info:'Info', err:'Error', warn:'Notice' };
-  const d = document.createElement('div');
-  d.className = 'toast toast-' + type;
-  d.innerHTML = `<div class="toast-body"><p>${title||labels[type]||'Info'}</p><p>${msg}</p></div><span class="toast-x" onclick="this.parentElement.remove()">×</span>`;
-  w.appendChild(d);
-  _tt = setTimeout(() => d.remove(), 2600);
+  // Mobile toast
+  const mw=$('toastWrap');
+  if (mw && !isDesktop()) {
+    mw.innerHTML='';
+    if (_tt) { clearTimeout(_tt); _tt=null; }
+    const labels={ok:'Done',info:'Info',err:'Error',warn:'Notice'};
+    const d=document.createElement('div');
+    d.className='toast toast-'+type;
+    d.innerHTML=`<div class="toast-body"><p>${title||labels[type]||'Info'}</p><p>${msg}</p></div><span class="toast-x" onclick="this.parentElement.remove()">×</span>`;
+    mw.appendChild(d);
+    _tt=setTimeout(()=>d.remove(),2600);
+  }
+  // Desktop toast
+  const dw=$('afToastWrap');
+  if (dw && isDesktop()) {
+    dw.innerHTML='';
+    if (_tdt) { clearTimeout(_tdt); _tdt=null; }
+    const labels={ok:'Done',info:'Info',err:'Error',warn:'Notice'};
+    const d=document.createElement('div');
+    d.className='af-toast af-toast-'+type;
+    d.innerHTML=`<div><p class="af-toast-title">${title||labels[type]||'Info'}</p><p class="af-toast-msg">${msg}</p></div><button class="af-toast-x" onclick="this.parentElement.remove()">×</button>`;
+    dw.appendChild(d);
+    _tdt=setTimeout(()=>d&&d.remove(),2600);
+  }
 }
 
-/* ── PANELS ── */
-const PANELS = ['auth','courses','noCourse','courseDetail','learning','chapters','content'];
-function showPanel(name) {
-  PANELS.forEach(p => {
-    const el = $('panel' + p.charAt(0).toUpperCase() + p.slice(1));
-    if (el) el.classList.add('hidden');
+/* ═══════════════════════════════════════════════
+   MESSAGES
+═══════════════════════════════════════════════ */
+function showMsg(type, text) {
+  // Both mobile and desktop message boxes
+  ['authMsg','dtAuthMsg'].forEach(id => {
+    const b=$(id); if(!b) return;
+    b.className='msg-box '+type; b.textContent=text||'';
+    // Desktop uses dt-msg-box class
+    if (id==='dtAuthMsg') b.className='dt-msg-box '+type;
   });
-  const el = $('panel' + name.charAt(0).toUpperCase() + name.slice(1));
-  if (el) el.classList.remove('hidden');
-  $('page').scrollTop = 0;
-  $('hdrLogout').classList.toggle('hidden', name === 'auth');
-  const titles = { auth:'Student 🎓', courses:'My Courses 📚', noCourse:'Not Enrolled 😬', courseDetail:'Course Details 📘', learning:'Start Learning 🎯', chapters:'Chapters 📖', content:'Content 📄' };
-  $('hdrTitle').textContent = titles[name] || 'Student 🎓';
+}
+function clearMsg() {
+  ['authMsg','dtAuthMsg'].forEach(id => {
+    const b=$(id); if(!b) return;
+    b.className='msg-box'; b.textContent='';
+    if (id==='dtAuthMsg') b.className='dt-msg-box';
+  });
 }
 
-/* ── AUTH MESSAGE ── */
-function showMsg(type, text) { const b=$('authMsg'); b.className='msg-box '+type; b.textContent=text||''; }
-function clearMsg() { const b=$('authMsg'); b.className='msg-box'; b.textContent=''; }
-
-/* ── DEVICE ── */
+/* ═══════════════════════════════════════════════
+   DEVICE
+═══════════════════════════════════════════════ */
 function getDeviceId() {
-  const k = 'af_device_id'; let id = localStorage.getItem(k);
-  if (!id) { id = 'afdev_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,12); localStorage.setItem(k,id); }
+  const k='af_device_id'; let id=localStorage.getItem(k);
+  if (!id) { id='afdev_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,12); localStorage.setItem(k,id); }
   return id;
 }
 function getDeviceName() {
-  const ua = navigator.userAgent||'';
+  const ua=navigator.userAgent||'';
   if (/Android/i.test(ua)) return 'Android WebView';
   if (/iPhone|iPad/i.test(ua)) return 'iOS WebView';
   if (/Windows/i.test(ua)) return 'Windows Browser';
   return 'Web Browser';
 }
 
-/* ── MODE SWITCHER ── */
+/* ═══════════════════════════════════════════════
+   INPUT BRIDGE — read from whichever input is visible
+   Each field has a mobile id and a desktop id.
+═══════════════════════════════════════════════ */
+function getVal(mobId, dtId) {
+  if (isDesktop()) { const el=$(dtId); return el?el.value:''; }
+  const el=$(mobId); return el?el.value:'';
+}
+
+/* ═══════════════════════════════════════════════
+   PANELS
+═══════════════════════════════════════════════ */
+// Mobile panels
+const MOB_PANELS = ['Auth','Courses','NoCourse','CourseDetail','Learning','Chapters','Content'];
+function showPanel(name) {
+  MOB_PANELS.forEach(p => { const el=$('panel'+p); if(el) el.classList.add('hidden'); });
+  const el=$('panel'+name.charAt(0).toUpperCase()+name.slice(1));
+  if (el) el.classList.remove('hidden');
+  $('mobPage').scrollTop=0;
+  $('hdrLogout').classList.toggle('hidden', name==='auth');
+  const titles={auth:'Student 🎓',courses:'My Courses 📚',noCourse:'Not Enrolled 😬',courseDetail:'Course Details 📘',learning:'Start Learning 🎯',chapters:'Chapters 📖',content:'Content 📄'};
+  $('hdrTitle').textContent=titles[name]||'Student 🎓';
+}
+
+// Desktop panels
+const DT_PANELS = ['Auth','Courses','NoCourse','CourseDetail','Learning','Chapters','Content'];
+function dtShowPanel(name) {
+  DT_PANELS.forEach(p => { const el=$('dtPanel'+p); if(el) el.classList.add('hidden'); });
+  const el=$('dtPanel'+name.charAt(0).toUpperCase()+name.slice(1));
+  if (el) el.classList.remove('hidden');
+  const dtMain=$('dtMain'); if(dtMain) dtMain.scrollTop=0;
+  const logoutBtn=$('dtHdrLogout');
+  if (logoutBtn) logoutBtn.classList.toggle('hidden', name==='auth');
+}
+
+/* ═══════════════════════════════════════════════
+   MODE SWITCHER
+═══════════════════════════════════════════════ */
 let _pendingCreate=null, _resetStudent=null, _forgotOtpVerified=false;
+
 function switchMode(mode) {
   clearMsg(); _pendingCreate=null; _resetStudent=null; _forgotOtpVerified=false;
-  ['Login','Create','Forgot'].forEach(m => { $('box'+m).classList.add('hidden'); const tb=$('tab'+m); if(tb) tb.classList.remove('active'); });
+  ['Login','Create','Forgot'].forEach(m => {
+    const b=$('box'+m); if(b) b.classList.add('hidden');
+    const tb=$('tab'+m); if(tb) tb.classList.remove('active');
+  });
   if ($('createOtpArea')) $('createOtpArea').classList.add('hidden');
   if ($('forgotOtpArea')) $('forgotOtpArea').classList.add('hidden');
   if ($('resetPasswordArea')) $('resetPasswordArea').classList.add('hidden');
-  if (mode==='login') { $('boxLogin').classList.remove('hidden'); $('tabLogin').classList.add('active'); }
+  if (mode==='login')  { $('boxLogin').classList.remove('hidden'); $('tabLogin').classList.add('active'); }
   else if (mode==='create') { $('boxCreate').classList.remove('hidden'); $('tabCreate').classList.add('active'); }
   else if (mode==='forgot') { $('boxForgot').classList.remove('hidden'); }
 }
 
-/* ── LOGIN ── */
+function dtSwitchMode(mode) {
+  clearMsg(); _pendingCreate=null; _resetStudent=null; _forgotOtpVerified=false;
+  ['Login','Create','Forgot'].forEach(m => {
+    const b=$('dtBox'+m); if(b) b.classList.add('hidden');
+    const tb=$('dtTab'+m); if(tb) tb.classList.remove('active');
+  });
+  if ($('dtCreateOtpArea'))   $('dtCreateOtpArea').classList.add('hidden');
+  if ($('dtForgotOtpArea'))   $('dtForgotOtpArea').classList.add('hidden');
+  if ($('dtResetPasswordArea')) $('dtResetPasswordArea').classList.add('hidden');
+  if (mode==='login')  { $('dtBoxLogin').classList.remove('hidden');  $('dtTabLogin').classList.add('active'); }
+  else if (mode==='create') { $('dtBoxCreate').classList.remove('hidden'); $('dtTabCreate').classList.add('active'); }
+  else if (mode==='forgot') { $('dtBoxForgot').classList.remove('hidden'); }
+}
+
+/* ═══════════════════════════════════════════════
+   LOGIN — works for both layouts by reading correct inputs
+═══════════════════════════════════════════════ */
 async function doLogin() {
-  const loginId = ($('loginPhone').value||'').trim();
-  const cleanId = cleanPhone(loginId);
-  const password = ($('loginPassword').value||'').trim();
-  if (!loginId) { showMsg('err','Enter your Student ID / phone number.'); return; }
+  const loginId   = getVal('loginPhone','dtLoginPhone').trim();
+  const cleanId   = cleanPhone(loginId);
+  const password  = getVal('loginPassword','dtLoginPassword').trim();
+  if (!loginId)  { showMsg('err','Enter your Student ID / phone number.'); return; }
   if (!password) { showMsg('err','Enter your password.'); return; }
   showMsg('info','Checking your login…');
-  const res = await edgeCall('student-login-af', { login_id:loginId, clean_login_id:cleanId, password, device_id:getDeviceId(), device_name:getDeviceName() });
-  if (!res||!res.ok) { showMsg('err', res?.message||'Login failed.'); return; }
-  if (!res.student) { showMsg('err','Login failed. Student data not received.'); return; }
-  const token = res.session_token||res.login_token||'';
+  const res = await edgeCall('student-login-af',{login_id:loginId,clean_login_id:cleanId,password,device_id:getDeviceId(),device_name:getDeviceName()});
+  if (!res||!res.ok) { showMsg('err',res?.message||'Login failed.'); return; }
+  if (!res.student)  { showMsg('err','Login failed. Student data not received.'); return; }
+  const token=res.session_token||res.login_token||'';
   if (!token) { showMsg('err','Login failed. Session token not received.'); return; }
-  saveSession(res.student, token, res.device_id||getDeviceId());
+  saveSession(res.student,token,res.device_id||getDeviceId());
   openAfterLogin(res.student);
 }
 
-/* ── CREATE ID ── */
+/* ═══════════════════════════════════════════════
+   CREATE ID
+═══════════════════════════════════════════════ */
 async function sendCreateOtp() {
-  const name=($('createName').value||'').trim(), mobile=cleanPhone($('createPhone').value||''), email=($('createEmail').value||'').trim().toLowerCase(), password=($('createPassword').value||'').trim();
-  if (!name||name.length<3) { showMsg('err','Enter your full name.'); return; }
+  const name     = getVal('createName','dtCreateName').trim();
+  const mobile   = cleanPhone(getVal('createPhone','dtCreatePhone'));
+  const email    = getVal('createEmail','dtCreateEmail').trim().toLowerCase();
+  const password = getVal('createPassword','dtCreatePassword').trim();
+  if (!name||name.length<3)   { showMsg('err','Enter your full name.'); return; }
   if (!mobile||mobile.length<10) { showMsg('err','Enter a valid phone number.'); return; }
   if (!email||!email.includes('@')) { showMsg('err','Enter a valid email address.'); return; }
   if (!password||password.length<4) { showMsg('err','Create a password with at least 4 characters.'); return; }
   showMsg('info','Checking existing account…');
-  const check = await edgeCall('student-check-existing-af', { mobile, email });
-  if (!check||!check.ok) { showMsg('err', check?.message||'Could not check account.'); return; }
+  const check=await edgeCall('student-check-existing-af',{mobile,email});
+  if (!check||!check.ok) { showMsg('err',check?.message||'Could not check account.'); return; }
   if (check.mobile_exists||check.student_id_exists) { showMsg('err','This phone number is already registered.'); return; }
   if (check.email_exists) { showMsg('err','This email is already registered.'); return; }
-  _pendingCreate = { student_id:mobile, name, mobile, email, password, status:'active', email_verified:false };
+  _pendingCreate={student_id:mobile,name,mobile,email,password,status:'active',email_verified:false};
   showMsg('info','Sending OTP to your email…');
-  const otpRes = await edgeCall('student-send-otp-af', { email, mobile, purpose:'create' });
+  const otpRes=await edgeCall('student-send-otp-af',{email,mobile,purpose:'create'});
   if (!otpRes||!otpRes.ok) { showMsg('err','OTP send failed: '+(otpRes?.message||'Server error.')); return; }
-  $('createOtpArea').classList.remove('hidden');
+  // Show OTP area in correct layout
+  if (isDesktop()) { $('dtCreateOtpArea').classList.remove('hidden'); }
+  else             { $('createOtpArea').classList.remove('hidden'); }
   showMsg('ok','OTP sent to your email. Please verify to create your Student ID.');
 }
 async function verifyCreateOtp() {
-  const otp = ($('createOtp').value||'').trim();
+  const otp=getVal('createOtp','dtCreateOtp').trim();
   if (!_pendingCreate) { showMsg('err','Please fill the form and send OTP first.'); return; }
   if (!otp||otp.length<4) { showMsg('err','Enter valid OTP.'); return; }
   showMsg('info','Verifying OTP and creating your Student ID…');
-  const res = await edgeCall('student-create-af', Object.assign({}, _pendingCreate, { otp, purpose:'create' }));
-  if (!res||!res.ok) { showMsg('err', res?.message||'Could not create Student ID.'); return; }
-  if (!res.student) { showMsg('err','Student ID created but data not received.'); return; }
-  _pendingCreate = null;
-  $('createOtpArea').classList.add('hidden'); $('createOtp').value = '';
+  const res=await edgeCall('student-create-af',Object.assign({},_pendingCreate,{otp,purpose:'create'}));
+  if (!res||!res.ok) { showMsg('err',res?.message||'Could not create Student ID.'); return; }
+  if (!res.student)  { showMsg('err','Student ID created but data not received.'); return; }
+  _pendingCreate=null;
+  if (isDesktop()) { $('dtCreateOtpArea').classList.add('hidden'); if($('dtCreateOtp')) $('dtCreateOtp').value=''; }
+  else             { $('createOtpArea').classList.add('hidden'); if($('createOtp')) $('createOtp').value=''; }
   saveSession(res.student);
   showMsg('ok','Student ID created successfully!');
   openAfterLogin(res.student);
 }
 
-/* ── FORGOT ── */
+/* ═══════════════════════════════════════════════
+   FORGOT PASSWORD
+═══════════════════════════════════════════════ */
 async function findStudentForReset() {
-  const value = ($('forgotLogin').value||'').trim(), clean = cleanPhone(value);
+  const value=getVal('forgotLogin','dtForgotLogin').trim(), clean=cleanPhone(value);
   if (!value) { showMsg('err','Enter your Student ID, phone, or email.'); return; }
   showMsg('info','Finding your account…');
-  const res = await edgeCall('student-find-reset-af', { value, clean_value:clean, email_value:value.toLowerCase() });
-  if (!res||!res.ok) { showMsg('err', res?.message||'No account found.'); return; }
+  const res=await edgeCall('student-find-reset-af',{value,clean_value:clean,email_value:value.toLowerCase()});
+  if (!res||!res.ok) { showMsg('err',res?.message||'No account found.'); return; }
   if (!res.student?.email) { showMsg('err','Account found but email is missing.'); return; }
-  _resetStudent = res.student; _forgotOtpVerified = false;
+  _resetStudent=res.student; _forgotOtpVerified=false;
   showMsg('info','Sending OTP to your registered email…');
-  const otpRes = await edgeCall('student-send-otp-af', { email:_resetStudent.email, mobile:_resetStudent.mobile||'', purpose:'reset' });
+  const otpRes=await edgeCall('student-send-otp-af',{email:_resetStudent.email,mobile:_resetStudent.mobile||'',purpose:'reset'});
   if (!otpRes||!otpRes.ok) { showMsg('err','OTP send failed: '+(otpRes?.message||'Server error.')); return; }
-  $('forgotOtpArea').classList.remove('hidden'); $('resetPasswordArea').classList.add('hidden');
+  if (isDesktop()) { $('dtForgotOtpArea').classList.remove('hidden'); $('dtResetPasswordArea').classList.add('hidden'); }
+  else             { $('forgotOtpArea').classList.remove('hidden'); $('resetPasswordArea').classList.add('hidden'); }
   showMsg('ok','OTP sent to your registered email. Please verify.');
 }
 async function verifyForgotOtp() {
-  const otp = ($('forgotOtp').value||'').trim();
+  const otp=getVal('forgotOtp','dtForgotOtp').trim();
   if (!_resetStudent) { showMsg('err','Please find your account first.'); return; }
   if (!otp||otp.length<4) { showMsg('err','Enter valid OTP.'); return; }
   showMsg('info','Verifying OTP…');
-  const res = await edgeCall('student-verify-otp-af', { email:_resetStudent.email, otp, purpose:'reset' });
+  const res=await edgeCall('student-verify-otp-af',{email:_resetStudent.email,otp,purpose:'reset'});
   if (!res||!res.ok) { showMsg('err','Invalid OTP: '+(res?.message||'Verification failed.')); return; }
-  _forgotOtpVerified = true; $('resetPasswordArea').classList.remove('hidden');
+  _forgotOtpVerified=true;
+  if (isDesktop()) $('dtResetPasswordArea').classList.remove('hidden');
+  else             $('resetPasswordArea').classList.remove('hidden');
   showMsg('ok','Email verified. Create your new password.');
 }
 async function resetPassword() {
-  const newPwd = ($('newPassword').value||'').trim();
-  if (!_resetStudent) { showMsg('err','Please find your account first.'); return; }
-  if (!_forgotOtpVerified) { showMsg('err','Please verify email OTP first.'); return; }
+  const newPwd=getVal('newPassword','dtNewPassword').trim();
+  if (!_resetStudent)       { showMsg('err','Please find your account first.'); return; }
+  if (!_forgotOtpVerified)  { showMsg('err','Please verify email OTP first.'); return; }
   if (!newPwd||newPwd.length<4) { showMsg('err','New password must be at least 4 characters.'); return; }
   showMsg('info','Resetting your password…');
-  const res = await edgeCall('student-reset-password-af', { id:_resetStudent.id, email:_resetStudent.email, new_password:newPwd });
-  if (!res||!res.ok) { showMsg('err', res?.message||'Password reset failed.'); return; }
+  const res=await edgeCall('student-reset-password-af',{id:_resetStudent.id,email:_resetStudent.email,new_password:newPwd});
+  if (!res||!res.ok) { showMsg('err',res?.message||'Password reset failed.'); return; }
   _resetStudent=null; _forgotOtpVerified=false;
-  $('forgotOtpArea').classList.add('hidden'); $('resetPasswordArea').classList.add('hidden');
-  $('forgotOtp').value=''; $('newPassword').value='';
+  if (isDesktop()) { $('dtForgotOtpArea').classList.add('hidden'); $('dtResetPasswordArea').classList.add('hidden'); if($('dtForgotOtp')) $('dtForgotOtp').value=''; if($('dtNewPassword')) $('dtNewPassword').value=''; }
+  else             { $('forgotOtpArea').classList.add('hidden'); $('resetPasswordArea').classList.add('hidden'); if($('forgotOtp')) $('forgotOtp').value=''; if($('newPassword')) $('newPassword').value=''; }
   showMsg('ok','Password reset successful. Please login now.');
-  setTimeout(() => switchMode('login'), 900);
+  setTimeout(()=>{ if(isDesktop()) dtSwitchMode('login'); else switchMode('login'); }, 900);
 }
 
-/* ── SESSION ── */
-function saveSession(student, token, deviceId) {
+/* ═══════════════════════════════════════════════
+   SESSION
+═══════════════════════════════════════════════ */
+function saveSession(student,token,deviceId) {
   localStorage.setItem('af_student_logged_in','true');
-  localStorage.setItem('af_session_token',    token||'');
-  localStorage.setItem('af_device_id',        deviceId||getDeviceId());
-  localStorage.setItem('af_student_uuid',     student.id||'');
-  localStorage.setItem('af_student_id',       student.student_id||student.mobile||student.phone||'');
-  localStorage.setItem('af_student_mobile',   student.mobile||student.phone||'');
-  localStorage.setItem('af_student_name',     student.name||'Student');
-  localStorage.setItem('af_student_email',    student.email||'');
+  localStorage.setItem('af_session_token',   token||'');
+  localStorage.setItem('af_device_id',       deviceId||getDeviceId());
+  localStorage.setItem('af_student_uuid',    student.id||'');
+  localStorage.setItem('af_student_id',      student.student_id||student.mobile||student.phone||'');
+  localStorage.setItem('af_student_mobile',  student.mobile||student.phone||'');
+  localStorage.setItem('af_student_name',    student.name||'Student');
+  localStorage.setItem('af_student_email',   student.email||'');
 }
 function doLogout() {
-  ['af_student_logged_in','af_student_uuid','af_student_id','af_student_mobile','af_student_name','af_student_email','af_session_token','af_student_phone'].forEach(k => localStorage.removeItem(k));
+  ['af_student_logged_in','af_student_uuid','af_student_id','af_student_mobile','af_student_name','af_student_email','af_session_token','af_student_phone'].forEach(k=>localStorage.removeItem(k));
   cacheClear(COURSES_KEY);
   enrolledCourses=[]; selectedCourse=null; learningMode='lectures';
+  // Mobile
   $('cacheBar').classList.add('hidden');
   showPanel('auth'); switchMode('login');
+  // Desktop
+  $('dtCacheBar').classList.add('hidden');
+  dtShowPanel('auth'); dtSwitchMode('login');
   showToast('Logged out 👋','ok');
 }
 
-/* ── STATE ── */
+/* ═══════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════ */
 let enrolledCourses=[], selectedCourse=null, learningMode='lectures';
 
 function openAfterLogin(student) {
-  $('welcomeText').textContent = 'Welcome ' + safe(student&&student.name,'Student');
+  const name=safe(student&&student.name,'Student');
+  // Mobile
+  $('welcomeText').textContent='Welcome '+name;
   showPanel('courses');
+  // Desktop
+  $('dtWelcomeText').textContent='Welcome '+name+' 🎓';
+  dtShowPanel('courses');
   loadCourses();
 }
 
-/* ── COURSES (with cache) ── */
+/* ═══════════════════════════════════════════════
+   COURSES (with cache)
+═══════════════════════════════════════════════ */
 async function loadCourses(force) {
-  const uuid = localStorage.getItem('af_student_uuid');
-  const name = localStorage.getItem('af_student_name') || 'Student';
-  $('welcomeText').textContent = 'Welcome ' + name;
+  const uuid=localStorage.getItem('af_student_uuid');
+  const name=localStorage.getItem('af_student_name')||'Student';
+  $('welcomeText').textContent='Welcome '+name;
+  $('dtWelcomeText').textContent='Welcome '+name+' 🎓';
 
   if (!uuid) { showNoCourse('Student session not found. Please login again.'); return; }
 
-  // Try cache first
   if (!force) {
-    const cached = cacheGet(COURSES_KEY);
-    if (cached && Array.isArray(cached) && cached.length) {
-      enrolledCourses = cached;
+    const cached=cacheGet(COURSES_KEY);
+    if (cached&&Array.isArray(cached)&&cached.length) {
+      enrolledCourses=cached;
       renderCourseCards();
-      showPanel('courses');
-      // Show cache bar
-      const ts = cacheTimestamp(COURSES_KEY);
-      const mins = Math.round((Date.now()-ts)/60000);
-    $('cacheMsg').textContent =
-  mins > 0
-    ? `Last updated ${mins}m ago`
-    : 'Updated just now';
-      $('cacheBar').classList.remove('hidden');
+      showPanel('courses'); dtShowPanel('courses');
+      const ts=cacheTimestamp(COURSES_KEY);
+      const mins=Math.round((Date.now()-ts)/60000);
+      const msg=mins>0?`Last updated ${mins}m ago`:'Updated just now';
+      $('cacheMsg').textContent=msg; $('cacheBar').classList.remove('hidden');
+      $('dtCacheMsg').textContent=msg; $('dtCacheBar').classList.remove('hidden');
       return;
     }
   }
 
-  $('courseCards').innerHTML = '<p class="loading-text">Loading your courses…</p>';
+  $('courseCards').innerHTML='<p class="loading-text">Loading your courses…</p>';
+  $('dtCourseCards').innerHTML='<p class="dt-loading-text">Loading your courses…</p>';
   $('cacheBar').classList.add('hidden');
-  const res = await edgeCall('student-courses-af', { student_id: uuid });
+  $('dtCacheBar').classList.add('hidden');
+
+  const res=await edgeCall('student-courses-af',{student_id:uuid});
   if (!res||!res.ok) { showNoCourse(res?.message||'Could not load your courses.'); return; }
-  enrolledCourses = Array.isArray(res.courses) ? res.courses : [];
+  enrolledCourses=Array.isArray(res.courses)?res.courses:[];
   if (!enrolledCourses.length) { showNoCourse('You are not enrolled in any batch.'); return; }
-  cacheSet(COURSES_KEY, enrolledCourses);
+  cacheSet(COURSES_KEY,enrolledCourses);
   renderCourseCards();
-  showPanel('courses');
+  showPanel('courses'); dtShowPanel('courses');
 }
 
 function forceRefreshCourses() {
@@ -626,349 +1284,401 @@ function forceRefreshCourses() {
 }
 
 function renderCourseCards() {
-  $('courseCards').innerHTML = enrolledCourses.map(c => `
+  // Mobile
+  $('courseCards').innerHTML=enrolledCourses.map(c=>`
     <button class="course-card" onclick="openCourseDetail('${c.id}')">
       <div class="course-icon">${esc(safe(c.icon,'📘'))}</div>
-      <div class="course-body">
-        <h3>${esc(safe(c.title,'Course'))}</h3>
-        <p>${esc(safe(c.short_description,'Course details will be available soon.'))}</p>
-      </div>
+      <div class="course-body"><h3>${esc(safe(c.title,'Course'))}</h3><p>${esc(safe(c.short_description,'Course details will be available soon.'))}</p></div>
+    </button>`).join('');
+  // Desktop
+  $('dtCourseCards').innerHTML=enrolledCourses.map(c=>`
+    <button class="dt-course-card" onclick="openCourseDetail('${c.id}')">
+      <div class="dt-course-icon">${esc(safe(c.icon,'📘'))}</div>
+      <div class="dt-course-body"><h3>${esc(safe(c.title,'Course'))}</h3><p>${esc(safe(c.short_description,'Course details will be available soon.'))}</p></div>
     </button>`).join('');
 }
 
 function showNoCourse(msg) {
-  $('noCourseMsg').textContent = msg || 'You are not enrolled in any batch.';
-  showPanel('noCourse');
+  $('noCourseMsg').textContent=msg||'You are not enrolled in any batch.';
+  $('dtNoCourseMsg').textContent=msg||'You are not enrolled in any batch.';
+  showPanel('noCourse'); dtShowPanel('noCourse');
 }
 
-/* ── COURSE DETAIL ── */
+/* ═══════════════════════════════════════════════
+   COURSE DETAIL
+═══════════════════════════════════════════════ */
 function openCourseDetail(courseId) {
-  selectedCourse = enrolledCourses.find(c => String(c.id)===String(courseId));
+  selectedCourse=enrolledCourses.find(c=>String(c.id)===String(courseId));
   if (!selectedCourse) { showToast('Course not found.','err','Error'); return; }
-  $('detailIcon').textContent    = safe(selectedCourse.icon,'📘');
-  $('detailTitle').textContent   = safe(selectedCourse.title,'Course Name');
-  $('detailIntro').textContent   = safe(selectedCourse.short_description,'Course intro will appear here.');
-  $('detailDetails').textContent = safe(selectedCourse.details,'Course details will be available soon.');
-  $('detailSyllabus').innerHTML  = '<li>Chapter-wise structured learning</li><li>Video lectures and study notes</li><li>Locked content will unlock after upload</li><li>Practice-based learning flow</li>';
-  let fac = [];
-  if (Array.isArray(selectedCourse.facilities)) fac = selectedCourse.facilities;
+
+  const icon=safe(selectedCourse.icon,'📘');
+  const title=safe(selectedCourse.title,'Course Name');
+  const intro=safe(selectedCourse.short_description,'Course intro will appear here.');
+  const details=safe(selectedCourse.details,'Course details will be available soon.');
+
+  let fac=[];
+  if (Array.isArray(selectedCourse.facilities)) fac=selectedCourse.facilities;
   else if (typeof selectedCourse.facilities==='string') {
     try { const p=JSON.parse(selectedCourse.facilities); fac=Array.isArray(p)?p:[]; } catch(_) { fac=selectedCourse.facilities.split(',').map(x=>x.trim()).filter(Boolean); }
   }
-  $('detailFacilities').innerHTML = fac.length ? fac.map(i=>`<li>${esc(i)}</li>`).join('') : '<li>Facilities will be updated soon.</li>';
+  const facHtml=fac.length?fac.map(i=>`<li>${esc(i)}</li>`).join(''):'<li>Facilities will be updated soon.</li>';
+  const syllabusHtml='<li>Chapter-wise structured learning</li><li>Video lectures and study notes</li><li>Locked content will unlock after upload</li><li>Practice-based learning flow</li>';
+
+  // Mobile
+  $('detailIcon').textContent=icon; $('detailTitle').textContent=title; $('detailIntro').textContent=intro;
+  $('detailDetails').textContent=details; $('detailSyllabus').innerHTML=syllabusHtml; $('detailFacilities').innerHTML=facHtml;
   showPanel('courseDetail');
-}
-function startLearning() {
-  if (!selectedCourse) { showToast('Please select a course first.','warn','Error'); return; }
-  $('learningTitle').textContent = safe(selectedCourse.icon,'📘')+' '+safe(selectedCourse.title,'Course');
-  showPanel('learning');
+
+  // Desktop
+  $('dtDetailIcon').textContent=icon; $('dtDetailTitle').textContent=title; $('dtDetailIntro').textContent=intro;
+  $('dtDetailDetails').textContent=details; $('dtDetailSyllabus').innerHTML=syllabusHtml; $('dtDetailFacilities').innerHTML=facHtml;
+  $('dtDetailPageTitle').textContent=icon+' '+title;
+  dtShowPanel('courseDetail');
 }
 
-/* ── LEARNING MODE ── */
+function startLearning() {
+  if (!selectedCourse) { showToast('Please select a course first.','warn','Error'); return; }
+  const label=safe(selectedCourse.icon,'📘')+' '+safe(selectedCourse.title,'Course');
+  $('learningTitle').textContent=label;
+  $('dtLearningTitle').textContent='Start Learning — '+safe(selectedCourse.title,'Course');
+  showPanel('learning'); dtShowPanel('learning');
+}
+
+/* ═══════════════════════════════════════════════
+   LEARNING MODE
+═══════════════════════════════════════════════ */
 async function openLearningMode(mode) {
-  learningMode = (mode==='notes') ? 'notes' : 'lectures';
-  $('chapterModeTitle').textContent = learningMode==='lectures' ? '🎥 Lectures' : '📝 Notes';
+  learningMode=(mode==='notes')?'notes':'lectures';
+  const modeLabel=learningMode==='lectures'?'🎥 Lectures':'📝 Notes';
+  $('chapterModeTitle').textContent=modeLabel;
+  $('dtChapterModeTitle').textContent=modeLabel;
   await loadChapters();
-  showPanel('chapters');
+  showPanel('chapters'); dtShowPanel('chapters');
 }
 
 async function loadChapters() {
-  const list = $('chapterList');
-  if (!selectedCourse) { list.innerHTML='<p class="error-text">Course not selected.</p>'; return; }
-
-  // Check cache
-  const cKey = CHAPTERS_PFX + selectedCourse.id;
-  const cached = cacheGet(cKey);
-  if (cached && Array.isArray(cached)) {
-    renderChapters(cached); return;
+  const list=$('chapterList'), dtList=$('dtChapterList');
+  if (!selectedCourse) {
+    list.innerHTML='<p class="error-text">Course not selected.</p>';
+    dtList.innerHTML='<p class="dt-error-text">Course not selected.</p>';
+    return;
   }
+  const cKey=CHAPTERS_PFX+selectedCourse.id;
+  const cached=cacheGet(cKey);
+  if (cached&&Array.isArray(cached)) { renderChapters(cached); return; }
 
-  list.innerHTML = '<p class="loading-text">Loading chapters…</p>';
-  const res = await edgeCall('student-chapters-af', { course_id: selectedCourse.id });
-  if (!res||!res.ok) { list.innerHTML=`<p class="error-text">${esc(safe(res?.message,'Unable to load chapters.'))}</p>`; return; }
-  const chapters = Array.isArray(res.chapters) ? res.chapters : [];
-  cacheSet(cKey, chapters);
+  list.innerHTML='<p class="loading-text">Loading chapters…</p>';
+  dtList.innerHTML='<p class="dt-loading-text">Loading chapters…</p>';
+  const res=await edgeCall('student-chapters-af',{course_id:selectedCourse.id});
+  if (!res||!res.ok) {
+    const errMsg=esc(safe(res?.message,'Unable to load chapters.'));
+    list.innerHTML=`<p class="error-text">${errMsg}</p>`;
+    dtList.innerHTML=`<p class="dt-error-text">${errMsg}</p>`;
+    return;
+  }
+  const chapters=Array.isArray(res.chapters)?res.chapters:[];
+  cacheSet(cKey,chapters);
   renderChapters(chapters);
 }
 function renderChapters(chapters) {
-  const list = $('chapterList');
-  if (!chapters.length) { list.innerHTML='<p class="empty-text">No chapters available yet.</p>'; return; }
-  list.innerHTML = chapters.map(ch => {
-    const locked = ch.is_locked===true;
+  const list=$('chapterList'), dtList=$('dtChapterList');
+  if (!chapters.length) {
+    list.innerHTML='<p class="empty-text">No chapters available yet.</p>';
+    dtList.innerHTML='<p class="dt-empty-text">No chapters available yet.</p>';
+    return;
+  }
+  const mobHtml=chapters.map(ch=>{
+    const locked=ch.is_locked===true;
     return `<div class="chapter-item ${locked?'locked':'unlocked'}" onclick="openChapterContent('${ch.id}',${locked})">
-      <div class="chapter-main">
-        <strong>${locked?'🔒':'🔓'} Chapter ${ch.chapter_number}: ${esc(ch.title)}</strong>
-        <small>${esc(safe(ch.description,'Chapter details will be available soon.'))}</small>
-      </div>
-      <span class="chapter-status">${locked?'Locked':'Unlocked'}</span>
-    </div>`;
+      <div class="chapter-main"><strong>${locked?'🔒':'🔓'} Chapter ${ch.chapter_number}: ${esc(ch.title)}</strong><small>${esc(safe(ch.description,'Chapter details will be available soon.'))}</small></div>
+      <span class="chapter-status">${locked?'Locked':'Unlocked'}</span></div>`;
   }).join('');
+  const dtHtml=chapters.map(ch=>{
+    const locked=ch.is_locked===true;
+    return `<div class="dt-chapter-item ${locked?'locked':'unlocked'}" onclick="openChapterContent('${ch.id}',${locked})">
+      <div class="dt-chapter-main"><strong>${locked?'🔒':'🔓'} Chapter ${ch.chapter_number}: ${esc(ch.title)}</strong><small>${esc(safe(ch.description,'Chapter details will be available soon.'))}</small></div>
+      <span class="dt-chapter-status">${locked?'Locked':'Unlocked'}</span></div>`;
+  }).join('');
+  list.innerHTML=mobHtml; dtList.innerHTML=dtHtml;
 }
 
-async function openChapterContent(chapterId, isLocked) {
+async function openChapterContent(chapterId,isLocked) {
   if (isLocked===true) {
+    // Mobile
     $('contentTitle').textContent='🔒 Chapter Locked';
     $('contentSubtitle').textContent='This chapter will unlock after content upload.';
     $('contentList').innerHTML='<p class="error-text">This chapter is currently locked.</p>';
-    showPanel('content'); return;
+    showPanel('content');
+    // Desktop
+    $('dtContentTitle').textContent='🔒 Chapter Locked';
+    $('dtContentSubtitle').textContent='This chapter will unlock after content upload.';
+    $('dtContentList').innerHTML='<p class="dt-error-text">This chapter is currently locked.</p>';
+    dtShowPanel('content');
+    return;
   }
   if (learningMode==='notes') await loadNotes(chapterId);
   else await loadLectures(chapterId);
-  showPanel('content');
+  showPanel('content'); dtShowPanel('content');
 }
 
+/* ═══════════════════════════════════════════════
+   LECTURES
+═══════════════════════════════════════════════ */
 async function loadLectures(chapterId) {
-  $('contentTitle').textContent='🎥 Lectures';
-  $('contentSubtitle').textContent='Watch lectures when they are unlocked.';
-  const list = $('contentList');
-
-  const cKey = LECTURES_PFX + chapterId;
-  const cached = cacheGet(cKey);
-  if (cached && Array.isArray(cached)) { renderLectures(cached); return; }
-
-  list.innerHTML = '<p class="loading-text">Loading lectures…</p>';
-  const res = await edgeCall('student-lectures-af', { chapter_id: chapterId });
-  if (!res||!res.ok) { list.innerHTML=`<p class="error-text">${esc(safe(res?.message,'Unable to load lectures.'))}</p>`; return; }
-  const lectures = Array.isArray(res.lectures) ? res.lectures : [];
-  cacheSet(cKey, lectures);
+  $('contentTitle').textContent='🎥 Lectures'; $('contentSubtitle').textContent='Watch lectures when they are unlocked.';
+  $('dtContentTitle').textContent='🎥 Lectures'; $('dtContentSubtitle').textContent='Watch lectures when they are unlocked.';
+  const cKey=LECTURES_PFX+chapterId;
+  const cached=cacheGet(cKey);
+  if (cached&&Array.isArray(cached)) { renderLectures(cached); return; }
+  $('contentList').innerHTML='<p class="loading-text">Loading lectures…</p>';
+  $('dtContentList').innerHTML='<p class="dt-loading-text">Loading lectures…</p>';
+  const res=await edgeCall('student-lectures-af',{chapter_id:chapterId});
+  if (!res||!res.ok) {
+    const e=esc(safe(res?.message,'Unable to load lectures.'));
+    $('contentList').innerHTML=`<p class="error-text">${e}</p>`;
+    $('dtContentList').innerHTML=`<p class="dt-error-text">${e}</p>`;
+    return;
+  }
+  const lectures=Array.isArray(res.lectures)?res.lectures:[];
+  cacheSet(cKey,lectures);
   renderLectures(lectures);
 }
 function renderLectures(lectures) {
-  const list = $('contentList');
-  if (!lectures.length) { list.innerHTML='<p class="empty-text">No lectures available yet.</p>'; return; }
-  list.innerHTML = lectures.map(lec => {
-    const locked = lec.is_locked===true||!lec.video_url;
+  if (!lectures.length) {
+    $('contentList').innerHTML='<p class="empty-text">No lectures available yet.</p>';
+    $('dtContentList').innerHTML='<p class="dt-empty-text">No lectures available yet.</p>';
+    return;
+  }
+  const mobHtml=lectures.map(lec=>{
+    const locked=lec.is_locked===true||!lec.video_url;
     return `<div class="content-item ${locked?'locked':'unlocked'}">
-      <div class="content-main">
-        <strong>${locked?'🔒':'▶️'} Lecture ${lec.lecture_number}: ${esc(lec.title)}</strong>
-        <small>${esc(safe(lec.description,'Lecture details will be available soon.'))}</small>
-        <span class="duration">⏱ ${esc(safe(lec.duration,'10-15 min'))}</span>
-      </div>
-      ${locked?`<button class="content-action locked-action" disabled>Locked</button>`:`<button class="content-action" onclick="openVideo('${lec.video_url}','${esc(lec.title||'')}')">Watch</button>`}
-    </div>`;
+      <div class="content-main"><strong>${locked?'🔒':'▶️'} Lecture ${lec.lecture_number}: ${esc(lec.title)}</strong><small>${esc(safe(lec.description,'Lecture details will be available soon.'))}</small><span class="duration">⏱ ${esc(safe(lec.duration,'10-15 min'))}</span></div>
+      ${locked?`<button class="content-action locked-action" disabled>Locked</button>`:`<button class="content-action" onclick="openVideo('${lec.video_url}','${esc(lec.title||'')}')">Watch</button>`}</div>`;
   }).join('');
+  const dtHtml=lectures.map(lec=>{
+    const locked=lec.is_locked===true||!lec.video_url;
+    return `<div class="dt-content-item ${locked?'locked':'unlocked'}">
+      <div class="dt-content-main"><strong>${locked?'🔒':'▶️'} Lecture ${lec.lecture_number}: ${esc(lec.title)}</strong><small>${esc(safe(lec.description,'Lecture details will be available soon.'))}</small><span class="dt-duration">⏱ ${esc(safe(lec.duration,'10-15 min'))}</span></div>
+      ${locked?`<button class="dt-content-action dt-locked-action" disabled>Locked</button>`:`<button class="dt-content-action" onclick="openVideo('${lec.video_url}','${esc(lec.title||'')}')">Watch</button>`}</div>`;
+  }).join('');
+  $('contentList').innerHTML=mobHtml; $('dtContentList').innerHTML=dtHtml;
 }
 
+/* ═══════════════════════════════════════════════
+   NOTES
+═══════════════════════════════════════════════ */
 async function loadNotes(chapterId) {
-  $('contentTitle').textContent='📝 Notes';
-  $('contentSubtitle').textContent='Open notes when they are unlocked.';
-  const list = $('contentList');
-
-  const cKey = NOTES_PFX + chapterId;
-  const cached = cacheGet(cKey);
-  if (cached && Array.isArray(cached)) { renderNotes(cached); return; }
-
-  list.innerHTML = '<p class="loading-text">Loading notes…</p>';
-  const res = await edgeCall('student-notes-af', { chapter_id: chapterId });
-  if (!res||!res.ok) { list.innerHTML=`<p class="error-text">${esc(safe(res?.message,'Unable to load notes.'))}</p>`; return; }
-  const notes = Array.isArray(res.notes) ? res.notes : [];
-  cacheSet(cKey, notes);
+  $('contentTitle').textContent='📝 Notes'; $('contentSubtitle').textContent='Open notes when they are unlocked.';
+  $('dtContentTitle').textContent='📝 Notes'; $('dtContentSubtitle').textContent='Open notes when they are unlocked.';
+  const cKey=NOTES_PFX+chapterId;
+  const cached=cacheGet(cKey);
+  if (cached&&Array.isArray(cached)) { renderNotes(cached); return; }
+  $('contentList').innerHTML='<p class="loading-text">Loading notes…</p>';
+  $('dtContentList').innerHTML='<p class="dt-loading-text">Loading notes…</p>';
+  const res=await edgeCall('student-notes-af',{chapter_id:chapterId});
+  if (!res||!res.ok) {
+    const e=esc(safe(res?.message,'Unable to load notes.'));
+    $('contentList').innerHTML=`<p class="error-text">${e}</p>`;
+    $('dtContentList').innerHTML=`<p class="dt-error-text">${e}</p>`;
+    return;
+  }
+  const notes=Array.isArray(res.notes)?res.notes:[];
+  cacheSet(cKey,notes);
   renderNotes(notes);
 }
 function renderNotes(notes) {
-  const list = $('contentList');
-  if (!notes.length) { list.innerHTML='<p class="empty-text">No notes available yet.</p>'; return; }
-  list.innerHTML = notes.map(n => {
-    const locked = n.is_locked===true||!n.pdf_url;
+  if (!notes.length) {
+    $('contentList').innerHTML='<p class="empty-text">No notes available yet.</p>';
+    $('dtContentList').innerHTML='<p class="dt-empty-text">No notes available yet.</p>';
+    return;
+  }
+  const mobHtml=notes.map(n=>{
+    const locked=n.is_locked===true||!n.pdf_url;
     return `<div class="content-item ${locked?'locked':'unlocked'}">
-      <div class="content-main">
-        <strong>${locked?'🔒':'📄'} Lecture ${n.note_number} Notes</strong>
-        <small>${esc(safe(n.title,'Notes will be available soon.'))}</small>
-      </div>
-      ${locked?`<button class="content-action locked-action" disabled>Locked</button>`:`<button class="content-action" onclick="openPdf('${n.pdf_url}')">Open PDF</button>`}
-    </div>`;
+      <div class="content-main"><strong>${locked?'🔒':'📄'} Lecture ${n.note_number} Notes</strong><small>${esc(safe(n.title,'Notes will be available soon.'))}</small></div>
+      ${locked?`<button class="content-action locked-action" disabled>Locked</button>`:`<button class="content-action" onclick="openPdf('${n.pdf_url}')">Open PDF</button>`}</div>`;
   }).join('');
+  const dtHtml=notes.map(n=>{
+    const locked=n.is_locked===true||!n.pdf_url;
+    return `<div class="dt-content-item ${locked?'locked':'unlocked'}">
+      <div class="dt-content-main"><strong>${locked?'🔒':'📄'} Lecture ${n.note_number} Notes</strong><small>${esc(safe(n.title,'Notes will be available soon.'))}</small></div>
+      ${locked?`<button class="dt-content-action dt-locked-action" disabled>Locked</button>`:`<button class="dt-content-action" onclick="openPdf('${n.pdf_url}')">Open PDF</button>`}</div>`;
+  }).join('');
+  $('contentList').innerHTML=mobHtml; $('dtContentList').innerHTML=dtHtml;
 }
 
-/**
- * Extracts YouTube video ID from any YouTube URL format.
- * Supports:
- *   https://youtu.be/xxxx
- *   https://youtube.com/watch?v=xxxx
- *   https://www.youtube.com/watch?v=xxxx
- *   https://www.youtube.com/embed/xxxx
- *   https://www.youtube.com/shorts/xxxx
- *   A raw video ID (11 chars) passed directly
- */
+/* ═══════════════════════════════════════════════
+   VIDEO / PDF (unchanged logic)
+═══════════════════════════════════════════════ */
 function extractYouTubeId(url) {
   if (!url) return null;
-  const str = String(url).trim();
-
-  // Already a plain video ID (11 alphanumeric chars)
+  const str=String(url).trim();
   if (/^[A-Za-z0-9_-]{11}$/.test(str)) return str;
-
-  // youtu.be/ID
-  const shortMatch = str.match(/youtu\.be\/([A-Za-z0-9_-]{11})/);
-  if (shortMatch) return shortMatch[1];
-
-  // youtube.com/watch?v=ID
-  const watchMatch = str.match(/[?&]v=([A-Za-z0-9_-]{11})/);
-  if (watchMatch) return watchMatch[1];
-
-  // youtube.com/embed/ID  or  youtube.com/shorts/ID
-  const embedMatch = str.match(/(?:embed|shorts)\/([A-Za-z0-9_-]{11})/);
-  if (embedMatch) return embedMatch[1];
-
+  const short=str.match(/youtu\.be\/([A-Za-z0-9_-]{11})/); if(short) return short[1];
+  const watch=str.match(/[?&]v=([A-Za-z0-9_-]{11})/); if(watch) return watch[1];
+  const embed=str.match(/(?:embed|shorts)\/([A-Za-z0-9_-]{11})/); if(embed) return embed[1];
   return null;
 }
-
-/**
- * Opens the AcademeForge Lecture Player for a given YouTube URL or video ID.
- * Pass optional lecture title to display in the player header.
- */
-function openVideo(url, title) {
-  if (!url) { showToast('Video not available yet.', 'warn', 'Locked'); return; }
-  const vid = extractYouTubeId(url);
-  if (!vid) { showToast('Invalid video URL.', 'err', 'Error'); return; }
-  const t   = encodeURIComponent(title || 'Lecture');
-  const back = encodeURIComponent(location.href);
-  location.href = '/lecture-player.html?v=' + vid + '&title=' + t + '&back=' + back;
+function openVideo(url,title) {
+  if (!url) { showToast('Video not available yet.','warn','Locked'); return; }
+  const vid=extractYouTubeId(url);
+  if (!vid) { showToast('Invalid video URL.','err','Error'); return; }
+  const t=encodeURIComponent(title||'Lecture'), back=encodeURIComponent(location.href);
+  location.href='/lecture-player.html?v='+vid+'&title='+t+'&back='+back;
 }
-  
-function openPdf(url)   { if(!url){showToast('PDF not available yet.','warn','Locked');return;} window.open(url,'_blank'); }
+function openPdf(url) { if(!url){showToast('PDF not available yet.','warn','Locked');return;} window.open(url,'_blank'); }
 
-/* ── INIT ── */
+/* ═══════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════ */
 function init() {
-  const loggedIn = localStorage.getItem('af_student_logged_in')==='true';
+  // Apply theme from global key
+  const dark=localStorage.getItem('af_dark_mode')!=='0';
+  applyTheme(dark);
+
+  const loggedIn=localStorage.getItem('af_student_logged_in')==='true';
   if (loggedIn) {
-    const student = { id:localStorage.getItem('af_student_uuid'), student_id:localStorage.getItem('af_student_id'), mobile:localStorage.getItem('af_student_mobile'), name:localStorage.getItem('af_student_name'), email:localStorage.getItem('af_student_email') };
+    const student={
+      id:   localStorage.getItem('af_student_uuid'),
+      student_id:localStorage.getItem('af_student_id'),
+      mobile:localStorage.getItem('af_student_mobile'),
+      name:  localStorage.getItem('af_student_name'),
+      email: localStorage.getItem('af_student_email')
+    };
     openAfterLogin(student);
-  } else { showPanel('auth'); switchMode('login'); }
+  } else {
+    showPanel('auth'); switchMode('login');
+    dtShowPanel('auth'); dtSwitchMode('login');
+  }
 }
+
 document.addEventListener('DOMContentLoaded', init);
-window.addEventListener('storage', e => { if(['af_student_logged_in','af_student_name','af_student_mobile'].includes(e.key)) init(); });
+window.addEventListener('storage', e => {
+  if (['af_student_logged_in','af_student_name','af_student_mobile'].includes(e.key)) init();
+});
 
-  /* ── SWIPE NAVIGATION ── */
-(function () {
-  let startX = 0;
-  let startY = 0;
-  let isTouch = false;
-
-  document.addEventListener("touchstart", function (e) {
-    if (!e.touches || !e.touches.length) return;
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-    isTouch = true;
-  }, { passive: true });
-
-  document.addEventListener("touchend", function (e) {
-    if (!isTouch || !e.changedTouches || !e.changedTouches.length) return;
-
-    const endX = e.changedTouches[0].clientX;
-    const endY = e.changedTouches[0].clientY;
-
-    const diffX = endX - startX;
-    const diffY = endY - startY;
-
-    // Ignore vertical scroll gestures
-    if (Math.abs(diffY) > Math.abs(diffX)) return;
-
-    const SWIPE_THRESHOLD = 80;
-
-  // Right Swipe → Home
-if (diffX > SWIPE_THRESHOLD) {
-  window.location.href = "/index.html";
-}
-
-// Left Swipe → Batches
-if (diffX < -SWIPE_THRESHOLD) {
-  window.location.href = "/batches/index.html";
-}
-
-    isTouch = false;
-  }, { passive: true });
+/* ═══════════════════════════════════════════════
+   MOBILE SWIPE NAVIGATION (unchanged)
+═══════════════════════════════════════════════ */
+(function(){
+  let startX=0, startY=0, isTouch=false;
+  document.addEventListener('touchstart',e=>{
+    if(!e.touches||!e.touches.length) return;
+    startX=e.touches[0].clientX; startY=e.touches[0].clientY; isTouch=true;
+  },{passive:true});
+  document.addEventListener('touchend',e=>{
+    if(!isTouch||!e.changedTouches||!e.changedTouches.length) return;
+    const endX=e.changedTouches[0].clientX, endY=e.changedTouches[0].clientY;
+    const diffX=endX-startX, diffY=endY-startY;
+    if(Math.abs(diffY)>Math.abs(diffX)) return;
+    const SWIPE_THRESHOLD=80;
+    if(diffX>SWIPE_THRESHOLD)  window.location.href='/index.html';
+    if(diffX<-SWIPE_THRESHOLD) window.location.href='/batches/index.html';
+    isTouch=false;
+  },{passive:true});
 })();
 
-  /* ── PULL TO REFRESH ── */
-(function () {
-
-  const page = document.getElementById("page");
-
-  const refreshEl = document.createElement("div");
-  refreshEl.innerHTML = `
-    <div id="ptr-circle"></div>
-  `;
-
-  refreshEl.style.cssText = `
-    position:fixed;
-    top:-60px;
-    left:50%;
-    transform:translateX(-50%);
-    width:48px;
-    height:48px;
-    z-index:99999;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    transition:.25s ease;
-    pointer-events:none;
-  `;
-
+/* ═══════════════════════════════════════════════
+   PULL TO REFRESH (mobile, unchanged)
+═══════════════════════════════════════════════ */
+(function(){
+  const page=document.getElementById('mobPage');
+  if (!page) return;
+  const refreshEl=document.createElement('div');
+  refreshEl.innerHTML='<div id="ptr-circle"></div>';
+  refreshEl.style.cssText='position:fixed;top:-60px;left:50%;transform:translateX(-50%);width:48px;height:48px;z-index:99999;display:flex;align-items:center;justify-content:center;transition:.25s ease;pointer-events:none;';
   document.body.appendChild(refreshEl);
-
-  const style = document.createElement("style");
-  style.textContent = `
-    #ptr-circle{
-      width:36px;
-      height:36px;
-      border:4px solid rgba(79,70,229,.2);
-      border-top-color:#4f46e5;
-      border-radius:50%;
-      animation:ptrSpin .8s linear infinite;
-    }
-    @keyframes ptrSpin{
-      to{transform:rotate(360deg);}
-    }
-  `;
+  const style=document.createElement('style');
+  style.textContent='#ptr-circle{width:36px;height:36px;border:4px solid rgba(79,70,229,.2);border-top-color:#4f46e5;border-radius:50%;animation:ptrSpin .8s linear infinite;}@keyframes ptrSpin{to{transform:rotate(360deg);}}';
   document.head.appendChild(style);
-
-  let startY = 0;
-  let pulling = false;
-  let distance = 0;
-  const threshold = 90;
-
-  page.addEventListener("touchstart", e => {
-    if (page.scrollTop > 0) return;
-
-    startY = e.touches[0].clientY;
-    pulling = true;
-  }, { passive:true });
-
-  page.addEventListener("touchmove", e => {
-    if (!pulling) return;
-
-    distance = e.touches[0].clientY - startY;
-
-    if (distance <= 0) return;
-
-    const move = Math.min(distance * 0.5, 100);
-
-    refreshEl.style.top = (-60 + move) + "px";
-
-    if (distance > threshold) {
-      refreshEl.style.top = "12px";
-    }
-  }, { passive:true });
-
-  page.addEventListener("touchend", () => {
-
-    if (!pulling) return;
-
-    if (distance > threshold) {
-
-      refreshEl.style.top = "12px";
-
-      setTimeout(() => {
-        location.reload();
-      }, 400);
-
-    } else {
-      refreshEl.style.top = "-60px";
-    }
-
-    pulling = false;
-    distance = 0;
+  let startY=0,pulling=false,distance=0;
+  const threshold=90;
+  page.addEventListener('touchstart',e=>{if(page.scrollTop>0) return; startY=e.touches[0].clientY; pulling=true;},{passive:true});
+  page.addEventListener('touchmove',e=>{
+    if(!pulling) return;
+    distance=e.touches[0].clientY-startY;
+    if(distance<=0) return;
+    const move=Math.min(distance*.5,100);
+    refreshEl.style.top=(-60+move)+'px';
+    if(distance>threshold) refreshEl.style.top='12px';
+  },{passive:true});
+  page.addEventListener('touchend',()=>{
+    if(!pulling) return;
+    if(distance>threshold) { refreshEl.style.top='12px'; setTimeout(()=>location.reload(),400); }
+    else refreshEl.style.top='-60px';
+    pulling=false; distance=0;
   });
+})();
+
+  (() => {
+
+  document.addEventListener("contextmenu", e => e.preventDefault());
+
+  document.addEventListener("copy", e => e.preventDefault());
+
+  document.addEventListener("cut", e => e.preventDefault());
+
+  document.addEventListener("paste", e => e.preventDefault());
+
+  document.addEventListener("dragstart", e => e.preventDefault());
+
+  document.addEventListener("selectstart", e => e.preventDefault());
+
+  document.addEventListener("keydown", e => {
+
+    if (
+      e.ctrlKey &&
+      ["+", "-", "=", "_", "0"].includes(e.key)
+    ) {
+      e.preventDefault();
+    }
+
+    if (e.key === "F12") {
+      e.preventDefault();
+      return false;
+    }
+
+    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "i") {
+      e.preventDefault();
+      return false;
+    }
+
+    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "j") {
+      e.preventDefault();
+      return false;
+    }
+
+    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "c") {
+      e.preventDefault();
+      return false;
+    }
+
+    if (e.ctrlKey && e.key.toLowerCase() === "u") {
+      e.preventDefault();
+      return false;
+    }
+
+    if (e.ctrlKey && e.key.toLowerCase() === "s") {
+      e.preventDefault();
+      return false;
+    }
+
+    if (e.ctrlKey && e.key.toLowerCase() === "p") {
+      e.preventDefault();
+      return false;
+    }
+
+  });
+
+  document.addEventListener(
+    "wheel",
+    function(e) {
+      if (e.ctrlKey) {
+        e.preventDefault();
+      }
+    },
+    { passive: false }
+  );
 
 })();
 </script>
