@@ -411,8 +411,53 @@ html.no-splash #afSplash { display: none !important; }
     margin-left: var(--sidebar-w);
     flex: 1;
     min-width: 0;
-    width: calc(100% - var(--sidebar-w));
-    padding: 32px 40px 60px;
+    width: calc(100% - var(--sidebar-w) - var(--task-panel-w));
+    padding: 28px 32px 60px;
+  }
+
+  /* ── TASK PANEL ── */
+  --task-panel-w: 390px;
+
+  .dt-task-panel {
+    width: var(--task-panel-w);
+    flex-shrink: 0;
+    position: fixed;
+    top: var(--header-h);
+    right: 0;
+    bottom: 0;
+    background: var(--bg-secondary);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 100;
+  }
+  .dt-task-panel-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    background: var(--bg-secondary);
+  }
+  .dt-task-panel-title {
+    font-family: var(--fd); font-size: 13px; font-weight: 800;
+    color: var(--text-primary); flex: 1;
+  }
+  .dt-task-panel-icon {
+    font-size: 16px; width: 30px; height: 30px; border-radius: 8px;
+    background: rgba(124,58,237,.14); border: 1px solid rgba(124,58,237,.2);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .dt-task-open-btn {
+    font-size: 10px; font-weight: 700; color: var(--primary-light);
+    padding: 4px 8px; border-radius: 6px;
+    background: rgba(124,58,237,.1); border: 1px solid rgba(124,58,237,.2);
+    cursor: pointer; transition: background var(--tr);
+  }
+  .dt-task-open-btn:hover { background: rgba(124,58,237,.2); }
+  .dt-task-iframe {
+    flex: 1; width: 100%; border: none;
+    background: var(--bg-secondary);
   }
 
   /* ── TICKER ── */
@@ -442,7 +487,7 @@ html.no-splash #afSplash { display: none !important; }
   }
 
   /* ── HERO BANNER ── */
-  .dt-banner-section { margin-bottom: 28px; }
+  .dt-banner-section { margin-bottom: 24px; }
   .dt-banner {
     position: relative; width: 100%; border-radius: var(--r4);
     overflow: hidden; background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -466,57 +511,56 @@ html.no-splash #afSplash { display: none !important; }
   .dt-dot.active { width: 22px; background: #fff; }
 
   /* ── QUICK ACCESS ── */
-  .dt-quick-section { margin-bottom: 28px; }
-  .dt-quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .dt-quick-section { margin-bottom: 24px; }
+  .dt-quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
   .dt-quick-card {
     border-radius: var(--r3);
-    padding: 20px 20px 22px;
-    display: flex; align-items: center; gap: 16px;
-    cursor: pointer; border: 1.5px solid transparent;
-    transition: transform var(--tr), box-shadow var(--tr), opacity var(--tr);
+    padding: 18px 20px;
+    display: flex; align-items: center; gap: 14px;
+    cursor: pointer; border: 1px solid var(--border);
+    transition: transform var(--tr), box-shadow var(--tr), border-color var(--tr), background var(--tr);
   }
-  .dt-quick-card:hover { transform: translateY(-3px); }
+  .dt-quick-card:hover { transform: translateY(-2px); border-color: var(--border-hover); }
   .dt-quick-card:active { opacity: .9; transform: translateY(0); }
 
-  /* Both logged-in cards: same indigo gradient family */
+  /* GREY cards — all states */
   .dt-quick-card.qc-courses,
-  .dt-quick-card.qc-profile-in {
-    background: linear-gradient(145deg, #4f46e5 0%, #6366f1 55%, #7C3AED 100%);
-    border-color: rgba(99,102,241,.45);
-    box-shadow: 0 4px 20px rgba(79,70,229,.22);
-  }
-  .dt-quick-card.qc-courses:hover,
-  .dt-quick-card.qc-profile-in:hover { box-shadow: 0 8px 32px rgba(79,70,229,.42); }
-
-  /* Both logged-out cards: same indigo gradient */
+  .dt-quick-card.qc-profile-in,
   .dt-quick-card.qc-login,
   .dt-quick-card.qc-profile-guest {
-    background: linear-gradient(145deg, #4f46e5 0%, #6366f1 55%, #7C3AED 100%);
-    border-color: rgba(99,102,241,.45);
-    box-shadow: 0 4px 20px rgba(79,70,229,.22);
+    background: linear-gradient(145deg, #1c1c24 0%, #16161e 100%);
+    border-color: #2a2a36;
+    box-shadow: 0 2px 12px rgba(0,0,0,.35);
   }
+  .dt-quick-card.qc-courses:hover,
+  .dt-quick-card.qc-profile-in:hover,
   .dt-quick-card.qc-login:hover,
-  .dt-quick-card.qc-profile-guest:hover { box-shadow: 0 8px 32px rgba(79,70,229,.42); }
+  .dt-quick-card.qc-profile-guest:hover {
+    background: linear-gradient(145deg, #222230 0%, #1a1a26 100%);
+    border-color: #3a3a4a;
+    box-shadow: 0 6px 24px rgba(0,0,0,.45);
+  }
 
   .dt-quick-icon {
-    width: 52px; height: 52px; border-radius: 14px;
-    display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;
-    background: rgba(255,255,255,.16); border: 1.5px solid rgba(255,255,255,.2);
+    width: 48px; height: 48px; border-radius: 13px;
+    display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08);
   }
 
   .dt-quick-info { flex: 1; min-width: 0; }
-  .dt-quick-title { font-family: var(--fd); font-size: 16px; font-weight: 800; color: #fff; line-height: 1.2; }
-  .dt-quick-sub { font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,.7); margin-top: 3px; }
+  .dt-quick-title { font-family: var(--fd); font-size: 15px; font-weight: 800; color: var(--text-primary); line-height: 1.2; }
+  .dt-quick-sub { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-top: 3px; }
   .dt-quick-greeting {
     font-family: var(--fd); font-size: 10px; font-weight: 700;
     letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); margin-top: 3px;
   }
 
-  /* ── FEATURED ── */
-  .dt-featured-section { margin-bottom: 28px; }
+  /* ── FEATURED — full width ── */
+  .dt-featured-section { margin-bottom: 24px; }
   .dt-featured-card {
-    border-radius: var(--r3); padding: 20px 24px;
+    width: 100%;
+    border-radius: var(--r3); padding: 20px 28px;
     display: flex; align-items: center; gap: 18px; cursor: pointer;
     background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 55%, #2563eb 100%);
     border: 1.5px solid rgba(124,58,237,.4);
@@ -526,22 +570,22 @@ html.no-splash #afSplash { display: none !important; }
   .dt-featured-card:hover { transform: translateY(-3px); box-shadow: 0 10px 40px rgba(79,70,229,.38); }
   .dt-featured-card:active { transform: translateY(0); opacity: .95; }
   .dt-feat-icon {
-    font-size: 28px; width: 60px; height: 60px; border-radius: var(--r2);
+    font-size: 28px; width: 58px; height: 58px; border-radius: var(--r2);
     background: rgba(255,255,255,.16); border: 1.5px solid rgba(255,255,255,.22);
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
   .dt-feat-text { flex: 1; min-width: 0; }
   .dt-feat-title { font-family: var(--fd); font-size: 18px; font-weight: 800; color: #fff; }
   .dt-feat-sub { font-size: 13px; color: rgba(255,255,255,.75); margin-top: 4px; }
-  .dt-feat-arr { font-size: 24px; color: rgba(255,255,255,.6); font-weight: 700; }
+  .dt-feat-arr { font-size: 24px; color: rgba(255,255,255,.6); font-weight: 700; flex-shrink: 0; }
 
   /* ── LEARNING TOOLS ── */
-  .dt-tools-section { margin-bottom: 28px; }
-  .dt-tools-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .dt-tools-section { margin-bottom: 24px; }
+  .dt-tools-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 
   .dt-tool-tile {
-    border-radius: var(--r3); padding: 24px 20px 22px;
-    display: flex; align-items: center; gap: 16px; cursor: pointer;
+    border-radius: var(--r3); padding: 22px 18px;
+    display: flex; align-items: center; gap: 14px; cursor: pointer;
     background: var(--bg-secondary);
     border: 1px solid var(--border);
     box-shadow: var(--sh-card);
@@ -556,7 +600,7 @@ html.no-splash #afSplash { display: none !important; }
   .dt-tool-tile:active { transform: translateY(-1px); opacity: .9; }
 
   .dt-tool-icon {
-    font-size: 26px; width: 52px; height: 52px; border-radius: 14px;
+    font-size: 24px; width: 48px; height: 48px; border-radius: 13px;
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
   .dt-tool-tile:nth-child(1) .dt-tool-icon { background: rgba(124,58,237,.14); border: 1px solid rgba(124,58,237,.2); }
@@ -564,7 +608,7 @@ html.no-splash #afSplash { display: none !important; }
   .dt-tool-tile:nth-child(3) .dt-tool-icon { background: rgba(6,182,212,.1); border: 1px solid rgba(6,182,212,.18); }
 
   .dt-tool-info { flex: 1; min-width: 0; }
-  .dt-tool-name { font-family: var(--fd); font-size: 14px; font-weight: 800; color: var(--text-primary); }
+  .dt-tool-name { font-family: var(--fd); font-size: 13.5px; font-weight: 800; color: var(--text-primary); }
   .dt-tool-desc { font-size: 11.5px; color: var(--text-muted); margin-top: 3px; }
 
   /* ── FOOTER ── */
@@ -572,22 +616,28 @@ html.no-splash #afSplash { display: none !important; }
     text-align: center; padding: 16px;
     font-size: 12px; color: var(--text-muted);
     border-top: 1px solid var(--border);
+    margin-top: 8px;
   }
   .dt-footer strong { color: var(--text-secondary); font-weight: 700; }
 
-  /* Wide screens — expand tools to 3 equal cols that fill the row */
-  @media (min-width: 1400px) {
-    .dt-main { padding: 36px 56px 72px; }
-    .dt-tools-grid { grid-template-columns: repeat(3, 1fr); gap: 18px; }
-    .dt-quick-grid { gap: 18px; }
+  /* Wide screens */
+  @media (min-width: 1600px) {
+    --task-panel-w: 420px;
+    .dt-main { padding: 32px 48px 72px; }
+    .dt-tools-grid { gap: 16px; }
+    .dt-quick-grid { gap: 16px; }
   }
 
   /* Laptop adjustments */
+  @media (max-width: 1280px) {
+    :root { --task-panel-w: 340px; }
+    .dt-main { width: calc(100% - var(--sidebar-w) - var(--task-panel-w)); padding: 24px 24px 60px; }
+  }
   @media (max-width: 1100px) {
-    :root { --sidebar-w: 220px; }
-    .dt-main { padding: 24px 28px 60px; }
-    .dt-tools-grid { gap: 12px; }
-    .dt-quick-card { padding: 16px; }
+    :root { --sidebar-w: 220px; --task-panel-w: 300px; }
+    .dt-main { width: calc(100% - var(--sidebar-w) - var(--task-panel-w)); padding: 20px 20px 60px; }
+    .dt-tools-grid { gap: 10px; }
+    .dt-quick-card { padding: 14px 16px; }
   }
 }
 
