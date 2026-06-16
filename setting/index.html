@@ -608,6 +608,21 @@ input, textarea { -webkit-user-select: text; -moz-user-select: text; user-select
 .af-toast-title { font-size: 12px; font-weight: 700; margin: 0 0 2px; }
 .af-toast-msg   { font-size: 11.5px; margin: 0; line-height: 1.4; }
 .af-toast-x { margin-left: auto; font-size: 17px; cursor: pointer; color: var(--text-muted); }
+
+  *{
+  -webkit-user-select:none !important;
+  -moz-user-select:none !important;
+  user-select:none !important;
+  -webkit-touch-callout:none !important;
+}
+
+input,
+textarea,
+[contenteditable="true"]{
+  -webkit-user-select:text !important;
+  -moz-user-select:text !important;
+  user-select:text !important;
+}
 </style>
 </head>
 <body>
@@ -955,7 +970,6 @@ input, textarea { -webkit-user-select: text; -moz-user-select: text; user-select
               <span class="dt-s-sub">Brain training puzzle game</span>
             </div>
             <div class="dt-s-end">
-              <span class="dt-s-badge plain">1</span>
               <span class="dt-s-arr">›</span>
             </div>
           </a>
@@ -1211,32 +1225,85 @@ window.addEventListener('storage', e => {
   }, { passive: true });
 })();
 
-  // Disable Ctrl + Plus/Minus/0
-document.addEventListener("keydown", (e) => {
-  if (
-    e.ctrlKey &&
-    ["+", "-", "=", "_", "0"].includes(e.key)
-  ) {
-    e.preventDefault();
-  }
-});
 
-// Disable Ctrl + Mouse Wheel Zoom
-document.addEventListener(
-  "wheel",
-  (e) => {
-    if (e.ctrlKey) {
-      e.preventDefault();
-    }
-  },
-  { passive: false }
-);
 /* ── INIT ── */
 (function init() {
   // af_dark_mode: '1' = dark, '0' = light, null = default dark
   const dark = localStorage.getItem('af_dark_mode') !== '0';
   applyTheme(dark);
   loadProfile();
+})();
+
+  (() => {
+
+  document.addEventListener("contextmenu", e => e.preventDefault());
+
+  document.addEventListener("copy", e => e.preventDefault());
+
+  document.addEventListener("cut", e => e.preventDefault());
+
+  document.addEventListener("paste", e => e.preventDefault());
+
+  document.addEventListener("dragstart", e => e.preventDefault());
+
+  document.addEventListener("selectstart", e => e.preventDefault());
+
+  document.addEventListener("keydown", e => {
+
+    if (
+      e.ctrlKey &&
+      ["+", "-", "=", "_", "0"].includes(e.key)
+    ) {
+      e.preventDefault();
+    }
+
+    if (e.key === "F12") {
+      e.preventDefault();
+      return false;
+    }
+
+    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "i") {
+      e.preventDefault();
+      return false;
+    }
+
+    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "j") {
+      e.preventDefault();
+      return false;
+    }
+
+    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "c") {
+      e.preventDefault();
+      return false;
+    }
+
+    if (e.ctrlKey && e.key.toLowerCase() === "u") {
+      e.preventDefault();
+      return false;
+    }
+
+    if (e.ctrlKey && e.key.toLowerCase() === "s") {
+      e.preventDefault();
+      return false;
+    }
+
+    if (e.ctrlKey && e.key.toLowerCase() === "p") {
+      e.preventDefault();
+      return false;
+    }
+
+  });
+
+  document.addEventListener(
+    "wheel",
+    function(e) {
+      if (e.ctrlKey) {
+        e.preventDefault();
+      }
+    },
+    { passive: false }
+  );
+
 })();
 </script>
 </body>
