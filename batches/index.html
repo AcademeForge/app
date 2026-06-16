@@ -510,6 +510,20 @@ input { -webkit-user-select: text; -moz-user-select: text; user-select: text; }
   .af-toast-wrap { bottom: calc(60px + 12px); background: none; border: none; box-shadow: none; }
   .af-toast { background: var(--surface, #fff); border: 1px solid var(--bc, rgba(79,70,229,.15)); }
 }
+  *{
+  -webkit-user-select:none !important;
+  -moz-user-select:none !important;
+  user-select:none !important;
+  -webkit-touch-callout:none !important;
+}
+
+input,
+textarea,
+[contenteditable="true"]{
+  -webkit-user-select:text !important;
+  -moz-user-select:text !important;
+  user-select:text !important;
+}
 </style>
 </head>
 <body>
