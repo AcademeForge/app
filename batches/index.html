@@ -260,7 +260,7 @@ input { -webkit-user-select: text; -moz-user-select: text; user-select: text; }
 
   /* ── TOOLBAR ── */
   .dt-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
-  .dt-search-box { flex: 1; max-width: 380px; display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 14px; border-radius: var(--r2); background: var(--bg-secondary); border: 1px solid var(--border); transition: border-color var(--tr); }
+  .dt-search-box { flex: 1; display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 14px; border-radius: var(--r2); background: var(--bg-secondary); border: 1px solid var(--border); transition: border-color var(--tr); }
   .dt-search-box:focus-within { border-color: var(--primary); }
   .dt-search-box span { font-size: 15px; flex-shrink: 0; opacity: .5; }
   .dt-search-box input { width: 100%; border: none; outline: none; background: transparent; color: var(--text-primary); font-size: 13px; font-weight: 600; font-family: var(--fb); }
@@ -389,7 +389,7 @@ input { -webkit-user-select: text; -moz-user-select: text; user-select: text; }
     border-radius: 24px;
     width: 100%;
     max-width: 720px;
-    max-height: 88vh;
+    height: min(600px, 88vh);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -403,11 +403,13 @@ input { -webkit-user-select: text; -moz-user-select: text; user-select: text; }
   .dt-modal-inner { display: flex; flex: 1; min-height: 0; overflow: hidden; }
 
   .dt-modal-left {
-    width: 280px; flex-shrink: 0;
+    width: 260px; flex-shrink: 0;
     position: relative; overflow: hidden;
     background: var(--bg-tertiary);
+    min-height: 420px;
   }
   .dt-modal-left img {
+    position: absolute; inset: 0;
     width: 100%; height: 100%;
     object-fit: cover; display: block;
   }
