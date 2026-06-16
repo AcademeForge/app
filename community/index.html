@@ -250,7 +250,7 @@ ul { list-style: none; }
    DESKTOP LAYOUT (≥ 768px) — FIXED TOP GAP & FIXED HEADERS
 ═══════════════════════════════════════════════════════════ */
 @media (min-width: 768px) {
-  body { overflow: hidden; display: block; } /* Outer body scroll locked */
+  body { overflow: hidden !important; display: block; } /* Outer body scroll locked */
   .mob-shell { display: none !important; }
 
   .dt-layout { display: flex; flex-direction: column; height: 100vh; background: var(--bg-primary); overflow: hidden; }
@@ -316,10 +316,11 @@ ul { list-style: none; }
 
   /* NEW: Sticky Header Wrapper to contain title and filter layout without scrolling */
   .dt-fixed-header-pane {
-    padding: 20px 36px 12px 36px;
+    padding: 24px 36px 12px 36px;
     background: var(--bg-primary);
     flex-shrink: 0;
     z-index: 90;
+    border-bottom: 1px solid var(--border);
   }
 
   /* PAGE TITLE & SUB — Reduced unnecessary massive gaps */
@@ -352,7 +353,7 @@ ul { list-style: none; }
   .dt-feed-scroll-area {
     flex: 1;
     overflow-y: auto;
-    padding: 16px 36px 80px 36px;
+    padding: 20px 36px 80px 36px;
   }
 
   /* LOCKED */
@@ -695,7 +696,7 @@ ul { list-style: none; }
       <div class="dt-comments-list" id="dtCommentsList"><div class="dt-spinner"></div></div>
       <div class="dt-comment-input-area">
         <textarea class="dt-compose" id="dtCommentInput" rows="2" placeholder="Write a comment…" oninput="dtCommentTyping()" style="min-height:64px;"></textarea>
-        <div class="dt-compose-foot"><span id="dtCommentCount">0 / 80 words</span><button class="dt-submit-btn" id="dtCommentSubmitBtn" onclick="nxCreateCommentDt()" disabled>Comment</button></div>
+        <div class="dt-compose-foot"><span id="dtCommentCount">0 / 80 words</span><button class="submit-btn" id="dtCommentSubmitBtn" onclick="nxCreateCommentDt()" disabled>Comment</button></div>
       </div>
     </div>
   </div>
@@ -718,6 +719,9 @@ ul { list-style: none; }
     </div>
   </div>
 </div><!-- /dt-layout -->
+
+<div class="af-toast-wrap" id="afToastWrap"></div>
+
 <script>
 'use strict';
 
