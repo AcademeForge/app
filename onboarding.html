@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+!function(){
+  // Redirect if onboarding already seen
+  if(localStorage.getItem('af_timezy_onboarding_seen')==='1'){
+    window.location.replace('../home/index.html');
+  }
+  document.documentElement.setAttribute('data-theme',
+    localStorage.getItem('af_dark_mode')==='1'?'dark':'light');
+}();
+</script>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#4f46e5"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>Timezy · Welcome</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Sora:wght@700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --p:#4f46e5;--p2:#3730a3;--pl:#818cf8;
+  --acc:#06b6d4;--ok:#22c55e;
+  --bg:#f0f2ff;--surface:#fff;
+  --t1:#0f0e2a;--t2:#4b5563;--tm:#9ca3af;
+  --b1:rgba(79,70,229,0.10);
+  --sh:0 4px 24px rgba(79,70,229,0.12);
+  --shb:0 8px 32px rgba(79,70,229,0.35);
+  --fd:'Sora',sans-serif;--fb:'Nunito',sans-serif;
+  --shell:430px;
+  --ease:cubic-bezier(0.22,1,0.36,1);
+  --spring:cubic-bezier(0.34,1.56,0.64,1);
+}
+[data-theme="dark"]{
+  --bg:#0b0a1e;--surface:#100e26;
+  --t1:#ede9ff;--t2:#a09dbf;--tm:#635f83;
+  --b1:rgba(129,140,248,0.12);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{font-size:15px;height:100%;height:100dvh;-webkit-text-size-adjust:100%;}
+body{
+  font-family:var(--fb);
+  background:var(--bg);
+  color:var(--t1);
+  height:100%;height:100dvh;
+  display:flex;justify-content:center;align-items:center;
+  overflow:hidden;
+}
+button{font-family:var(--fb);cursor:pointer;border:none;background:none;color:inherit;}
+html,body,*{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-touch-callout:none;}
+
+.shell{
+  width:100%;max-width:var(--shell);
+  height:100%;height:100dvh;
+  background:var(--surface);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  position:relative;
+}
+@media(min-width:700px){
+  body{padding:28px 0 44px;height:auto;min-height:100dvh;overflow-y:auto;}
+  .shell{
+    border-radius:36px;
+    height:calc(100dvh - 72px);
+    max-height:900px;
+    box-shadow:0 32px 80px rgba(0,0,0,.20),0 8px 24px rgba(79,70,229,.14);
+  }
+}
+
+/* ── ILLUSTRATION AREA ── */
+.ob-top{
+  flex:1;
+  background:linear-gradient(160deg,#eef0ff 0%,#e8f4ff 60%,#eafff6 100%);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  position:relative;
+  overflow:hidden;
+  padding:40px 24px 32px;
+}
+[data-theme="dark"] .ob-top{
+  background:linear-gradient(160deg,#13113a 0%,#0d1a2e 60%,#0a1f1a 100%);
+}
+
+/* Floating blobs */
+.blob{
+  position:absolute;border-radius:50%;filter:blur(40px);opacity:.35;pointer-events:none;
+}
+.blob-1{width:220px;height:220px;background:#818cf8;top:-60px;right:-40px;}
+.blob-2{width:160px;height:160px;background:#06b6d4;bottom:20px;left:-30px;}
+.blob-3{width:120px;height:120px;background:#22c55e;top:50%;right:-20px;opacity:.2;}
+
+/* Weather/time decorations */
+.deco-sun{
+  position:absolute;top:22px;right:28px;
+  width:40px;height:40px;
+  background:radial-gradient(circle,#fbbf24 50%,rgba(251,191,36,0) 100%);
+  border-radius:50%;
+  box-shadow:0 0 0 8px rgba(251,191,36,0.15),0 0 0 16px rgba(251,191,36,0.07);
+  animation:pulse-sun 3s ease-in-out infinite;
+}
+@keyframes pulse-sun{
+  0%,100%{box-shadow:0 0 0 8px rgba(251,191,36,0.15),0 0 0 16px rgba(251,191,36,0.07);}
+  50%{box-shadow:0 0 0 12px rgba(251,191,36,0.20),0 0 0 22px rgba(251,191,36,0.09);}
+}
+.deco-cloud{
+  position:absolute;top:30px;left:30px;opacity:.5;font-size:22px;
+  animation:float-cloud 6s ease-in-out infinite;
+}
+@keyframes float-cloud{0%,100%{transform:translateX(0);}50%{transform:translateX(8px);}}
+
+/* SVG Illustration */
+.ob-illustration{
+  position:relative;z-index:1;
+  animation:rise-in .6s var(--ease) .1s both;
+}
+.ob-illustration svg{
+  width:min(280px,72vw);
+  height:auto;
+  filter:drop-shadow(0 16px 32px rgba(79,70,229,0.15));
+}
+@keyframes rise-in{
+  from{opacity:0;transform:translateY(24px) scale(.96);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+
+/* Brand badge above illustration */
+.ob-brand{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:28px;
+  animation:fade-up .5s var(--ease) both;
+}
+.ob-brand-icon{
+  width:44px;height:44px;border-radius:14px;
+  background:linear-gradient(135deg,var(--p),var(--acc));
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;
+  box-shadow:0 6px 20px rgba(79,70,229,0.35);
+}
+.ob-brand-name{
+  font-family:var(--fd);font-size:22px;font-weight:900;
+  color:var(--t1);letter-spacing:-.02em;
+}
+.ob-brand-by{
+  font-size:10px;font-weight:800;color:var(--tm);
+  text-transform:uppercase;letter-spacing:.07em;margin-top:1px;
+}
+@keyframes fade-up{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── BOTTOM CONTENT ── */
+.ob-bottom{
+  background:var(--surface);
+  border-radius:28px 28px 0 0;
+  padding:28px 28px 40px;
+  padding-bottom:calc(40px + env(safe-area-inset-bottom,0px));
+  box-shadow:0 -8px 40px rgba(79,70,229,0.08);
+  animation:slide-up .5s var(--ease) .15s both;
+  flex-shrink:0;
+}
+@keyframes slide-up{
+  from{opacity:0;transform:translateY(32px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+.ob-headline{
+  font-family:var(--fd);
+  font-size:26px;font-weight:900;
+  color:var(--t1);line-height:1.2;
+  margin-bottom:10px;
+}
+.ob-headline span{
+  background:linear-gradient(90deg,var(--p),var(--acc));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+.ob-desc{
+  font-size:14px;font-weight:600;
+  color:var(--t2);line-height:1.65;
+  margin-bottom:28px;
+}
+
+/* Feature pills */
+.ob-pills{
+  display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;
+}
+.ob-pill{
+  display:flex;align-items:center;gap:5px;
+  padding:6px 12px;border-radius:999px;
+  background:rgba(79,70,229,0.07);
+  border:1px solid rgba(79,70,229,0.12);
+  font-size:12px;font-weight:800;color:var(--p);
+}
+
+/* CTA Button */
+.ob-cta{
+  width:100%;
+  padding:17px 24px;
+  border-radius:18px;
+  background:linear-gradient(135deg,#4f46e5 0%,#06b6d4 100%);
+  color:#fff;
+  font-family:var(--fd);
+  font-weight:900;font-size:16px;
+  letter-spacing:.01em;
+  box-shadow:0 8px 28px rgba(79,70,229,0.40);
+  transition:transform .18s var(--spring),box-shadow .18s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.ob-cta:active{transform:scale(.97);box-shadow:0 4px 16px rgba(79,70,229,0.30);}
+.ob-cta-arrow{font-size:18px;transition:transform .18s var(--spring);}
+.ob-cta:hover .ob-cta-arrow{transform:translateX(4px);}
+
+/* Dots indicator */
+.ob-dots{
+  display:flex;justify-content:center;gap:6px;
+  margin-bottom:20px;
+}
+.ob-dot{width:6px;height:6px;border-radius:99px;background:var(--b1);}
+.ob-dot.active{width:22px;background:var(--p);}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ILLUSTRATION AREA -->
+  <div class="ob-top">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="deco-sun"></div>
+    <div class="deco-cloud">☁️</div>
+
+    <!-- Brand -->
+    <div class="ob-brand">
+      <div class="ob-brand-icon">⏱</div>
+      <div>
+        <div class="ob-brand-name">Timezy</div>
+        <div class="ob-brand-by">by AcademeForge</div>
+      </div>
+    </div>
+
+    <!-- SVG Illustration - person at laptop -->
+    <div class="ob-illustration">
+      <svg viewBox="0 0 320 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Desk surface -->
+        <rect x="20" y="210" width="280" height="16" rx="8" fill="#e0e7ff"/>
+        <rect x="40" y="224" width="240" height="8" rx="4" fill="#c7d2fe"/>
+
+        <!-- Laptop body -->
+        <rect x="80" y="130" width="160" height="100" rx="10" fill="#1e1b4b"/>
+        <rect x="86" y="136" width="148" height="88" rx="7" fill="#312e81"/>
+        <!-- Screen glow -->
+        <rect x="90" y="140" width="140" height="80" rx="5" fill="#4338ca"/>
+        <!-- Screen content lines -->
+        <rect x="100" y="152" width="80" height="6" rx="3" fill="rgba(255,255,255,0.6)"/>
+        <rect x="100" y="164" width="60" height="5" rx="2.5" fill="rgba(255,255,255,0.35)"/>
+        <rect x="100" y="175" width="100" height="4" rx="2" fill="rgba(255,255,255,0.25)"/>
+        <rect x="100" y="185" width="40" height="4" rx="2" fill="rgba(129,140,248,0.6)"/>
+        <!-- Checkmark on screen -->
+        <circle cx="198" cy="168" r="14" fill="rgba(34,197,94,0.2)"/>
+        <path d="M191 168l5 5 10-10" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Laptop base -->
+        <path d="M70 230 Q80 230 86 230 L80 210 Q80 210 86 210" stroke="#1e1b4b" stroke-width="2" fill="none"/>
+        <rect x="68" y="228" width="184" height="6" rx="3" fill="#1e1b4b"/>
+
+        <!-- Person - sitting -->
+        <!-- Chair back -->
+        <rect x="138" y="90" width="44" height="60" rx="8" fill="#c7d2fe" opacity=".5"/>
+        <!-- Body -->
+        <ellipse cx="160" cy="175" rx="26" ry="18" fill="#fef3c7"/>
+        <rect x="138" y="155" width="44" height="55" rx="10" fill="#fff"/>
+        <!-- Shirt -->
+        <rect x="140" y="160" width="40" height="45" rx="8" fill="#f0fdf4"/>
+        <!-- Arms -->
+        <path d="M140 175 Q120 185 105 195" stroke="#fed7aa" stroke-width="14" stroke-linecap="round"/>
+        <path d="M180 175 Q200 185 215 195" stroke="#fed7aa" stroke-width="14" stroke-linecap="round"/>
+        <!-- Hands on laptop -->
+        <ellipse cx="105" cy="197" rx="10" ry="7" fill="#fed7aa"/>
+        <ellipse cx="215" cy="197" rx="10" ry="7" fill="#fed7aa"/>
+
+        <!-- Head -->
+        <circle cx="160" cy="108" r="32" fill="#fed7aa"/>
+        <!-- Hair -->
+        <ellipse cx="160" cy="84" rx="32" ry="18" fill="#7c2d12"/>
+        <ellipse cx="160" cy="86" rx="34" ry="16" fill="#92400e"/>
+        <!-- Long hair sides -->
+        <ellipse cx="133" cy="112" rx="9" ry="22" fill="#92400e"/>
+        <ellipse cx="187" cy="112" rx="9" ry="22" fill="#92400e"/>
+        <!-- Face -->
+        <ellipse cx="152" cy="112" rx="3" ry="3.5" fill="#1e1b4b" opacity=".7"/>
+        <ellipse cx="168" cy="112" rx="3" ry="3.5" fill="#1e1b4b" opacity=".7"/>
+        <path d="M154 120 Q160 125 166 120" stroke="#1e1b4b" stroke-width="1.5" stroke-linecap="round" fill="none" opacity=".6"/>
+
+        <!-- Headphones -->
+        <path d="M130 104 Q130 70 160 70 Q190 70 190 104" stroke="#4f46e5" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <rect x="123" y="104" width="12" height="16" rx="6" fill="#4f46e5"/>
+        <rect x="185" y="104" width="12" height="16" rx="6" fill="#4f46e5"/>
+
+        <!-- Speech bubble -->
+        <rect x="194" y="64" width="106" height="38" rx="12" fill="white" filter="url(#bubble-shadow)"/>
+        <path d="M200 102 L196 112 L210 102" fill="white"/>
+        <text x="201" y="84" font-family="Nunito, sans-serif" font-size="11" font-weight="800" fill="#4f46e5">Join us! 🚀</text>
+        <text x="201" y="98" font-family="Nunito, sans-serif" font-size="9" font-weight="600" fill="#6b7280">Stay organized</text>
+
+        <!-- Floating task cards -->
+        <rect x="16" y="80" width="70" height="38" rx="10" fill="white" opacity=".9" filter="url(#card-shadow)"/>
+        <rect x="22" y="88" width="16" height="16" rx="5" fill="#22c55e"/>
+        <text x="26" y="100" font-family="Nunito, sans-serif" font-size="10" font-weight="900" fill="white">✓</text>
+        <rect x="44" y="90" width="34" height="5" rx="2.5" fill="#e0e7ff"/>
+        <rect x="44" y="100" width="24" height="4" rx="2" fill="#e0e7ff" opacity=".6"/>
+
+        <rect x="234" y="58" width="72" height="38" rx="10" fill="white" opacity=".9" filter="url(#card-shadow)"/>
+        <rect x="240" y="66" width="16" height="16" rx="5" fill="#ef4444"/>
+        <text x="244" y="78" font-family="Nunito, sans-serif" font-size="10" font-weight="900" fill="white">!</text>
+        <rect x="262" y="68" width="36" height="5" rx="2.5" fill="#fee2e2"/>
+        <rect x="262" y="78" width="26" height="4" rx="2" fill="#fee2e2" opacity=".6"/>
+
+        <!-- Coffee mug -->
+        <rect x="30" y="195" width="28" height="24" rx="6" fill="#dbeafe"/>
+        <path d="M58 202 Q66 202 66 210 Q66 218 58 218" stroke="#93c5fd" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <!-- Steam -->
+        <path d="M38 192 Q40 185 38 178" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round" fill="none" opacity=".5"/>
+        <path d="M46 190 Q48 182 46 175" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round" fill="none" opacity=".5"/>
+
+        <defs>
+          <filter id="bubble-shadow" x="-10%" y="-10%" width="120%" height="120%">
+            <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="rgba(79,70,229,0.12)"/>
+          </filter>
+          <filter id="card-shadow" x="-10%" y="-10%" width="120%" height="120%">
+            <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="rgba(79,70,229,0.15)"/>
+          </filter>
+        </defs>
+      </svg>
+    </div>
+  </div>
+
+  <!-- BOTTOM CONTENT -->
+  <div class="ob-bottom">
+    <div class="ob-dots">
+      <div class="ob-dot active"></div>
+      <div class="ob-dot"></div>
+      <div class="ob-dot"></div>
+    </div>
+
+    <div class="ob-headline">
+      Schedule Smarter,<br><span>Work Better</span>
+    </div>
+
+    <p class="ob-desc">
+      Manage tasks, deadlines, study goals and productivity — all in one place. Your personal task manager, built for students.
+    </p>
+
+    <div class="ob-pills">
+      <div class="ob-pill">✅ Task Manager</div>
+      <div class="ob-pill">📅 Planner</div>
+      <div class="ob-pill">🎯 Priorities</div>
+    </div>
+
+    <button class="ob-cta" onclick="startApp()">
+      Let's Go
+      <span class="ob-cta-arrow">→</span>
+    </button>
+  </div>
+
+</div>
+
+<script>
+'use strict';
+
+function startApp(){
+  localStorage.setItem('af_timezy_onboarding_seen','1');
+  // Animate out then redirect
+  document.querySelector('.shell').style.transition='opacity .25s ease,transform .25s ease';
+  document.querySelector('.shell').style.opacity='0';
+  document.querySelector('.shell').style.transform='scale(.97)';
+  setTimeout(()=>{
+    window.location.href='../home/index.html';
+  },250);
+}
+
+// If somehow already seen, skip
+if(localStorage.getItem('af_timezy_onboarding_seen')==='1'){
+  window.location.replace('../home/index.html');
+}
+</script>
+</body>
+</html>
