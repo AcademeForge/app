@@ -3,227 +3,614 @@
 <head>
 <script>
 !function(){
-  document.documentElement.setAttribute('data-theme',
-    localStorage.getItem('af_dark_mode')==='1'?'dark':'light');
+  var dark = localStorage.getItem('af_dark_mode');
+  document.documentElement.setAttribute('data-theme', dark === '0' ? 'light' : 'dark');
 }();
 </script>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<meta name="theme-color" content="#4f46e5"/>
+<meta name="theme-color" content="#7C3AED"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>Batches · AcademeForge</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="icon" type="image/jpeg" href="/IMG/AF%20LOGO%202.jpeg">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Sora:wght@700;800;900&display=swap" rel="stylesheet"/>
 <style>
-:root{
-  --p:#4f46e5;--p2:#3730a3;--pl:#818cf8;
-  --acc:#06b6d4;--ok:#22c55e;--err:#ef4444;--warn:#f59e0b;
-  --bg:#f0f2ff;--surface:#fff;--card:rgba(255,255,255,.88);
-  --nav:rgba(255,255,255,.95);--inp:#f4f5fb;
-  --grp:rgba(79,70,229,.06);--grph:rgba(79,70,229,.10);
-  --t1:#0f0e2a;--t2:#4b5563;--tm:#9ca3af;
-  --b1:rgba(79,70,229,.12);--bc:rgba(79,70,229,.15);--bi:#d1d5db;
-  --sh:0 2px 12px rgba(79,70,229,.08),0 1px 3px rgba(0,0,0,.05);
-  --she:0 12px 40px rgba(79,70,229,.15);
-  --shb:0 4px 16px rgba(79,70,229,.28);
-  --r1:8px;--r2:12px;--r3:16px;--r4:24px;--rf:9999px;
-  --fd:'Sora',sans-serif;--fb:'Nunito',sans-serif;
-  --nav-h:60px;--hdr-h:52px;--shell:430px;
-}
-[data-theme="dark"]{
-  --bg:#0c0b1d;--surface:#120f2a;--card:rgba(30,27,60,.88);
-  --nav:rgba(18,15,42,.98);--inp:#1e1b3c;
-  --grp:rgba(129,140,248,.08);--grph:rgba(129,140,248,.14);
-  --t1:#f0eeff;--t2:#a5a3c2;--tm:#6b6a8a;
-  --b1:rgba(129,140,248,.12);--bc:rgba(129,140,248,.18);--bi:rgba(129,140,248,.20);
-  --sh:0 2px 12px rgba(0,0,0,.28);--she:0 12px 40px rgba(0,0,0,.45);
-  --shb:0 4px 16px rgba(79,70,229,.40);
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html{font-size:15px;-webkit-text-size-adjust:100%;height:100%;height:100dvh;}
-body{font-family:var(--fb);background:var(--bg);color:var(--t1);height:100%;height:100dvh;display:flex;justify-content:center;overflow:hidden;}
-button{font-family:var(--fb);cursor:pointer;border:none;background:none;color:inherit;}
-a{text-decoration:none;color:inherit;}
-.shell{width:100%;max-width:var(--shell);height:100%;height:100dvh;background:var(--surface);display:flex;flex-direction:column;position:relative;overflow:hidden;box-shadow:0 0 0 1px var(--b1);}
-@media(min-width:700px){body{padding:24px 0 40px;height:auto;min-height:100dvh;overflow-y:auto;}.shell{border-radius:32px;height:calc(100dvh - 64px);max-height:880px;}}
-.hdr{position:sticky;top:0;z-index:100;height:var(--hdr-h);background:var(--nav);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;}
-.hdr-title{font-family:var(--fd);font-size:15px;font-weight:800;color:var(--t1);flex:1;}
-.hdr-count{font-size:10px;color:var(--tm);font-weight:700;background:var(--grp);border:1px solid var(--b1);padding:3px 8px;border-radius:var(--rf);}
-.hdr-refresh{width:30px;height:30px;border-radius:var(--r1);background:var(--grp);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;color:var(--t2);}
-.hdr-refresh:active{opacity:.7;}
-.page{flex:1;overflow-y:scroll;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;padding:12px 12px calc(var(--nav-h) + 20px + env(safe-area-inset-bottom,0px));min-height:0;-webkit-transform:translateZ(0);transform:translateZ(0);}
-.page::-webkit-scrollbar{width:2px;}
-.page::-webkit-scrollbar-thumb{background:var(--bc);border-radius:99px;}
-.search-box{display:flex;align-items:center;gap:10px;height:44px;padding:0 14px;border-radius:var(--r3);background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);margin-bottom:12px;}
-.search-box:focus-within{border-color:var(--p);}
-.search-box span{font-size:16px;}
-.search-box input{width:100%;border:none;outline:none;background:transparent;color:var(--t1);font-size:13px;font-weight:700;font-family:var(--fb);}
-.search-box input::placeholder{color:var(--tm);font-weight:600;}
-.batch-grid{display:flex;flex-direction:column;gap:12px;}
-.batch-card{overflow:hidden;border-radius:20px;background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);position:relative;}
-.batch-card.enrolled{border-color:rgba(34,197,94,.35);}
-.batch-img-wrap{position:relative;cursor:pointer;background:var(--grp);aspect-ratio:16/8;}
-.batch-img{width:100%;aspect-ratio:16/8;object-fit:cover;display:block;}
-.batch-body{padding:14px;}
-.batch-meta{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;}
-.batch-cat{display:inline-flex;align-items:center;padding:4px 9px;border-radius:var(--rf);background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.18);color:var(--warn);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;}
-.batch-lang{padding:4px 10px;border-radius:var(--rf);background:var(--grp);border:1px solid var(--b1);color:var(--t2);font-size:10px;font-weight:800;}
-.batch-title{font-family:var(--fd);font-size:16px;font-weight:900;line-height:1.25;color:var(--t1);cursor:pointer;margin-bottom:6px;}
-.batch-sub{font-size:12.5px;color:var(--t2);line-height:1.6;margin-bottom:8px;}
-.batch-status{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--t2);margin-bottom:8px;}
-.batch-dot{width:8px;height:8px;border-radius:50%;background:var(--err);flex-shrink:0;}
-.batch-dot.ok{background:var(--ok);}
-.enrolled-tag{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:var(--rf);background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.22);color:var(--ok);font-size:11px;font-weight:800;margin-bottom:8px;}
-.batch-price-row{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-top:2px;}
-.price-line{display:flex;align-items:center;gap:6px;}
-.price-line strong{font-size:20px;font-weight:900;color:var(--t1);}
-.price-line del{color:var(--tm);font-size:13px;}
-.price-off{color:var(--ok);font-size:11.5px;font-weight:900;margin-top:1px;}
-.batch-btns{display:flex;align-items:center;gap:8px;}
-.buy-btn{padding:10px 16px;border-radius:var(--r2);font-size:12.5px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--p),var(--p2));box-shadow:var(--shb);min-width:110px;text-align:center;}
-.buy-btn:active{transform:scale(.97);}
-.buy-btn.enrolled-btn{background:var(--ok);box-shadow:none;cursor:default;}
-.arrow-btn{width:42px;height:42px;border-radius:var(--r2);background:var(--grp);border:1px solid var(--b1);font-size:20px;font-weight:800;color:var(--t1);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.arrow-btn:active{transform:scale(.95);}
-/* DETAIL */
-.detail-wrap{display:none;flex-direction:column;gap:0;}
-.detail-wrap.active{display:flex;}
-.back-btn{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:var(--r2);background:var(--grp);border:1px solid var(--b1);color:var(--p);font-size:12.5px;font-weight:800;margin-bottom:12px;align-self:flex-start;}
-.back-btn:active{transform:scale(.96);}
-.detail-card{border-radius:20px;overflow:hidden;background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);margin-bottom:12px;}
-.detail-img{width:100%;aspect-ratio:16/8;object-fit:cover;display:block;background:var(--grp);}
-.detail-body{padding:16px;}
-.detail-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;}
-.detail-head h2{font-family:var(--fd);font-size:18px;font-weight:900;line-height:1.2;color:var(--t1);flex:1;}
-.detail-desc{font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:12px;}
-.detail-price-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
-.detail-price-row strong{font-size:24px;font-weight:900;color:var(--t1);}
-.detail-price-row del{color:var(--tm);font-size:13px;}
-.detail-price-row span{color:var(--ok);font-size:12px;font-weight:900;}
-.detail-buy-btn{width:100%;padding:13px;border-radius:var(--r2);font-size:14px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--p),var(--p2));box-shadow:var(--shb);text-align:center;}
-.detail-buy-btn.enrolled-btn{background:var(--ok);cursor:default;}
-.detail-buy-btn:active{transform:scale(.98);}
-.info-box{border-radius:var(--r3);background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);padding:14px 16px;margin-bottom:10px;position:relative;overflow:hidden;}
-.info-box::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;border-radius:99px;background:linear-gradient(180deg,var(--p),var(--acc));}
-.info-box h3{font-family:var(--fd);font-size:14px;font-weight:900;color:var(--t1);margin-bottom:8px;padding-left:10px;}
-.info-box p,.info-box li{font-size:12.5px;color:var(--t2);line-height:1.7;padding-left:10px;}
-.info-box ul{padding-left:26px;}
-.info-box li{list-style:disc;}
-.state-msg{text-align:center;padding:32px 16px;font-size:13px;color:var(--tm);font-weight:600;}
-/* CACHE BADGE */
-.cache-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;background:rgba(79,70,229,.05);border-bottom:1px solid var(--b1);font-size:11px;color:var(--tm);font-weight:600;}
-.cache-bar span{opacity:.7;}
-/* NAV */
-.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:var(--shell);z-index:999;height:var(--nav-h);background:var(--nav);border-top:1px solid var(--b1);display:flex;align-items:center;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px);}
-.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:100%;border-radius:var(--r2);padding:6px 4px;position:relative;}
-.bnav-btn::before{content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--p);border-radius:99px;transition:width .15s ease;}
-.bnav-btn.active::before{width:24px;}
-.bnav-icon{font-size:20px;line-height:1;}
-.bnav-btn.active .bnav-icon{transform:scale(1.08);}
-.bnav-label{font-size:10px;font-weight:700;color:var(--tm);}
-.bnav-btn.active .bnav-label{color:var(--p);}
-/* TOAST */
-.toast-wrap{position:fixed;left:50%;bottom:calc(var(--nav-h) + 12px);transform:translateX(-50%);z-index:99999;width:min(90vw,380px);pointer-events:none;}
-.toast{display:flex;align-items:flex-start;gap:10px;background:var(--surface);color:var(--t1);border:1px solid var(--bc);border-radius:12px;padding:10px 12px;box-shadow:0 4px 20px rgba(0,0,0,.12);pointer-events:auto;}
-.toast-ok{border-left:3px solid var(--ok);}
-.toast-info{border-left:3px solid var(--p);}
-.toast-err{border-left:3px solid var(--err);}
-.toast-warn{border-left:3px solid var(--warn);}
-.toast-body p:first-child{font-size:12px;font-weight:800;}
-.toast-body p:last-child{font-size:11px;color:var(--t2);margin-top:1px;}
-.toast-x{font-size:16px;color:var(--tm);cursor:pointer;margin-left:auto;}
-html,body,*{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-touch-callout:none;}
-input{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
 
+/* ═══════════════════════════════════════════════════════════
+   DESIGN TOKENS — shared with Home + Settings
+═══════════════════════════════════════════════════════════ */
+:root {
+  --bg-primary:   #050505;
+  --bg-secondary: #0B0B0F;
+  --bg-tertiary:  #121218;
+  --border:       #1D1D26;
+  --border-hover: #2D2D3A;
+
+  --primary:        #7C3AED;
+  --primary-light:  #A855F7;
+  --secondary:      #2563EB;
+  --success:        #10B981;
+  --warning:        #F59E0B;
+  --danger:         #EF4444;
+
+  --text-primary:   #FFFFFF;
+  --text-secondary: #B8B8C7;
+  --text-muted:     #7A7A8C;
+
+  --sidebar-w: 260px;
+  --header-h:  72px;
+  --nav-h:     60px;
+  --r1: 8px; --r2: 12px; --r3: 16px; --r4: 20px; --rf: 9999px;
+  --fd: 'Sora', sans-serif;
+  --fb: 'Nunito', sans-serif;
+  --sh-card: 0 1px 3px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+  --sh-hover: 0 4px 24px rgba(124,58,237,.18), 0 1px 3px rgba(0,0,0,.5);
+  --tr: 0.22s ease;
+}
+
+[data-theme="light"] {
+  --bg-primary:   #f0f2ff;
+  --bg-secondary: #ffffff;
+  --bg-tertiary:  #f4f5fb;
+  --border:       rgba(79,70,229,.12);
+  --border-hover: rgba(79,70,229,.25);
+  --text-primary:   #0f0e2a;
+  --text-secondary: #4b5563;
+  --text-muted:     #9ca3af;
+  --sh-card: 0 1px 3px rgba(79,70,229,.06), 0 4px 16px rgba(79,70,229,.05);
+  --sh-hover: 0 4px 24px rgba(79,70,229,.14), 0 1px 3px rgba(79,70,229,.08);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESET
+═══════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { font-size: 15px; -webkit-text-size-adjust: 100%; }
+[data-theme="dark"] { color-scheme: dark; }
+[data-theme="light"] { color-scheme: light; }
+html, body { height: 100%; }
+body { font-family: var(--fb); background: var(--bg-primary); color: var(--text-primary); -webkit-font-smoothing: antialiased; overflow: hidden; }
+button { font-family: var(--fb); cursor: pointer; border: none; background: none; color: inherit; }
+a { text-decoration: none; color: inherit; }
+img { display: block; max-width: 100%; }
+*, body, html { -webkit-user-select: none; -moz-user-select: none; user-select: none; -webkit-touch-callout: none; }
+input { -webkit-user-select: text; -moz-user-select: text; user-select: text; }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE SHELL (< 768px) — ORIGINAL, UNTOUCHED
+═══════════════════════════════════════════════════════════ */
+@media (max-width: 767px) {
+  body { display: flex; justify-content: center; overflow: hidden; }
+
+  :root {
+    --p:#4f46e5;--p2:#3730a3;--pl:#818cf8;
+    --acc:#06b6d4;--ok:#22c55e;--err:#ef4444;--warn:#f59e0b;
+    --bg:#f0f2ff;--surface:#fff;--card:rgba(255,255,255,.88);
+    --nav:rgba(255,255,255,.95);--inp:#f4f5fb;
+    --grp:rgba(79,70,229,.06);--grph:rgba(79,70,229,.10);
+    --t1:#0f0e2a;--t2:#4b5563;--tm:#9ca3af;
+    --b1:rgba(79,70,229,.12);--bc:rgba(79,70,229,.15);--bi:#d1d5db;
+    --sh:0 2px 12px rgba(79,70,229,.08),0 1px 3px rgba(0,0,0,.05);
+    --she:0 12px 40px rgba(79,70,229,.15);
+    --shb:0 4px 16px rgba(79,70,229,.28);
+    --shell:430px;
+  }
+  [data-theme="dark"] {
+    --bg:#0c0b1d;--surface:#120f2a;--card:rgba(30,27,60,.88);
+    --nav:rgba(18,15,42,.98);--inp:#1e1b3c;
+    --grp:rgba(129,140,248,.08);--grph:rgba(129,140,248,.14);
+    --t1:#f0eeff;--t2:#a5a3c2;--tm:#6b6a8a;
+    --b1:rgba(129,140,248,.12);--bc:rgba(129,140,248,.18);--bi:rgba(129,140,248,.20);
+    --sh:0 2px 12px rgba(0,0,0,.28);--she:0 12px 40px rgba(0,0,0,.45);
+    --shb:0 4px 16px rgba(79,70,229,.40);
+  }
+
+  .mob-shell { width:100%;max-width:430px;height:100%;height:100dvh;background:var(--surface);display:flex;flex-direction:column;position:relative;overflow:hidden;box-shadow:0 0 0 1px var(--b1); }
+  .mob-hdr { position:sticky;top:0;z-index:100;height:52px;background:var(--nav);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0; }
+  .mob-hdr-title { font-family:var(--fd);font-size:15px;font-weight:800;color:var(--t1);flex:1; }
+  .mob-hdr-count { font-size:10px;color:var(--tm);font-weight:700;background:var(--grp);border:1px solid var(--b1);padding:3px 8px;border-radius:var(--rf); }
+  .mob-hdr-refresh { width:30px;height:30px;border-radius:var(--r1);background:var(--grp);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;color:var(--t2); }
+  .mob-hdr-refresh:active { opacity:.7; }
+
+  .mob-page { flex:1;overflow-y:scroll;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;padding:12px 12px calc(var(--nav-h) + 20px + env(safe-area-inset-bottom,0px));min-height:0;-webkit-transform:translateZ(0);transform:translateZ(0); }
+  .mob-page::-webkit-scrollbar { width:2px; }
+  .mob-page::-webkit-scrollbar-thumb { background:var(--bc);border-radius:99px; }
+
+  .cache-bar { display:flex;align-items:center;justify-content:space-between;padding:6px 14px;background:rgba(79,70,229,.05);border-bottom:1px solid var(--b1);font-size:11px;color:var(--tm);font-weight:600; }
+  .cache-bar span { opacity:.7; }
+
+  .search-box { display:flex;align-items:center;gap:10px;height:44px;padding:0 14px;border-radius:var(--r3);background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);margin-bottom:12px; }
+  .search-box:focus-within { border-color:var(--p); }
+  .search-box span { font-size:16px; }
+  .search-box input { width:100%;border:none;outline:none;background:transparent;color:var(--t1);font-size:13px;font-weight:700;font-family:var(--fb); }
+  .search-box input::placeholder { color:var(--tm);font-weight:600; }
+
+  .batch-grid { display:flex;flex-direction:column;gap:12px; }
+  .batch-card { overflow:hidden;border-radius:20px;background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);position:relative; }
+  .batch-card.enrolled { border-color:rgba(34,197,94,.35); }
+  .batch-img-wrap { position:relative;cursor:pointer;background:var(--grp);aspect-ratio:16/8; }
+  .batch-img { width:100%;aspect-ratio:16/8;object-fit:cover;display:block; }
+  .batch-body { padding:14px; }
+  .batch-meta { display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px; }
+  .batch-cat { display:inline-flex;align-items:center;padding:4px 9px;border-radius:var(--rf);background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.18);color:var(--warn);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em; }
+  .batch-lang { padding:4px 10px;border-radius:var(--rf);background:var(--grp);border:1px solid var(--b1);color:var(--t2);font-size:10px;font-weight:800; }
+  .batch-title { font-family:var(--fd);font-size:16px;font-weight:900;line-height:1.25;color:var(--t1);cursor:pointer;margin-bottom:6px; }
+  .batch-sub { font-size:12.5px;color:var(--t2);line-height:1.6;margin-bottom:8px; }
+  .batch-status { display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--t2);margin-bottom:8px; }
+  .batch-dot { width:8px;height:8px;border-radius:50%;background:var(--err);flex-shrink:0; }
+  .batch-dot.ok { background:var(--ok); }
+  .enrolled-tag { display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:var(--rf);background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.22);color:var(--ok);font-size:11px;font-weight:800;margin-bottom:8px; }
+  .batch-price-row { display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-top:2px; }
+  .price-line { display:flex;align-items:center;gap:6px; }
+  .price-line strong { font-size:20px;font-weight:900;color:var(--t1); }
+  .price-line del { color:var(--tm);font-size:13px; }
+  .price-off { color:var(--ok);font-size:11.5px;font-weight:900;margin-top:1px; }
+  .batch-btns { display:flex;align-items:center;gap:8px; }
+  .buy-btn { padding:10px 16px;border-radius:var(--r2);font-size:12.5px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--p),var(--p2));box-shadow:var(--shb);min-width:110px;text-align:center; }
+  .buy-btn:active { transform:scale(.97); }
+  .buy-btn.enrolled-btn { background:var(--ok);box-shadow:none;cursor:default; }
+  .arrow-btn { width:42px;height:42px;border-radius:var(--r2);background:var(--grp);border:1px solid var(--b1);font-size:20px;font-weight:800;color:var(--t1);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+  .arrow-btn:active { transform:scale(.95); }
+
+  /* DETAIL */
+  .detail-wrap { display:none;flex-direction:column;gap:0; }
+  .detail-wrap.active { display:flex; }
+  .back-btn { display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:var(--r2);background:var(--grp);border:1px solid var(--b1);color:var(--p);font-size:12.5px;font-weight:800;margin-bottom:12px;align-self:flex-start; }
+  .back-btn:active { transform:scale(.96); }
+  .detail-card { border-radius:20px;overflow:hidden;background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);margin-bottom:12px; }
+  .detail-img { width:100%;aspect-ratio:16/8;object-fit:cover;display:block;background:var(--grp); }
+  .detail-body { padding:16px; }
+  .detail-head { display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px; }
+  .detail-head h2 { font-family:var(--fd);font-size:18px;font-weight:900;line-height:1.2;color:var(--t1);flex:1; }
+  .detail-desc { font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:12px; }
+  .detail-price-row { display:flex;align-items:center;gap:8px;margin-bottom:12px; }
+  .detail-price-row strong { font-size:24px;font-weight:900;color:var(--t1); }
+  .detail-price-row del { color:var(--tm);font-size:13px; }
+  .detail-price-row span { color:var(--ok);font-size:12px;font-weight:900; }
+  .detail-buy-btn { width:100%;padding:13px;border-radius:var(--r2);font-size:14px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--p),var(--p2));box-shadow:var(--shb);text-align:center; }
+  .detail-buy-btn.enrolled-btn { background:var(--ok);cursor:default; }
+  .detail-buy-btn:active { transform:scale(.98); }
+  .info-box { border-radius:var(--r3);background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);padding:14px 16px;margin-bottom:10px;position:relative;overflow:hidden; }
+  .info-box::before { content:'';position:absolute;top:0;left:0;width:3px;height:100%;border-radius:99px;background:linear-gradient(180deg,var(--p),var(--acc)); }
+  .info-box h3 { font-family:var(--fd);font-size:14px;font-weight:900;color:var(--t1);margin-bottom:8px;padding-left:10px; }
+  .info-box p,.info-box li { font-size:12.5px;color:var(--t2);line-height:1.7;padding-left:10px; }
+  .info-box ul { padding-left:26px; }
+  .info-box li { list-style:disc; }
+  .state-msg { text-align:center;padding:32px 16px;font-size:13px;color:var(--tm);font-weight:600; }
+
+  .mob-bnav { position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;z-index:999;height:var(--nav-h);background:var(--nav);border-top:1px solid var(--b1);display:flex;align-items:center;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px); }
+  .mob-bnav-btn { flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:100%;border-radius:var(--r2);padding:6px 4px;position:relative; }
+  .mob-bnav-btn::before { content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--p);border-radius:99px;transition:width .15s ease; }
+  .mob-bnav-btn.active::before { width:24px; }
+  .mob-bnav-icon { font-size:20px;line-height:1; }
+  .mob-bnav-btn.active .mob-bnav-icon { transform:scale(1.08); }
+  .mob-bnav-label { font-size:10px;font-weight:700;color:var(--tm); }
+  .mob-bnav-btn.active .mob-bnav-label { color:var(--p); }
+
+  .dt-layout { display:none !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DESKTOP (≥ 768px) — matches Settings / Home Page shell
+═══════════════════════════════════════════════════════════ */
+@media (min-width: 768px) {
+  body { overflow: auto; display: block; }
+  .mob-shell { display: none !important; }
+
+  .dt-layout { display: flex; flex-direction: column; min-height: 100vh; background: var(--bg-primary); }
+
+  /* HEADER */
+  .dt-header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    height: var(--header-h);
+    background: rgba(5,5,5,.92);
+    backdrop-filter: blur(20px) saturate(160%); -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 28px; gap: 16px;
+  }
+  [data-theme="light"] .dt-header { background: rgba(255,255,255,.92); }
+
+  .dt-brand { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+  .dt-brand-logo { width: 42px; height: 42px; border-radius: 12px; object-fit: cover; flex-shrink: 0; border: 1px solid var(--border); }
+  .dt-brand-logo-fb { width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-family: var(--fd); font-weight: 800; font-size: 16px; color: #fff; border: 1px solid rgba(124,58,237,.4); }
+  .dt-brand-text { display: flex; flex-direction: column; }
+  .dt-brand-name { font-family: var(--fd); font-size: 16px; font-weight: 800; color: var(--text-primary); letter-spacing: -.01em; }
+  .dt-brand-tag { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-top: 1px; }
+  .dt-header-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+  .dt-streak { display: flex; align-items: center; gap: 5px; padding: 6px 14px 6px 10px; background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.2); border-radius: var(--rf); font-size: 13px; font-weight: 800; color: #f59e0b; cursor: pointer; transition: background var(--tr), border-color var(--tr); }
+  .dt-streak:hover { background: rgba(245,158,11,.16); border-color: rgba(245,158,11,.35); }
+
+  .dt-notif { width: 40px; height: 40px; border-radius: var(--r2); background: var(--bg-tertiary); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 18px; position: relative; cursor: pointer; transition: background var(--tr); }
+  .dt-notif:hover { background: var(--bg-secondary); border-color: var(--border-hover); }
+  .dt-notif-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); border: 2px solid var(--bg-primary); display: none; }
+
+  /* BODY WRAP */
+  .dt-body-wrap { display: flex; margin-top: var(--header-h); min-height: calc(100vh - var(--header-h)); }
+
+  /* SIDEBAR */
+  .dt-sidebar { width: var(--sidebar-w); flex-shrink: 0; background: var(--bg-secondary); border-right: 1px solid var(--border); position: fixed; top: var(--header-h); bottom: 0; left: 0; display: flex; flex-direction: column; padding: 20px 12px; overflow-y: auto; z-index: 100; }
+  .dt-sidebar::-webkit-scrollbar { width: 0; }
+
+  .dt-nav-section { margin-bottom: 4px; }
+  .dt-nav-label-text { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); padding: 0 12px; margin-bottom: 4px; display: block; }
+
+  .dt-nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: var(--r2); font-size: 14px; font-weight: 700; color: var(--text-secondary); cursor: pointer; transition: background var(--tr), color var(--tr); border: 1px solid transparent; width: 100%; text-align: left; }
+  .dt-nav-item:hover { background: rgba(255,255,255,.04); color: var(--text-primary); border-color: var(--border); }
+  [data-theme="light"] .dt-nav-item:hover { background: rgba(79,70,229,.04); }
+  .dt-nav-item.active { background: rgba(124,58,237,.14); color: var(--primary-light); border-color: rgba(124,58,237,.25); }
+  .dt-nav-icon-wrap { font-size: 18px; width: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  .dt-sidebar-upgrade { margin-top: auto; background: linear-gradient(145deg, rgba(124,58,237,.14), rgba(37,99,235,.10)); border: 1px solid rgba(124,58,237,.25); border-radius: var(--r3); padding: 14px; margin-bottom: 12px; }
+  .dt-sidebar-upgrade-icon { font-size: 18px; margin-bottom: 6px; }
+  .dt-sidebar-upgrade-title { font-family: var(--fd); font-size: 13px; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; }
+  .dt-sidebar-upgrade-sub { font-size: 11px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 10px; }
+  .dt-sidebar-upgrade-btn { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 8px 12px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: var(--r2); color: #fff; font-family: var(--fd); font-size: 12px; font-weight: 800; cursor: pointer; transition: opacity var(--tr); }
+  .dt-sidebar-upgrade-btn:hover { opacity: .9; }
+
+  .dt-sidebar-footer { padding-top: 12px; border-top: 1px solid var(--border); font-size: 11.5px; color: var(--text-muted); line-height: 1.6; padding-left: 2px; }
+  .dt-sidebar-footer strong { color: var(--text-secondary); font-weight: 700; }
+
+  /* MAIN */
+  .dt-main { margin-left: var(--sidebar-w); flex: 1; min-width: 0; padding: 32px 36px 60px; }
+
+  .dt-page-title { font-family: var(--fd); font-size: 26px; font-weight: 900; color: var(--text-primary); letter-spacing: -.02em; margin-bottom: 4px; }
+  .dt-page-sub { font-size: 13px; color: var(--text-muted); font-weight: 500; margin-bottom: 24px; }
+
+  /* TOOLBAR */
+  .dt-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .dt-search-box { flex: 1; max-width: 360px; display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 14px; border-radius: var(--r3); background: var(--bg-secondary); border: 1px solid var(--border); transition: border-color var(--tr); }
+  .dt-search-box:focus-within { border-color: var(--primary); }
+  .dt-search-box span { font-size: 16px; flex-shrink: 0; }
+  .dt-search-box input { width: 100%; border: none; outline: none; background: transparent; color: var(--text-primary); font-size: 13px; font-weight: 600; font-family: var(--fb); }
+  .dt-search-box input::placeholder { color: var(--text-muted); }
+  .dt-batch-count { font-size: 12px; font-weight: 700; color: var(--text-muted); background: var(--bg-tertiary); border: 1px solid var(--border); padding: 4px 12px; border-radius: var(--rf); margin-left: auto; white-space: nowrap; }
+  .dt-refresh-btn { width: 44px; height: 44px; border-radius: var(--r2); background: var(--bg-secondary); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; color: var(--text-secondary); transition: background var(--tr), border-color var(--tr); flex-shrink: 0; }
+  .dt-refresh-btn:hover { background: var(--bg-tertiary); border-color: var(--border-hover); color: var(--text-primary); }
+
+  /* CACHE BAR desktop */
+  .dt-cache-bar { display: none; align-items: center; justify-content: space-between; padding: 8px 16px; background: rgba(124,58,237,.06); border: 1px solid rgba(124,58,237,.15); border-radius: var(--r2); margin-bottom: 16px; font-size: 11.5px; color: var(--text-muted); font-weight: 600; }
+
+  /* BATCH GRID desktop */
+  .dt-batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+
+  /* BATCH CARD desktop */
+  .dt-batch-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--r4); overflow: hidden; box-shadow: var(--sh-card); transition: transform var(--tr), box-shadow var(--tr), border-color var(--tr); display: flex; flex-direction: column; }
+  .dt-batch-card:hover { transform: translateY(-3px); box-shadow: var(--sh-hover); border-color: var(--border-hover); }
+  .dt-batch-card.enrolled { border-color: rgba(16,185,129,.3); }
+  .dt-batch-card.enrolled:hover { border-color: rgba(16,185,129,.5); }
+
+  .dt-batch-thumb { position: relative; aspect-ratio: 16/8; overflow: hidden; cursor: pointer; background: var(--bg-tertiary); }
+  .dt-batch-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; }
+  .dt-batch-card:hover .dt-batch-thumb img { transform: scale(1.04); }
+
+  .dt-enrolled-ribbon { position: absolute; top: 12px; left: 12px; display: flex; align-items: center; gap: 5px; padding: 4px 10px; background: rgba(16,185,129,.9); border-radius: var(--rf); font-size: 10px; font-weight: 800; color: #fff; backdrop-filter: blur(6px); }
+
+  .dt-batch-body { padding: 18px; flex: 1; display: flex; flex-direction: column; }
+  .dt-batch-meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .dt-batch-cat { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: var(--rf); background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.2); color: var(--warning); font-size: 9.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .06em; }
+  .dt-batch-lang { padding: 3px 9px; border-radius: var(--rf); background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-muted); font-size: 9.5px; font-weight: 800; }
+
+  .dt-batch-title { font-family: var(--fd); font-size: 15px; font-weight: 800; line-height: 1.3; color: var(--text-primary); cursor: pointer; margin-bottom: 6px; }
+  .dt-batch-title:hover { color: var(--primary-light); }
+  .dt-batch-sub { font-size: 12px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px; flex: 1; }
+
+  .dt-batch-status { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; color: var(--text-muted); margin-bottom: 14px; }
+  .dt-status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--danger); flex-shrink: 0; }
+  .dt-status-dot.ok { background: var(--success); }
+
+  .dt-batch-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 14px; border-top: 1px solid var(--border); margin-top: auto; }
+  .dt-price-block { display: flex; flex-direction: column; gap: 2px; }
+  .dt-price-main { display: flex; align-items: baseline; gap: 6px; }
+  .dt-price-main strong { font-family: var(--fd); font-size: 20px; font-weight: 900; color: var(--text-primary); }
+  .dt-price-main del { font-size: 12px; color: var(--text-muted); }
+  .dt-price-off { font-size: 10.5px; font-weight: 800; color: var(--success); }
+
+  .dt-card-btns { display: flex; align-items: center; gap: 8px; }
+  .dt-buy-btn { padding: 9px 18px; border-radius: var(--r2); font-size: 12.5px; font-weight: 900; color: #fff; background: linear-gradient(135deg, var(--primary), var(--secondary)); cursor: pointer; transition: opacity var(--tr), transform var(--tr); white-space: nowrap; }
+  .dt-buy-btn:hover { opacity: .9; transform: translateY(-1px); }
+  .dt-buy-btn:active { transform: scale(.97); }
+  .dt-buy-btn.enrolled-btn { background: linear-gradient(135deg, var(--success), #059669); cursor: default; }
+  .dt-buy-btn.enrolled-btn:hover { transform: none; }
+  .dt-detail-btn { width: 38px; height: 38px; border-radius: var(--r2); background: var(--bg-tertiary); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--text-secondary); flex-shrink: 0; transition: background var(--tr), border-color var(--tr); }
+  .dt-detail-btn:hover { background: rgba(124,58,237,.1); border-color: rgba(124,58,237,.25); color: var(--primary-light); }
+
+  .dt-state-msg { text-align: center; padding: 48px 16px; font-size: 14px; color: var(--text-muted); font-weight: 600; grid-column: 1/-1; }
+
+  /* DETAIL PANEL (right side slide-in) */
+  .dt-detail-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(0,0,0,.5); opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility .25s ease; }
+  .dt-detail-overlay.open { opacity: 1; visibility: visible; }
+
+  .dt-detail-panel {
+    position: fixed; top: var(--header-h); right: 0; bottom: 0; z-index: 501;
+    width: min(480px, 92vw);
+    background: var(--bg-secondary);
+    border-left: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    transform: translateX(100%);
+    transition: transform .3s cubic-bezier(.22,.61,.36,1);
+    overflow: hidden;
+  }
+  .dt-detail-overlay.open .dt-detail-panel { transform: translateX(0); }
+
+  .dt-detail-header { display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .dt-detail-close { width: 34px; height: 34px; border-radius: var(--r2); background: var(--bg-tertiary); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; color: var(--text-secondary); transition: background var(--tr); flex-shrink: 0; }
+  .dt-detail-close:hover { background: rgba(239,68,68,.1); border-color: rgba(239,68,68,.2); color: var(--danger); }
+  .dt-detail-panel-title { font-family: var(--fd); font-size: 13px; font-weight: 800; color: var(--text-primary); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .dt-detail-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; }
+  .dt-detail-scroll::-webkit-scrollbar { width: 4px; }
+  .dt-detail-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  .dt-detail-img { width: 100%; aspect-ratio: 16/8; object-fit: cover; display: block; background: var(--bg-tertiary); }
+
+  .dt-detail-content { padding: 20px; }
+  .dt-detail-meta { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .dt-detail-h2 { font-family: var(--fd); font-size: 20px; font-weight: 900; color: var(--text-primary); line-height: 1.25; margin-bottom: 8px; }
+  .dt-detail-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.75; margin-bottom: 16px; }
+
+  .dt-detail-price-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 16px; }
+  .dt-detail-price-row strong { font-family: var(--fd); font-size: 28px; font-weight: 900; color: var(--text-primary); }
+  .dt-detail-price-row del { font-size: 14px; color: var(--text-muted); }
+  .dt-detail-price-row .off { font-size: 12px; font-weight: 800; color: var(--success); }
+
+  .dt-detail-buy-btn { width: 100%; padding: 14px; border-radius: var(--r3); font-family: var(--fd); font-size: 15px; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--primary), var(--secondary)); cursor: pointer; margin-bottom: 20px; transition: opacity var(--tr), transform var(--tr); }
+  .dt-detail-buy-btn:hover { opacity: .9; transform: translateY(-1px); }
+  .dt-detail-buy-btn:active { transform: scale(.98); }
+  .dt-detail-buy-btn.enrolled-btn { background: linear-gradient(135deg, var(--success), #059669); cursor: default; }
+  .dt-detail-buy-btn.enrolled-btn:hover { transform: none; }
+
+  .dt-info-box { background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: var(--r3); padding: 16px 18px; margin-bottom: 12px; position: relative; overflow: hidden; }
+  .dt-info-box::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: linear-gradient(180deg, var(--primary), var(--secondary)); border-radius: 99px; }
+  .dt-info-box h3 { font-family: var(--fd); font-size: 13px; font-weight: 800; color: var(--text-primary); margin-bottom: 10px; padding-left: 12px; }
+  .dt-info-box li { font-size: 12.5px; color: var(--text-secondary); line-height: 1.75; padding-left: 12px; list-style: disc; margin-left: 16px; }
+  .dt-info-box p { font-size: 12.5px; color: var(--text-secondary); line-height: 1.75; padding-left: 12px; }
+
+  /* FOOTER */
+  .dt-footer { text-align: center; padding: 16px; font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--border); margin-top: 8px; }
+  .dt-footer strong { color: var(--text-secondary); font-weight: 700; }
+
+  /* Laptop / tablet adjustments */
+  @media (max-width: 1280px) { .dt-main { padding: 28px 28px 60px; } }
+  @media (max-width: 1100px) { :root { --sidebar-w: 220px; } .dt-main { padding: 24px 20px 60px; } .dt-batch-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); } }
+}
+
+/* TABLET collapsed sidebar */
+@media (min-width: 768px) and (max-width: 1023px) {
+  :root { --sidebar-w: 68px; }
+  .dt-nav-item { padding: 10px; justify-content: center; }
+  .dt-nav-item span:not(.dt-nav-icon-wrap) { display: none; }
+  .dt-nav-label-text, .dt-sidebar-footer, .dt-sidebar-upgrade { display: none; }
+  .dt-sidebar { padding: 16px 8px; align-items: center; }
+  .dt-main { padding: 20px 16px 60px; }
+  .dt-batch-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST — shared
+═══════════════════════════════════════════════════════════ */
+.af-toast-wrap { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 999999; width: min(92vw, 420px); pointer-events: none; }
+.af-toast { display: flex; align-items: flex-start; gap: 12px; background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border); border-radius: 14px; padding: 11px 13px; box-shadow: var(--sh-card); pointer-events: auto; }
+.af-toast-ok   { border-left: 4px solid var(--success); }
+.af-toast-err  { border-left: 4px solid var(--danger); }
+.af-toast-warn { border-left: 4px solid var(--warning); }
+.af-toast-info { border-left: 4px solid var(--primary); }
+.af-toast-title { font-size: 12px; font-weight: 700; margin: 0 0 2px; }
+.af-toast-msg   { font-size: 11.5px; margin: 0; line-height: 1.4; }
+.af-toast-x { margin-left: auto; font-size: 17px; cursor: pointer; color: var(--text-muted); }
+
+/* Mobile toast override */
+@media (max-width: 767px) {
+  .af-toast-wrap { bottom: calc(60px + 12px); background: none; border: none; box-shadow: none; }
+  .af-toast { background: var(--surface, #fff); border: 1px solid var(--bc, rgba(79,70,229,.15)); }
+}
 </style>
 </head>
 <body>
-<div class="shell">
 
-  <header class="hdr">
-    <span class="hdr-title">Batches 📚</span>
-    <span class="hdr-count" id="batchCountLabel">5 available</span>
-    <button class="hdr-refresh" onclick="forceRefresh()" title="Refresh batches">↻</button>
+<!-- ══════════════════════════════════════════════
+     MOBILE SHELL (< 768px) — ORIGINAL UNTOUCHED
+══════════════════════════════════════════════ -->
+<div class="mob-shell">
+  <header class="mob-hdr">
+    <span class="mob-hdr-title">Batches 📚</span>
+    <span class="mob-hdr-count" id="mobBatchCount">5 available</span>
+    <button class="mob-hdr-refresh" onclick="forceRefresh()" title="Refresh">↻</button>
   </header>
 
-  <!-- small cache status bar -->
-  <div class="cache-bar" id="cacheBar" style="display:none;">
-    <span id="cacheTime">Loaded from cache</span>
+  <div class="cache-bar" id="mobCacheBar" style="display:none;">
+    <span id="mobCacheTime">Loaded from cache</span>
     <span>Pull down to refresh</span>
   </div>
 
-  <div class="page" id="page">
-
-    <!-- LIST VIEW -->
-    <div id="listView">
+  <div class="mob-page" id="mobPage">
+    <div id="mobListView">
       <div class="search-box">
         <span>🔍</span>
-        <input id="searchInput" type="text" placeholder="Search batches…" oninput="filterBatches()"/>
+        <input id="mobSearchInput" type="text" placeholder="Search batches…" oninput="filterBatches('mob')"/>
       </div>
-      <div class="batch-grid" id="batchGrid"></div>
+      <div class="batch-grid" id="mobBatchGrid"></div>
     </div>
 
-    <!-- DETAIL VIEW -->
-    <div class="detail-wrap" id="detailView">
-      <button class="back-btn" onclick="showList()">← Back to Batches</button>
+    <div class="detail-wrap" id="mobDetailView">
+      <button class="back-btn" onclick="showMobList()">← Back to Batches</button>
       <div class="detail-card">
-        <img id="detailImg" src="" alt="" class="detail-img"/>
+        <img id="mobDetailImg" src="" alt="" class="detail-img"/>
         <div class="detail-body">
           <div class="detail-head">
-            <h2 id="detailTitle">Batch</h2>
-            <span class="batch-lang" id="detailLang">HINGLISH</span>
+            <h2 id="mobDetailTitle">Batch</h2>
+            <span class="batch-lang" id="mobDetailLang">HINGLISH</span>
           </div>
-          <p class="batch-cat" id="detailCat" style="margin-bottom:10px;">Target</p>
-          <p class="detail-desc" id="detailDesc"></p>
+          <p class="batch-cat" id="mobDetailCat" style="margin-bottom:10px;">Target</p>
+          <p class="detail-desc" id="mobDetailDesc"></p>
           <div class="detail-price-row">
-            <strong id="detailPrice">₹49</strong>
-            <del id="detailOldPrice">₹99</del>
-            <span id="detailOff">51% OFF</span>
+            <strong id="mobDetailPrice">₹49</strong>
+            <del id="mobDetailOld">₹99</del>
+            <span id="mobDetailOff">51% OFF</span>
           </div>
-          <button class="detail-buy-btn" id="detailBuyBtn" onclick="buySelected()">Buy Now</button>
+          <button class="detail-buy-btn" id="mobDetailBuyBtn" onclick="buySelected()">Buy Now</button>
         </div>
       </div>
-      <div class="info-box"><h3>📌 What you will learn</h3><ul id="detailLearn"></ul></div>
-      <div class="info-box"><h3>🏫 Batch Facilities</h3><ul id="detailFacilities"></ul></div>
-      <div class="info-box"><h3>🧾 Batch Details</h3><p id="detailFull"></p></div>
+      <div class="info-box"><h3>📌 What you will learn</h3><ul id="mobDetailLearn"></ul></div>
+      <div class="info-box"><h3>🏫 Batch Facilities</h3><ul id="mobDetailFacilities"></ul></div>
+      <div class="info-box"><h3>🧾 Batch Details</h3><p id="mobDetailFull"></p></div>
     </div>
-
   </div>
 
-  <nav class="bnav">
-    <button class="bnav-btn" onclick="window.location.href='/index.html'"><span class="bnav-icon">🏠</span><span class="bnav-label">Home</span></button>
-    <button class="bnav-btn" onclick="window.location.href='/student/index.html'"><span class="bnav-icon">🎓</span><span class="bnav-label">Student</span></button>
-    <button class="bnav-btn active"><span class="bnav-icon">📚</span><span class="bnav-label">Batches</span></button>
-    <button class="bnav-btn" onclick="window.location.href='/community/index.html'"><span class="bnav-icon">💬</span><span class="bnav-label">Community</span></button>
-    <button class="bnav-btn" onclick="window.location.href='/setting/index.html'"><span class="bnav-icon">⚙️</span><span class="bnav-label">Settings</span></button>
+  <nav class="mob-bnav">
+    <button class="mob-bnav-btn" onclick="window.location.href='/index.html'"><span class="mob-bnav-icon">🏠</span><span class="mob-bnav-label">Home</span></button>
+    <button class="mob-bnav-btn" onclick="window.location.href='/student/index.html'"><span class="mob-bnav-icon">🎓</span><span class="mob-bnav-label">Student</span></button>
+    <button class="mob-bnav-btn active"><span class="mob-bnav-icon">📚</span><span class="mob-bnav-label">Batches</span></button>
+    <button class="mob-bnav-btn" onclick="window.location.href='/community/index.html'"><span class="mob-bnav-icon">💬</span><span class="mob-bnav-label">Community</span></button>
+    <button class="mob-bnav-btn" onclick="window.location.href='/setting/index.html'"><span class="mob-bnav-icon">⚙️</span><span class="mob-bnav-label">Settings</span></button>
   </nav>
-
 </div>
 
-<div class="toast-wrap" id="toastWrap"></div>
+<!-- ══════════════════════════════════════════════
+     DESKTOP (≥ 768px)
+══════════════════════════════════════════════ -->
+<div class="dt-layout">
 
-<!--
-  Razorpay loaded ONLY when user clicks Buy — not on page load.
-  This eliminates all the v2-entry-* network requests you saw in DevTools.
--->
+  <header class="dt-header">
+    <div class="dt-brand">
+      <img src="/IMG/AF LOGO 1.jpeg" alt="AF" class="dt-brand-logo"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
+      <div class="dt-brand-logo-fb" style="display:none;" aria-hidden="true">AF</div>
+      <div class="dt-brand-text">
+        <div class="dt-brand-name">AcademeForge</div>
+        <div class="dt-brand-tag">Learning Beyond the Classroom</div>
+      </div>
+    </div>
+    <div class="dt-header-actions">
+      <button class="dt-streak" onclick="window.location.href='/Heatmap/index.html'" type="button">
+        <span style="font-size:16px;">🔥</span>
+        <span id="dtStreakCount">0</span>
+      </button>
+      <button class="dt-notif" onclick="window.location.href='/Notify/index.html'" type="button">
+        🔔
+        <span class="dt-notif-dot" id="dtNotifDot"></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="dt-body-wrap">
+
+    <!-- SIDEBAR -->
+    <aside class="dt-sidebar">
+      <div class="dt-nav-section">
+        <span class="dt-nav-label-text">Navigation</span>
+        <button class="dt-nav-item" onclick="window.location.href='/index.html'" type="button">
+          <span class="dt-nav-icon-wrap">🏠</span><span>Home</span>
+        </button>
+        <button class="dt-nav-item" onclick="window.location.href='/student/index.html'" type="button">
+          <span class="dt-nav-icon-wrap">🎓</span><span>Student</span>
+        </button>
+        <button class="dt-nav-item active" type="button">
+          <span class="dt-nav-icon-wrap">📚</span><span>Batches</span>
+        </button>
+        <button class="dt-nav-item" onclick="window.location.href='/community/index.html'" type="button">
+          <span class="dt-nav-icon-wrap">💬</span><span>Community</span>
+        </button>
+        <button class="dt-nav-item" onclick="window.location.href='/setting/index.html'" type="button">
+          <span class="dt-nav-icon-wrap">⚙️</span><span>Settings</span>
+        </button>
+      </div>
+
+      <div class="dt-sidebar-upgrade">
+        <div class="dt-sidebar-upgrade-icon">👑</div>
+        <div class="dt-sidebar-upgrade-title">Upgrade to Pro</div>
+        <div class="dt-sidebar-upgrade-sub">Unlock all premium features and boost your learning.</div>
+        <button class="dt-sidebar-upgrade-btn" type="button">
+          <span>Upgrade Now</span><span>→</span>
+        </button>
+      </div>
+
+      <div class="dt-sidebar-footer">
+        <strong>Developed by Devraj Kumar</strong><br>Made with ❤️ in India
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="dt-main">
+      <div class="dt-page-title">Batches 📚</div>
+      <div class="dt-page-sub">Explore all available learning batches</div>
+
+      <!-- TOOLBAR -->
+      <div class="dt-toolbar">
+        <div class="dt-search-box">
+          <span>🔍</span>
+          <input id="dtSearchInput" type="text" placeholder="Search batches…" oninput="filterBatches('dt')"/>
+        </div>
+        <span class="dt-batch-count" id="dtBatchCount">5 available</span>
+        <button class="dt-refresh-btn" onclick="forceRefresh()" title="Refresh batches">↻</button>
+      </div>
+
+      <!-- CACHE BAR -->
+      <div class="dt-cache-bar" id="dtCacheBar">
+        <span id="dtCacheTime">Loaded from cache</span>
+        <span style="opacity:.6;">Click ↻ to refresh</span>
+      </div>
+
+      <!-- BATCH GRID -->
+      <div class="dt-batch-grid" id="dtBatchGrid"></div>
+
+      <footer class="dt-footer">
+        <strong>Developed by Devraj Kumar</strong> &nbsp;·&nbsp; Made with ❤️ in India · AcademeForge
+      </footer>
+    </main>
+  </div>
+
+  <!-- DETAIL PANEL OVERLAY -->
+  <div class="dt-detail-overlay" id="dtDetailOverlay" onclick="closeDtDetail()">
+    <div class="dt-detail-panel" onclick="event.stopPropagation()">
+      <div class="dt-detail-header">
+        <button class="dt-detail-close" onclick="closeDtDetail()" type="button">×</button>
+        <span class="dt-detail-panel-title" id="dtDetailPanelTitle">Batch Details</span>
+      </div>
+      <div class="dt-detail-scroll">
+        <img id="dtDetailImg" src="" alt="" class="dt-detail-img"/>
+        <div class="dt-detail-content">
+          <div class="dt-detail-meta" id="dtDetailMeta"></div>
+          <div class="dt-detail-h2" id="dtDetailTitle"></div>
+          <div class="dt-detail-desc" id="dtDetailDesc"></div>
+          <div class="dt-detail-price-row">
+            <strong id="dtDetailPrice">₹49</strong>
+            <del id="dtDetailOld">₹99</del>
+            <span class="off" id="dtDetailOff">51% OFF</span>
+          </div>
+          <button class="dt-detail-buy-btn" id="dtDetailBuyBtn" onclick="buySelected()">Buy Now</button>
+          <div class="dt-info-box"><h3>📌 What you will learn</h3><ul id="dtDetailLearn"></ul></div>
+          <div class="dt-info-box"><h3>🏫 Batch Facilities</h3><ul id="dtDetailFacilities"></ul></div>
+          <div class="dt-info-box"><h3>🧾 Batch Details</h3><p id="dtDetailFull"></p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /dt-layout -->
+
+<!-- TOAST -->
+<div class="af-toast-wrap" id="afToastWrap"></div>
 
 <script>
 'use strict';
 
 /* ─── CONFIG ─────────────────────────────────────────────── */
-const STUDENT_URL    = "https://afooyyydhlwngzssgqih.supabase.co";
-const STUDENT_KEY    = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb295eXlkaGx3bmd6c3NncWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDQxMjgsImV4cCI6MjA5NDIyMDEyOH0.KG0XO0oP_2MpewHoIwTtbrKg5FkyOYRUtVzLH1MSJiE";
-const RAZORPAY_KEY   = "rzp_test_SpO0DdKfoz5wRu";
-const BATCH_PRICE    = 49;
-const BATCH_OLD      = 99;
-const DISCOUNT       = Math.round(((BATCH_OLD - BATCH_PRICE) / BATCH_OLD) * 100);
+const STUDENT_URL  = "https://afooyyydhlwngzssgqih.supabase.co";
+const STUDENT_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb295eXlkaGx3bmd6c3NncWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDQxMjgsImV4cCI6MjA5NDIyMDEyOH0.KG0XO0oP_2MpewHoIwTtbrKg5FkyOYRUtVzLH1MSJiE";
+const RAZORPAY_KEY = "rzp_test_SpO0DdKfoz5wRu";
+const BATCH_PRICE  = 49;
+const BATCH_OLD    = 99;
+const DISCOUNT     = Math.round(((BATCH_OLD - BATCH_PRICE) / BATCH_OLD) * 100);
+const CACHE_KEY    = 'af_batches_cache_v1';
+const ENROLLED_KEY = 'af_enrolled_cache_v1';
+const CACHE_TTL_MS = 30 * 60 * 1000;
 
-/* Cache TTL: 30 minutes. Enrolled status cached for same session. */
-const CACHE_KEY      = 'af_batches_cache_v1';
-const ENROLLED_KEY   = 'af_enrolled_cache_v1';
-const CACHE_TTL_MS   = 30 * 60 * 1000; // 30 min
-
-/* ─── BATCH DATA (static — no network needed) ──────────────── */
+/* ─── STATIC BATCH DATA ───────────────────────────────────── */
 const COURSE_IDS = {
   "video-editing":         "4cdd5351-b370-4d07-8841-b4024a0bcb27",
   "graphic-design":        "483ed390-1923-4198-a003-0ff46ec8dba9",
@@ -245,9 +632,11 @@ let enrolledSlugs = [];
 let selectedBatch = null;
 let razorpayLoaded = false;
 
-/* ─── HELPERS ────────────────────────────────────────────── */
+/* ─── HELPERS ─────────────────────────────────────────────── */
 const $id = id => document.getElementById(id);
-const esc  = t  => String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const isDesktop = () => window.innerWidth >= 768;
+const esc = t => String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function isEnrolled(slug){ return enrolledSlugs.includes(slug); }
 
 function getStudent(){
   return {
@@ -258,71 +647,78 @@ function getStudent(){
     email:      localStorage.getItem('af_student_email')  || ''
   };
 }
-function isEnrolled(slug){ return enrolledSlugs.includes(slug); }
 
-/* ─── THEME ──────────────────────────────────────────────── */
+/* ─── THEME SYNC (cross-page) ─────────────────────────────── */
 window.addEventListener('storage', e => {
-  if (e.key === 'af_dark_mode')
-    document.documentElement.setAttribute('data-theme', e.newValue==='1'?'dark':'light');
+  if (e.key === 'af_dark_mode') {
+    document.documentElement.setAttribute('data-theme', e.newValue === '0' ? 'light' : 'dark');
+  }
+  if (['af_student_name','af_student_mobile','af_student_phone','af_streak'].includes(e.key)) {
+    updateStreakBadge(parseInt(localStorage.getItem('af_streak')||'0'));
+  }
 });
 
-/* ─── TOAST ──────────────────────────────────────────────── */
-let _tt = null;
-function showToast(msg, type='info', title=''){
-  const w = $id('toastWrap'); w.innerHTML = '';
-  if(_tt){ clearTimeout(_tt); _tt = null; }
-  const labels = {ok:'Done',info:'Info',err:'Error',warn:'Notice'};
-  const d = document.createElement('div');
-  d.className = 'toast toast-'+type;
-  d.innerHTML = `<div class="toast-body"><p>${title||labels[type]||'Info'}</p><p>${msg}</p></div><span class="toast-x" onclick="this.parentElement.remove()">×</span>`;
-  w.appendChild(d);
-  _tt = setTimeout(() => d.remove(), 2600);
+function updateStreakBadge(n) {
+  const el = $id('dtStreakCount');
+  if (el) el.textContent = n;
 }
 
-/* ─── CACHE HELPERS ──────────────────────────────────────── */
+/* ─── TOAST ─────────────────────────────────────────────── */
+let _tt = null;
+function showToast(msg, type='info', title=''){
+  const wrap = $id('afToastWrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  if (_tt){ clearTimeout(_tt); _tt = null; }
+  const labels = {ok:'Done',info:'Info',err:'Error',warn:'Notice'};
+  const d = document.createElement('div');
+  d.className = 'af-toast af-toast-' + type;
+  d.innerHTML = `<div><p class="af-toast-title">${title||labels[type]||'Info'}</p><p class="af-toast-msg">${msg}</p></div><button class="af-toast-x" onclick="this.parentElement.remove()">×</button>`;
+  wrap.appendChild(d);
+  _tt = setTimeout(() => d && d.remove(), 2600);
+}
+
+/* ─── CACHE ─────────────────────────────────────────────── */
 function cacheGet(key) {
   try {
     const raw = localStorage.getItem(key);
     if (!raw) return null;
     const obj = JSON.parse(raw);
-    // Check TTL
     if (Date.now() - obj.ts > CACHE_TTL_MS) return null;
     return obj.data;
   } catch(_){ return null; }
 }
-
 function cacheSet(key, data) {
   try { localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch(_){}
 }
-
 function cacheClear(key) {
   try { localStorage.removeItem(key); } catch(_){}
 }
 
 function showCacheBar(ts) {
-  const bar = $id('cacheBar');
-  const timeEl = $id('cacheTime');
-  if (!bar || !timeEl || !ts) return;
   const mins = Math.round((Date.now() - ts) / 60000);
-  timeEl.textContent = mins < 1
-  ? 'Updated just now'
-  : `Last updated ${mins}m ago`;
-  bar.style.display = 'flex';
+  const txt = mins < 1 ? 'Updated just now' : `Last updated ${mins}m ago`;
+
+  const mob = $id('mobCacheBar');
+  const mobT = $id('mobCacheTime');
+  if (mob && mobT) { mobT.textContent = txt; mob.style.display = 'flex'; }
+
+  const dt = $id('dtCacheBar');
+  const dtT = $id('dtCacheTime');
+  if (dt && dtT) { dtT.textContent = txt; dt.style.display = 'flex'; }
+}
+function hideCacheBar() {
+  const mob = $id('mobCacheBar'); if (mob) mob.style.display = 'none';
+  const dt  = $id('dtCacheBar');  if (dt)  dt.style.display  = 'none';
 }
 
-/* ─── SUPABASE (lazy — only imported when needed) ───────── */
+/* ─── SUPABASE LAZY ──────────────────────────────────────── */
 let _sbClient = null;
 function getSb() {
   if (_sbClient) return _sbClient;
-  // supabase-js is NOT pre-loaded. We import it lazily only when a network call is needed.
-  // For the initial render this is never called because BATCHES is static.
-  // It's only needed for: loadEnrolled() and grantAccess().
-  if (typeof supabase !== 'undefined') {
-    _sbClient = supabase.createClient(STUDENT_URL, STUDENT_KEY);
-  }
+  if (typeof supabase !== 'undefined') _sbClient = supabase.createClient(STUDENT_URL, STUDENT_KEY);
   return _sbClient;
 }
-
 async function edgeCall(fn, payload) {
   try {
     if (!navigator.onLine) return { ok:false, message:'No internet connection.' };
@@ -334,21 +730,12 @@ async function edgeCall(fn, payload) {
   } catch(e) { return { ok:false, message: e.message||'Request failed.' }; }
 }
 
-/* ─── LOAD ENROLLED (with cache) ─────────────────────────── */
 async function loadEnrolled() {
   enrolledSlugs = [];
-
-  // 1. Try cache first (same session)
   const cached = cacheGet(ENROLLED_KEY);
-  if (cached && Array.isArray(cached)) {
-    enrolledSlugs = cached;
-    return; // ← no network call if cache is fresh
-  }
-
-  // 2. Only fetch if logged in
+  if (cached && Array.isArray(cached)) { enrolledSlugs = cached; return; }
   const s = getStudent();
   if (!s.id) return;
-
   try {
     const res = await edgeCall('batch-enrolled-af', { student_id: s.id });
     if (!res || !res.ok) return;
@@ -358,17 +745,16 @@ async function loadEnrolled() {
   } catch(_) {}
 }
 
-/* ─── RENDER ─────────────────────────────────────────────── */
-function renderBatches(list) {
-  const grid  = $id('batchGrid');
-  const label = $id('batchCountLabel');
-  if (label) label.textContent = list.length + ' available';
+/* ─── RENDER MOBILE ──────────────────────────────────────── */
+function renderMobBatches(list) {
+  const grid = $id('mobBatchGrid');
+  const lbl  = $id('mobBatchCount');
+  if (lbl) lbl.textContent = list.length + ' available';
   if (!list.length) { grid.innerHTML = '<div class="state-msg">No batches found.</div>'; return; }
-
   grid.innerHTML = list.map(b => {
     const enrolled = isEnrolled(b.courseSlug);
     return `<div class="batch-card${enrolled?' enrolled':''}">
-      <div class="batch-img-wrap" onclick="openDetail('${b.id}')">
+      <div class="batch-img-wrap" onclick="openMobDetail('${b.id}')">
         <img class="batch-img" src="${esc(b.image)}" alt="${esc(b.title)}" loading="lazy"
           onerror="this.style.background='linear-gradient(135deg,#4f46e5,#06b6d4)';this.src=''"/>
       </div>
@@ -377,7 +763,7 @@ function renderBatches(list) {
           <span class="batch-cat">${esc(b.category)}</span>
           <span class="batch-lang">${esc(b.language)}</span>
         </div>
-        <div class="batch-title" onclick="openDetail('${b.id}')">${esc(b.title)}</div>
+        <div class="batch-title" onclick="openMobDetail('${b.id}')">${esc(b.title)}</div>
         <div class="batch-sub">${esc(b.subtitle)}</div>
         <div class="batch-status">
           <span class="batch-dot${enrolled?' ok':''}"></span>
@@ -396,7 +782,52 @@ function renderBatches(list) {
               ? `<button class="buy-btn enrolled-btn" disabled>Enrolled ✓</button>`
               : `<button class="buy-btn" onclick="buyDirect('${b.id}',this)">Buy Now</button>`
             }
-            <button class="arrow-btn" onclick="openDetail('${b.id}')">›</button>
+            <button class="arrow-btn" onclick="openMobDetail('${b.id}')">›</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ─── RENDER DESKTOP ─────────────────────────────────────── */
+function renderDtBatches(list) {
+  const grid = $id('dtBatchGrid');
+  const lbl  = $id('dtBatchCount');
+  if (lbl) lbl.textContent = list.length + ' available';
+  if (!list.length) { grid.innerHTML = '<div class="dt-state-msg">No batches found.</div>'; return; }
+  grid.innerHTML = list.map(b => {
+    const enrolled = isEnrolled(b.courseSlug);
+    return `<div class="dt-batch-card${enrolled?' enrolled':''}">
+      <div class="dt-batch-thumb" onclick="openDtDetail('${b.id}')">
+        <img src="${esc(b.image)}" alt="${esc(b.title)}" loading="lazy"
+          onerror="this.style.background='linear-gradient(135deg,#7c3aed,#2563eb)';this.src=''"/>
+        ${enrolled?'<div class="dt-enrolled-ribbon">✓ Enrolled</div>':''}
+      </div>
+      <div class="dt-batch-body">
+        <div class="dt-batch-meta">
+          <span class="dt-batch-cat">${esc(b.category)}</span>
+          <span class="dt-batch-lang">${esc(b.language)}</span>
+        </div>
+        <div class="dt-batch-title" onclick="openDtDetail('${b.id}')">${esc(b.title)}</div>
+        <div class="dt-batch-sub">${esc(b.subtitle)}</div>
+        <div class="dt-batch-status">
+          <span class="dt-status-dot${enrolled?' ok':''}"></span>
+          <span>${enrolled?'Access active':esc(b.status)}</span>
+          <span style="margin:0 4px;opacity:.4;">·</span>
+          <span>${enrolled?'Enrolled':'Test Payment'}</span>
+        </div>
+        <div class="dt-batch-footer">
+          <div class="dt-price-block">
+            <div class="dt-price-main"><strong>₹${b.price}</strong><del>₹${b.oldPrice}</del></div>
+            <div class="dt-price-off">${DISCOUNT}% OFF</div>
+          </div>
+          <div class="dt-card-btns">
+            ${enrolled
+              ? `<button class="dt-buy-btn enrolled-btn" disabled>Enrolled ✓</button>`
+              : `<button class="dt-buy-btn" onclick="buyDirect('${b.id}',this)">Buy Now</button>`
+            }
+            <button class="dt-detail-btn" onclick="openDtDetail('${b.id}')">›</button>
           </div>
         </div>
       </div>
@@ -405,66 +836,91 @@ function renderBatches(list) {
 }
 
 /* ─── FILTER ─────────────────────────────────────────────── */
-function filterBatches() {
-  const q = ($id('searchInput').value || '').trim().toLowerCase();
-  if (!q) { renderBatches(BATCHES); return; }
-  renderBatches(BATCHES.filter(b =>
+function filterBatches(target) {
+  const inputId = target === 'dt' ? 'dtSearchInput' : 'mobSearchInput';
+  const q = ($id(inputId)?.value || '').trim().toLowerCase();
+  const filtered = !q ? BATCHES : BATCHES.filter(b =>
     b.title.toLowerCase().includes(q) ||
     b.subtitle.toLowerCase().includes(q) ||
     b.courseSlug.toLowerCase().includes(q)
-  ));
+  );
+  if (target === 'dt') renderDtBatches(filtered);
+  else renderMobBatches(filtered);
 }
 
-/* ─── SHOW LIST / DETAIL ─────────────────────────────────── */
-function showList() {
-  $id('listView').style.display = 'block';
-  $id('detailView').classList.remove('active');
-  $id('page').scrollTop = 0;
+/* ─── MOBILE DETAIL ──────────────────────────────────────── */
+function showMobList() {
+  $id('mobListView').style.display = 'block';
+  $id('mobDetailView').classList.remove('active');
+  $id('mobPage').scrollTop = 0;
 }
 
-function openDetail(id) {
+function openMobDetail(id) {
   const b = BATCHES.find(x => x.id === id);
   if (!b) return;
   selectedBatch = b;
   const enrolled = isEnrolled(b.courseSlug);
-
-  $id('detailImg').src                   = b.image;
-  $id('detailTitle').textContent         = b.title;
-  $id('detailLang').textContent          = b.language;
-  $id('detailCat').textContent           = b.category;
-  $id('detailDesc').textContent          = b.subtitle;
-  $id('detailPrice').textContent         = '₹' + b.price;
-  $id('detailOldPrice').textContent      = '₹' + b.oldPrice;
-  $id('detailOff').textContent           = DISCOUNT + '% OFF';
-  $id('detailFull').textContent          = b.details;
-  $id('detailLearn').innerHTML           = b.learn.map(i => `<li>${esc(i)}</li>`).join('');
-  $id('detailFacilities').innerHTML      = b.facilities.map(i => `<li>${esc(i)}</li>`).join('');
-
-  const btn = $id('detailBuyBtn');
-  if (enrolled) {
-    btn.textContent = 'Already Enrolled ✓'; btn.disabled = true; btn.classList.add('enrolled-btn');
-  } else {
-    btn.textContent = 'Buy Now'; btn.disabled = false; btn.classList.remove('enrolled-btn');
-  }
-
-  $id('listView').style.display = 'none';
-  $id('detailView').classList.add('active');
-  $id('page').scrollTop = 0;
+  $id('mobDetailImg').src        = b.image;
+  $id('mobDetailTitle').textContent = b.title;
+  $id('mobDetailLang').textContent  = b.language;
+  $id('mobDetailCat').textContent   = b.category;
+  $id('mobDetailDesc').textContent  = b.subtitle;
+  $id('mobDetailPrice').textContent = '₹' + b.price;
+  $id('mobDetailOld').textContent   = '₹' + b.oldPrice;
+  $id('mobDetailOff').textContent   = DISCOUNT + '% OFF';
+  $id('mobDetailFull').textContent  = b.details;
+  $id('mobDetailLearn').innerHTML      = b.learn.map(i => `<li>${esc(i)}</li>`).join('');
+  $id('mobDetailFacilities').innerHTML = b.facilities.map(i => `<li>${esc(i)}</li>`).join('');
+  const btn = $id('mobDetailBuyBtn');
+  if (enrolled) { btn.textContent = 'Already Enrolled ✓'; btn.disabled = true; btn.classList.add('enrolled-btn'); }
+  else { btn.textContent = 'Buy Now'; btn.disabled = false; btn.classList.remove('enrolled-btn'); }
+  $id('mobListView').style.display = 'none';
+  $id('mobDetailView').classList.add('active');
+  $id('mobPage').scrollTop = 0;
 }
 
-/* ─── LOAD RAZORPAY ON DEMAND ────────────────────────────── */
+/* ─── DESKTOP DETAIL PANEL ───────────────────────────────── */
+function openDtDetail(id) {
+  const b = BATCHES.find(x => x.id === id);
+  if (!b) return;
+  selectedBatch = b;
+  const enrolled = isEnrolled(b.courseSlug);
+  $id('dtDetailPanelTitle').textContent = b.title;
+  $id('dtDetailImg').src    = b.image;
+  $id('dtDetailTitle').textContent = b.title;
+  $id('dtDetailDesc').textContent  = b.subtitle;
+  $id('dtDetailPrice').textContent = '₹' + b.price;
+  $id('dtDetailOld').textContent   = '₹' + b.oldPrice;
+  $id('dtDetailOff').textContent   = DISCOUNT + '% OFF';
+  $id('dtDetailFull').textContent  = b.details;
+  $id('dtDetailMeta').innerHTML =
+    `<span class="dt-batch-cat">${esc(b.category)}</span><span class="dt-batch-lang">${esc(b.language)}</span>`;
+  $id('dtDetailLearn').innerHTML      = b.learn.map(i => `<li>${esc(i)}</li>`).join('');
+  $id('dtDetailFacilities').innerHTML = b.facilities.map(i => `<li>${esc(i)}</li>`).join('');
+  const btn = $id('dtDetailBuyBtn');
+  if (enrolled) { btn.textContent = 'Already Enrolled ✓'; btn.disabled = true; btn.classList.add('enrolled-btn'); }
+  else { btn.textContent = 'Buy Now →'; btn.disabled = false; btn.classList.remove('enrolled-btn'); }
+  $id('dtDetailOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDtDetail() {
+  $id('dtDetailOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  selectedBatch = null;
+}
+
+/* ─── RAZORPAY LAZY ──────────────────────────────────────── */
 function loadRazorpay() {
   return new Promise((resolve, reject) => {
     if (razorpayLoaded && typeof Razorpay !== 'undefined') { resolve(); return; }
     const s = document.createElement('script');
     s.src = 'https://checkout.razorpay.com/v1/checkout.js';
     s.onload  = () => { razorpayLoaded = true; resolve(); };
-    s.onerror = () => reject(new Error('Razorpay script failed to load.'));
+    s.onerror = () => reject(new Error('Razorpay failed to load.'));
     document.head.appendChild(s);
   });
 }
-
-/* ─── LOAD SUPABASE SDK ON DEMAND ────────────────────────── */
 function loadSupabaseSDK() {
   return new Promise((resolve, reject) => {
     if (typeof supabase !== 'undefined') { resolve(); return; }
@@ -484,49 +940,45 @@ function buyDirect(id, btn) {
   selectedBatch = b;
   startPayment(b, btn);
 }
-
 function buySelected() {
   if (!selectedBatch) return;
   if (isEnrolled(selectedBatch.courseSlug)) { showToast('You already have access.','ok','Enrolled'); return; }
-  startPayment(selectedBatch, $id('detailBuyBtn'));
+  const btn = isDesktop() ? $id('dtDetailBuyBtn') : $id('mobDetailBuyBtn');
+  startPayment(selectedBatch, btn);
 }
 
 async function startPayment(batch, btn) {
   const s = getStudent();
   if (!s.id) { showToast('Please login first to purchase a batch.','warn','Login Required'); return; }
   if (!batch.courseId) { showToast('Course ID missing.','err','Error'); return; }
-
   if (btn) { btn.disabled = true; btn.textContent = 'Loading…'; }
-
   try {
-    // Load Razorpay + Supabase only NOW (lazy)
     await loadSupabaseSDK();
     await loadRazorpay();
-
     if (btn) btn.textContent = 'Checking…';
     const check = await edgeCall('batch-course-check-af', { course_id:batch.courseId, course_slug:batch.courseSlug });
     if (!check || !check.ok) throw new Error(check?.message || 'Course verification failed.');
-
     if (btn) btn.textContent = 'Opening Payment…';
-
     const options = {
       key: RAZORPAY_KEY, amount: batch.price * 100, currency: 'INR',
       name: 'AcademeForge', description: batch.title, image: '',
       prefill: { name:s.name, email:s.email, contact:s.mobile },
       notes: { student_uuid:s.id, student_id:s.student_id, course_id:batch.courseId, course_slug:batch.courseSlug, batch_title:batch.title },
       method: { upi:true, card:true, netbanking:true, wallet:true, paylater:false, emi:false },
-      theme: { color:'#4f46e5' },
+      theme: { color:'#7C3AED' },
       handler: async function(response) {
         try {
           if (btn) btn.textContent = 'Adding Access…';
           await grantAccess(batch, response);
-          cacheClear(ENROLLED_KEY); // invalidate enrolled cache after purchase
+          cacheClear(ENROLLED_KEY);
           await loadEnrolled();
           showToast('Batch access added successfully!','ok','Payment Successful');
-          renderBatches(BATCHES);
-          showList();
+          renderMobBatches(BATCHES);
+          renderDtBatches(BATCHES);
+          showMobList();
+          closeDtDetail();
         } catch(err) {
-          showToast(err.message || 'Payment done but access failed.','err','Access Error');
+          showToast(err.message || 'Access update failed.','err','Error');
           if (btn) { btn.disabled = false; btn.textContent = 'Buy Now'; }
         }
       },
@@ -565,7 +1017,7 @@ async function grantAccess(batch, paymentResponse) {
   return true;
 }
 
-/* ─── FORCE REFRESH (manual button) ─────────────────────── */
+/* ─── FORCE REFRESH ──────────────────────────────────────── */
 function forceRefresh() {
   cacheClear(CACHE_KEY);
   cacheClear(ENROLLED_KEY);
@@ -573,80 +1025,79 @@ function forceRefresh() {
   init(true);
 }
 
+/* ─── KEYBOARD ───────────────────────────────────────────── */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeDtDetail();
+});
+
+/* ─── MOBILE SWIPE ───────────────────────────────────────── */
+(function(){
+  let sx = 0, sy = 0;
+  document.addEventListener('touchstart', e => {
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dy) > Math.abs(dx)) return;
+    const t = 80;
+    if (dx > t) window.location.href = '/student/index.html';
+    if (dx < -t) window.location.href = '/community/index.html';
+  }, { passive: true });
+})();
+
+  // Disable Ctrl + Plus/Minus/0
+document.addEventListener("keydown", (e) => {
+  if (
+    e.ctrlKey &&
+    ["+", "-", "=", "_", "0"].includes(e.key)
+  ) {
+    e.preventDefault();
+  }
+});
+
+// Disable Ctrl + Mouse Wheel Zoom
+document.addEventListener(
+  "wheel",
+  (e) => {
+    if (e.ctrlKey) {
+      e.preventDefault();
+    }
+  },
+  { passive: false }
+);
+  
 /* ─── INIT ───────────────────────────────────────────────── */
 async function init(force) {
-  // STEP 1: Render BATCHES immediately from static data (zero network)
-  // Always show content right away — no loading spinner needed since data is static.
-  renderBatches(BATCHES);
+  renderMobBatches(BATCHES);
+  renderDtBatches(BATCHES);
+  updateStreakBadge(parseInt(localStorage.getItem('af_streak')||'0'));
 
-  // STEP 2: Check enrolled cache
   const cachedEnrolled = cacheGet(ENROLLED_KEY);
   if (cachedEnrolled && !force) {
     enrolledSlugs = cachedEnrolled;
-    renderBatches(BATCHES); // re-render with enrolled state
-    // Show cache bar
+    renderMobBatches(BATCHES);
+    renderDtBatches(BATCHES);
     try {
       const raw = localStorage.getItem(ENROLLED_KEY);
       if (raw) { const obj = JSON.parse(raw); showCacheBar(obj.ts); }
     } catch(_){}
-    return; // ← done, no network at all
+    return;
   }
 
-  // STEP 3: Fetch enrolled from network only if not cached / force refresh
   const s = getStudent();
   if (s.id) {
-    // Load supabase SDK lazily (only now)
     try {
       await loadSupabaseSDK();
       await loadEnrolled();
-      renderBatches(BATCHES); // re-render with fresh enrolled state
-    } catch(_) {
-      // silently fail — static batches already visible
-    }
+      renderMobBatches(BATCHES);
+      renderDtBatches(BATCHES);
+    } catch(_) {}
   }
-  // Hide cache bar since data is fresh
-  const bar = $id('cacheBar');
-  if (bar) bar.style.display = 'none';
+  hideCacheBar();
 }
 
 document.addEventListener('DOMContentLoaded', () => init(false));
-
-  /* ── SWIPE NAVIGATION ── */
-(function () {
-
-  let startX = 0;
-  let startY = 0;
-
-  document.addEventListener("touchstart", function (e) {
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-  }, { passive: true });
-
-  document.addEventListener("touchend", function (e) {
-
-    const endX = e.changedTouches[0].clientX;
-    const endY = e.changedTouches[0].clientY;
-
-    const diffX = endX - startX;
-    const diffY = endY - startY;
-
-    if (Math.abs(diffY) > Math.abs(diffX)) return;
-
-    const threshold = 80;
-
-   // Right Swipe → Student
-if (diffX > threshold) {
-  window.location.href = "/student/index.html";
-}
-
-// Left Swipe → Community
-if (diffX < -threshold) {
-  window.location.href = "/community/index.html";
-}
-
-  }, { passive: true });
-
-})();
 </script>
 </body>
 </html>
