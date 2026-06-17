@@ -3,9 +3,12 @@
 <head>
 <script>
 !function(){
-  var dark = localStorage.getItem('af_dark_mode');
+var dark = localStorage.getItem('af_dark_mode');
 
-  document.documentElement.setAttribute('data-theme', dark === '0' ? 'light' : 'dark');
+document.documentElement.setAttribute(
+  'data-theme',
+  dark === '1' ? 'dark' : 'light'
+);
 }();
 </script>
 <meta charset="UTF-8"/>
@@ -919,7 +922,7 @@ function applyTheme(dark) {
 }
 
 window.addEventListener('storage', e => {
-  if (e.key === 'af_dark_mode') applyTheme(e.newValue !== '0');
+  if (e.key === 'af_dark_mode') applyTheme(e.newValue === '1');
 });
 
 /* ═══════════════════════════════════════════════
@@ -1584,9 +1587,8 @@ function openPdf(url) { if(!url){showToast('PDF not available yet.','warn','Lock
    INIT
 ═══════════════════════════════════════════════ */
 function init() {
-  // Apply theme from global key
-  const dark=localStorage.getItem('af_dark_mode')!=='0';
-  applyTheme(dark);
+const dark=localStorage.getItem('af_dark_mode')==='1';
+applyTheme(dark);
 
   const loggedIn=localStorage.getItem('af_student_logged_in')==='true';
   if (loggedIn) {
@@ -1625,7 +1627,7 @@ window.addEventListener('storage', e => {
     if(Math.abs(diffY)>Math.abs(diffX)) return;
     const SWIPE_THRESHOLD=80;
     if(diffX>SWIPE_THRESHOLD)  window.location.href='/indix.html';
-    if(diffX<-SWIPE_THRESHOLD) window.location.href='/batches/indix.html';
+    if(diffX<-SWIPE_THRESHOLD) window.location.href='/batches/index.html';
     isTouch=false;
   },{passive:true});
 })();
