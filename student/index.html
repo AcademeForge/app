@@ -665,11 +665,11 @@ input, textarea, select { -webkit-user-select: text; -moz-user-select: text; use
   </div><!-- /mob-page -->
 
   <nav class="mob-bnav">
-    <button class="mob-bnav-btn" onclick="window.location.href='/index.html'"><span class="mob-bnav-icon">🏠</span><span class="mob-bnav-label">Home</span></button>
+    <button class="mob-bnav-btn" onclick="window.location.href='/indix.html'"><span class="mob-bnav-icon">🏠</span><span class="mob-bnav-label">Home</span></button>
     <button class="mob-bnav-btn active"><span class="mob-bnav-icon">🎓</span><span class="mob-bnav-label">Student</span></button>
-    <button class="mob-bnav-btn" onclick="window.location.href='/batches/index.html'"><span class="mob-bnav-icon">📚</span><span class="mob-bnav-label">Batches</span></button>
+    <button class="mob-bnav-btn" onclick="window.location.href='/batches/indix.html'"><span class="mob-bnav-icon">📚</span><span class="mob-bnav-label">Batches</span></button>
     <button class="mob-bnav-btn" onclick="window.location.href='/community/indix.html'"><span class="mob-bnav-icon">💬</span><span class="mob-bnav-label">Community</span></button>
-    <button class="mob-bnav-btn" onclick="window.location.href='/setting/index.html'"><span class="mob-bnav-icon">⚙️</span><span class="mob-bnav-label">Settings</span></button>
+    <button class="mob-bnav-btn" onclick="window.location.href='/setting/indix.html'"><span class="mob-bnav-icon">⚙️</span><span class="mob-bnav-label">Settings</span></button>
   </nav>
 </div><!-- /mob-shell -->
 <div class="toast-wrap" id="toastWrap"></div>
@@ -1452,6 +1452,10 @@ function renderChapters(chapters) {
 }
 
 async function openChapterContent(chapterId,isLocked) {
+   if (!isLocked && selectedCourse) {
+  saveNavState({ panel: 'content', courseId: selectedCourse.id, learningMode: learningMode, chapterId: chapterId });
+}
+  
   if (isLocked===true) {
     // Mobile
     $('contentTitle').textContent='🔒 Chapter Locked';
@@ -1468,10 +1472,6 @@ async function openChapterContent(chapterId,isLocked) {
   if (learningMode==='notes') await loadNotes(chapterId);
   else await loadLectures(chapterId);
   showPanel('content'); dtShowPanel('content');
-}
-
-  if (!isLocked && selectedCourse) {
-  saveNavState({ panel: 'content', courseId: selectedCourse.id, learningMode: learningMode, chapterId: chapterId });
 }
 /* ═══════════════════════════════════════════════
    LECTURES
@@ -1624,8 +1624,8 @@ window.addEventListener('storage', e => {
     const diffX=endX-startX, diffY=endY-startY;
     if(Math.abs(diffY)>Math.abs(diffX)) return;
     const SWIPE_THRESHOLD=80;
-    if(diffX>SWIPE_THRESHOLD)  window.location.href='/index.html';
-    if(diffX<-SWIPE_THRESHOLD) window.location.href='/batches/index.html';
+    if(diffX>SWIPE_THRESHOLD)  window.location.href='/indix.html';
+    if(diffX<-SWIPE_THRESHOLD) window.location.href='/batches/indix.html';
     isTouch=false;
   },{passive:true});
 })();
