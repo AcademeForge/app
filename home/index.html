@@ -413,7 +413,8 @@ function renderTaskCard(t){
 let allTasks = [];
 
 function renderStats(tasks){
-  const total=tasks.length, done=tasks.filter(t=>t.completed).length, high=tasks.filter(t=>t.priority==='high'&&!t.completed).length;
+  const today=tasks.filter(t=>t.due_date&&toDateKey(new Date(t.due_date))===todayKey);
+  const total=today.length, done=today.filter(t=>t.completed).length, high=today.filter(t=>t.priority==='high'&&!t.completed).length;
   const pct=total?Math.round((done/total)*100):0;
   $('statTotal').textContent=total; $('statDone').textContent=done; $('statHigh').textContent=high;
   $('pcPct').textContent=pct+'%'; $('streakVal').textContent=pct+'%';
