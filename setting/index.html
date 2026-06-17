@@ -3,8 +3,11 @@
 <head>
 <script>
 !function(){
-  var dark = localStorage.getItem('af_dark_mode');
-  document.documentElement.setAttribute('data-theme', dark === '0' ? 'light' : 'dark');
+var dark = localStorage.getItem('af_dark_mode');
+document.documentElement.setAttribute(
+  'data-theme',
+  dark === '1' ? 'dark' : 'light'
+);
 }();
 </script>
 <meta charset="UTF-8"/>
@@ -1220,10 +1223,8 @@ window.addEventListener('storage', e => {
 
 /* ── INIT ── */
 (function init() {
-  // af_dark_mode: '1' = dark, '0' = light, null = default dark
-  const dark = localStorage.getItem('af_dark_mode') !== '0';
-  applyTheme(dark);
-  loadProfile();
+const dark = localStorage.getItem('af_dark_mode') === '1';
+applyTheme(dark);
 })();
 
   (() => {
