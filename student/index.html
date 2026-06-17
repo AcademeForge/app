@@ -4,7 +4,7 @@
 <script>
 !function(){
   var dark = localStorage.getItem('af_dark_mode');
-  // null/undefined → default dark (match Settings behavior)
+
   document.documentElement.setAttribute('data-theme', dark === '0' ? 'light' : 'dark');
 }();
 </script>
@@ -665,11 +665,11 @@ input, textarea, select { -webkit-user-select: text; -moz-user-select: text; use
   </div><!-- /mob-page -->
 
   <nav class="mob-bnav">
-    <button class="mob-bnav-btn" onclick="window.location.href='/indix.html'"><span class="mob-bnav-icon">🏠</span><span class="mob-bnav-label">Home</span></button>
+    <button class="mob-bnav-btn" onclick="window.location.href='/index.html'"><span class="mob-bnav-icon">🏠</span><span class="mob-bnav-label">Home</span></button>
     <button class="mob-bnav-btn active"><span class="mob-bnav-icon">🎓</span><span class="mob-bnav-label">Student</span></button>
-    <button class="mob-bnav-btn" onclick="window.location.href='/batches/indix.html'"><span class="mob-bnav-icon">📚</span><span class="mob-bnav-label">Batches</span></button>
+    <button class="mob-bnav-btn" onclick="window.location.href='/batches/index.html'"><span class="mob-bnav-icon">📚</span><span class="mob-bnav-label">Batches</span></button>
     <button class="mob-bnav-btn" onclick="window.location.href='/community/indix.html'"><span class="mob-bnav-icon">💬</span><span class="mob-bnav-label">Community</span></button>
-    <button class="mob-bnav-btn" onclick="window.location.href='/setting/indix.html'"><span class="mob-bnav-icon">⚙️</span><span class="mob-bnav-label">Settings</span></button>
+    <button class="mob-bnav-btn" onclick="window.location.href='/setting/index.html'"><span class="mob-bnav-icon">⚙️</span><span class="mob-bnav-label">Settings</span></button>
   </nav>
 </div><!-- /mob-shell -->
 <div class="toast-wrap" id="toastWrap"></div>
