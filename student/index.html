@@ -1592,7 +1592,7 @@ function openVideo(url,title) {
   const vid=extractYouTubeId(url);
   if (!vid) { showToast('Invalid video URL.','err','Error'); return; }
   const t=encodeURIComponent(title||'Lecture'), back=encodeURIComponent(location.href);
-  location.href='../lecture-player.html?v='+vid+'&title='+t+'&back='+back;
+  location.href='../student/lecture-player.html?v='+vid+'&title='+t+'&back='+back;
 }
 function openPdf(url) { if(!url){showToast('PDF not available yet.','warn','Locked');return;} window.open(url,'_blank'); }
 
