@@ -3,17 +3,17 @@
 <head>
 <script>
 (function(){
- 
-  var dark = localStorage.getItem('af_dark_mode');
-  if (window.innerWidth >= 768) {
- 
-    document.documentElement.setAttribute('data-theme', dark === '0' ? 'light' : 'dark');
-  } else {
-   
-    document.documentElement.setAttribute('data-theme', dark === '1' ? 'dark' : 'light');
-  }
+
+  const dark = localStorage.getItem('af_dark_mode');
+
+  document.documentElement.setAttribute(
+    'data-theme',
+    dark === '1' ? 'dark' : 'light'
+  );
+
   if(sessionStorage.getItem('af_splash_shown'))
     document.documentElement.classList.add('no-splash');
+
 })();
 </script>
 <meta charset="UTF-8"/>
@@ -1319,15 +1319,12 @@ window.openExternal = openExternal;
 
 /* ── STORAGE SYNC ── */
 window.addEventListener('storage', e=>{
-  if(e.key==='af_dark_mode') {
-    if(isDesktop()) {
-      /* Desktop: dark unless explicitly set to light */
-      document.documentElement.setAttribute('data-theme', e.newValue==='0' ? 'light' : 'dark');
-    } else {
-      /* Mobile: light unless explicitly set to dark */
-      document.documentElement.setAttribute('data-theme', e.newValue==='1' ? 'dark' : 'light');
-    }
-  }
+if(e.key === 'af_dark_mode') {
+  document.documentElement.setAttribute(
+    'data-theme',
+    e.newValue === '1' ? 'dark' : 'light'
+  );
+}
   if(['af_student_name','af_student_phone','af_student_mobile','af_student_uuid'].includes(e.key)){
     renderQuickCards();
     renderDesktopQuickCards();
