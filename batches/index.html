@@ -4,7 +4,11 @@
 <script>
 !function(){
   var dark = localStorage.getItem('af_dark_mode');
-  document.documentElement.setAttribute('data-theme', dark === '0' ? 'light' : 'dark');
+
+  document.documentElement.setAttribute(
+    'data-theme',
+    dark === '1' ? 'dark' : 'light'
+  );
 }();
 </script>
 <meta charset="UTF-8"/>
@@ -774,10 +778,10 @@ function getStudent(){
 /* ─── THEME SYNC (cross-page) ─────────────────────────────── */
 window.addEventListener('storage', e => {
   if (e.key === 'af_dark_mode') {
-    document.documentElement.setAttribute('data-theme', e.newValue === '0' ? 'light' : 'dark');
-  }
-  if (['af_student_name','af_student_mobile','af_student_phone','af_streak'].includes(e.key)) {
-    updateStreakBadge(parseInt(localStorage.getItem('af_streak')||'0'));
+    document.documentElement.setAttribute(
+      'data-theme',
+      e.newValue === '1' ? 'dark' : 'light'
+    );
   }
 });
 
