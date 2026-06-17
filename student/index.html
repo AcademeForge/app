@@ -1639,7 +1639,7 @@ window.addEventListener('storage', e => {
     const diffX=endX-startX, diffY=endY-startY;
     if(Math.abs(diffY)>Math.abs(diffX)) return;
     const SWIPE_THRESHOLD=80;
-    if(diffX>SWIPE_THRESHOLD)  window.location.href='/indix.html';
+    if(diffX>SWIPE_THRESHOLD)  window.location.href='/index.html';
     if(diffX<-SWIPE_THRESHOLD) window.location.href='/batches/index.html';
     isTouch=false;
   },{passive:true});
