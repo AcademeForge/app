@@ -3,13 +3,13 @@
 <head>
 <script>
 (function(){
-  /* Theme sync: AMOLED dark default for desktop, light default for mobile */
+ 
   var dark = localStorage.getItem('af_dark_mode');
   if (window.innerWidth >= 768) {
-    /* Desktop: always AMOLED dark unless user explicitly set light */
+ 
     document.documentElement.setAttribute('data-theme', dark === '0' ? 'light' : 'dark');
   } else {
-    /* Mobile: respects user preference, defaults to light */
+   
     document.documentElement.setAttribute('data-theme', dark === '1' ? 'dark' : 'light');
   }
   if(sessionStorage.getItem('af_splash_shown'))
