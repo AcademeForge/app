@@ -891,14 +891,27 @@ const LECTURES_PFX  = 'af_lectures_v1_';
 const NOTES_PFX     = 'af_notes_v1_';
 const CACHE_TTL     = 20 * 60 * 1000;
 const NAV_STATE_KEY = 'af_nav_state_v1';
+const NAV_STATE_KEY = 'af_nav_state_v1';
+
 function saveNavState(state) {
-  try { localStorage.setItem(NAV_STATE_KEY, JSON.stringify(state)); } catch(_) {}
+  try {
+    sessionStorage.setItem(NAV_STATE_KEY, JSON.stringify(state));
+  } catch (_) {}
 }
+
 function loadNavState() {
-  try { const r = localStorage.getItem(NAV_STATE_KEY); return r ? JSON.parse(r) : null; } catch(_) { return null; }
+  try {
+    const r = sessionStorage.getItem(NAV_STATE_KEY);
+    return r ? JSON.parse(r) : null;
+  } catch (_) {
+    return null;
+  }
 }
+
 function clearNavState() {
-  try { localStorage.removeItem(NAV_STATE_KEY); } catch(_) {}
+  try {
+    sessionStorage.removeItem(NAV_STATE_KEY);
+  } catch (_) {}
 }
   
 const STUDENT_URL = "https://afooyyydhlwngzssgqih.supabase.co";
