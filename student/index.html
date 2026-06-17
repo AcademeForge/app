@@ -887,7 +887,17 @@ const CHAPTERS_PFX  = 'af_chapters_v1_';
 const LECTURES_PFX  = 'af_lectures_v1_';
 const NOTES_PFX     = 'af_notes_v1_';
 const CACHE_TTL     = 20 * 60 * 1000;
-
+const NAV_STATE_KEY = 'af_nav_state_v1';
+function saveNavState(state) {
+  try { localStorage.setItem(NAV_STATE_KEY, JSON.stringify(state)); } catch(_) {}
+}
+function loadNavState() {
+  try { const r = localStorage.getItem(NAV_STATE_KEY); return r ? JSON.parse(r) : null; } catch(_) { return null; }
+}
+function clearNavState() {
+  try { localStorage.removeItem(NAV_STATE_KEY); } catch(_) {}
+}
+  
 const STUDENT_URL = "https://afooyyydhlwngzssgqih.supabase.co";
 const STUDENT_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb295eXlkaGx3bmd6c3NncWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDQxMjgsImV4cCI6MjA5NDIyMDEyOH0.KG0XO0oP_2MpewHoIwTtbrKg5FkyOYRUtVzLH1MSJiE";
 
@@ -1211,6 +1221,7 @@ function saveSession(student,token,deviceId) {
 function doLogout() {
   ['af_student_logged_in','af_student_uuid','af_student_id','af_student_mobile','af_student_name','af_student_email','af_session_token','af_student_phone'].forEach(k=>localStorage.removeItem(k));
   cacheClear(COURSES_KEY);
+  clearNavState();
   enrolledCourses=[]; selectedCourse=null; learningMode='lectures';
   // Mobile
   $('cacheBar').classList.add('hidden');
@@ -1234,13 +1245,13 @@ function openAfterLogin(student) {
   // Desktop
   $('dtWelcomeText').textContent='Welcome '+name+' 🎓';
   dtShowPanel('courses');
-  loadCourses();
+  loadCourses(false, loadNavState());
 }
 
 /* ═══════════════════════════════════════════════
    COURSES (with cache)
 ═══════════════════════════════════════════════ */
-async function loadCourses(force) {
+async function loadCourses(force, navState) {
   const uuid=localStorage.getItem('af_student_uuid');
   const name=localStorage.getItem('af_student_name')||'Student';
   $('welcomeText').textContent='Welcome '+name;
@@ -1254,6 +1265,7 @@ async function loadCourses(force) {
       enrolledCourses=cached;
       renderCourseCards();
       showPanel('courses'); dtShowPanel('courses');
+      if (navState) restoreNavState(navState);
       const ts=cacheTimestamp(COURSES_KEY);
       const mins=Math.round((Date.now()-ts)/60000);
       const msg=mins>0?`Last updated ${mins}m ago`:'Updated just now';
@@ -1275,6 +1287,7 @@ async function loadCourses(force) {
   cacheSet(COURSES_KEY,enrolledCourses);
   renderCourseCards();
   showPanel('courses'); dtShowPanel('courses');
+  if (navState) restoreNavState(navState);
 }
 
 function forceRefreshCourses() {
@@ -1304,11 +1317,45 @@ function showNoCourse(msg) {
   showPanel('noCourse'); dtShowPanel('noCourse');
 }
 
+  async function restoreNavState(state) {
+  if (!state || !state.panel || !state.courseId) return;
+
+  // Restore selected course
+  selectedCourse = enrolledCourses.find(c => String(c.id) === String(state.courseId));
+  if (!selectedCourse) return;
+
+  if (state.panel === 'courseDetail') {
+    openCourseDetail(state.courseId);
+    return;
+  }
+
+  if (state.panel === 'learning') {
+    openCourseDetail(state.courseId);
+    startLearning();
+    return;
+  }
+
+  if (state.panel === 'chapters' && state.learningMode) {
+    openCourseDetail(state.courseId);
+    startLearning();
+    await openLearningMode(state.learningMode);
+    return;
+  }
+
+  if (state.panel === 'content' && state.learningMode && state.chapterId) {
+    openCourseDetail(state.courseId);
+    startLearning();
+    await openLearningMode(state.learningMode);
+    await openChapterContent(state.chapterId, false);
+    return;
+  }
+}
 /* ═══════════════════════════════════════════════
    COURSE DETAIL
 ═══════════════════════════════════════════════ */
 function openCourseDetail(courseId) {
   selectedCourse=enrolledCourses.find(c=>String(c.id)===String(courseId));
+  saveNavState({ panel: 'courseDetail', courseId: courseId });
   if (!selectedCourse) { showToast('Course not found.','err','Error'); return; }
 
   const icon=safe(selectedCourse.icon,'📘');
@@ -1341,6 +1388,7 @@ function startLearning() {
   const label=safe(selectedCourse.icon,'📘')+' '+safe(selectedCourse.title,'Course');
   $('learningTitle').textContent=label;
   $('dtLearningTitle').textContent='Start Learning — '+safe(selectedCourse.title,'Course');
+  saveNavState({ panel: 'learning', courseId: selectedCourse.id });
   showPanel('learning'); dtShowPanel('learning');
 }
 
@@ -1349,6 +1397,7 @@ function startLearning() {
 ═══════════════════════════════════════════════ */
 async function openLearningMode(mode) {
   learningMode=(mode==='notes')?'notes':'lectures';
+  if (selectedCourse) saveNavState({ panel: 'chapters', courseId: selectedCourse.id, learningMode: learningMode });
   const modeLabel=learningMode==='lectures'?'🎥 Lectures':'📝 Notes';
   $('chapterModeTitle').textContent=modeLabel;
   $('dtChapterModeTitle').textContent=modeLabel;
@@ -1421,6 +1470,9 @@ async function openChapterContent(chapterId,isLocked) {
   showPanel('content'); dtShowPanel('content');
 }
 
+  if (!isLocked && selectedCourse) {
+  saveNavState({ panel: 'content', courseId: selectedCourse.id, learningMode: learningMode, chapterId: chapterId });
+}
 /* ═══════════════════════════════════════════════
    LECTURES
 ═══════════════════════════════════════════════ */
