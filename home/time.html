@@ -52,7 +52,7 @@ input,textarea{-webkit-user-select:text;user-select:text;}
 
 /* ── TOP STRIP ── */
 .top-strip{overflow:hidden;border-bottom:1px solid var(--line);background:rgba(91,79,232,.06);position:relative;z-index:50;width:100%;}
-.strip-track{display:flex;flex-shrink:0;width:max-content;min-width:max-content;min-height:34px;align-items:center;gap:44px;color:var(--ink-mute);font-family:var(--fd);font-size:10.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;white-space:nowrap;animation:stripMove 28s linear infinite;will-change:transform;transform:translate3d(0,0,0);}
+.strip-track{display:flex;flex-shrink:0;width:max-content;min-height:34px;align-items:center;gap:44px;color:var(--ink-mute);font-family:var(--fd);font-size:10.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;white-space:nowrap;will-change:transform;}
 .strip-track span{display:inline-flex;flex-shrink:0;align-items:center;gap:9px;white-space:nowrap;}
 .strip-track span::before{content:'';width:6px;height:6px;flex-shrink:0;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--mint));}
 
@@ -201,7 +201,7 @@ input,textarea{-webkit-user-select:text;user-select:text;}
 .toast span{display:block;margin-top:3px;color:var(--ink-mute);font-size:12px;font-weight:600;}
 
 /* ── ANIMATIONS ── */
-@keyframes stripMove{0%{transform:translate3d(0,0,0);}100%{transform:translate3d(-50%,0,0);}}
+/* strip animation handled by JS */
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 @keyframes loaderSlide{0%{transform:translateX(-110%);}100%{transform:translateX(215%);}}
 
@@ -523,6 +523,40 @@ function showToast(title, msg){
   t.classList.add('show');
   toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2800);
 }
+
+/* ── BANNER SCROLL (RAF - immune to font load timing) ── */
+(function(){
+  var track = document.querySelector('.strip-track');
+  if(!track) return;
+  var pos = 0;
+  var speed = 0.5; // px per frame ~30px/s at 60fps
+  var halfW = 0;
+
+  function measure(){
+    // Half the total scroll width = one set of items
+    halfW = track.scrollWidth / 2;
+  }
+
+  function tick(){
+    pos += speed;
+    if(halfW > 0 && pos >= halfW) pos = 0;
+    track.style.transform = 'translate3d(-' + pos + 'px,0,0)';
+    requestAnimationFrame(tick);
+  }
+
+  // Wait for fonts + layout before measuring
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(function(){
+      measure();
+      requestAnimationFrame(tick);
+    });
+  } else {
+    window.addEventListener('load', function(){
+      measure();
+      requestAnimationFrame(tick);
+    });
+  }
+})();
 
 /* ── BLOCK DEV TOOLS ── */
 document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
