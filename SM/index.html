@@ -539,8 +539,7 @@ input{font:inherit;outline:none;}
     <div class="hdr-right">
       <button class="icon-btn" onclick="history.back()" title="Back">←</button>
       <button class="icon-btn" id="darkBtn" onclick="toggleTheme()" title="Theme">🌙</button>
-      <button class="icon-btn" id="headerAvatarBtn" onclick="openScreen('profileScreen')">👤</button>
-    </div>
+      </div>
   </div>
 </header>
 
@@ -602,15 +601,6 @@ input{font:inherit;outline:none;}
     <div style="font-family:var(--ff-d);font-size:.95rem;font-weight:700;margin-bottom:6px;color:var(--t-1)">Ready to Play?</div>
     <div style="font-size:.75rem;color:var(--t-3);margin-bottom:16px;">Select a board size and difficulty to start</div>
     <button onclick="navToPlay()" class="btn btn-pri btn-full" style="height:50px;font-family:var(--ff-d);">🚀 Start Playing</button>
-  </div>
-
-  <div id="afSyncBar" class="af-sync-bar unsynced">
-    <div class="af-ava" id="afAva">?</div>
-    <div class="af-info">
-      <div class="af-name" id="afName">Not Synced</div>
-      <div class="af-sub" id="afSub">Open AcademeForge app to sync</div>
-    </div>
-    <span class="af-badge warn" id="afBadge">Not Synced</span>
   </div>
 </section>
 
@@ -767,13 +757,6 @@ input{font:inherit;outline:none;}
       <div class="set-row"><div><div class="sr-lbl">Student ID</div></div><span class="sr-val" id="afpcSid">—</span></div>
     </div>
   </div>
-  <div class="sec-lbl">Sync Status</div>
-  <div class="set-section">
-    <div class="set-row"><div><div class="sr-lbl">Profile Sync</div><div class="sr-sub">Account info synced</div></div><span id="nxPlayerStatus" class="nx-chip">—</span></div>
-    <div class="set-row"><div><div class="sr-lbl">Game Statistics</div><div class="sr-sub">Progress and achievements</div></div><span id="nxStatsStatus" class="nx-chip">—</span></div>
-    <div class="set-row"><div><div class="sr-lbl">Leaderboard</div><div class="sr-sub">Rankings updated live</div></div><span id="nxLbStatus" class="nx-chip">—</span></div>
-    <div class="set-row"><div><div class="sr-lbl">Last Sync</div><div class="sr-sub">Updated automatically</div></div><span id="nxLastSync" style="font-size:.68rem;color:var(--t-3)">—</span></div>
-  </div>
 </section>
 
 <!-- ══ LEADERBOARD ══ -->
@@ -847,9 +830,9 @@ input{font:inherit;outline:none;}
   </div>
   <div class="sec-lbl">About</div>
   <div class="set-section">
-    <div class="set-row"><div class="sr-lbl">Version</div><span class="sr-val">Sudoku v6 · Nxdb</span></div>
+    <div class="set-row"><div class="sr-lbl">Version</div><span class="sr-val">Sudoku v7</span></div>
     <div class="set-row"><div class="sr-lbl">Design</div><span class="sr-val">AF Portal System</span></div>
-    <div class="set-row"><div class="sr-lbl">Developer</div><span class="sr-val">AcademeForge</span></div>
+    <div class="set-row"><div class="sr-lbl">Powered By</div><span class="sr-val">AcademeForge</span></div>
   </div>
 </section>
 
@@ -1051,14 +1034,36 @@ function toggleTheme(){
    HELPERS
 ════════════════════════════════════════════ */
 function getAFStudent(){
+  const liveData = {
+    name:      localStorage.getItem('af_student_name') || '',
+    phone:     localStorage.getItem('af_student_mobile') || localStorage.getItem('af_student_phone') || '',
+    email:     localStorage.getItem('af_student_email') || '',
+    studentId: localStorage.getItem('af_student_id') || '',
+    uuid:      localStorage.getItem('af_student_uuid') || '',
+    profilePhoto: localStorage.getItem('af_student_photo') || '',
+    loggedIn:  localStorage.getItem('af_student_logged_in') === 'true'
+  };
+
+
+  if(liveData.studentId){
+    saveAFStudentCache(liveData);
+    return liveData;
+  }
+
+
+  const cached = getCachedAFStudent();
+  if(cached){
+    return cached;
+  }
+
   return {
-    name:      localStorage.getItem('af_student_name')||'',
-    phone:     localStorage.getItem('af_student_mobile')||localStorage.getItem('af_student_phone')||'',
-    email:     localStorage.getItem('af_student_email')||'',
-    studentId: localStorage.getItem('af_student_id')||'',
-    uuid:      localStorage.getItem('af_student_uuid')||'',
-    profilePhoto:localStorage.getItem('af_student_photo')||'',
-    loggedIn:  localStorage.getItem('af_student_logged_in')==='true'
+    name:'',
+    phone:'',
+    email:'',
+    studentId:'',
+    uuid:'',
+    profilePhoto:'',
+    loggedIn:false
   };
 }
 function getXp()    {return nxdbPlayer?(nxdbPlayer.xp||0)          :localData.xp;}
@@ -1197,6 +1202,19 @@ async function doRefresh(){
   }finally{hideRefresh();}
 }
 
+   if(res.player){
+  nxdbPlayer = res.player;
+
+  saveAFStudentCache({
+    name: res.player.name,
+    email: res.player.email,
+    phone: res.player.phone,
+    studentId: res.player.student_id,
+    uuid: res.player.uuid,
+    profilePhoto: res.player.profile_photo,
+    loggedIn: true
+  });
+}
 /* ════════════════════════════════════════════
    SAVE GAME PROGRESS
 ════════════════════════════════════════════ */
@@ -1945,6 +1963,20 @@ window.addEventListener('storage',e=>{
   }
 });
 
+   function saveAFStudentCache(student){
+  localStorage.setItem('af_cached_student', JSON.stringify({
+    ...student,
+    cachedAt: Date.now()
+  }));
+}
+
+function getCachedAFStudent(){
+  try{
+    return JSON.parse(localStorage.getItem('af_cached_student') || 'null');
+  }catch{
+    return null;
+  }
+}
 /* ════════════════════════════════════════════
    SECURITY
 ════════════════════════════════════════════ */
@@ -1964,6 +1996,12 @@ let lastTouch=0;document.addEventListener('touchend',e=>{const now=Date.now();if
    INIT
 ════════════════════════════════════════════ */
 async function init(){
+   const cachedStudent = getCachedAFStudent();
+
+if(cachedStudent){
+  console.log('Loaded from cache:', cachedStudent);
+}
+   
   try{
     loadLocal();loadOfflineQueue();setOnlineState(navigator.onLine);refreshUI();
     const af=getAFStudent();
