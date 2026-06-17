@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Timezy · Master Your Time</title>
 <meta name="theme-color" content="#0a0816"/>
+<link rel="icon" type="image/png" href="/IMG/AF LOGO 3.png"/>
+<link rel="apple-touch-icon" href="/IMG/AF LOGO 3.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800;900&display=swap" rel="stylesheet"/>
@@ -67,6 +69,10 @@ input,textarea{-webkit-user-select:text;user-select:text;}
 .nav{display:flex;align-items:center;gap:clamp(16px,2vw,30px);}
 .nav a{font-size:13.5px;font-weight:700;color:var(--ink-soft);transition:color var(--dur);}
 .nav a:hover{color:var(--ink);}
+.back-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;border-radius:999px;padding:11px 16px;border:1px solid var(--line);background:var(--card);color:var(--ink-soft);font-family:var(--fb);font-weight:800;font-size:13px;transition:background var(--dur),color var(--dur),transform var(--dur);}
+.back-btn:hover{background:var(--card2);color:var(--ink);transform:translateX(-2px);}
+.back-btn:active{transform:scale(.96);}
+.back-arrow{font-size:16px;line-height:1;}
 .hdr-actions{display:flex;align-items:center;gap:10px;}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border-radius:999px;padding:11px 20px;font-family:var(--fb);font-weight:800;font-size:13px;letter-spacing:-.01em;white-space:nowrap;transition:transform var(--dur),box-shadow var(--dur);}
 .btn:hover{transform:translateY(-1px);}
@@ -277,6 +283,9 @@ input,textarea{-webkit-user-select:text;user-select:text;}
     </nav>
 
     <div class="hdr-actions">
+      <button class="back-btn" onclick="window.history.length > 1 ? window.history.back() : window.location.href='../index.html'" aria-label="Go back">
+        <span class="back-arrow">←</span><span>Back</span>
+      </button>
       <button id="themeToggle" class="btn btn-ghost theme-btn" type="button" aria-label="Toggle theme">
         <span id="themeLabel">Light</span>
         <span class="t-switch" aria-hidden="true"><span class="t-dot"></span></span>
