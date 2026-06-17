@@ -1201,19 +1201,7 @@ async function doRefresh(){
   }finally{hideRefresh();}
 }
 
-   if(res.player){
-  nxdbPlayer = res.player;
 
-  saveAFStudentCache({
-    name: res.player.name,
-    email: res.player.email,
-    phone: res.player.phone,
-    studentId: res.player.student_id,
-    uuid: res.player.uuid,
-    profilePhoto: res.player.profile_photo,
-    loggedIn: true
-  });
-}
 /* ════════════════════════════════════════════
    SAVE GAME PROGRESS
 ════════════════════════════════════════════ */
