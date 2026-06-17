@@ -56,11 +56,13 @@ a{text-decoration:none;color:inherit;}
 html,body,*{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-touch-callout:none;}
 input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
 
-.shell{width:100%;max-width:var(--shell);height:100%;height:100dvh;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;}
-@media(min-width:700px){
-  body{padding:28px 0 44px;height:auto;min-height:100dvh;overflow-y:auto;}
-  .shell{border-radius:36px;height:calc(100dvh - 72px);max-height:900px;box-shadow:0 32px 80px rgba(0,0,0,.18),0 8px 24px rgba(79,70,229,.12);}
-}
+/* Scrollbar for Desktop */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--b1); border-radius: var(--rf); }
+::-webkit-scrollbar-thumb:hover { background: var(--bc); }
+
+.shell{width:100%;max-width:var(--shell);height:100%;height:100dvh;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;position:relative;}
 
 /* ── HEADER ── */
 .hdr{
@@ -75,18 +77,19 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
 .hdr-logo{display:flex;align-items:center;gap:9px;flex:1;}
 .hdr-logo-icon{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--p),var(--acc));display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 3px 10px rgba(79,70,229,.3);}
 .hdr-logo-text{font-family:var(--fd);font-size:17px;font-weight:900;color:var(--t1);}
-.hdr-notif{width:36px;height:36px;border-radius:11px;background:var(--grp);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-size:16px;position:relative;}
+.hdr-notif{width:36px;height:36px;border-radius:11px;background:var(--grp);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-size:16px;position:relative;cursor:pointer;transition:background var(--dur);}
+.hdr-notif:hover{background:var(--grph);}
 
 /* ── PAGE ── */
 .page{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;padding:16px 16px calc(var(--nav-h)+32px+env(safe-area-inset-bottom,0px));}
-.page::-webkit-scrollbar{width:0;}
 
 /* ── LOGIN REQUIRED ── */
 .login-required{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;height:100%;padding:32px 24px;text-align:center;}
 .lr-icon{width:72px;height:72px;border-radius:24px;background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;font-size:32px;}
 .lr-title{font-family:var(--fd);font-size:22px;font-weight:900;color:var(--t1);}
 .lr-sub{font-size:13.5px;color:var(--t2);font-weight:600;line-height:1.6;max-width:280px;}
-.lr-btn{padding:14px 28px;border-radius:var(--r2);background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;font-weight:900;font-size:14px;box-shadow:var(--shb);}
+.lr-btn{padding:14px 28px;border-radius:var(--r2);background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;font-weight:900;font-size:14px;box-shadow:var(--shb);transition:transform var(--dur),box-shadow var(--dur);}
+.lr-btn:hover{transform:translateY(-2px);box-shadow:var(--she);}
 
 /* ── GREETING BANNER ── */
 .greeting-banner{
@@ -102,8 +105,12 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
 .gb-date{font-size:11px;font-weight:800;color:rgba(255,255,255,0.65);letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;}
 .gb-greeting{font-family:var(--fd);font-size:22px;font-weight:900;color:#fff;margin-bottom:2px;}
 .gb-name{font-size:14px;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:14px;}
-.gb-tagline{font-size:13px;color:rgba(255,255,255,.85);font-weight:700;padding:10px 13px;background:rgba(255,255,255,.13);border-radius:var(--r2);border:1px solid rgba(255,255,255,.18);}
+.gb-tagline{font-size:13px;color:rgba(255,255,255,.85);font-weight:700;padding:10px 13px;background:rgba(255,255,255,.13);border-radius:var(--r2);border:1px solid rgba(255,255,255,.18);display:inline-block;}
 .gb-avatar{position:absolute;top:18px;right:18px;width:48px;height:48px;border-radius:15px;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:17px;font-weight:900;color:#fff;}
+
+/* ── LAYOUT WRAPPERS (For Desktop Grid) ── */
+.dashboard-top-row{display:flex;flex-direction:column;gap:16px;}
+.dashboard-bottom-row{display:flex;flex-direction:column;gap:16px;margin-top:20px;}
 
 /* ── CREATE TASK CARD ── */
 .create-card{
@@ -112,13 +119,13 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
   border:1px solid var(--bc);
   box-shadow:var(--sh);
   padding:16px 18px;
-  margin-bottom:16px;
   display:flex;align-items:center;gap:14px;
   cursor:pointer;
-  transition:transform var(--dur) var(--spring),box-shadow var(--dur);
+  transition:transform var(--dur) var(--spring),box-shadow var(--dur),border-color var(--dur);
   animation:fade-up .32s var(--ease) .04s both;
 }
-.create-card:active{transform:scale(.98);box-shadow:var(--she);}
+.create-card:hover{border-color:var(--p);box-shadow:var(--she);}
+.create-card:active{transform:scale(.98);}
 .create-card-icon{
   width:48px;height:48px;border-radius:15px;
   background:linear-gradient(135deg,var(--p),var(--acc));
@@ -128,7 +135,8 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
 }
 .create-card-text .create-label{font-family:var(--fd);font-size:15px;font-weight:900;color:var(--t1);}
 .create-card-text .create-sub{font-size:12px;color:var(--tm);font-weight:700;margin-top:2px;}
-.create-card-arrow{margin-left:auto;font-size:20px;color:var(--tm);}
+.create-card-arrow{margin-left:auto;font-size:20px;color:var(--tm);transition:transform var(--dur);}
+.create-card:hover .create-card-arrow{transform:translateX(4px);color:var(--p);}
 
 /* ── PROGRESS CARD ── */
 .progress-card{
@@ -137,13 +145,13 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
   border:1px solid var(--bc);
   box-shadow:var(--sh);
   padding:18px 18px;
-  margin-bottom:20px;
   animation:fade-up .33s var(--ease) .06s both;
+  display:flex;flex-direction:column;justify-content:center;
 }
 .pc-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
 .pc-label{font-family:var(--fd);font-size:13px;font-weight:800;color:var(--t2);}
 .pc-pct{font-family:var(--fd);font-size:28px;font-weight:900;color:var(--p);}
-.pc-bar-bg{height:10px;background:var(--grp);border-radius:var(--rf);overflow:hidden;margin-bottom:10px;}
+.pc-bar-bg{height:10px;background:var(--grp);border-radius:var(--rf);overflow:hidden;margin-bottom:12px;}
 .pc-bar-fill{height:100%;background:linear-gradient(90deg,var(--p),var(--acc));border-radius:var(--rf);transition:width .7s var(--ease);}
 .pc-stats{display:flex;gap:0;}
 .pc-stat{flex:1;text-align:center;padding:10px 0;}
@@ -152,12 +160,13 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
 .pc-stat-lbl{font-size:10px;font-weight:800;color:var(--tm);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
 
 /* ── SECTION HEADER ── */
-.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin:0 2px 10px;}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin:0 2px 12px;}
 .sec-title{font-family:var(--fd);font-size:14px;font-weight:900;color:var(--t1);}
-.sec-more{font-size:12px;font-weight:800;color:var(--p);}
+.sec-more{font-size:12px;font-weight:800;color:var(--p);cursor:pointer;}
+.sec-more:hover{text-decoration:underline;}
 
-/* ── TASK CARD (mobile style) ── */
-.task-section{margin-bottom:20px;animation:fade-up .35s var(--ease) .08s both;}
+/* ── TASK CARD ── */
+.task-section{animation:fade-up .35s var(--ease) .08s both;}
 .task-card{
   border-radius:var(--r3);
   background:var(--card);
@@ -166,16 +175,17 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
   margin-bottom:10px;
   overflow:hidden;
   display:flex;
-  transition:transform var(--dur) var(--spring);
+  transition:transform var(--dur) var(--spring), box-shadow var(--dur);
 }
-.task-card:active{transform:scale(.99);}
+.task-card:hover{box-shadow:var(--she);transform:translateY(-2px);}
+.task-card:active{transform:scale(.99) translateY(0);}
 .tc-accent{width:5px;flex-shrink:0;}
 .tc-accent.high{background:var(--high);}
 .tc-accent.medium{background:var(--med);}
 .tc-accent.low{background:var(--low);}
 .tc-accent.done{background:var(--ok);}
 .tc-content{flex:1;padding:14px 14px;}
-.tc-title{font-size:14px;font-weight:800;color:var(--t1);margin-bottom:5px;line-height:1.35;}
+.tc-title{font-size:14px;font-weight:800;color:var(--t1);margin-bottom:5px;line-height:1.35;transition:color var(--dur);}
 .tc-title.done{color:var(--tm);text-decoration:line-through;}
 .tc-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
 .tc-priority{font-size:9.5px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;padding:3px 9px;border-radius:var(--rf);}
@@ -195,7 +205,9 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
   font-size:14px;cursor:pointer;
   transition:all .18s var(--spring);
 }
+.tc-check-btn:hover{background:var(--b1);}
 .tc-check-btn.done{background:var(--ok);border-color:var(--ok);color:#fff;}
+.tc-check-btn.done:hover{filter:brightness(1.1);}
 
 /* ── EMPTY STATE ── */
 .empty-state{text-align:center;padding:32px 20px;}
@@ -208,7 +220,7 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
 .skel{height:70px;border-radius:var(--r3);background:linear-gradient(90deg,var(--grp) 25%,var(--grph) 50%,var(--grp) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
 @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
 
-/* ── BOTTOM NAV ── */
+/* ── BOTTOM NAV (MOBILE) ── */
 .bnav{
   position:fixed;bottom:0;left:50%;transform:translateX(-50%);
   width:100%;max-width:var(--shell);z-index:999;
@@ -226,6 +238,7 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
   transition:background var(--dur);
   position:relative;
 }
+.bnav-btn:hover{background:var(--grp);}
 .bnav-btn.active{background:rgba(79,70,229,.07);}
 .bnav-icon{font-size:21px;line-height:1;transition:transform var(--dur) var(--spring);}
 .bnav-btn.active .bnav-icon{transform:scale(1.12);}
@@ -245,6 +258,88 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
 @keyframes fade-up{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
 @keyframes toast-in{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 .hidden{display:none!important;}
+
+/* ────────────────────────────────────────────────────────
+   ── DESKTOP & LAPTOP LAYOUT UPGRADE ──
+──────────────────────────────────────────────────────── */
+@media(min-width: 800px) {
+  body { padding: 0; }
+  
+  /* Remove mobile shell constraints */
+  .shell {
+    max-width: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    padding-left: 90px; /* Space for sidebar */
+  }
+
+  /* Transform Bottom Nav into a Sidebar */
+  .bnav {
+    left: 0; top: 0; bottom: 0;
+    width: 90px; height: 100vh; max-width: 90px;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 24px 12px;
+    border-top: none;
+    border-right: 1px solid var(--b1);
+    transform: none; /* Remove centering transform */
+    gap: 16px;
+  }
+  .bnav-btn {
+    flex: none; height: 64px; width: 100%;
+    border-radius: 16px;
+  }
+  .bnav-icon { font-size: 24px; }
+  .bnav-label { font-size: 11px; margin-top: 4px; }
+
+  /* Adjust Header */
+  .hdr {
+    height: 72px; padding: 0 40px;
+    background: transparent;
+    backdrop-filter: none;
+    border-bottom: 1px solid var(--b1);
+  }
+
+  /* Dashboard Main Content Area */
+  .page {
+    padding: 32px 40px 40px;
+    max-width: 1400px; /* Keep it constrained gracefully on ultra-wide screens */
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* Desktop Grid Overrides */
+  .greeting-banner {
+    padding: 32px 40px;
+    border-radius: 32px;
+    margin-bottom: 24px;
+  }
+  .gb-greeting { font-size: 32px; }
+  .gb-name { font-size: 18px; margin-bottom: 18px; }
+  .gb-tagline { font-size: 14px; padding: 12px 18px; }
+  .gb-avatar { width: 64px; height: 64px; font-size: 22px; top: 32px; right: 40px; border-radius: 20px; }
+
+  /* Top row (Progress + Create) */
+  .dashboard-top-row {
+    flex-direction: row; gap: 24px; margin-bottom: 24px;
+  }
+  .progress-card { flex: 2; margin-bottom: 0; padding: 24px 32px; }
+  .create-card { flex: 1; margin-bottom: 0; flex-direction: column; text-align: center; justify-content: center; padding: 32px; }
+  .create-card-icon { width: 64px; height: 64px; font-size: 28px; margin-bottom: 8px; }
+  .create-card-arrow { display: none; } /* Hide arrow in large card mode */
+  .pc-pct { font-size: 36px; }
+
+  /* Bottom row (Today + Upcoming) */
+  .dashboard-bottom-row {
+    flex-direction: row; gap: 32px; align-items: flex-start;
+  }
+  .dashboard-bottom-row > div { flex: 1; }
+  .sec-title { font-size: 18px; }
+  .sec-more { font-size: 14px; }
+
+  /* Toast Adjustments */
+  .toast-wrap { bottom: 24px; }
+}
 </style>
 </head>
 <body>
@@ -258,7 +353,6 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
     <div class="hdr-notif">🔔</div>
   </header>
 
-  <!-- LOGIN REQUIRED -->
   <div id="loginRequired" class="login-required hidden">
     <div class="lr-icon">🔒</div>
     <div class="lr-title">Login Required</div>
@@ -266,10 +360,8 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
     <button class="lr-btn" onclick="window.location.href='../student/index.html'">Go To Login</button>
   </div>
 
-  <!-- MAIN -->
   <div id="mainContent" class="page hidden">
 
-    <!-- GREETING -->
     <div class="greeting-banner">
       <div class="gb-bg"></div>
       <div class="gb-date" id="gbDate"></div>
@@ -279,70 +371,68 @@ input,textarea,select{-webkit-user-select:text;-moz-user-select:text;user-select
       <div class="gb-avatar" id="gbAvatar">S</div>
     </div>
 
-    <!-- CREATE TASK -->
-    <div class="create-card" onclick="window.location.href='../home/dashboard/index.html'">
-      <div class="create-card-icon">➕</div>
-      <div class="create-card-text">
-        <div class="create-label">Create New Task</div>
-        <div class="create-sub">Tap to add a task or goal</div>
+    <div class="dashboard-top-row">
+      <div class="progress-card">
+        <div class="pc-row">
+          <span class="pc-label">Today's Progress</span>
+          <span class="pc-pct" id="pcPct">0%</span>
+        </div>
+        <div class="pc-bar-bg">
+          <div class="pc-bar-fill" id="pcFill" style="width:0%"></div>
+        </div>
+        <div class="pc-stats">
+          <div class="pc-stat">
+            <div class="pc-stat-val" id="statTotal">—</div>
+            <div class="pc-stat-lbl">Total</div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-val" id="statDone" style="color:var(--ok)">—</div>
+            <div class="pc-stat-lbl">Done</div>
+          </div>
+          <div class="pc-stat">
+            <div class="pc-stat-val" id="statHigh" style="color:var(--err)">—</div>
+            <div class="pc-stat-lbl">High</div>
+          </div>
+        </div>
       </div>
-      <div class="create-card-arrow">›</div>
-    </div>
 
-    <!-- PROGRESS -->
-    <div class="progress-card">
-      <div class="pc-row">
-        <span class="pc-label">Today's Progress</span>
-        <span class="pc-pct" id="pcPct">0%</span>
-      </div>
-      <div class="pc-bar-bg">
-        <div class="pc-bar-fill" id="pcFill" style="width:0%"></div>
-      </div>
-      <div class="pc-stats">
-        <div class="pc-stat">
-          <div class="pc-stat-val" id="statTotal">—</div>
-          <div class="pc-stat-lbl">Total</div>
+      <div class="create-card" onclick="window.location.href='../home/dashboard/index.html'">
+        <div class="create-card-icon">➕</div>
+        <div class="create-card-text">
+          <div class="create-label">Create New Task</div>
+          <div class="create-sub">Tap to add a task or goal</div>
         </div>
-        <div class="pc-stat">
-          <div class="pc-stat-val" id="statDone" style="color:var(--ok)">—</div>
-          <div class="pc-stat-lbl">Done</div>
-        </div>
-        <div class="pc-stat">
-          <div class="pc-stat-val" id="statHigh" style="color:var(--err)">—</div>
-          <div class="pc-stat-lbl">High</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TODAY'S TASKS -->
-    <div class="task-section" id="todaySection">
-      <div class="sec-hdr">
-        <span class="sec-title">📅 Today's Tasks</span>
-        <button class="sec-more" onclick="window.location.href='../home/planner/index.html'">See Planner</button>
-      </div>
-      <div id="todayList">
-        <div class="loading-skeleton">
-          <div class="skel"></div><div class="skel"></div>
-        </div>
+        <div class="create-card-arrow">›</div>
       </div>
     </div>
 
-    <!-- UPCOMING TASKS -->
-    <div class="task-section" id="upcomingSection">
-      <div class="sec-hdr">
-        <span class="sec-title">🔜 Upcoming</span>
-        <button class="sec-more" onclick="window.location.href='../home/dashboard/index.html'">See All</button>
+    <div class="dashboard-bottom-row">
+      <div class="task-section" id="todaySection">
+        <div class="sec-hdr">
+          <span class="sec-title">📅 Today's Tasks</span>
+          <button class="sec-more" onclick="window.location.href='../home/planner/index.html'">See Planner</button>
+        </div>
+        <div id="todayList">
+          <div class="loading-skeleton">
+            <div class="skel"></div><div class="skel"></div>
+          </div>
+        </div>
       </div>
-      <div id="upcomingList">
-        <div class="loading-skeleton">
-          <div class="skel"></div><div class="skel"></div>
+
+      <div class="task-section" id="upcomingSection">
+        <div class="sec-hdr">
+          <span class="sec-title">🔜 Upcoming</span>
+          <button class="sec-more" onclick="window.location.href='../home/dashboard/index.html'">See All</button>
+        </div>
+        <div id="upcomingList">
+          <div class="loading-skeleton">
+            <div class="skel"></div><div class="skel"></div>
+          </div>
         </div>
       </div>
     </div>
 
-  </div><!-- /main -->
-
-  <nav class="bnav">
+  </div><nav class="bnav">
     <button class="bnav-btn active">
       <span class="bnav-icon">🏠</span><span class="bnav-label">Home</span>
     </button>
