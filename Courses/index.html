@@ -165,6 +165,21 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
   color:#fff;font-size:15px;font-weight:700;box-shadow:0 4px 16px rgba(79,70,229,.35);
 }
 .af-btn-primary:active{transform:scale(.98);opacity:.9}
+.af-completed-banner{
+  display:flex;align-items:flex-start;gap:11px;padding:14px 14px;
+  background:rgba(34,197,94,.10);border:1.5px solid rgba(34,197,94,.28);border-radius:14px;
+}
+.af-completed-banner .ic{
+  width:26px;height:26px;border-radius:50%;background:var(--ok);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;flex-shrink:0;margin-top:1px;
+}
+.af-completed-title{font-size:13.5px;font-weight:800;color:var(--t1)}
+.af-completed-sub{font-size:12px;color:var(--t2);line-height:1.55;margin-top:3px}
+.af-btn-secondary-outline{
+  width:100%;height:50px;border-radius:14px;background:transparent;
+  border:1.5px solid var(--bc);color:var(--t1);font-size:14.5px;font-weight:700;
+}
+.af-btn-secondary-outline:active{background:var(--grp)}
 .af-progress-wrap{display:flex;flex-direction:column;gap:6px}
 .af-progress-track{height:7px;background:var(--b1);border-radius:99px;overflow:hidden}
 .af-progress-fill{height:100%;background:linear-gradient(90deg,var(--p),var(--acc));border-radius:99px;transition:width .3s ease}
@@ -264,6 +279,28 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
 .af-lock-hint{text-align:center;font-size:11.5px;color:var(--tm);margin-top:8px;font-weight:600}
 
 /* Completion screen */
+/* Survey / poll */
+.af-survey-intro{padding:20px 18px 6px;display:flex;flex-direction:column;gap:10px}
+.af-survey-list{padding:6px 18px 4px;display:flex;flex-direction:column;gap:14px}
+.af-poll-card{
+  background:var(--card-s);border:1.5px solid var(--bc);border-radius:15px;
+  padding:15px 14px;display:flex;flex-direction:column;gap:11px;box-shadow:var(--sh);
+}
+.af-poll-q{font-size:14px;font-weight:700;color:var(--t1);line-height:1.45;display:flex;gap:10px}
+.af-poll-num{
+  width:22px;height:22px;border-radius:50%;background:var(--p-soft);color:var(--p);
+  font-size:11.5px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;
+}
+.af-poll-opts{display:flex;flex-direction:column;gap:8px}
+.af-poll-opt{
+  width:100%;text-align:left;padding:11px 14px;border-radius:11px;
+  border:1.5px solid var(--b1);background:var(--inp);color:var(--t2);
+  font-size:13px;font-weight:600;transition:border-color .15s,background .15s,color .15s;
+}
+.af-poll-opt:active{opacity:.85}
+.af-poll-opt.sel{border-color:var(--p);background:var(--p-soft);color:var(--p);font-weight:700}
+.af-poll-opt:disabled{opacity:.7;pointer-events:none}
+
 .af-complete-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:30px;text-align:center}
 .af-complete-badge{width:84px;height:84px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--acc));display:flex;align-items:center;justify-content:center;font-size:38px;box-shadow:0 10px 30px rgba(79,70,229,.35)}
 .af-complete-title{font-family:var(--fd);font-size:21px;font-weight:900;color:var(--t1)}
@@ -306,7 +343,6 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
       <div class="af-topbar-title" style="display:flex;align-items:center;gap:8px">
         <span style="font-family:var(--fd);font-weight:900;font-size:15px">Explore</span>
       </div>
-      <button class="af-toc-btn" onclick="toggleDark()" aria-label="Theme" id="darkToggleBtn">🌙</button>
     </header>
 
     <div class="af-page" id="catalogPage">
@@ -424,14 +460,11 @@ function afToast(msg, type){
   setTimeout(()=>t.remove(), 2600);
 }
 
-/* ── DARK MODE ── */
-function toggleDark(){
-  const isDark = document.documentElement.getAttribute('data-theme')==='dark';
-  document.documentElement.setAttribute('data-theme', isDark?'light':'dark');
-  localStorage.setItem('af_dark_mode', isDark?'0':'1');
-  $('darkToggleBtn').textContent = isDark?'🌙':'☀️';
-}
-if(localStorage.getItem('af_dark_mode')==='1') $('darkToggleBtn').textContent='☀️';
+/* ── DARK MODE — mirrors home page exactly: set on load, sync via storage event ── */
+window.addEventListener('storage', e=>{
+  if(e.key==='af_dark_mode')
+    document.documentElement.setAttribute('data-theme', e.newValue==='1'?'dark':'light');
+});
 
 /* ── VIEW SWITCHING ── */
 function showView(id){
@@ -573,7 +606,18 @@ async function openCourse(courseId){
         </div>
       ` : ''}
 
-      <button class="af-btn-primary" onclick="enterModuleList()">${percent>0 && percent<100 ? 'Continue course' : percent>=100 ? 'Review course' : 'Start course'}</button>
+      ${percent>=100 ? `
+        <div class="af-completed-banner">
+          <span class="ic">✓</span>
+          <div>
+            <div class="af-completed-title">Course already completed</div>
+            <div class="af-completed-sub">You finished this course${progress?.completed_at ? ' on '+formatDate(progress.completed_at) : ''}. ${_currentCourse.has_certificate ? 'Your certificate is in My Dashboard.' : ''}</div>
+          </div>
+        </div>
+        <button class="af-btn-secondary-outline" onclick="enterModuleList()">Review course content</button>
+      ` : `
+        <button class="af-btn-primary" onclick="enterModuleList()">${percent>0 ? 'Continue course' : 'Start course'}</button>
+      `}
 
       <div class="af-section-h">About this course</div>
       <p class="af-detail-desc">${escapeHtml(_currentCourse.description||'')}</p>
@@ -581,6 +625,13 @@ async function openCourse(courseId){
   `;
 }
 window.openCourse = openCourse;
+
+function formatDate(iso){
+  try{
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  }catch(_){ return ''; }
+}
 
 /* ════════════════════════════════════════
    MODULE LIST
@@ -633,6 +684,11 @@ let _currentModule = null;
 let _currentCheck = null;
 let _checkPassed = false;
 let _cameFromLesson = false;
+let _isReviewMode = false;
+
+function _isCourseCompleted(){
+  return _currentModules.length>0 && _currentModules.every(m=>m.is_done);
+}
 
 async function openModule(moduleId){
   showView('viewLesson');
@@ -648,12 +704,17 @@ async function openModule(moduleId){
   _currentCheck = data.check;
   _checkPassed = !!data.is_done; // if already done before, treat check as already passed
   _currentModule._next = data.next_module;
+  _isReviewMode = _isCourseCompleted();
 
   const pct = data.module_total>0 ? Math.round(((data.module_index-1)/data.module_total)*100) : 0;
   $('lessonProgFill').style.width = pct+'%';
   $('lessonProgPct').textContent = 'Progress: '+pct+'%';
 
-  renderLessonBlocks(data.blocks||[]);
+  if(_currentModule.module_type === 'survey'){
+    renderSurvey(data.survey_questions||[], data.survey_answers||{});
+  } else {
+    renderLessonBlocks(data.blocks||[]);
+  }
 }
 window.openModule = openModule;
 
@@ -683,22 +744,109 @@ function renderLessonBlocks(blocks){
     <div class="af-lesson-body">${html || '<p class="af-block-paragraph">No content yet for this lesson.</p>'}</div>
     <div id="checkSlot"></div>
     <div class="af-lesson-footer">
-      <button class="af-btn-continue" id="continueBtn" ${_checkPassed?'':'disabled'} onclick="handleContinue()">Continue</button>
-      <div class="af-lock-hint" id="lockHint" style="${_checkPassed?'display:none':''}">Solve the quick check above to unlock Continue</div>
+      <button class="af-btn-continue" id="continueBtn" ${(_checkPassed||_isReviewMode)?'':'disabled'} onclick="handleContinue()">${_isReviewMode?'Next':'Continue'}</button>
+      <div class="af-lock-hint" id="lockHint" style="${(_checkPassed||_isReviewMode)?'display:none':''}">Solve the quick check above to unlock Continue</div>
     </div>
   `;
 
+  if(_isReviewMode){ _checkPassed = true; }
   renderCheckWidget();
 }
+
+/* ════════════════════════════════════════
+   SURVEY / POLL (5-question feedback, completes the course)
+   ════════════════════════════════════════ */
+let _surveyAnswers = {};
+let _surveyQuestions = [];
+
+function renderSurvey(questions, existingAnswers){
+  _surveyQuestions = questions;
+  _surveyAnswers = { ...existingAnswers };
+  const alreadyDone = _checkPassed; // is_done from server
+
+  if(questions.length === 0){
+    $('lessonPage').innerHTML = `<div class="af-empty"><span>📊</span>This survey isn't set up yet.</div>`;
+    return;
+  }
+
+  $('lessonPage').innerHTML = `
+    <div class="af-survey-intro">
+      <div class="af-block-heading">Tell us about your experience</div>
+      <p class="af-block-paragraph">Before you finish, we'd love your honest feedback — it takes less than a minute and helps us improve AcademeForge for everyone.</p>
+    </div>
+    <div id="surveyList" class="af-survey-list"></div>
+    <div class="af-lesson-footer">
+      <button class="af-btn-continue" id="surveySubmitBtn" onclick="submitSurvey()" ${alreadyDone?'':'disabled'}>${alreadyDone ? 'Already submitted' : 'Submit feedback & finish course'}</button>
+      <div class="af-lock-hint" id="surveyHint" style="${alreadyDone?'display:none':''}">Answer all ${questions.length} questions to finish</div>
+    </div>
+  `;
+
+  renderSurveyList(alreadyDone);
+}
+
+function renderSurveyList(locked){
+  $('surveyList').innerHTML = _surveyQuestions.map((q,i)=>`
+    <div class="af-poll-card">
+      <div class="af-poll-q"><span class="af-poll-num">${i+1}</span>${escapeHtml(q.question_text)}</div>
+      <div class="af-poll-opts">
+        ${(q.options||[]).map(opt=>{
+          const sel = _surveyAnswers[q.id]===opt;
+          return `<button class="af-poll-opt ${sel?'sel':''}" ${locked?'disabled':''} onclick="selectPollOption('${q.id}', ${JSON.stringify(opt).replace(/"/g,'&quot;')})">${escapeHtml(opt)}</button>`;
+        }).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectPollOption(questionId, option){
+  _surveyAnswers[questionId] = option;
+  renderSurveyList(false);
+  updateSurveySubmitState();
+}
+window.selectPollOption = selectPollOption;
+
+function updateSurveySubmitState(){
+  const allAnswered = _surveyQuestions.every(q => !!_surveyAnswers[q.id]);
+  $('surveySubmitBtn').disabled = !allAnswered;
+  $('surveyHint').style.display = allAnswered ? 'none' : '';
+  if(allAnswered) $('surveySubmitBtn').classList.add('ready');
+}
+
+async function submitSurvey(){
+  const sid = getStudentId();
+  if(!sid){
+    afToast('Please log in to submit feedback and complete the course.', 'err');
+    return;
+  }
+  const allAnswered = _surveyQuestions.every(q => !!_surveyAnswers[q.id]);
+  if(!allAnswered){ afToast('Please answer every question first.', 'err'); return; }
+
+  const btn = $('surveySubmitBtn');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+
+  const answers = _surveyQuestions.map(q => ({ question_id: q.id, selected_option: _surveyAnswers[q.id] }));
+  const data = await callCatalog('submit_survey', {
+    student_id: sid, module_id: _currentModule.id, course_id: _currentCourse.id, answers
+  });
+
+  if(!data.ok){
+    afToast(data.message || 'Could not submit feedback. Please try again.', 'err');
+    btn.disabled = false; btn.textContent = 'Submit feedback & finish course';
+    return;
+  }
+
+  const idx = _currentModules.findIndex(m=>m.id===_currentModule.id);
+  if(idx>=0) _currentModules[idx].is_done = true;
+
+  afToast('Thanks for your feedback!', 'ok');
+  showCompletionScreen();
+}
+window.submitSurvey = submitSurvey;
 
 function renderCheckWidget(){
   const slot = $('checkSlot');
   if(!_currentCheck || _checkPassed){
-    if(_currentCheck && _checkPassed){
-      slot.innerHTML = `<div class="af-check-card"><div class="af-check-done-badge"><span>✓</span> Quick check complete</div></div>`;
-    } else {
-      slot.innerHTML = '';
-    }
+    slot.innerHTML = '';
     return;
   }
   const c = _currentCheck;
@@ -735,6 +883,20 @@ async function submitCheck(){
     $('continueBtn').disabled = false;
     $('continueBtn').classList.add('ready');
     $('lockHint').style.display='none';
+    const card = $('checkSlot').querySelector('.af-check-card');
+    if(card){
+      card.style.transition = 'opacity .35s ease, max-height .35s ease, margin .35s ease';
+      setTimeout(()=>{
+        card.style.opacity='0';
+        card.style.maxHeight='0px';
+        card.style.overflow='hidden';
+        card.style.marginTop='0';
+        card.style.marginBottom='0';
+        card.style.paddingTop='0';
+        card.style.paddingBottom='0';
+        setTimeout(()=>{ $('checkSlot').innerHTML=''; }, 380);
+      }, 550);
+    }
   } else {
     input.classList.remove('right'); input.classList.add('wrong');
     $('checkMsg').className='af-check-msg err'; $('checkMsg').textContent='Not quite — try again.';
@@ -743,13 +905,15 @@ async function submitCheck(){
 window.submitCheck = submitCheck;
 
 async function handleContinue(){
-  const sid = getStudentId();
-  if(sid){
-    await callCatalog('complete_module', { student_id: sid, module_id: _currentModule.id, course_id: _currentCourse.id });
-    const idx = _currentModules.findIndex(m=>m.id===_currentModule.id);
-    if(idx>=0) _currentModules[idx].is_done = true;
-  } else {
-    afToast('Log in to save your progress permanently.', 'err');
+  if(!_isReviewMode){
+    const sid = getStudentId();
+    if(sid){
+      await callCatalog('complete_module', { student_id: sid, module_id: _currentModule.id, course_id: _currentCourse.id });
+      const idx = _currentModules.findIndex(m=>m.id===_currentModule.id);
+      if(idx>=0) _currentModules[idx].is_done = true;
+    } else {
+      afToast('Log in to save your progress permanently.', 'err');
+    }
   }
 
   if(_currentModule._next){
