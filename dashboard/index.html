@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+(function(){
+  var dark = localStorage.getItem('af_dark_mode') === '1';
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+})();
+</script>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#4f46e5"/>
+<title>Dashboard — AcademeForge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="icon" type="image/jpeg" href="/IMG/AF%20LOGO%202.jpeg">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Sora:wght@700;800;900&display=swap" rel="stylesheet"/>
+<style>
+/* ── TOKENS (1:1 with main app) ── */
+:root {
+  --p:#4f46e5;--p2:#3730a3;--pl:#818cf8;--p-soft:rgba(79,70,229,.10);
+  --acc:#06b6d4;--acc2:#f59e0b;--err:#ef4444;--ok:#22c55e;
+  --bg:#f0f2ff;--shell:#fff;
+  --card:rgba(255,255,255,.85);--card-s:#fff;
+  --nav:rgba(255,255,255,.94);--hdr:rgba(255,255,255,.97);
+  --inp:#f4f5fb;--grp:rgba(79,70,229,.06);
+  --t1:#0f0e2a;--t2:#4b5563;--tm:#9ca3af;
+  --b1:rgba(79,70,229,.12);--bc:rgba(79,70,229,.18);
+  --sh:0 2px 12px rgba(79,70,229,.08),0 1px 3px rgba(0,0,0,.04);
+  --she:0 8px 32px rgba(79,70,229,.14);
+  --shell-border:#c7cbea;--nav-h:62px;
+  --fd:'Sora',sans-serif;--fb:'Inter',sans-serif;
+  --ok-soft:rgba(34,197,94,.12);--ok-b:rgba(34,197,94,.28);
+  --prog-soft:rgba(245,158,11,.12);--prog-b:rgba(245,158,11,.28);
+}
+[data-theme="dark"]{
+  --bg:#0c0b1d;--shell:#120f2a;
+  --card:rgba(30,27,60,.82);--card-s:#1e1b3c;
+  --nav:rgba(18,15,42,.97);--hdr:rgba(18,15,42,.98);
+  --inp:#1e1b3c;--grp:rgba(129,140,248,.08);
+  --t1:#f0eeff;--t2:#a5a3c2;--tm:#6b6a8a;
+  --b1:rgba(129,140,248,.14);--bc:rgba(129,140,248,.22);
+  --sh:0 2px 12px rgba(0,0,0,.32);--she:0 8px 32px rgba(0,0,0,.44);
+  --shell-border:#202637;--p-soft:rgba(129,140,248,.12);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{font-size:15px;-webkit-text-size-adjust:100%}
+html,body{height:100%;min-height:100dvh}
+body{
+  font-family:var(--fb);background:var(--bg);color:var(--t1);
+  -webkit-font-smoothing:antialiased;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;height:100dvh;
+}
+[data-theme="light"]{color-scheme:light}
+[data-theme="dark"]{color-scheme:dark}
+button{font-family:var(--fb);cursor:pointer;border:none;background:none;color:inherit}
+a{text-decoration:none;color:inherit}
+img{display:block;max-width:100%}
+ul{list-style:none}
+*,body,html{-webkit-user-select:none;-moz-user-select:none;user-select:none}
+input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
+
+/* ── SHELL ── */
+.af-shell{width:min(100%,460px);height:100dvh;background:var(--shell);position:relative;display:flex;flex-direction:column;overflow:hidden}
+@media(min-width:520px){
+  body{background:var(--bg)}
+  .af-shell{height:min(900px,calc(100dvh - 32px));border:8px solid var(--shell-border);border-radius:44px;box-shadow:0 30px 90px rgba(0,0,0,.28)}
+  [data-theme="dark"] .af-shell{box-shadow:0 30px 90px rgba(0,0,0,.75)}
+}
+
+/* ── TOPBAR ── */
+.af-topbar{flex-shrink:0;height:52px;background:var(--hdr);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 14px;gap:10px;z-index:100}
+.af-topbar-title{font-family:var(--fd);font-size:14.5px;font-weight:800;color:var(--t1);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.af-back{width:34px;height:34px;border-radius:10px;background:var(--grp);border:1px solid var(--b1);color:var(--t1);font-size:17px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* ── PAGE / VIEW ── */
+.af-view{display:none;flex:1;min-height:0;flex-direction:column;overflow:hidden}
+.af-view.active{display:flex}
+.af-page{flex:1;overflow-y:scroll;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;min-height:0;padding-bottom:calc(var(--nav-h) + 20px + env(safe-area-inset-bottom,0px))}
+.af-page.no-nav-pad{padding-bottom:24px}
+.af-page::-webkit-scrollbar{width:2px}
+.af-page::-webkit-scrollbar-thumb{background:var(--bc);border-radius:99px}
+
+/* ── BOTTOM NAV ── */
+.af-bnav{position:absolute;bottom:0;left:0;right:0;z-index:999;height:var(--nav-h);background:var(--nav);border-top:1px solid var(--b1);display:flex;align-items:center;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px)}
+.af-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:100%;border-radius:10px;padding:6px 4px;position:relative}
+.af-nav-btn::before{content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--p);border-radius:99px;transition:width .15s ease}
+.af-nav-btn.active::before{width:22px}
+.af-nav-icon{font-size:19px;line-height:1}
+.af-nav-label{font-size:9.5px;font-weight:700;color:var(--tm)}
+.af-nav-btn.active .af-nav-label{color:var(--p)}
+
+/* ── DASHBOARD BODY ── */
+.db-body{padding:16px;display:flex;flex-direction:column;gap:16px}
+
+/* ── PROFILE CARD ── */
+.profile-card{background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);border-radius:20px;padding:20px 18px;display:flex;align-items:center;gap:14px;box-shadow:0 8px 24px rgba(79,70,229,.35)}
+.profile-avatar{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.2);border:3px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden}
+.profile-avatar img{width:100%;height:100%;object-fit:cover}
+.profile-info{flex:1;min-width:0}
+.profile-name{font-family:var(--fd);font-size:17px;font-weight:800;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-sub{font-size:11.5px;color:rgba(255,255,255,.75);margin-top:3px}
+.profile-badge{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);border-radius:99px;padding:4px 12px;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+
+/* ── STATS ROW ── */
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.stat-card{background:var(--card-s);border:1.5px solid var(--bc);border-radius:16px;padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:var(--sh)}
+.stat-num{font-family:var(--fd);font-size:24px;font-weight:900;color:var(--t1)}
+.stat-lbl{font-size:10px;font-weight:700;color:var(--tm);text-align:center;letter-spacing:.03em}
+
+/* ── SECTION HEADER ── */
+.sec-h{display:flex;align-items:center;justify-content:space-between}
+.sec-title{font-family:var(--fd);font-size:15px;font-weight:800;color:var(--t1)}
+.sec-see-all{font-size:11.5px;font-weight:700;color:var(--p)}
+
+/* ── IN-PROGRESS CARDS ── */
+.progress-card{background:var(--card-s);border:1.5px solid var(--bc);border-radius:16px;overflow:hidden;box-shadow:var(--sh);display:flex;gap:0;width:100%;text-align:left}
+.progress-card:active{opacity:.92}
+.progress-card-thumb{width:80px;flex-shrink:0;aspect-ratio:1;object-fit:cover;background:var(--grp)}
+.progress-card-body{flex:1;padding:11px 13px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.progress-card-cat{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--tm)}
+.progress-card-title{font-family:var(--fd);font-size:13.5px;font-weight:800;color:var(--t1);line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.progress-track{height:5px;background:var(--b1);border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--p),var(--acc));border-radius:99px;transition:width .3s ease}
+.progress-pct{font-size:10.5px;font-weight:700;color:var(--p)}
+
+/* ── COMPLETED COURSE CARDS ── */
+.completed-card{background:var(--card-s);border:1.5px solid var(--ok-b);border-radius:16px;overflow:hidden;box-shadow:var(--sh);display:flex;gap:0;width:100%;text-align:left;position:relative}
+.completed-card:active{opacity:.92}
+.completed-thumb{width:80px;flex-shrink:0;aspect-ratio:1;object-fit:cover;background:var(--grp)}
+.completed-body{flex:1;padding:11px 13px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.completed-cat{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--tm)}
+.completed-title{font-family:var(--fd);font-size:13.5px;font-weight:800;color:var(--t1);line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.completed-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#15803d;background:var(--ok-soft);border:1px solid var(--ok-b);border-radius:99px;padding:3px 10px}
+[data-theme="dark"] .completed-badge{color:#4ade80}
+.cert-ready-btn{width:100%;margin-top:4px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--ok) 0%,#16a34a 100%);color:#fff;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 3px 10px rgba(34,197,94,.3)}
+.cert-ready-btn:active{transform:scale(.97)}
+.cert-ready-btn.loading{opacity:.65;pointer-events:none}
+
+/* ── CERTIFICATE CARDS ── */
+.cert-card{background:var(--card-s);border:1.5px solid var(--bc);border-radius:16px;overflow:hidden;box-shadow:var(--sh);width:100%}
+.cert-card-header{background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);padding:14px 16px;display:flex;align-items:center;gap:10px}
+.cert-card-icon{font-size:28px;width:48px;height:48px;background:rgba(255,255,255,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cert-card-info{flex:1;min-width:0}
+.cert-card-title{font-family:var(--fd);font-size:13px;font-weight:800;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cert-card-id{font-size:10px;color:rgba(255,255,255,.7);margin-top:3px;font-weight:600}
+.cert-card-body{padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.cert-card-meta{font-size:11.5px;color:var(--t2);font-weight:600}
+.cert-card-actions{display:flex;gap:8px}
+.cert-action-btn{flex:1;height:38px;border-radius:10px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:5px;border:1.5px solid var(--bc);color:var(--t1);background:var(--inp)}
+.cert-action-btn:active{opacity:.8}
+.cert-action-btn.primary{background:var(--p);border-color:var(--p);color:#fff}
+
+/* ── CERT DETAIL VIEW ── */
+.cert-detail-wrap{padding:18px;display:flex;flex-direction:column;gap:16px}
+.cert-preview-frame{width:100%;aspect-ratio:1.414;border-radius:14px;overflow:hidden;border:1.5px solid var(--bc);background:var(--grp);position:relative}
+.cert-preview-frame iframe{width:250%;height:250%;transform:scale(0.4);transform-origin:top left;border:none;pointer-events:none}
+.cert-badge-row{display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--ok-soft);border:1.5px solid var(--ok-b);border-radius:14px}
+.cert-badge-circle{width:40px;height:40px;border-radius:50%;background:var(--ok);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;flex-shrink:0}
+.cert-badge-info{flex:1}
+.cert-badge-title{font-size:14px;font-weight:800;color:var(--t1)}
+.cert-badge-sub{font-size:11.5px;color:var(--t2);margin-top:3px}
+.cert-meta-card{background:var(--grp);border:1px solid var(--b1);border-radius:13px;padding:13px 14px;display:flex;flex-direction:column;gap:8px}
+.cert-meta-row{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--t2);font-weight:600}
+.cert-meta-row span.ic{font-size:14px}
+.cert-detail-actions{display:flex;flex-direction:column;gap:9px}
+.cert-dl-btn{width:100%;height:50px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);color:#fff;font-size:14px;font-weight:700;box-shadow:0 4px 16px rgba(79,70,229,.35)}
+.cert-dl-btn:active{transform:scale(.98)}
+.cert-share-btn{width:100%;height:46px;border-radius:14px;background:transparent;border:1.5px solid var(--bc);color:var(--t1);font-size:13.5px;font-weight:700}
+.cert-share-btn:active{background:var(--grp)}
+.cert-verify-btn{width:100%;height:46px;border-radius:14px;background:var(--ok-soft);border:1.5px solid var(--ok-b);color:#15803d;font-size:13.5px;font-weight:700}
+[data-theme="dark"] .cert-verify-btn{color:#4ade80}
+
+/* ── EMPTY STATE ── */
+.af-empty{padding:36px 20px;text-align:center;color:var(--tm);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.af-empty span{font-size:30px}
+.af-empty strong{color:var(--t2);font-size:13.5px}
+
+/* ── SKELETON ── */
+.af-skel{background:linear-gradient(90deg,var(--grp) 25%,var(--b1) 50%,var(--grp) 75%);background-size:200% 100%;animation:skel 1.4s ease infinite;border-radius:14px}
+@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ── TOAST ── */
+.af-toast-wrap{position:absolute;bottom:calc(var(--nav-h) + 14px);left:14px;right:14px;z-index:99999;pointer-events:none}
+.af-toast{display:flex;align-items:flex-start;gap:12px;background:var(--card-s);color:var(--t1);border:1px solid var(--bc);border-radius:13px;padding:11px 13px;box-shadow:var(--she);pointer-events:auto}
+.af-toast-ok{border-left:4px solid #22c55e}
+.af-toast-err{border-left:4px solid #ef4444}
+.af-toast-title{font-size:12px;font-weight:700;margin:0 0 2px}
+.af-toast-msg{font-size:11.5px;margin:0;line-height:1.4}
+
+/* ── LOADING SPINNER ── */
+.spin{display:inline-block;width:16px;height:16px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── VERIFY BADGE ── */
+.verify-inline{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--ok);padding:6px 12px;background:var(--ok-soft);border-radius:99px;border:1px solid var(--ok-b);width:fit-content}
+</style>
+</head>
+<body>
+
+<div class="af-shell" id="afShell">
+
+  <!-- ════════ VIEW: DASHBOARD ════════ -->
+  <div class="af-view active" id="viewDashboard">
+    <header class="af-topbar">
+      <div class="af-topbar-title" style="display:flex;align-items:center;gap:8px">
+        <span style="font-family:var(--fd);font-weight:900;font-size:15px">My Dashboard</span>
+      </div>
+    </header>
+
+    <div class="af-page" id="dashPage">
+      <div class="db-body" id="dashBody">
+        <!-- skeleton -->
+        <div class="af-skel" style="height:88px;border-radius:20px"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div class="af-skel" style="height:72px;border-radius:16px"></div>
+          <div class="af-skel" style="height:72px;border-radius:16px"></div>
+          <div class="af-skel" style="height:72px;border-radius:16px"></div>
+        </div>
+        <div class="af-skel" style="height:80px;border-radius:16px"></div>
+        <div class="af-skel" style="height:80px;border-radius:16px"></div>
+      </div>
+    </div>
+
+    <nav class="af-bnav">
+      <button class="af-nav-btn" onclick="window.location.href='/index.html'" type="button">
+        <span class="af-nav-icon">🏠</span><span class="af-nav-label">Home</span>
+      </button>
+      <button class="af-nav-btn" onclick="window.location.href='/explore/index.html'" type="button">
+        <span class="af-nav-icon">🧭</span><span class="af-nav-label">Explore</span>
+      </button>
+      <button class="af-nav-btn" onclick="window.location.href='/batches/index.html'" type="button">
+        <span class="af-nav-icon">📚</span><span class="af-nav-label">Batches</span>
+      </button>
+      <button class="af-nav-btn" onclick="window.location.href='/community/index.html'" type="button">
+        <span class="af-nav-icon">💬</span><span class="af-nav-label">Community</span>
+      </button>
+      <button class="af-nav-btn active" type="button">
+        <span class="af-nav-icon">🎓</span><span class="af-nav-label">Dashboard</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ════════ VIEW: CERTIFICATE DETAIL ════════ -->
+  <div class="af-view" id="viewCert">
+    <header class="af-topbar">
+      <button class="af-back" onclick="showView('viewDashboard')">←</button>
+      <div class="af-topbar-title">My Certificate</div>
+    </header>
+    <div class="af-page no-nav-pad" id="certDetailPage"></div>
+  </div>
+
+</div><!-- /af-shell -->
+
+<div class="af-toast-wrap" id="afToastWrap"></div>
+
+<script>
+'use strict';
+
+/* ── CONFIG ── */
+const STUDENT_URL = "https://afooyyydhlwngzssgqih.supabase.co";
+const STUDENT_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb295eXlkaGx3bmd6c3NncWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDQxMjgsImV4cCI6MjA5NDIyMDEyOH0.KG0XO0oP_2MpewHoIwTtbrKg5FkyOYRUtVzLH1MSJiE";
+const DASH_EDGE   = STUDENT_URL + "/functions/v1/student-dashboard-af";
+const HDRS = {
+  'Content-Type':'application/json',
+  'apikey':STUDENT_KEY,
+  'Authorization':'Bearer '+STUDENT_KEY
+};
+const VERIFY_BASE = "https://cert.academeforge.in/verify?id=";
+const $ = id => document.getElementById(id);
+
+function getStudentId(){ return localStorage.getItem('af_student_uuid') || null; }
+
+async function callDash(action, payload = {}){
+  try{
+    const res = await fetch(DASH_EDGE, {method:'POST',headers:HDRS,body:JSON.stringify({action,...payload})});
+    return await res.json();
+  }catch(e){ return {ok:false,message:'Network error.'}; }
+}
+
+/* ── DARK MODE ── */
+window.addEventListener('storage', e => {
+  if(e.key === 'af_dark_mode')
+    document.documentElement.setAttribute('data-theme', e.newValue==='1'?'dark':'light');
+});
+
+/* ── VIEW SWITCH ── */
+function showView(id){
+  document.querySelectorAll('.af-view').forEach(v=>v.classList.remove('active'));
+  $(id).classList.add('active');
+}
+window.showView = showView;
+
+/* ── TOAST ── */
+function afToast(msg, type='ok'){
+  const wrap = $('afToastWrap'); wrap.innerHTML='';
+  const t = document.createElement('div');
+  t.className = 'af-toast af-toast-'+(type==='err'?'err':'ok');
+  t.innerHTML = `<div><p class="af-toast-title">${type==='err'?'Notice':'Done'}</p><p class="af-toast-msg">${msg}</p></div>`;
+  wrap.appendChild(t);
+  setTimeout(()=>t.remove(), 2800);
+}
+
+/* ── ESCAPE ── */
+function esc(s){ return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function fallback(){ return 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=800&q=80'; }
+function fmtDate(iso){
+  try{ return new Date(iso).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}); }catch(_){ return iso||''; }
+}
+
+/* ── ISSUE CERTIFICATE ── */
+async function issueCert(courseId, btn){
+  const sid = getStudentId();
+  if(!sid){ afToast('Please log in to get your certificate.','err'); return; }
+
+  btn.classList.add('loading');
+  btn.innerHTML = '<span class="spin"></span> Generating…';
+
+  const data = await callDash('issue_certificate',{ student_id:sid, course_id:courseId });
+
+  if(!data.ok){
+    afToast(data.message||'Could not generate certificate.','err');
+    btn.classList.remove('loading');
+    btn.innerHTML = '🎓 Get Certificate';
+    return;
+  }
+
+  afToast('Certificate ready! 🎉','ok');
+  // Refresh dashboard to show the cert
+  loadDashboard();
+}
+window.issueCert = issueCert;
+
+/* ── OPEN CERT DETAIL ── */
+let _currentCert = null;
+function openCert(cert){
+  _currentCert = cert;
+  const page = $('certDetailPage');
+  const isoDate = fmtDate(cert.issued_at);
+  const htmlUrl = cert.cert_image_url || cert.metadata?.html_url || '';
+  const verifyUrl = cert.verify_url || (VERIFY_BASE + cert.cert_id);
+
+  page.innerHTML = `
+    <div class="cert-detail-wrap">
+      <!-- Certificate Preview -->
+      <div class="cert-preview-frame" id="certPreviewFrame">
+        ${htmlUrl
+          ? `<iframe src="${esc(htmlUrl)}" title="Certificate" sandbox="allow-same-origin allow-scripts" loading="lazy"></iframe>`
+          : `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;color:var(--tm)"><span style="font-size:40px">🎓</span><span style="font-size:13px;font-weight:600">${esc(cert.course_title)}</span></div>`
+        }
+      </div>
+
+      <!-- Badge row -->
+      <div class="cert-badge-row">
+        <div class="cert-badge-circle">✓</div>
+        <div class="cert-badge-info">
+          <div class="cert-badge-title">Certificate Earned!</div>
+          <div class="cert-badge-sub">${esc(cert.course_title)}</div>
+        </div>
+      </div>
+
+      <!-- Meta -->
+      <div class="cert-meta-card">
+        <div class="cert-meta-row"><span class="ic">🆔</span> <strong>ID:</strong>&nbsp;${esc(cert.cert_id)}</div>
+        <div class="cert-meta-row"><span class="ic">👤</span> <strong>Name:</strong>&nbsp;${esc(cert.student_name)}</div>
+        <div class="cert-meta-row"><span class="ic">📚</span> <strong>Course:</strong>&nbsp;${esc(cert.course_title)}</div>
+        <div class="cert-meta-row"><span class="ic">📅</span> <strong>Issued:</strong>&nbsp;${isoDate}</div>
+        <div class="cert-meta-row"><span class="ic">🏢</span> <strong>By:</strong>&nbsp;AcademeForge</div>
+      </div>
+
+      <!-- Verify badge -->
+      <div class="verify-inline">
+        <span>✅</span> Digitally Verified · cert.academeforge.in
+      </div>
+
+      <!-- Actions -->
+      <div class="cert-detail-actions">
+        ${htmlUrl
+          ? `<button class="cert-dl-btn" onclick="downloadCert()">📥 Download Certificate</button>`
+          : `<button class="cert-dl-btn" style="opacity:.5;pointer-events:none">📥 Certificate Rendering…</button>`}
+        <button class="cert-share-btn" onclick="shareCert()">🔗 Share Certificate</button>
+        <button class="cert-verify-btn" onclick="verifyCert()">✅ Verify on Portal</button>
+      </div>
+    </div>
+  `;
+
+  showView('viewCert');
+}
+window.openCert = openCert;
+
+function downloadCert(){
+  if(!_currentCert) return;
+  const url = _currentCert.cert_image_url || _currentCert.metadata?.html_url;
+  if(!url){ afToast('Certificate file not available yet.','err'); return; }
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${_currentCert.cert_id}.html`;
+  a.target = '_blank';
+  a.click();
+  afToast('Opening certificate…');
+}
+window.downloadCert = downloadCert;
+
+function shareCert(){
+  if(!_currentCert) return;
+  const verifyUrl = _currentCert.verify_url || (VERIFY_BASE + _currentCert.cert_id);
+  if(navigator.share){
+    navigator.share({
+      title: `My ${_currentCert.course_title} Certificate`,
+      text: `I earned a certificate for completing "${_currentCert.course_title}" on AcademeForge! Verify: ${verifyUrl}`,
+      url: verifyUrl
+    }).catch(()=>{});
+  } else {
+    navigator.clipboard?.writeText(verifyUrl).then(()=>afToast('Verify link copied!')).catch(()=>{
+      afToast('Share link: ' + verifyUrl);
+    });
+  }
+}
+window.shareCert = shareCert;
+
+function verifyCert(){
+  if(!_currentCert) return;
+  const verifyUrl = _currentCert.verify_url || (VERIFY_BASE + _currentCert.cert_id);
+  window.open(verifyUrl, '_blank');
+}
+window.verifyCert = verifyCert;
+
+/* ── RENDER DASHBOARD ── */
+function renderDashboard(data){
+  const sid = getStudentId();
+  const { in_progress = [], completed = [], certificates = [], profile } = data;
+
+  const name = profile?.full_name || localStorage.getItem('af_student_name') || 'Student';
+  const initials = name.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2) || 'S';
+
+  // Build cert lookup: course_id → cert
+  const certByCourse = {};
+  certificates.forEach(c => { certByCourse[c.course_id] = c; });
+
+  let html = '';
+
+  // ── Profile Card
+  html += `
+    <div class="profile-card">
+      <div class="profile-avatar">${initials}</div>
+      <div class="profile-info">
+        <div class="profile-name">${esc(name)}</div>
+        <div class="profile-sub">AcademeForge Learner</div>
+      </div>
+      <div class="profile-badge">🏅 ${certificates.length} Cert${certificates.length!==1?'s':''}</div>
+    </div>`;
+
+  // ── Stats
+  html += `
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num">${in_progress.length}</div>
+        <div class="stat-lbl">In Progress</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">${completed.length}</div>
+        <div class="stat-lbl">Completed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">${certificates.length}</div>
+        <div class="stat-lbl">Certificates</div>
+      </div>
+    </div>`;
+
+  // ── In-Progress
+  if(in_progress.length > 0){
+    html += `<div>
+      <div class="sec-h" style="margin-bottom:10px">
+        <div class="sec-title">📖 In Progress</div>
+        <div class="sec-see-all">${in_progress.length} course${in_progress.length!==1?'s':''}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">`;
+    in_progress.forEach(p => {
+      const course = p.af_courses || {};
+      const pct = p.percent || 0;
+      const thumb = course.cover_image_url || fallback();
+      html += `
+        <button class="progress-card" onclick="window.location.href='/explore/index.html'">
+          <img class="progress-card-thumb" src="${esc(thumb)}" alt="" loading="lazy" onerror="this.src='${fallback()}'"/>
+          <div class="progress-card-body">
+            <div class="progress-card-cat">${esc(course.category||'Course')}</div>
+            <div class="progress-card-title">${esc(course.title||'Untitled')}</div>
+            <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+            <div class="progress-pct">${pct}% complete</div>
+          </div>
+        </button>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // ── Completed Courses
+  if(completed.length > 0){
+    html += `<div>
+      <div class="sec-h" style="margin-bottom:10px">
+        <div class="sec-title">✅ Completed Courses</div>
+        <div class="sec-see-all">${completed.length} course${completed.length!==1?'s':''}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">`;
+    completed.forEach(p => {
+      const course = p.af_courses || {};
+      const thumb = course.cover_image_url || fallback();
+      const hasCert = !!certByCourse[course.id || p.course_id];
+      const courseId = course.id || p.course_id;
+      html += `
+        <div class="completed-card">
+          <img class="completed-thumb" src="${esc(thumb)}" alt="" loading="lazy" onerror="this.src='${fallback()}'"/>
+          <div class="completed-body">
+            <div class="completed-cat">${esc(course.category||'Course')}</div>
+            <div class="completed-title">${esc(course.title||'Untitled')}</div>
+            <div class="completed-badge">✓ Completed · ${fmtDate(p.completed_at)}</div>
+            ${hasCert
+              ? `<button class="cert-ready-btn" onclick="openCert(${JSON.stringify(certByCourse[courseId]).replace(/"/g,'&quot;')})">🎓 View Certificate</button>`
+              : `<button class="cert-ready-btn" id="cert-btn-${esc(courseId)}" onclick="issueCert('${esc(courseId)}', this)">🎓 Get Certificate</button>`
+            }
+          </div>
+        </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // ── Certificates
+  if(certificates.length > 0){
+    html += `<div>
+      <div class="sec-h" style="margin-bottom:10px">
+        <div class="sec-title">🏆 My Certificates</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">`;
+    certificates.forEach(cert => {
+      const isoDate = fmtDate(cert.issued_at);
+      const verifyUrl = cert.verify_url || (VERIFY_BASE + cert.cert_id);
+      // Safe serialise for onclick
+      const safeJson = JSON.stringify(cert).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      html += `
+        <div class="cert-card">
+          <div class="cert-card-header">
+            <div class="cert-card-icon">🎓</div>
+            <div class="cert-card-info">
+              <div class="cert-card-title">${esc(cert.course_title)}</div>
+              <div class="cert-card-id">${esc(cert.cert_id)}</div>
+            </div>
+          </div>
+          <div class="cert-card-body">
+            <div class="cert-card-meta">Issued: ${isoDate} · AcademeForge</div>
+            <div class="cert-card-actions">
+              <button class="cert-action-btn primary" onclick="openCert(${safeJson})">🔍 View</button>
+              <button class="cert-action-btn" onclick="navigator.clipboard?.writeText('${esc(verifyUrl)}').then(()=>afToast('Link copied!'))">🔗 Share</button>
+              <button class="cert-action-btn" onclick="window.open('${esc(verifyUrl)}','_blank')">✅ Verify</button>
+            </div>
+          </div>
+        </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // ── Empty state
+  if(in_progress.length === 0 && completed.length === 0 && certificates.length === 0){
+    html += `
+      <div class="af-empty">
+        <span>🎯</span>
+        <strong>Nothing here yet!</strong>
+        <span>Enroll in a course to start your learning journey.</span>
+        <button onclick="window.location.href='/explore/index.html'" style="margin-top:8px;height:44px;padding:0 24px;border-radius:12px;background:var(--p);color:#fff;font-size:13px;font-weight:700;box-shadow:0 4px 14px rgba(79,70,229,.35)">Explore Courses</button>
+      </div>`;
+  }
+
+  $('dashBody').innerHTML = html;
+}
+
+/* ── LOAD DASHBOARD ── */
+async function loadDashboard(){
+  $('dashBody').innerHTML = `
+    <div class="af-skel" style="height:88px;border-radius:20px"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <div class="af-skel" style="height:72px;border-radius:16px"></div>
+      <div class="af-skel" style="height:72px;border-radius:16px"></div>
+      <div class="af-skel" style="height:72px;border-radius:16px"></div>
+    </div>
+    <div class="af-skel" style="height:80px;border-radius:16px"></div>
+    <div class="af-skel" style="height:80px;border-radius:16px"></div>`;
+
+  const sid = getStudentId();
+  if(!sid){
+    $('dashBody').innerHTML = `
+      <div class="af-empty">
+        <span>🔒</span>
+        <strong>Sign in to see your dashboard</strong>
+        <button onclick="window.location.href='/login/index.html'" style="margin-top:8px;height:44px;padding:0 24px;border-radius:12px;background:var(--p);color:#fff;font-size:13px;font-weight:700;">Sign In</button>
+      </div>`;
+    return;
+  }
+
+  const data = await callDash('get_dashboard',{ student_id: sid });
+  if(!data.ok){
+    $('dashBody').innerHTML = `<div class="af-empty"><span>⚠️</span>${esc(data.message||'Could not load dashboard.')}</div>`;
+    return;
+  }
+  renderDashboard(data);
+}
+
+/* ── INIT ── */
+loadDashboard();
+</script>
+</body>
+</html>
