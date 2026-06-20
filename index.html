@@ -698,6 +698,14 @@ body.gate-active #afPullLoader { display: none !important; }
   }
   .af-toast-x { color: var(--text-muted); }
 }
+  .al-back{
+  border:none;
+  background:transparent;
+  font-size:22px;
+  cursor:pointer;
+  padding:6px 10px;
+  color:inherit;
+}
 </style>
 </head>
 <body>
@@ -716,64 +724,133 @@ body.gate-active #afPullLoader { display: none !important; }
 <div id="authFlow">
   <div class="auth-inner">
 
-    <!-- WELCOME VIEW -->
-    <div id="viewWelcome" class="auth-view">
-      <div class="aw-topbar">
-        <img src="/IMG/AF LOGO 1.jpeg" alt="AcademeForge" class="aw-logo"
-          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
-        <div class="aw-logo-fb" style="display:none;" aria-hidden="true">AF</div>
-        <span class="aw-brand">AcademeForge</span>
+ <!-- WELCOME VIEW -->
+<div id="viewWelcome" class="auth-view">
+
+  <header class="af-topbar">
+    <div class="af-brand">
+      <img src="/IMG/AF LOGO 1.jpeg" alt="AF" class="af-brand-logo"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
+      <div class="af-brand-logo-fb" style="display:none;" aria-hidden="true">AF</div>
+
+      <div>
+        <div class="af-brand-name">AcademeForge</div>
+        <div class="af-brand-tag">Learning Beyond the Classroom</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="aw-hero" id="awHero">
+    <img src="/IMG/banner1.png" alt="AcademeForge"
+      onerror="this.parentElement.innerHTML=awHeroFb()"/>
+  </div>
+
+  <div class="aw-body">
+    <h1 class="aw-title">Welcome to AcademeForge</h1>
+    <p class="aw-desc">
+      Learning Beyond the Classroom — structured courses, smart learning tools,
+      and a student community, all in one place.
+    </p>
+
+    <button class="aw-btn aw-btn-primary" type="button"
+      onclick="showAuthView('login')">
+      Log in
+    </button>
+
+    <button class="aw-btn aw-btn-outline" type="button"
+      onclick="window.location.href='https://signup.academeforge.in'">
+      Join for free
+    </button>
+
+    <div class="aw-footer">
+      <strong>Developed by Devraj Kumar</strong><br>
+      Made with ❤️ in India
+    </div>
+  </div>
+
+</div>
+
+<!-- LOGIN VIEW -->
+<div id="viewLogin" class="auth-view hidden">
+
+  <header class="af-topbar">
+
+    <div class="af-brand">
+      <img src="/IMG/AF LOGO 1.jpeg"
+           alt="AF"
+           class="af-brand-logo"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
+
+      <div class="af-brand-logo-fb"
+           style="display:none;"
+           aria-hidden="true">
+        AF
       </div>
 
-      <div class="aw-hero" id="awHero">
-        <img src="/IMG/banner1.png" alt="AcademeForge" onerror="this.parentElement.innerHTML=awHeroFb()"/>
-      </div>
-
-      <div class="aw-body">
-        <h1 class="aw-title">Welcome to AcademeForge</h1>
-        <p class="aw-desc">Learning Beyond the Classroom — structured courses, smart learning tools, and a student community, all in one place.</p>
-        <button class="aw-btn aw-btn-primary" type="button" onclick="showAuthView('login')">Log in</button>
-        <button class="aw-btn aw-btn-outline" type="button" onclick="window.location.href='https://signup.academeforge.in'">Join for free</button>
-        <div class="aw-footer">
-          <strong>Developed by Devraj Kumar</strong><br>
-          Made with ❤️ in India
-        </div>
+      <div>
+        <div class="af-brand-name">AcademeForge</div>
+        <div class="af-brand-tag">Learning Beyond the Classroom</div>
       </div>
     </div>
 
-    <!-- LOGIN VIEW -->
-    <div id="viewLogin" class="auth-view hidden">
-      <div class="al-topbar">
-        <button class="al-back" type="button" onclick="showAuthView('welcome')" aria-label="Back">←</button>
-      </div>
-      <div class="al-body">
-        <div class="al-logo-row">
-          <img src="/IMG/AF LOGO 1.jpeg" alt="AcademeForge" class="al-logo"
-            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
-          <div class="al-logo-fb" style="display:none;" aria-hidden="true">AF</div>
-        </div>
-        <h1 class="al-title">Log in</h1>
-        <p class="al-sub">Existing user? Log in with your Student ID</p>
+    <div class="af-topbar-actions">
+      <button
+        class="al-back"
+        type="button"
+        onclick="showAuthView('welcome')"
+        aria-label="Back">
+        ←
+      </button>
+    </div>
 
-        <label class="al-label" for="alLoginId">Student ID / Phone Number</label>
-        <input id="alLoginId" class="al-input" type="tel" placeholder="Enter your Student ID or phone number" autocomplete="username"/>
+  </header>
 
-        <label class="al-label" for="alPassword">Password</label>
-        <input id="alPassword" class="al-input" type="password" placeholder="Enter your password" autocomplete="current-password"/>
+  <div class="al-body">
 
-        <div class="al-forgot">Forgot password? <a href="https://reset.academeforge.in">Reset it here</a></div>
+    <label class="al-label" for="alLoginId">
+      Student ID / Email / Phone Number
+    </label>
 
-        <button class="al-btn" type="button" onclick="doAcademeLogin()">Log in</button>
+    <input
+      id="alLoginId"
+      class="al-input"
+      type="text"
+      placeholder="Enter your Student ID, Email or Phone Number"
+      autocomplete="username" />
 
-        <div class="al-msg" id="alMsg"></div>
+    <label class="al-label" for="alPassword">
+      Password
+    </label>
 
-        <div class="al-signup">New User? <a href="https://signup.academeforge.in">Sign up</a></div>
-      </div>
+    <input
+      id="alPassword"
+      class="al-input"
+      type="password"
+      placeholder="Enter your password"
+      autocomplete="current-password" />
+
+    <div class="al-forgot">
+      Forgot password?
+      <a href="https://reset.academeforge.in">Reset it here</a>
+    </div>
+
+    <button
+      class="al-btn"
+      type="button"
+      onclick="doAcademeLogin()">
+      Log in
+    </button>
+
+    <div class="al-msg" id="alMsg"></div>
+
+    <div class="al-signup">
+      New User?
+      <a href="https://signup.academeforge.in">Sign up</a>
     </div>
 
   </div>
-</div>
 
+</div>
 <!-- ═══ MOBILE SHELL (Home) ═══ -->
 <div class="af-shell" id="afShell">
   <header class="af-topbar">
