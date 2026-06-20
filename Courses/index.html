@@ -702,7 +702,10 @@ async function openModule(moduleId){
   }
   _currentModule = data.module;
   _currentCheck = data.check;
-  _checkPassed = !!data.is_done; // if already done before, treat check as already passed
+  // Continue is unlocked if: the module was already completed before,
+  // OR there's no quick-check configured for this module at all
+  // (e.g. Resources / Survey have none — nothing to solve).
+  _checkPassed = !!data.is_done || !data.check;
   _currentModule._next = data.next_module;
   _isReviewMode = _isCourseCompleted();
 
