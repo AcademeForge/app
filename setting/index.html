@@ -10,6 +10,9 @@ document.documentElement.setAttribute(
 );
 }();
 </script>
+
+  <script src="/push-setup.js"></script>
+  
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#7C3AED"/>
@@ -1165,7 +1168,11 @@ function closeLogoutSheet() { $('logoutSheet')?.classList.remove('open'); }
 function openLogoutModal()  { $('dtLogoutModal')?.classList.add('open');  }
 function closeLogoutModal() { $('dtLogoutModal')?.classList.remove('open'); }
 
-function doLogout() {
+async function doLogout() {
+  if (window.AFPush) {
+    await AFPush.clear();
+  }
+
   ['af_student_logged_in','af_student_uuid','af_student_id',
    'af_student_mobile','af_student_name','af_student_email',
    'af_session_token','af_student_phone'].forEach(k => localStorage.removeItem(k));
@@ -1175,7 +1182,7 @@ function doLogout() {
   loadProfile();
   setTimeout(() => { window.location.href = '/'; }, 900);
 }
-
+  
 /* ── TOAST ── */
 let _tTimer = null;
 function showToast(msg, type = 'info') {
