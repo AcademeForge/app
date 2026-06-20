@@ -3,22 +3,14 @@
 <head>
 <script>
 (function(){
-
   const dark = localStorage.getItem('af_dark_mode');
-
-  document.documentElement.setAttribute(
-    'data-theme',
-    dark === '1' ? 'dark' : 'light'
-  );
-
-  if(sessionStorage.getItem('af_splash_shown'))
-    document.documentElement.classList.add('no-splash');
-
+  document.documentElement.setAttribute('data-theme', dark === '1' ? 'dark' : 'light');
+  if(sessionStorage.getItem('af_splash_shown')) document.documentElement.classList.add('no-splash');
 })();
 </script>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<meta name="theme-color" content="#7C3AED"/>
+<meta name="theme-color" content="#4f46e5"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -26,878 +18,624 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link rel="icon" type="image/jpeg" href="/IMG/AF%20LOGO%202.jpeg">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Sora:wght@700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Sora:wght@700;800;900&display=swap" rel="stylesheet"/>
 <style>
-
-/* ═══════════════════════════════════════════════════════════
-   DESIGN TOKENS — DESKTOP (AMOLED dark-first)
-   These tokens live at :root, so they are available globally
-   (used by the Welcome / Login gate as well, regardless of viewport).
-═══════════════════════════════════════════════════════════ */
+/* ── TOKENS ── */
 :root {
-  --bg-primary:   #050505;
-  --bg-secondary: #0B0B0F;
-  --bg-tertiary:  #121218;
-  --border:       #1D1D26;
-  --border-hover: #2D2D3A;
-
-  --primary:        #7C3AED;
-  --primary-light:  #A855F7;
-  --secondary:      #2563EB;
-  --secondary-light:#3B82F6;
-  --success:        #10B981;
-  --warning:        #F59E0B;
-  --danger:         #EF4444;
-
-  --text-primary:   #FFFFFF;
-  --text-secondary: #B8B8C7;
-  --text-muted:     #7A7A8C;
-
-  --sidebar-w: 260px;
-  --header-h:  72px;
-  --nav-h:     60px;
-  --r1: 8px; --r2: 12px; --r3: 16px; --r4: 20px; --rf: 9999px;
-
+  --p: #4f46e5; --p2: #3730a3; --pl: #818cf8; --p-soft: rgba(79,70,229,.10);
+  --acc: #06b6d4; --acc2: #f59e0b;
+  --err: #ef4444; --ok: #22c55e;
+  --bg: #f0f2ff; --shell: #fff;
+  --card: rgba(255,255,255,.85); --card-s: #fff;
+  --nav: rgba(255,255,255,.94); --hdr: rgba(255,255,255,.97);
+  --inp: #f4f5fb; --grp: rgba(79,70,229,.06);
+  --t1: #0f0e2a; --t2: #4b5563; --tm: #9ca3af;
+  --b1: rgba(79,70,229,.12); --bc: rgba(79,70,229,.18);
+  --sh: 0 2px 12px rgba(79,70,229,.08), 0 1px 3px rgba(0,0,0,.04);
+  --she: 0 8px 32px rgba(79,70,229,.14);
+  --shb: 0 4px 20px rgba(79,70,229,.32);
+  --nav-h: 62px;
   --fd: 'Sora', sans-serif;
-  --fb: 'Nunito', sans-serif;
-
-  --sh-card: 0 1px 3px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
-  --sh-hover: 0 4px 24px rgba(124,58,237,.18), 0 1px 3px rgba(0,0,0,.5);
-  --tr: 0.22s ease;
+  --fb: 'Inter', sans-serif;
+}
+[data-theme="dark"] {
+  --bg: #0c0b1d; --shell: #120f2a;
+  --card: rgba(30,27,60,.82); --card-s: #1e1b3c;
+  --nav: rgba(18,15,42,.97); --hdr: rgba(18,15,42,.98);
+  --inp: #1e1b3c; --grp: rgba(129,140,248,.08);
+  --t1: #f0eeff; --t2: #a5a3c2; --tm: #6b6a8a;
+  --b1: rgba(129,140,248,.14); --bc: rgba(129,140,248,.22);
+  --sh: 0 2px 12px rgba(0,0,0,.32); --she: 0 8px 32px rgba(0,0,0,.44);
+  --shb: 0 4px 20px rgba(79,70,229,.44);
+  --p-soft: rgba(129,140,248,.12);
 }
 
-[data-theme="light"] {
-  --bg-primary:   #f0f2ff;
-  --bg-secondary: #fff;
-  --bg-tertiary:  #f4f5fb;
-  --border:       rgba(79,70,229,.12);
-  --border-hover: rgba(79,70,229,.25);
-  --text-primary:   #0f0e2a;
-  --text-secondary: #4b5563;
-  --text-muted:     #9ca3af;
+/* ── RESET ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{font-size:15px;-webkit-text-size-adjust:100%;color-scheme:light}
+[data-theme="dark"]{color-scheme:dark}
+html,body{height:100%;min-height:100dvh}
+body{
+  font-family:var(--fb);
+  background:var(--bg);
+  color:var(--t1);
+  -webkit-font-smoothing:antialiased;
+  display:flex;justify-content:center;
+  overflow:hidden;
+  height:100dvh;
+}
+button{font-family:var(--fb);cursor:pointer;border:none;background:none;color:inherit}
+a{text-decoration:none;color:inherit}
+img{display:block;max-width:100%}
+ul{list-style:none}
+*,body,html{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
+
+/* ── SHELL — always phone-shaped, centered ── */
+.af-shell{
+  width:100%;max-width:430px;
+  height:100dvh;
+  background:var(--shell);
+  display:flex;flex-direction:column;
+  box-shadow:0 0 0 1px var(--b1),var(--she);
+  overflow:hidden;position:relative;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   MOBILE TOKENS — override for < 768px (home shell only)
-═══════════════════════════════════════════════════════════ */
-@media (max-width: 767px) {
-  :root {
-    --p: #4f46e5; --p2: #3730a3; --pl: #818cf8;
-    --acc: #06b6d4; --acc2: #f59e0b;
-    --err: #ef4444; --ok: #22c55e;
-    --bg: #f0f2ff; --shell: #fff;
-    --card: rgba(255,255,255,.72); --card-s: #fff;
-    --nav: rgba(255,255,255,.92); --hdr: rgba(255,255,255,.95);
-    --inp: #f4f5fb; --grp: rgba(79,70,229,.06); --grph: rgba(79,70,229,.10);
-    --t1: #0f0e2a; --t2: #4b5563; --tm: #9ca3af;
-    --b1: rgba(79,70,229,.12); --bc: rgba(79,70,229,.15);
-    --sh: 0 2px 10px rgba(79,70,229,.08),0 1px 3px rgba(0,0,0,.04);
-    --she: 0 8px 32px rgba(79,70,229,.14);
-    --shb: 0 4px 16px rgba(79,70,229,.28);
-  }
-  [data-theme="dark"] {
-    --bg: #0c0b1d; --shell: #120f2a;
-    --card: rgba(30,27,60,.80); --card-s: #1e1b3c;
-    --nav: rgba(18,15,42,.96); --hdr: rgba(18,15,42,.97);
-    --inp: #1e1b3c; --grp: rgba(129,140,248,.08); --grph: rgba(129,140,248,.14);
-    --t1: #f0eeff; --t2: #a5a3c2; --tm: #6b6a8a;
-    --b1: rgba(129,140,248,.12); --bc: rgba(129,140,248,.18);
-    --sh: 0 2px 10px rgba(0,0,0,.28); --she: 0 8px 32px rgba(0,0,0,.40);
-    --shb: 0 4px 16px rgba(79,70,229,.40);
-  }
+/* ── SPLASH ── */
+html.no-splash #afSplash{display:none!important}
+#afSplash{
+  position:fixed;inset:0;z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  background:linear-gradient(145deg,#0f0e2a 0%,#1a1560 50%,#0f0e2a 100%);
+  transition:opacity .4s ease,visibility .4s ease;
 }
-
-/* ═══════════════════════════════════════════════════════════
-   RESET
-═══════════════════════════════════════════════════════════ */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html { font-size: 15px; -webkit-text-size-adjust: 100%; }
-html, body { height: 100%; }
-body {
-  font-family: var(--fb);
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  -webkit-font-smoothing: antialiased;
-  overflow: hidden;
+#afSplash.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.sp-ring{
+  width:80px;height:80px;border-radius:22px;overflow:hidden;
+  box-shadow:0 0 0 1px rgba(129,140,248,.3),0 8px 32px rgba(79,70,229,.5);
 }
-button { font-family: var(--fb); cursor: pointer; border: none; background: none; color: inherit; }
-a { text-decoration: none; color: inherit; }
-img { display: block; max-width: 100%; }
-ul { list-style: none; }
-*, body, html { -webkit-user-select: none; -moz-user-select: none; user-select: none; -webkit-touch-callout: none; }
-input, textarea { -webkit-user-select: text; -moz-user-select: text; user-select: text; }
+.sp-ring img{width:100%;height:100%;object-fit:cover}
+.sp-title{font-family:var(--fd);font-size:22px;font-weight:900;color:#fff;letter-spacing:-.03em}
+.sp-sub{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:rgba(165,163,194,.7)}
+.sp-bar-wrap{width:80px;height:3px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-top:8px}
+.sp-bar{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#818cf8,#06b6d4);animation:splashLoad 1.4s cubic-bezier(.22,.61,.36,1) forwards}
+@keyframes splashLoad{to{width:100%}}
 
-/* ═══════════════════════════════════════════════════════════
-   SPLASH
-═══════════════════════════════════════════════════════════ */
-html.no-splash #afSplash { display: none !important; }
-#afSplash {
-  position: fixed; inset: 0; z-index: 9999;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-  transition: opacity .4s ease, visibility .4s ease;
-}
-#afSplash.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-
-@media (max-width: 767px) {
-  #afSplash {
-    background: linear-gradient(135deg, #12050a 0%, #1a0f05 45%, #08060f 100%);
-  }
-  .sp-ring {
-    box-shadow: 0 0 20px rgba(255,59,48,.6), 0 0 40px rgba(248,199,92,.4);
-  }
-  .sp-title { color: #fff3b3; }
-  .sp-sub { color: rgba(255,247,214,.85); }
-  .sp-bar { background: linear-gradient(90deg, #ff3b30, #ff8c00, #f8c75c, #fff1a8); }
-}
-
-@media (min-width: 768px) {
-  #afSplash {
-    background: linear-gradient(135deg, #050505 0%, #0B0B0F 50%, #120f2a 100%);
-  }
-  .sp-ring {
-    box-shadow: 0 0 20px rgba(124,58,237,.5), 0 0 40px rgba(37,99,235,.3);
-  }
-  .sp-title { color: #fff; }
-  .sp-sub { color: var(--text-muted, #7A7A8C); }
-  .sp-bar { background: linear-gradient(90deg, #7C3AED, #2563EB); }
-}
-
-.sp-ring {
-  width: 88px; height: 88px; border-radius: 24px; overflow: hidden;
-  display: flex; align-items: center; justify-content: center;
-}
-.sp-ring img { width: 100%; height: 100%; object-fit: cover; }
-.sp-title { font-family: var(--fd); font-size: 22px; font-weight: 900; letter-spacing: -.02em; }
-.sp-sub { font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; }
-.sp-bar-wrap { width: 90px; height: 4px; background: rgba(255,255,255,.08); border-radius: 99px; overflow: hidden; margin-top: 12px; }
-.sp-bar { height: 100%; width: 0; border-radius: 99px; animation: splashLoad 1.2s cubic-bezier(.22,.61,.36,1) forwards; }
-@keyframes splashLoad { to { width: 100%; } }
-
-/* =========================
-   AUTH FLOW
-========================= */
-
+/* ── AUTH GATE ── */
 #authFlow{
-    position:fixed;
-    inset:0;
-    z-index:5000;
-    display:none;
-    justify-content:center;
-    background:#fcf8f3;
+  position:absolute;inset:0;z-index:5000;
+  display:none;flex-direction:column;
+  background:var(--shell);
+  overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
 }
+#authFlow::-webkit-scrollbar{display:none}
 body.gate-active #authFlow{display:flex}
-body.gate-active .af-shell,
-body.gate-active .dt-layout,
-body.gate-active #afPullLoader{display:none!important}
+body.gate-active .af-home-wrap,body.gate-active #afPullLoader{display:none!important}
 
-.auth-inner{
-    width:100%;
-    max-width:460px;
-    min-height:100dvh;
-    display:flex;
-    flex-direction:column;
-    overflow-y:auto;
-    background:transparent;
-}
-.auth-inner::-webkit-scrollbar{display:none}
+.auth-view{display:none;flex-direction:column;min-height:100%}
+.auth-view.visible{display:flex}
 
-.auth-view{flex:1;display:flex;flex-direction:column}
-.auth-view.hidden{display:none}
-
-/* =========================
-   BRANDING
-========================= */
-
-.aw-topbar{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    padding:24px;
+/* ── ONBOARDING: WELCOME ── */
+.aw-wrap{
+  display:flex;flex-direction:column;
+  min-height:100%;
+  background:var(--shell);
 }
 
-.aw-logo,.aw-logo-fb{
-    width:42px;
-    height:42px;
-    border-radius:12px;
+/* Top status bar area */
+.aw-statusbar{
+  height:env(safe-area-inset-top,0px);
+  background:transparent;
+  flex-shrink:0;
 }
 
-.aw-logo{
-    object-fit:cover;
-    box-shadow:0 4px 12px rgba(0,0,0,.08);
+/* Logo pill at top */
+.aw-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 22px 0;
+  flex-shrink:0;
+}
+.aw-logo-pill{
+  display:flex;align-items:center;gap:9px;
+  padding:6px 12px 6px 6px;
+  background:var(--grp);
+  border:1px solid var(--b1);
+  border-radius:99px;
+}
+.aw-logo-pill img{
+  width:28px;height:28px;border-radius:8px;object-fit:cover;
+}
+.aw-logo-pill-fb{
+  width:28px;height:28px;border-radius:8px;
+  background:linear-gradient(135deg,var(--p),var(--acc));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:12px;color:#fff;
+}
+.aw-logo-name{font-size:13px;font-weight:700;color:var(--t1)}
+
+.aw-badge-pill{
+  display:flex;align-items:center;gap:5px;
+  padding:5px 11px;
+  background:linear-gradient(90deg,rgba(245,158,11,.12),rgba(239,68,68,.08));
+  border:1px solid rgba(245,158,11,.25);
+  border-radius:99px;
+  font-size:11px;font-weight:700;color:#d97706;
+}
+[data-theme="dark"] .aw-badge-pill{color:#fbbf24}
+
+/* Hero image — natural size */
+.aw-hero-wrap{
+  flex-shrink:0;
+  width:100%;
+  margin-top:22px;
+  position:relative;
+  overflow:hidden;
+}
+.aw-hero-img{
+  width:100%;
+  display:block;
+  /* Natural height from image */
+  height:auto;
+  object-fit:cover;
+}
+.aw-hero-fb{
+  width:100%;
+  aspect-ratio:4/3;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;
+  background:linear-gradient(135deg,#4f46e5 0%,#06b6d4 100%);
+  color:#fff;
+}
+.aw-hero-fb span{font-size:48px}
+.aw-hero-fb p{font-size:15px;font-weight:700;opacity:.85}
+
+/* Pill overlay on hero */
+.aw-hero-badge{
+  position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
+  white-space:nowrap;
+  background:rgba(15,14,42,.72);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:99px;padding:6px 16px;
+  font-size:11px;font-weight:600;color:rgba(255,255,255,.85);
+  letter-spacing:.02em;
 }
 
-.aw-logo-fb{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:#0f172a;
-    color:#fff;
-    font-weight:800;
-}
-
-.aw-brand{
-    font-size:22px;
-    font-weight:800;
-    color:#0f172a;
-    letter-spacing:-.5px;
-}
-
-/* =========================
-   HERO
-========================= */
-
-.aw-hero{
-    margin:0 24px;
-    aspect-ratio:4/3;
-    overflow:hidden;
-    border-radius:24px;
-    background:#fff;
-    border:1px solid #e2e8f0;
-    box-shadow:0 20px 40px rgba(15,23,42,.06);
-}
-
-.aw-hero img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-}
-
+/* Body text area */
 .aw-body{
-    flex:1;
-    padding:28px 24px;
+  flex:1;
+  padding:26px 22px;
+  display:flex;flex-direction:column;
 }
 
-.aw-badge{
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    padding:8px 14px;
-    border-radius:999px;
-    background:#ffedd5;
-    border:1px solid #fdba74;
-    color:#c2410c;
-    font-size:13px;
-    font-weight:700;
-    margin-bottom:18px;
+.aw-kicker{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--pl);margin-bottom:12px;
 }
+.aw-kicker-dot{width:6px;height:6px;border-radius:50%;background:var(--pl)}
 
 .aw-title{
-    font-size:42px;
-    line-height:1.05;
-    letter-spacing:-2px;
-    font-weight:900;
-    color:#0f172a;
-    margin-bottom:16px;
+  font-family:var(--fd);
+  font-size:30px;line-height:1.07;letter-spacing:-.04em;
+  font-weight:900;color:var(--t1);
+  margin-bottom:12px;
 }
+.aw-title em{font-style:normal;color:var(--p)}
 
 .aw-desc{
-    color:#475569;
-    font-size:16px;
-    line-height:1.8;
-    margin-bottom:28px;
+  color:var(--t2);font-size:14px;line-height:1.75;
+  margin-bottom:24px;
 }
 
-/* =========================
-   BUTTONS
-========================= */
-
-.aw-btn,.al-btn{
-    width:100%;
-    height:56px;
-    border:none;
-    border-radius:14px;
-    font-size:15px;
-    font-weight:700;
-    cursor:pointer;
-    transition:.25s;
+/* Feature pills row */
+.aw-features{
+  display:flex;flex-wrap:wrap;gap:8px;
+  margin-bottom:26px;
 }
-
-.aw-btn-primary,.al-btn{
-    background:#0f172a;
-    color:#fff;
-    box-shadow:0 8px 20px rgba(15,23,42,.12);
+.aw-feat-chip{
+  display:flex;align-items:center;gap:5px;
+  padding:5px 11px;
+  background:var(--grp);border:1px solid var(--b1);border-radius:99px;
+  font-size:11.5px;font-weight:600;color:var(--t2);
 }
+.aw-feat-chip span{font-size:13px}
 
-.aw-btn-primary:hover,
-.al-btn:hover{
-    transform:translateY(-2px);
-    box-shadow:0 14px 30px rgba(15,23,42,.18);
+/* Buttons */
+.aw-btn-primary{
+  width:100%;height:52px;
+  border-radius:14px;border:none;
+  background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);
+  color:#fff;font-size:15px;font-weight:700;
+  box-shadow:0 4px 16px rgba(79,70,229,.35);
+  transition:transform .2s,box-shadow .2s,opacity .2s;
+  position:relative;overflow:hidden;
 }
+.aw-btn-primary::after{
+  content:'';position:absolute;inset:0;
+  background:rgba(255,255,255,0);transition:background .2s;
+}
+.aw-btn-primary:active{transform:scale(.98);opacity:.92}
+.aw-btn-primary:active::after{background:rgba(255,255,255,.08)}
 
-.aw-btn-outline{
-    margin-top:12px;
-    background:#fff;
-    border:1px solid #e2e8f0;
-    color:#0f172a;
+.aw-btn-secondary{
+  width:100%;height:52px;margin-top:10px;
+  border-radius:14px;
+  background:var(--grp);
+  border:1px solid var(--b1);
+  color:var(--t1);font-size:15px;font-weight:600;
+  transition:background .2s,border-color .2s,transform .2s;
 }
+.aw-btn-secondary:active{transform:scale(.98)}
+[data-theme="dark"] .aw-btn-secondary{background:rgba(129,140,248,.08)}
 
 .aw-footer{
-    margin-top:auto;
-    padding-top:24px;
-    text-align:center;
-    color:#94a3b8;
-    font-size:13px;
-    line-height:1.7;
+  margin-top:auto;padding-top:20px;
+  text-align:center;color:var(--tm);font-size:12px;line-height:1.8;
+}
+.aw-footer strong{color:var(--t2)}
+
+/* ── LOGIN VIEW ── */
+.al-wrap{
+  display:flex;flex-direction:column;
+  min-height:100%;
+  background:var(--shell);
+  padding-bottom:env(safe-area-inset-bottom,0px);
 }
 
-/* =========================
-   LOGIN CARD
-========================= */
-
-.al-topbar{padding:24px 24px 0}
-
+.al-header{
+  display:flex;align-items:center;
+  padding:16px 18px;
+  flex-shrink:0;
+}
 .al-back{
-    width:42px;
-    height:42px;
-    border:none;
-    border-radius:12px;
-    background:#fff;
-    border:1px solid #e2e8f0;
-    color:#0f172a;
+  width:38px;height:38px;
+  border-radius:11px;
+  background:var(--grp);border:1px solid var(--b1);
+  color:var(--t1);font-size:18px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
 }
+.al-back:active{opacity:.7}
 
 .al-body{
-    flex:1;
-    margin:20px;
-    padding:28px;
-    background:#fff;
-    border:1px solid #e2e8f0;
-    border-radius:24px;
-    box-shadow:0 20px 40px rgba(15,23,42,.06);
+  flex:1;
+  padding:0 20px 24px;
+  display:flex;flex-direction:column;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+}
+.al-body::-webkit-scrollbar{display:none}
+
+/* Brand block inside login */
+.al-brand{
+  text-align:center;
+  padding:20px 0 22px;
+}
+.al-brand-logo{
+  width:64px;height:64px;border-radius:18px;object-fit:cover;
+  box-shadow:0 4px 20px rgba(79,70,229,.22);
+  margin:0 auto 12px;
+}
+.al-brand-logo-fb{
+  width:64px;height:64px;border-radius:18px;
+  background:linear-gradient(135deg,var(--p),var(--acc));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fd);font-weight:900;font-size:20px;color:#fff;
+  box-shadow:0 4px 20px rgba(79,70,229,.22);
+  margin:0 auto 12px;
+}
+.al-brand-name{font-family:var(--fd);font-size:22px;font-weight:900;color:var(--t1);letter-spacing:-.03em}
+.al-brand-sub{font-size:13px;color:var(--tm);margin-top:4px}
+
+/* Login card */
+.al-card{
+  background:var(--card);
+  border:1px solid var(--b1);
+  border-radius:20px;
+  padding:24px 20px;
+  box-shadow:var(--sh);
 }
 
-.al-logo-row{
-    display:flex;
-    justify-content:center;
-    margin-bottom:16px;
+.al-section-title{
+  font-size:16px;font-weight:700;color:var(--t1);
+  margin-bottom:18px;
 }
 
-.al-logo,.al-logo-fb{
-    width:64px;
-    height:64px;
-    border-radius:18px;
-}
-
-.al-logo{object-fit:cover}
-
-.al-logo-fb{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:#0f172a;
-    color:#fff;
-    font-weight:800;
-}
-
-.al-title{
-    text-align:center;
-    font-size:32px;
-    font-weight:900;
-    color:#0f172a;
-    margin-bottom:6px;
-}
-
-.al-sub{
-    text-align:center;
-    color:#64748b;
-    font-size:14px;
-    margin-bottom:20px;
-}
-
+/* Field groups */
+.al-field{margin-bottom:16px}
 .al-label{
-    display:block;
-    margin:14px 0 8px;
-    font-size:13px;
-    font-weight:700;
-    color:#0f172a;
+  display:flex;align-items:center;gap:5px;
+  font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--tm);margin-bottom:7px;
 }
-
+.al-input-wrap{position:relative}
+.al-input-icon{
+  position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  font-size:16px;color:var(--tm);pointer-events:none;
+}
 .al-input{
-    width:100%;
-    height:54px;
-    padding:0 16px;
-    border-radius:12px;
-    border:1px solid #e2e8f0;
-    background:#fff;
-    font-size:14px;
-    transition:.2s;
+  width:100%;height:50px;
+  padding:0 14px 0 42px;
+  border-radius:12px;
+  border:1.5px solid var(--b1);
+  background:var(--inp);
+  font-size:14px;font-family:var(--fb);color:var(--t1);
+  transition:border-color .2s,box-shadow .2s,background .2s;
+  outline:none;
 }
-
+.al-input::placeholder{color:var(--tm)}
 .al-input:focus{
-    outline:none;
-    border-color:#0f172a;
-    box-shadow:0 0 0 4px rgba(15,23,42,.08);
+  border-color:var(--p);
+  background:var(--shell);
+  box-shadow:0 0 0 3px rgba(79,70,229,.12);
+}
+[data-theme="dark"] .al-input:focus{background:rgba(129,140,248,.06)}
+
+.al-input-toggle{
+  position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  color:var(--tm);font-size:15px;cursor:pointer;
 }
 
+/* Forgot */
 .al-forgot{
-    margin-top:12px;
-    font-size:13px;
-    color:#64748b;
+  text-align:right;
+  font-size:12px;font-weight:600;color:var(--p);
+  margin-top:6px;cursor:pointer;
 }
 
-.al-forgot a,
-.al-signup a{
-    color:#0f172a;
-    font-weight:700;
+/* Login button */
+.al-btn{
+  width:100%;height:52px;
+  border-radius:13px;border:none;
+  margin-top:20px;
+  background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);
+  color:#fff;font-size:15px;font-weight:700;
+  box-shadow:0 4px 16px rgba(79,70,229,.35);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:transform .2s,opacity .2s;
 }
+.al-btn:active{transform:scale(.98);opacity:.9}
+.al-btn:disabled{opacity:.6;pointer-events:none}
 
+/* Divider */
+.al-or{
+  display:flex;align-items:center;gap:10px;
+  margin:18px 0;color:var(--tm);font-size:12px;font-weight:600;
+}
+.al-or::before,.al-or::after{content:'';flex:1;height:1px;background:var(--b1)}
+
+/* Signup row */
 .al-signup{
-    margin-top:24px;
-    text-align:center;
-    color:#64748b;
-    font-size:14px;
+  text-align:center;font-size:13px;color:var(--t2);
+  margin-top:16px;
 }
+.al-signup a{color:var(--p);font-weight:700}
 
+/* Message */
 .al-msg{
-    display:none;
-    margin-top:14px;
-    padding:12px;
-    border-radius:12px;
-    font-size:13px;
-    font-weight:600;
+  display:none;margin-top:14px;
+  padding:12px 14px;border-radius:11px;
+  font-size:13px;font-weight:600;line-height:1.5;
+}
+.al-msg.ok{display:block;background:rgba(34,197,94,.12);color:#15803d;border:1px solid rgba(34,197,94,.2)}
+.al-msg.err{display:block;background:rgba(239,68,68,.10);color:#b91c1c;border:1px solid rgba(239,68,68,.18)}
+.al-msg.info{display:block;background:var(--p-soft);color:var(--pl);border:1px solid var(--b1)}
+[data-theme="dark"] .al-msg.ok{color:#4ade80}
+[data-theme="dark"] .al-msg.err{color:#f87171}
+
+/* Trust badges */
+.al-trust{
+  display:flex;justify-content:center;gap:16px;
+  margin-top:22px;
+}
+.al-trust-item{
+  display:flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:600;color:var(--tm);
+}
+.al-trust-item span{font-size:13px}
+
+/* ── HOME WRAP ── */
+.af-home-wrap{
+  display:flex;flex-direction:column;
+  flex:1;min-height:0;
+  overflow:hidden;
 }
 
-.al-msg.ok{display:block;background:#dcfce7;color:#166534}
-.al-msg.err{display:block;background:#fee2e2;color:#991b1b}
-.al-msg.info{display:block;background:#e0f2fe;color:#075985}
+/* Topbar */
+.af-topbar{
+  flex-shrink:0;height:52px;
+  background:var(--hdr);
+  backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  border-bottom:1px solid var(--b1);
+  display:flex;align-items:center;padding:0 14px;gap:10px;z-index:100;
+}
+.af-brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.af-brand-logo{width:34px;height:34px;border-radius:10px;object-fit:cover;flex-shrink:0}
+.af-brand-logo-fb{
+  width:34px;height:34px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--p),var(--acc));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fd);font-weight:800;font-size:14px;color:#fff;
+}
+.af-brand-name{font-family:var(--fd);font-size:14px;font-weight:800;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.af-brand-tag{font-size:9.5px;color:var(--tm);font-weight:500;margin-top:1px}
+.af-topbar-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
 
-/* ═══════════════════════════════════════════════════════════
-   MOBILE SHELL (< 768px) — Home
-═══════════════════════════════════════════════════════════ */
-@media (max-width: 767px) {
-  html { color-scheme: light; }
-  [data-theme="dark"] { color-scheme: dark; }
+.af-streak{
+  display:flex;align-items:center;gap:4px;
+  padding:5px 10px 5px 7px;
+  background:linear-gradient(135deg,rgba(245,158,11,.14),rgba(239,68,68,.08));
+  border:1px solid rgba(245,158,11,.22);border-radius:99px;
+  font-size:12px;font-weight:800;color:#d97706;cursor:pointer;
+}
+.af-streak:active{opacity:.8}
+[data-theme="dark"] .af-streak{color:#fbbf24}
 
-  body {
-    background: var(--bg);
-    color: var(--t1);
-    display: flex; justify-content: center;
-    height: 100dvh; overflow: hidden;
-  }
-
-  .af-shell {
-    width: 100%; max-width: 430px;
-    height: 100%; height: 100dvh;
-    background: var(--shell);
-    display: flex; flex-direction: column;
-    box-shadow: 0 0 0 1px var(--b1), var(--she);
-    overflow: hidden; position: relative;
-  }
-
-  /* Mobile topbar */
-  .af-topbar {
-    flex-shrink: 0; height: 52px;
-    background: var(--hdr);
-    backdrop-filter: blur(16px) saturate(160%); -webkit-backdrop-filter: blur(16px) saturate(160%);
-    border-bottom: 1px solid var(--b1);
-    display: flex; align-items: center; padding: 0 14px; gap: 10px; z-index: 100;
-  }
-  .af-brand { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
-  .af-brand-logo { width: 38px; height: 38px; border-radius: 11px; object-fit: cover; flex-shrink: 0; }
-  .af-brand-logo-fb {
-    width: 38px; height: 38px; border-radius: 11px; flex-shrink: 0;
-    background: linear-gradient(135deg, var(--p), var(--acc));
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--fd); font-weight: 800; font-size: 16px; color: #fff;
-  }
-  .af-brand-name { font-family: var(--fd); font-size: 15px; font-weight: 800; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .af-brand-tag { font-size: 10px; color: var(--tm); font-weight: 500; margin-top: 1px; }
-  .af-topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-
-  /* streak */
-  .af-streak {
-    display: flex; align-items: center; gap: 4px;
-    padding: 5px 10px 5px 7px;
-    background: linear-gradient(135deg, rgba(245,158,11,.15), rgba(239,68,68,.10));
-    border: 1px solid rgba(245,158,11,.25); border-radius: var(--rf);
-    font-size: 12px; font-weight: 800; color: #d97706; cursor: pointer;
-  }
-  .af-streak:active { opacity: .8; }
-  [data-theme="dark"] .af-streak { color: #fbbf24; }
-
-  /* notif */
-  .af-notif {
-    width: 36px; height: 36px; border-radius: var(--r2);
-    background: var(--grp); border: 1px solid var(--b1);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 17px; position: relative; cursor: pointer;
-  }
-  .af-notif:active { opacity: .8; }
-  .af-notif-dot {
-    position: absolute; top: 6px; right: 6px;
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--err); border: 2px solid var(--shell); display: none;
-  }
-
-  /* page */
-  .af-page {
-    flex: 1; overflow-y: scroll; overflow-x: hidden;
-    -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain;
-    padding-bottom: calc(var(--nav-h) + 24px + env(safe-area-inset-bottom, 0px));
-    min-height: 0;
-    -webkit-transform: translateZ(0); transform: translateZ(0);
-  }
-  .af-page::-webkit-scrollbar { width: 2px; }
-  .af-page::-webkit-scrollbar-thumb { background: var(--bc); border-radius: 99px; }
-
-  /* banner */
-  .af-banner { position: relative; width: 100%; aspect-ratio: 16/7; overflow: hidden; background: linear-gradient(135deg, var(--p), var(--acc)); flex-shrink: 0; }
-  .af-slide { position: absolute; inset: 0; opacity: 0; transition: opacity .5s ease; }
-  .af-slide.active { opacity: 1; }
-  .af-slide img { width: 100%; height: 100%; object-fit: cover; }
-  .af-slide-fb { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #fff; font-family: var(--fd); }
-  .af-slide-fb h3 { font-size: 18px; font-weight: 800; }
-  .af-slide-fb p { font-size: 13px; opacity: .8; }
-  .af-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
-  .af-dot { width: 6px; height: 6px; border-radius: 99px; background: rgba(255,255,255,.45); border: none; cursor: pointer; transition: width .3s, background .3s; }
-  .af-dot.active { width: 20px; background: #fff; }
-
-  /* ticker */
-  .af-ticker {
-    background: linear-gradient(90deg, var(--p), var(--p2));
-    color: #fff; font-size: 12px; font-weight: 600;
-    overflow: hidden; white-space: nowrap; padding: 7px 0; flex-shrink: 0;
-  }
-  .af-ticker-track { display: inline-block; animation: ticker 20s linear infinite; }
-  .af-ticker-track span { padding: 0 40px; }
-  @keyframes ticker { to { transform: translateX(-50%); } }
-
-  /* body */
-  .af-body { padding: 14px; display: flex; flex-direction: column; gap: 14px; }
-  .af-sec-label { font-family: var(--fd); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--tm); margin-bottom: 4px; }
-
-  /* wide card */
-  .af-wide-card {
-    border-radius: var(--r3); padding: 14px;
-    display: flex; align-items: center; gap: 12px; cursor: pointer;
-    background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 60%, #06b6d4 100%);
-    border: 1.5px solid rgba(124,58,237,.4); box-shadow: 0 4px 20px rgba(79,70,229,.25);
-  }
-  .af-wide-card:active { opacity: .9; }
-  .af-wide-icon {
-    font-size: 26px; width: 50px; height: 50px; border-radius: var(--r2);
-    background: rgba(255,255,255,.18); border: 1.5px solid rgba(255,255,255,.25);
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  }
-  .af-wide-text { flex: 1; min-width: 0; }
-  .af-wide-title { font-family: var(--fd); font-size: 14px; font-weight: 800; color: #fff; }
-  .af-wide-sub { font-size: 11.5px; color: rgba(255,255,255,.8); margin-top: 2px; }
-  .af-wide-arr { font-size: 20px; color: rgba(255,255,255,.7); font-weight: 700; }
-
-  /* feat grid */
-  .af-feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
-  .af-feat-tile {
-    border-radius: var(--r2); padding: 13px 8px;
-    display: flex; flex-direction: column; align-items: center; gap: 7px; text-align: center; cursor: pointer;
-    background: var(--card); border: 1.5px solid var(--bc);
-    box-shadow: 0 1px 6px rgba(79,70,229,.08);
-  }
-  .af-feat-tile:active { opacity: .8; }
-  .af-feat-tile:nth-child(1) .af-feat-icon { background: linear-gradient(135deg, rgba(99,102,241,.14), rgba(79,70,229,.07)); }
-  .af-feat-tile:nth-child(2) .af-feat-icon { background: linear-gradient(135deg, rgba(245,158,11,.14), rgba(251,191,36,.07)); }
-  .af-feat-tile:nth-child(3) .af-feat-icon { background: linear-gradient(135deg, rgba(6,182,212,.14), rgba(34,211,238,.07)); }
-  .af-feat-icon { font-size: 21px; width: 42px; height: 42px; border-radius: var(--r1); display: flex; align-items: center; justify-content: center; }
-  .af-feat-label { font-size: 10.5px; font-weight: 700; color: var(--t1); line-height: 1.3; }
-
-  /* credit */
-  .af-credit { text-align: center; padding: 14px; font-size: 11.5px; color: var(--tm); }
-  .af-credit strong { color: var(--t2); font-weight: 700; }
-
-  /* bottom nav */
-  .af-bnav {
-    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-    width: 100%; max-width: 430px; z-index: 999; height: var(--nav-h);
-    background: var(--nav);
-    border-top: 1px solid var(--b1);
-    display: flex; align-items: center; padding: 0 4px;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  .af-nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; height: 100%; border-radius: var(--r2); padding: 6px 4px; position: relative; }
-  .af-nav-btn::before { content: ''; position: absolute; top: 6px; left: 50%; transform: translateX(-50%); width: 0; height: 2px; background: var(--p); border-radius: 99px; transition: width .15s ease; }
-  .af-nav-btn.active::before { width: 24px; }
-  .af-nav-icon { font-size: 20px; line-height: 1; }
-  .af-nav-btn.active .af-nav-icon { transform: scale(1.08); }
-  .af-nav-label { font-size: 10px; font-weight: 700; color: var(--tm); }
-  .af-nav-btn.active .af-nav-label { color: var(--p); }
-
-  /* pull loader */
-  #afPullLoader {
-    position: fixed; top: -90px; left: 50%; transform: translateX(-50%);
-    width: 48px; height: 48px; border-radius: 50%;
-    background: rgba(255,255,255,.88);
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,255,255,.5);
-    box-shadow: 0 8px 24px rgba(15,23,42,.12);
-    z-index: 99999; opacity: 0;
-    display: flex; align-items: center; justify-content: center;
-    transition: top .22s ease, opacity .22s ease;
-  }
-  [data-theme="dark"] #afPullLoader { background: rgba(18,15,42,.88); border-color: rgba(255,255,255,.08); }
-  #afPullLoader.show { top: 14px; opacity: 1; }
-  #afPullLoader.ready { transform: translateX(-50%) scale(1.06); }
-
-  /* toast */
-  .af-toast-wrap { bottom: calc(var(--nav-h) + 14px) !important; }
-  .af-toast {
-    background: var(--card-s); color: var(--t1);
-    border: 1px solid var(--bc); border-radius: 14px;
-    padding: 11px 13px; box-shadow: var(--she);
-  }
-
-  /* desktop elements hidden on mobile */
-  .dt-layout { display: none !important; }
+.af-notif{
+  width:34px;height:34px;border-radius:10px;
+  background:var(--grp);border:1px solid var(--b1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;position:relative;cursor:pointer;
+}
+.af-notif:active{opacity:.8}
+.af-notif-dot{
+  position:absolute;top:5px;right:5px;
+  width:7px;height:7px;border-radius:50%;
+  background:var(--err);border:2px solid var(--shell);display:none;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   DESKTOP LAYOUT (≥ 768px) — Home
-═══════════════════════════════════════════════════════════ */
-@media (min-width: 768px) {
-  html { color-scheme: dark; }
-  [data-theme="light"] { color-scheme: light; }
-  body { overflow: auto; display: block; }
-
-  .af-shell { display: none !important; }
-  #afPullLoader { display: none !important; }
-  .af-toast-wrap { bottom: 20px !important; }
-
-  .dt-layout {
-    display: flex; flex-direction: column;
-    min-height: 100vh; background: var(--bg-primary);
-  }
-
-  /* Header */
-  .dt-header {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-    height: var(--header-h);
-    background: rgba(5,5,5,.92);
-    backdrop-filter: blur(20px) saturate(160%); -webkit-backdrop-filter: blur(20px) saturate(160%);
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; padding: 0 28px; gap: 16px;
-  }
-  [data-theme="light"] .dt-header { background: rgba(255,255,255,.90); }
-
-  .dt-brand { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
-  .dt-brand-logo { width: 42px; height: 42px; border-radius: 12px; object-fit: cover; flex-shrink: 0; border: 1px solid var(--border); }
-  .dt-brand-logo-fb {
-    width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--fd); font-weight: 800; font-size: 16px; color: #fff;
-    border: 1px solid rgba(124,58,237,.4);
-  }
-  .dt-brand-text { display: flex; flex-direction: column; }
-  .dt-brand-name { font-family: var(--fd); font-size: 16px; font-weight: 800; color: var(--text-primary); letter-spacing: -.01em; }
-  .dt-brand-tag { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-top: 1px; }
-  .dt-header-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-
-  .dt-streak {
-    display: flex; align-items: center; gap: 5px;
-    padding: 6px 14px 6px 10px;
-    background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.2); border-radius: var(--rf);
-    font-size: 13px; font-weight: 800; color: #f59e0b; cursor: pointer;
-    transition: background var(--tr), border-color var(--tr);
-  }
-  .dt-streak:hover { background: rgba(245,158,11,.16); border-color: rgba(245,158,11,.35); }
-
-  .dt-notif {
-    width: 40px; height: 40px; border-radius: var(--r2);
-    background: var(--bg-tertiary); border: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; position: relative; cursor: pointer;
-    transition: background var(--tr), border-color var(--tr);
-  }
-  .dt-notif:hover { background: var(--bg-secondary); border-color: var(--border-hover); }
-  .dt-notif-dot {
-    position: absolute; top: 6px; right: 6px;
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--danger); border: 2px solid var(--bg-primary); display: none;
-  }
-
-  /* Body wrap */
-  .dt-body-wrap { display: flex; margin-top: var(--header-h); min-height: calc(100vh - var(--header-h)); }
-
-  /* Sidebar */
-  .dt-sidebar {
-    width: var(--sidebar-w); flex-shrink: 0;
-    background: var(--bg-secondary); border-right: 1px solid var(--border);
-    position: fixed; top: var(--header-h); bottom: 0; left: 0;
-    display: flex; flex-direction: column; padding: 20px 12px;
-    overflow-y: auto; z-index: 100;
-  }
-  .dt-sidebar::-webkit-scrollbar { width: 0; }
-
-  .dt-nav-section { margin-bottom: 4px; }
-  .dt-nav-label-text {
-    font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
-    color: var(--text-muted); padding: 0 12px; margin-bottom: 4px; display: block;
-  }
-  .dt-nav-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 14px; border-radius: var(--r2);
-    font-size: 14px; font-weight: 700; color: var(--text-secondary);
-    cursor: pointer; transition: background var(--tr), color var(--tr);
-    border: 1px solid transparent; width: 100%; text-align: left;
-  }
-  .dt-nav-item:hover { background: rgba(255,255,255,.04); color: var(--text-primary); border-color: var(--border); }
-  [data-theme="light"] .dt-nav-item:hover { background: rgba(79,70,229,.04); }
-  .dt-nav-item.active { background: rgba(124,58,237,.14); color: var(--primary-light); border-color: rgba(124,58,237,.25); }
-  .dt-nav-item.active .dt-nav-icon-wrap { color: var(--primary-light); }
-  .dt-nav-icon-wrap { font-size: 18px; width: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-
-  .dt-sidebar-footer {
-    margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border);
-    font-size: 11.5px; color: var(--text-muted); line-height: 1.6; padding-left: 2px;
-  }
-  .dt-sidebar-footer strong { color: var(--text-secondary); font-weight: 700; }
-
-  /* Main content */
-  .dt-main {
-    margin-left: var(--sidebar-w); flex: 1; min-width: 0;
-    padding: 28px 32px 60px;
-  }
-
-  /* Ticker */
-  .dt-ticker {
-    background: linear-gradient(90deg, rgba(124,58,237,.15), rgba(37,99,235,.12));
-    border: 1px solid var(--border); border-radius: var(--r2);
-    color: var(--text-secondary); font-size: 12px; font-weight: 600;
-    overflow: hidden; white-space: nowrap; padding: 9px 0; margin-bottom: 24px; position: relative;
-  }
-  .dt-ticker::before { content: '🔔'; position: absolute; left: 14px; top: 50%; transform: translateY(-50%); z-index: 2; font-size: 13px; }
-  .dt-ticker-mask-l { position: absolute; left: 0; top: 0; bottom: 0; width: 40px; background: linear-gradient(90deg, var(--bg-secondary), transparent); z-index: 1; pointer-events: none; }
-  .dt-ticker-mask-r { position: absolute; right: 0; top: 0; bottom: 0; width: 60px; background: linear-gradient(-90deg, var(--bg-secondary), transparent); z-index: 1; pointer-events: none; }
-  .dt-ticker-track { display: inline-block; padding-left: 44px; animation: dtTicker 28s linear infinite; }
-  .dt-ticker-track span { padding: 0 60px; }
-  @keyframes dtTicker { to { transform: translateX(-50%); } }
-
-  /* Section label */
-  .dt-sec-label {
-    font-family: var(--fd); font-size: 10px; font-weight: 700;
-    letter-spacing: .1em; text-transform: uppercase;
-    color: var(--text-muted); margin-bottom: 12px; display: block;
-  }
-
-  /* Hero banner */
-  .dt-banner-section { margin-bottom: 24px; }
-  .dt-banner {
-    position: relative; width: 100%; border-radius: var(--r4);
-    overflow: hidden; background: linear-gradient(135deg, var(--primary), var(--secondary));
-    border: 1px solid var(--border); box-shadow: var(--sh-card);
-    aspect-ratio: 16/6;
-  }
-  @media (min-width: 1200px) { .dt-banner { aspect-ratio: 16/5.5; } }
-  .dt-slide { position: absolute; inset: 0; opacity: 0; transition: opacity .5s ease; }
-  .dt-slide.active { opacity: 1; }
-  .dt-slide img { width: 100%; height: 100%; object-fit: cover; }
-  .dt-slide-fb { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: #fff; font-family: var(--fd); }
-  .dt-slide-fb h3 { font-size: 24px; font-weight: 800; }
-  .dt-slide-fb p { font-size: 14px; opacity: .8; }
-  .dt-dots { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
-  .dt-dot { width: 6px; height: 6px; border-radius: 99px; background: rgba(255,255,255,.35); border: none; cursor: pointer; transition: width .3s, background .3s; }
-  .dt-dot.active { width: 22px; background: #fff; }
-
-  /* Featured */
-  .dt-featured-section { margin-bottom: 24px; }
-  .dt-featured-card {
-    width: 100%; border-radius: var(--r3); padding: 20px 28px;
-    display: flex; align-items: center; gap: 18px; cursor: pointer;
-    background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 55%, #2563eb 100%);
-    border: 1.5px solid rgba(124,58,237,.4); box-shadow: 0 4px 24px rgba(79,70,229,.22);
-    transition: transform var(--tr), box-shadow var(--tr);
-  }
-  .dt-featured-card:hover { transform: translateY(-3px); box-shadow: 0 10px 40px rgba(79,70,229,.38); }
-  .dt-featured-card:active { transform: translateY(0); opacity: .95; }
-  .dt-feat-icon { font-size: 28px; width: 58px; height: 58px; border-radius: var(--r2); background: rgba(255,255,255,.16); border: 1.5px solid rgba(255,255,255,.22); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .dt-feat-text { flex: 1; min-width: 0; }
-  .dt-feat-title { font-family: var(--fd); font-size: 18px; font-weight: 800; color: #fff; }
-  .dt-feat-sub { font-size: 13px; color: rgba(255,255,255,.75); margin-top: 4px; }
-  .dt-feat-arr { font-size: 24px; color: rgba(255,255,255,.6); font-weight: 700; flex-shrink: 0; }
-
-  /* Learning tools */
-  .dt-tools-section { margin-bottom: 24px; }
-  .dt-tools-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-  .dt-tool-tile {
-    border-radius: var(--r3); padding: 22px 18px;
-    display: flex; align-items: center; gap: 14px; cursor: pointer;
-    background: var(--bg-secondary); border: 1px solid var(--border);
-    box-shadow: var(--sh-card);
-    transition: transform var(--tr), box-shadow var(--tr), border-color var(--tr);
-    text-align: left;
-  }
-  .dt-tool-tile:hover { transform: translateY(-4px); box-shadow: var(--sh-hover); border-color: var(--border-hover); }
-  .dt-tool-tile:active { transform: translateY(-1px); opacity: .9; }
-  .dt-tool-icon { font-size: 24px; width: 48px; height: 48px; border-radius: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .dt-tool-tile:nth-child(1) .dt-tool-icon { background: rgba(124,58,237,.14); border: 1px solid rgba(124,58,237,.2); }
-  .dt-tool-tile:nth-child(2) .dt-tool-icon { background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.18); }
-  .dt-tool-tile:nth-child(3) .dt-tool-icon { background: rgba(6,182,212,.1); border: 1px solid rgba(6,182,212,.18); }
-  .dt-tool-info { flex: 1; min-width: 0; }
-  .dt-tool-name { font-family: var(--fd); font-size: 13.5px; font-weight: 800; color: var(--text-primary); }
-  .dt-tool-desc { font-size: 11.5px; color: var(--text-muted); margin-top: 3px; }
-
-  /* Footer */
-  .dt-footer { text-align: center; padding: 16px; font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--border); margin-top: 8px; }
-  .dt-footer strong { color: var(--text-secondary); font-weight: 700; }
-
-  /* Wide screens */
-  @media (min-width: 1600px) {
-    .dt-main { padding: 32px 48px 72px; }
-    .dt-tools-grid { gap: 16px; }
-  }
-
-  /* Laptop adjustments */
-  @media (max-width: 1280px) {
-    .dt-main { padding: 24px 24px 60px; }
-  }
-  @media (max-width: 1100px) {
-    :root { --sidebar-w: 220px; }
-    .dt-main { padding: 20px 20px 60px; }
-    .dt-tools-grid { gap: 10px; }
-  }
+/* Page scroll area */
+.af-page{
+  flex:1;overflow-y:scroll;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;
+  padding-bottom:calc(var(--nav-h) + 20px + env(safe-area-inset-bottom,0px));
+  min-height:0;
 }
+.af-page::-webkit-scrollbar{width:2px}
+.af-page::-webkit-scrollbar-thumb{background:var(--bc);border-radius:99px}
 
-/* Tablet (768–1023px) — collapsed sidebar */
-@media (min-width: 768px) and (max-width: 1023px) {
-  :root { --sidebar-w: 68px; }
-  .dt-nav-item { padding: 10px; justify-content: center; }
-  .dt-nav-item span:not(.dt-nav-icon-wrap) { display: none; }
-  .dt-nav-icon-wrap { width: auto; }
-  .dt-nav-label-text { display: none; }
-  .dt-sidebar-footer { display: none; }
-  .dt-sidebar { padding: 16px 8px; align-items: center; }
-  .dt-tools-grid { grid-template-columns: 1fr 1fr; }
-  .dt-main { padding: 20px 16px 60px; }
+/* Banner — natural image height */
+.af-banner{
+  position:relative;width:100%;
+  overflow:hidden;
+  background:linear-gradient(135deg,var(--p),var(--acc));
+  flex-shrink:0;
 }
+.af-slide{position:absolute;inset:0;opacity:0;transition:opacity .5s ease}
+.af-slide.active{opacity:1;position:relative;inset:auto}
+.af-slide img{width:100%;height:auto;display:block}
+.af-slide-fb{
+  width:100%;aspect-ratio:16/7;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;color:#fff;font-family:var(--fd);
+}
+.af-slide-fb h3{font-size:18px;font-weight:800}
+.af-slide-fb p{font-size:13px;opacity:.8}
+.af-dots{
+  position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  display:flex;gap:6px;z-index:5;
+}
+.af-dot{
+  width:6px;height:6px;border-radius:99px;
+  background:rgba(255,255,255,.4);border:none;cursor:pointer;
+  transition:width .3s,background .3s;
+}
+.af-dot.active{width:20px;background:#fff}
 
-/* ═══════════════════════════════════════════════════════════
-   SHARED UTILITIES
-═══════════════════════════════════════════════════════════ */
-.af-pull-spin { width: 22px; height: 22px; border-radius: 50%; border: 3px solid rgba(99,102,241,.18); border-top-color: #4f46e5; }
-#afPullLoader.spin .af-pull-spin { animation: spin .8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+/* Ticker */
+.af-ticker{
+  background:linear-gradient(90deg,var(--p),var(--p2));
+  color:#fff;font-size:11.5px;font-weight:600;
+  overflow:hidden;white-space:nowrap;padding:7px 0;flex-shrink:0;
+}
+.af-ticker-track{display:inline-block;animation:ticker 22s linear infinite}
+.af-ticker-track span{padding:0 36px}
+@keyframes ticker{to{transform:translateX(-50%)}}
 
-.af-toast-wrap {
-  position: fixed; left: 50%; transform: translateX(-50%);
-  z-index: 999999; width: min(92vw, 420px); pointer-events: none;
-}
-.af-toast {
-  display: flex; align-items: flex-start; gap: 12px;
-  border-radius: 14px; padding: 11px 13px; pointer-events: auto;
-}
-.af-toast-warn { border-left: 4px solid #f59e0b; }
-.af-toast-err  { border-left: 4px solid #ef4444; }
-.af-toast-ok   { border-left: 4px solid #22c55e; }
-.af-toast-info { border-left: 4px solid #4f46e5; }
-.af-toast-title { font-size: 12px; font-weight: 700; margin: 0 0 2px; }
-.af-toast-msg   { font-size: 11.5px; margin: 0; line-height: 1.4; }
-.af-toast-x     { margin-left: auto; font-size: 17px; cursor: pointer; }
+/* Body sections */
+.af-body{padding:14px;display:flex;flex-direction:column;gap:14px}
+.af-sec-label{font-family:var(--fd);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin-bottom:5px}
 
-@media (min-width: 768px) {
-  .af-toast {
-    background: var(--bg-secondary); color: var(--text-primary);
-    border: 1px solid var(--border); box-shadow: var(--sh-card);
-  }
-  .af-toast-x { color: var(--text-muted); }
+/* Featured card */
+.af-wide-card{
+  border-radius:14px;padding:14px;
+  display:flex;align-items:center;gap:12px;cursor:pointer;
+  background:linear-gradient(135deg,#7c3aed 0%,#4f46e5 60%,#06b6d4 100%);
+  border:1.5px solid rgba(124,58,237,.35);box-shadow:0 4px 20px rgba(79,70,229,.22);
 }
+.af-wide-card:active{opacity:.9}
+.af-wide-icon{
+  font-size:24px;width:48px;height:48px;border-radius:12px;
+  background:rgba(255,255,255,.16);border:1.5px solid rgba(255,255,255,.22);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.af-wide-text{flex:1;min-width:0}
+.af-wide-title{font-family:var(--fd);font-size:14px;font-weight:800;color:#fff}
+.af-wide-sub{font-size:11px;color:rgba(255,255,255,.78);margin-top:2px}
+.af-wide-arr{font-size:18px;color:rgba(255,255,255,.65);font-weight:700}
+
+/* 3-col grid */
+.af-feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.af-feat-tile{
+  border-radius:12px;padding:13px 8px;
+  display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;cursor:pointer;
+  background:var(--card);border:1.5px solid var(--bc);
+  box-shadow:0 1px 6px rgba(79,70,229,.07);
+}
+.af-feat-tile:active{opacity:.8}
+.af-feat-tile:nth-child(1) .af-feat-icon{background:linear-gradient(135deg,rgba(99,102,241,.16),rgba(79,70,229,.07))}
+.af-feat-tile:nth-child(2) .af-feat-icon{background:linear-gradient(135deg,rgba(245,158,11,.16),rgba(251,191,36,.07))}
+.af-feat-tile:nth-child(3) .af-feat-icon{background:linear-gradient(135deg,rgba(6,182,212,.16),rgba(34,211,238,.07))}
+.af-feat-icon{font-size:20px;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.af-feat-label{font-size:10.5px;font-weight:700;color:var(--t1);line-height:1.3}
+
+.af-credit{text-align:center;padding:10px 14px;font-size:11px;color:var(--tm)}
+.af-credit strong{color:var(--t2);font-weight:700}
+
+/* Bottom nav */
+.af-bnav{
+  position:absolute;bottom:0;left:0;right:0;
+  z-index:999;height:var(--nav-h);
+  background:var(--nav);border-top:1px solid var(--b1);
+  display:flex;align-items:center;padding:0 4px;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.af-nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;height:100%;border-radius:10px;padding:6px 4px;position:relative;
+}
+.af-nav-btn::before{
+  content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);
+  width:0;height:2px;background:var(--p);border-radius:99px;transition:width .15s ease;
+}
+.af-nav-btn.active::before{width:22px}
+.af-nav-icon{font-size:19px;line-height:1}
+.af-nav-btn.active .af-nav-icon{transform:scale(1.08)}
+.af-nav-label{font-size:9.5px;font-weight:700;color:var(--tm)}
+.af-nav-btn.active .af-nav-label{color:var(--p)}
+
+/* Pull loader */
+#afPullLoader{
+  position:fixed;top:-90px;left:50%;transform:translateX(-50%);
+  width:44px;height:44px;border-radius:50%;
+  background:var(--shell);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--b1);box-shadow:var(--sh);
+  z-index:99999;opacity:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:top .22s ease,opacity .22s ease;
+}
+#afPullLoader.show{top:14px;opacity:1}
+#afPullLoader.ready{transform:translateX(-50%) scale(1.06)}
+.af-pull-spin{
+  width:20px;height:20px;border-radius:50%;
+  border:2.5px solid rgba(99,102,241,.18);border-top-color:#4f46e5;
+}
+#afPullLoader.spin .af-pull-spin{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Toast */
+.af-toast-wrap{
+  position:fixed;bottom:calc(var(--nav-h) + 14px);left:50%;transform:translateX(-50%);
+  z-index:999999;width:min(92vw,410px);pointer-events:none;
+}
+.af-toast{
+  display:flex;align-items:flex-start;gap:12px;
+  background:var(--card-s);color:var(--t1);
+  border:1px solid var(--bc);border-radius:13px;
+  padding:11px 13px;box-shadow:var(--she);pointer-events:auto;
+}
+.af-toast-warn{border-left:4px solid #f59e0b}
+.af-toast-err{border-left:4px solid #ef4444}
+.af-toast-ok{border-left:4px solid #22c55e}
+.af-toast-info{border-left:4px solid #4f46e5}
+.af-toast-title{font-size:12px;font-weight:700;margin:0 0 2px}
+.af-toast-msg{font-size:11.5px;margin:0;line-height:1.4}
+.af-toast-x{margin-left:auto;font-size:17px;cursor:pointer;color:var(--tm)}
+
+/* Devtools block */
+body *{-webkit-user-drag:none}
 </style>
 </head>
 <body>
@@ -912,325 +650,239 @@ body.gate-active #afPullLoader{display:none!important}
   <div class="sp-bar-wrap"><div class="sp-bar"></div></div>
 </div>
 
-<!-- ═══ AUTH GATE (Welcome + Login) ═══ -->
-<div id="authFlow">
-  <div class="auth-inner">
+<!-- ═══ PHONE SHELL ═══ -->
+<div class="af-shell">
+
+  <!-- ═══ AUTH GATE ═══ -->
+  <div id="authFlow">
 
     <!-- WELCOME VIEW -->
-    <div id="viewWelcome" class="auth-view">
-      <div class="aw-topbar">
-        <img src="/IMG/AF LOGO 1.jpeg" alt="AcademeForge" class="aw-logo"
-          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
-        <div class="aw-logo-fb" style="display:none;" aria-hidden="true">AF</div>
-        <span class="aw-brand">AcademeForge</span>
-      </div>
+    <div id="viewWelcome" class="auth-view visible">
+      <div class="aw-wrap">
+        <div class="aw-statusbar"></div>
 
-      <div class="aw-hero" id="awHero">
-        <img src="/IMG/banner1.png" alt="AcademeForge" onerror="this.parentElement.innerHTML=awHeroFb()"/>
-      </div>
+        <div class="aw-header">
+          <div class="aw-logo-pill">
+            <img src="/IMG/AF LOGO 1.jpeg" alt="AF"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+            <div class="aw-logo-pill-fb" style="display:none" aria-hidden="true">AF</div>
+            <span class="aw-logo-name">AcademeForge</span>
+          </div>
+          <div class="aw-badge-pill">
+            <span>🔥</span> Beta
+          </div>
+        </div>
 
-      <div class="aw-body">
-        <h1 class="aw-title">Welcome to AcademeForge</h1>
-        <p class="aw-desc">Learning Beyond the Classroom — structured courses, smart learning tools, and a student community, all in one place.</p>
-        <button class="aw-btn aw-btn-primary" type="button" onclick="showAuthView('login')">Log in</button>
-        <button class="aw-btn aw-btn-outline" type="button" onclick="window.location.href='https://signup.academeforge.in'">Join for free</button>
-        <div class="aw-footer">
-          <strong>Developed by Devraj Kumar</strong><br>
-          Made with ❤️ in India
+        <div class="aw-hero-wrap" id="awHeroWrap">
+          <img class="aw-hero-img" src="/IMG/banner.png" alt="AcademeForge"
+            onerror="this.parentElement.innerHTML=awHeroFb()"/>
+          <div class="aw-hero-badge">Learning Beyond the Classroom</div>
+        </div>
+
+        <div class="aw-body">
+          <div class="aw-kicker">
+            <div class="aw-kicker-dot"></div>
+            Trusted by students across India
+          </div>
+          <h1 class="aw-title">Your <em>Smarter</em><br>Learning Space</h1>
+          <p class="aw-desc">Structured courses, AI-powered tools, live tests and a student community — everything you need to grow, all in one place.</p>
+
+          <button class="aw-btn-primary" type="button" onclick="showAuthView('login')">
+            Log in to your account →
+          </button>
+          <button class="aw-btn-secondary" type="button" onclick="window.location.href='https://signup.academeforge.in'">
+            Create free account
+          </button>
+
+          <div class="aw-footer">
+            Made with ❤️ in India
+          </div>
         </div>
       </div>
     </div>
 
     <!-- LOGIN VIEW -->
-    <div id="viewLogin" class="auth-view hidden">
-      <div class="al-topbar">
-        <button class="al-back" type="button" onclick="showAuthView('welcome')" aria-label="Back">←</button>
-      </div>
-      <div class="al-body">
-        <div class="al-logo-row">
-          <img src="/IMG/AF LOGO 1.jpeg" alt="AcademeForge" class="al-logo"
-            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
-          <div class="al-logo-fb" style="display:none;" aria-hidden="true">AF</div>
+    <div id="viewLogin" class="auth-view">
+      <div class="al-wrap">
+        <div class="al-header">
+          <button class="al-back" type="button" onclick="showAuthView('welcome')" aria-label="Back">←</button>
         </div>
-        <h1 class="al-title">Log in</h1>
-        <p class="al-sub">Existing user? Log in with your Student ID</p>
 
-        <label class="al-label" for="alLoginId">Student ID / Phone Number</label>
-        <input id="alLoginId" class="al-input" type="tel" placeholder="Enter your Student ID or phone number" autocomplete="username"/>
-
-        <label class="al-label" for="alPassword">Password</label>
-        <input id="alPassword" class="al-input" type="password" placeholder="Enter your password" autocomplete="current-password"/>
-
-        <div class="al-forgot">Forgot password? <a href="https://reset.academeforge.in">Reset it here</a></div>
-
-        <button class="al-btn" type="button" onclick="doAcademeLogin()">Log in</button>
-
-        <div class="al-msg" id="alMsg"></div>
-
-        <div class="al-signup">New User? <a href="https://signup.academeforge.in">Sign up</a></div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- ═══ MOBILE SHELL (Home) ═══ -->
-<div class="af-shell" id="afShell">
-  <header class="af-topbar">
-    <div class="af-brand">
-      <img src="/IMG/AF LOGO 1.jpeg" alt="AF" class="af-brand-logo"
-        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
-      <div class="af-brand-logo-fb" style="display:none;" aria-hidden="true">AF</div>
-      <div>
-        <div class="af-brand-name">AcademeForge</div>
-        <div class="af-brand-tag">Learning Beyond the Classroom</div>
-      </div>
-    </div>
-    <div class="af-topbar-actions">
-      <button class="af-streak" onclick="window.location.href='/Heatmap/index.html'" type="button" aria-label="Learning streak">
-        <span style="font-size:15px;">🔥</span>
-        <span id="afStreakCount">0</span>
-      </button>
-      <button class="af-notif" onclick="goToNotif()" type="button" id="afNotifBtn" aria-label="Notifications">
-        🔔
-        <span class="af-notif-dot" id="afNotifDot"></span>
-      </button>
-    </div>
-  </header>
-
-  <div class="af-page" id="afPage">
-    <div class="af-banner" id="afBanner">
-      <div class="af-slide active" id="slide0">
-        <img src="/IMG/banner1.png" alt="Banner 1"
-          onerror="this.parentElement.innerHTML=afBannerFb(1,'🚀','Welcome to AcademeForge','Your learning journey starts here')"/>
-      </div>
-      <div class="af-slide" id="slide1">
-        <img src="/IMG/banner2.png" alt="Banner 2"
-          onerror="this.parentElement.innerHTML=afBannerFb(2,'📚','Explore Batches &amp; Courses','Practical learning for real skills')"/>
-      </div>
-      <div class="af-slide" id="slide2">
-        <img src="/IMG/Banner3.png" alt="Banner 3"
-          onerror="this.parentElement.innerHTML=afBannerFb(3,'🏆','AF Test Arena','Compete, rank and grow nationally')"/>
-      </div>
-      <div class="af-dots" aria-hidden="true">
-        <button class="af-dot active" onclick="goToSlideMobile(0)" type="button"></button>
-        <button class="af-dot" onclick="goToSlideMobile(1)" type="button"></button>
-        <button class="af-dot" onclick="goToSlideMobile(2)" type="button"></button>
-      </div>
-    </div>
-
-    <div class="af-ticker">
-      <div class="af-ticker-track">
-        <span>🔔 Beta version — Contents of AF Nexus are being updated...</span>
-        <span>🔔 Beta version — Contents of AF Nexus are being updated...</span>
-        <span>🔔 Beta version — Contents of AF Nexus are being updated...</span>
-        <span>🔔 Beta version — Contents of AF Nexus are being updated...</span>
-        <span>🔔 Beta version — Contents of AF Nexus are being updated...</span>
-        <span>🔔 Beta version — Contents of AF Nexus are being updated...</span>
-      </div>
-    </div>
-
-    <div class="af-body">
-      <div>
-        <div class="af-sec-label">Featured</div>
-        <button class="af-wide-card" onclick="window.location.href='/T/index.html'" type="button">
-          <div class="af-wide-icon">🧪</div>
-          <div class="af-wide-text">
-            <div class="af-wide-title">AF Test Arena</div>
-            <div class="af-wide-sub">Attempt quizzes and see your national ranking.</div>
+        <div class="al-body">
+          <div class="al-brand">
+            <img src="/IMG/AF LOGO 1.jpeg" alt="AcademeForge" class="al-brand-logo"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+            <div class="al-brand-logo-fb" style="display:none" aria-hidden="true">AF</div>
+            <div class="al-brand-name">AcademeForge</div>
+            <div class="al-brand-sub">Sign in to continue learning</div>
           </div>
-          <div class="af-wide-arr">›</div>
-        </button>
-      </div>
-      <div>
-        <div class="af-sec-label">Learning Tools</div>
-        <div class="af-feat-grid">
-          <button class="af-feat-tile" onclick="window.location.href='/al/'" type="button">
-            <div class="af-feat-icon">✦</div>
-            <div class="af-feat-label">AcademeForge AI</div>
-          </button>
-          <button class="af-feat-tile" onclick="window.location.href='/SM/'" type="button">
-            <div class="af-feat-icon">🧩</div>
-            <div class="af-feat-label">Sudoku Master</div>
-          </button>
-          <button class="af-feat-tile" onclick="window.location.href='/Spark/'" type="button">
-            <div class="af-feat-icon">🌐</div>
-            <div class="af-feat-label">Smart Search</div>
-          </button>
-        </div>
-      </div>
-      <div class="af-credit">
-        <strong>Developed by Devraj Kumar</strong><br>
-        <span>Made with ❤️ in India</span>
-      </div>
-    </div>
-  </div>
 
-  <nav class="af-bnav">
-    <button class="af-nav-btn active" type="button" aria-label="Home">
-      <span class="af-nav-icon">🏠</span><span class="af-nav-label">Home</span>
-    </button>
-    <button class="af-nav-btn" onclick="window.location.href='/student/index.html'" type="button" aria-label="Student">
-      <span class="af-nav-icon">🎓</span><span class="af-nav-label">Student</span>
-    </button>
-    <button class="af-nav-btn" onclick="window.location.href='/batches/index.html'" type="button" aria-label="Batches">
-      <span class="af-nav-icon">📚</span><span class="af-nav-label">Batches</span>
-    </button>
-    <button class="af-nav-btn" onclick="window.location.href='/community/indix.html'" type="button" aria-label="Community">
-      <span class="af-nav-icon">💬</span><span class="af-nav-label">Community</span>
-    </button>
-    <button class="af-nav-btn" onclick="window.location.href='/setting/index.html'" type="button" aria-label="Settings">
-      <span class="af-nav-icon">⚙️</span><span class="af-nav-label">Settings</span>
-    </button>
-  </nav>
-</div>
+          <div class="al-card">
+            <div class="al-section-title">Welcome back 👋</div>
 
-<!-- ═══ DESKTOP LAYOUT (Home) ═══ -->
-<div class="dt-layout">
-
-  <header class="dt-header">
-    <div class="dt-brand">
-      <img src="/IMG/AF LOGO 1.jpeg" alt="AF" class="dt-brand-logo"
-        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
-      <div class="dt-brand-logo-fb" style="display:none;" aria-hidden="true">AF</div>
-      <div class="dt-brand-text">
-        <div class="dt-brand-name">AcademeForge</div>
-        <div class="dt-brand-tag">Learning Beyond the Classroom</div>
-      </div>
-    </div>
-    <div class="dt-header-actions">
-      <button class="dt-streak" onclick="window.location.href='/Heatmap/index.html'" type="button" aria-label="Streak">
-        <span style="font-size:16px;">🔥</span>
-        <span id="dtStreakCount">0</span>
-      </button>
-      <button class="dt-notif" onclick="goToNotif()" type="button" aria-label="Notifications">
-        🔔
-        <span class="dt-notif-dot" id="dtNotifDot"></span>
-      </button>
-    </div>
-  </header>
-
-  <div class="dt-body-wrap">
-
-    <aside class="dt-sidebar">
-      <div class="dt-nav-section">
-        <span class="dt-nav-label-text">Navigation</span>
-        <button class="dt-nav-item active" type="button" aria-label="Home">
-          <span class="dt-nav-icon-wrap">🏠</span>
-          <span>Home</span>
-        </button>
-        <button class="dt-nav-item" onclick="window.location.href='/student/index.html'" type="button" aria-label="Student">
-          <span class="dt-nav-icon-wrap">🎓</span>
-          <span>Student</span>
-        </button>
-        <button class="dt-nav-item" onclick="window.location.href='/batches/index.html'" type="button" aria-label="Batches">
-          <span class="dt-nav-icon-wrap">📚</span>
-          <span>Batches</span>
-        </button>
-        <button class="dt-nav-item" onclick="window.location.href='/community/index.html'" type="button" aria-label="Community">
-          <span class="dt-nav-icon-wrap">💬</span>
-          <span>Community</span>
-        </button>
-        <button class="dt-nav-item" onclick="window.location.href='/setting/index.html'" type="button" aria-label="Settings">
-          <span class="dt-nav-icon-wrap">⚙️</span>
-          <span>Settings</span>
-        </button>
-         <button class="dt-nav-item" onclick="window.location.href='/home/time.html'" type="button" aria-label="timezy">
-          <span class="dt-nav-icon-wrap">⏱️</span>
-          <span>Timezy</span>
-        </button>
-      </div>
-      <div class="dt-sidebar-footer">
-        <strong>Developed by Devraj Kumar</strong><br>
-        Made with ❤️ in India
-      </div>
-    </aside>
-
-    <main class="dt-main">
-
-      <div class="dt-ticker" aria-label="Updates">
-        <div class="dt-ticker-mask-l"></div>
-        <div class="dt-ticker-mask-r"></div>
-        <div class="dt-ticker-track">
-          <span>Beta version — Contents of AF Nexus are being updated...</span>
-          <span>Beta version — Contents of AF Nexus are being updated...</span>
-          <span>Beta version — Contents of AF Nexus are being updated...</span>
-          <span>Beta version — Contents of AF Nexus are being updated...</span>
-          <span>Beta version — Contents of AF Nexus are being updated...</span>
-          <span>Beta version — Contents of AF Nexus are being updated...</span>
-        </div>
-      </div>
-
-      <section class="dt-banner-section">
-        <div class="dt-banner" id="dtBanner">
-          <div class="dt-slide active" id="dtSlide0">
-            <img src="/IMG/banner1.png" alt="Banner 1"
-              onerror="this.parentElement.innerHTML=dtBannerFb(1,'🚀','Welcome to AcademeForge','Your learning journey starts here')"/>
-          </div>
-          <div class="dt-slide" id="dtSlide1">
-            <img src="/IMG/banner2.png" alt="Banner 2"
-              onerror="this.parentElement.innerHTML=dtBannerFb(2,'📚','Explore Batches &amp; Courses','Practical learning for real skills')"/>
-          </div>
-          <div class="dt-slide" id="dtSlide2">
-            <img src="/IMG/Banner3.png" alt="Banner 3"
-              onerror="this.parentElement.innerHTML=dtBannerFb(3,'🏆','AF Test Arena','Compete, rank and grow nationally')"/>
-          </div>
-          <div class="dt-dots" aria-hidden="true">
-            <button class="dt-dot active" onclick="goToSlideDesktop(0)" type="button"></button>
-            <button class="dt-dot" onclick="goToSlideDesktop(1)" type="button"></button>
-            <button class="dt-dot" onclick="goToSlideDesktop(2)" type="button"></button>
-          </div>
-        </div>
-      </section>
-
-      <section class="dt-featured-section">
-        <span class="dt-sec-label">Featured</span>
-        <button class="dt-featured-card" onclick="window.location.href='/T/index.html'" type="button">
-          <div class="dt-feat-icon">🧪</div>
-          <div class="dt-feat-text">
-            <div class="dt-feat-title">AF Test Arena</div>
-            <div class="dt-feat-sub">Attempt quizzes and see your national ranking.</div>
-          </div>
-          <div class="dt-feat-arr">›</div>
-        </button>
-      </section>
-
-      <section class="dt-tools-section">
-        <span class="dt-sec-label">Learning Tools</span>
-        <div class="dt-tools-grid">
-          <button class="dt-tool-tile" onclick="window.location.href='/al/'" type="button">
-            <div class="dt-tool-icon">✦</div>
-            <div class="dt-tool-info">
-              <div class="dt-tool-name">AcademeForge AI</div>
-              <div class="dt-tool-desc">Your intelligent study companion</div>
+            <div class="al-field">
+              <div class="al-label">Student ID / Phone</div>
+              <div class="al-input-wrap">
+                <span class="al-input-icon">👤</span>
+                <input id="alLoginId" class="al-input" type="tel"
+                  placeholder="Student ID or phone number"
+                  autocomplete="username"/>
+              </div>
             </div>
-          </button>
-          <button class="dt-tool-tile" onclick="window.location.href='/SM/'" type="button">
-            <div class="dt-tool-icon">🧩</div>
-            <div class="dt-tool-info">
-              <div class="dt-tool-name">Sudoku Master</div>
-              <div class="dt-tool-desc">Train your logical thinking</div>
+
+            <div class="al-field">
+              <div class="al-label">Password</div>
+              <div class="al-input-wrap">
+                <span class="al-input-icon">🔒</span>
+                <input id="alPassword" class="al-input" type="password"
+                  placeholder="Enter your password"
+                  autocomplete="current-password"
+                  id="alPasswordInput"/>
+              </div>
+              <div class="al-forgot" onclick="window.location.href='https://reset.academeforge.in'">
+                Forgot password?
+              </div>
             </div>
-          </button>
-          <button class="dt-tool-tile" onclick="window.location.href='/Spark/'" type="button">
-            <div class="dt-tool-icon">🌐</div>
-            <div class="dt-tool-info">
-              <div class="dt-tool-name">Smart Search</div>
-              <div class="dt-tool-desc">Find what you need, fast</div>
+
+            <button class="al-btn" type="button" onclick="doAcademeLogin()" id="alLoginBtn">
+              <span>Log in</span>
+              <span>→</span>
+            </button>
+
+            <div class="al-msg" id="alMsg"></div>
+          </div>
+
+          <div class="al-or">or</div>
+
+          <div class="al-signup">
+            New to AcademeForge? <a href="https://signup.academeforge.in">Create account</a>
+          </div>
+
+          <div class="al-trust">
+            <div class="al-trust-item"><span>🔐</span> Secure login</div>
+            <div class="al-trust-item"><span>🇮🇳</span> Made in India</div>
+            <div class="al-trust-item"><span>⚡</span> Instant access</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /authFlow -->
+
+  <!-- ═══ HOME ═══ -->
+  <div class="af-home-wrap" id="afHomeWrap">
+    <header class="af-topbar">
+      <div class="af-brand">
+        <img src="/IMG/AF LOGO 1.jpeg" alt="AF" class="af-brand-logo"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+        <div class="af-brand-logo-fb" style="display:none" aria-hidden="true">AF</div>
+        <div>
+          <div class="af-brand-name">AcademeForge</div>
+          <div class="af-brand-tag">Learning Beyond the Classroom</div>
+        </div>
+      </div>
+      <div class="af-topbar-actions">
+        <button class="af-streak" onclick="window.location.href='/Heatmap/index.html'" type="button" aria-label="Streak">
+          <span style="font-size:14px">🔥</span>
+          <span id="afStreakCount">0</span>
+        </button>
+        <button class="af-notif" onclick="goToNotif()" type="button" id="afNotifBtn" aria-label="Notifications">
+          🔔
+          <span class="af-notif-dot" id="afNotifDot"></span>
+        </button>
+      </div>
+    </header>
+
+    <div class="af-page" id="afPage">
+      <div class="af-banner" id="afBanner">
+        <div class="af-slide active" id="slide0">
+          <img src="/IMG/banner1.png" alt="Banner 1"
+            onerror="this.parentElement.innerHTML=afBannerFb(1,'🚀','Welcome to AcademeForge','Your learning journey starts here')"/>
+        </div>
+        <div class="af-slide" id="slide1">
+          <img src="/IMG/banner2.png" alt="Banner 2"
+            onerror="this.parentElement.innerHTML=afBannerFb(2,'📚','Explore Batches &amp; Courses','Practical learning for real skills')"/>
+        </div>
+        <div class="af-slide" id="slide2">
+          <img src="/IMG/Banner3.png" alt="Banner 3"
+            onerror="this.parentElement.innerHTML=afBannerFb(3,'🏆','AF Test Arena','Compete, rank and grow nationally')"/>
+        </div>
+        <div class="af-dots" aria-hidden="true">
+          <button class="af-dot active" onclick="goToSlideMobile(0)" type="button"></button>
+          <button class="af-dot" onclick="goToSlideMobile(1)" type="button"></button>
+          <button class="af-dot" onclick="goToSlideMobile(2)" type="button"></button>
+        </div>
+      </div>
+
+      <div class="af-ticker">
+        <div class="af-ticker-track">
+          <span>🔔 Beta version — Contents of AF Nexus are being updated...</span>
+          <span>🔔 Beta version — Contents of AF Nexus are being updated...</span>
+          <span>🔔 Beta version — Contents of AF Nexus are being updated...</span>
+          <span>🔔 Beta version — Contents of AF Nexus are being updated...</span>
+          <span>🔔 Beta version — Contents of AF Nexus are being updated...</span>
+          <span>🔔 Beta version — Contents of AF Nexus are being updated...</span>
+        </div>
+      </div>
+
+      <div class="af-body">
+        <div>
+          <div class="af-sec-label">Featured</div>
+          <button class="af-wide-card" onclick="window.location.href='/T/index.html'" type="button">
+            <div class="af-wide-icon">🧪</div>
+            <div class="af-wide-text">
+              <div class="af-wide-title">AF Test Arena</div>
+              <div class="af-wide-sub">Attempt quizzes • National ranking</div>
             </div>
+            <div class="af-wide-arr">›</div>
           </button>
         </div>
-      </section>
+        <div>
+          <div class="af-sec-label">Learning Tools</div>
+          <div class="af-feat-grid">
+            <button class="af-feat-tile" onclick="window.location.href='/al/'" type="button">
+              <div class="af-feat-icon">✦</div>
+              <div class="af-feat-label">AcademeForge AI</div>
+            </button>
+            <button class="af-feat-tile" onclick="window.location.href='/SM/'" type="button">
+              <div class="af-feat-icon">🧩</div>
+              <div class="af-feat-label">Sudoku Master</div>
+            </button>
+            <button class="af-feat-tile" onclick="window.location.href='/Spark/'" type="button">
+              <div class="af-feat-icon">🌐</div>
+              <div class="af-feat-label">Smart Search</div>
+            </button>
+          </div>
+        </div>
+        <div class="af-credit">
+          <strong>Developed by Devraj Kumar</strong><br>
+          <span>Made with ❤️ in India</span>
+        </div>
+      </div>
+    </div>
 
-      <footer class="dt-footer">
-        <strong>Developed by Devraj Kumar</strong> &nbsp;·&nbsp; Made with ❤️ in India
-      </footer>
-
-    </main>
+    <nav class="af-bnav">
+      <button class="af-nav-btn active" type="button" aria-label="Home">
+        <span class="af-nav-icon">🏠</span><span class="af-nav-label">Home</span>
+      </button>
+      <button class="af-nav-btn" onclick="window.location.href='/student/index.html'" type="button" aria-label="Student">
+        <span class="af-nav-icon">🎓</span><span class="af-nav-label">Student</span>
+      </button>
+      <button class="af-nav-btn" onclick="window.location.href='/batches/index.html'" type="button" aria-label="Batches">
+        <span class="af-nav-icon">📚</span><span class="af-nav-label">Batches</span>
+      </button>
+      <button class="af-nav-btn" onclick="window.location.href='/community/index.html'" type="button" aria-label="Community">
+        <span class="af-nav-icon">💬</span><span class="af-nav-label">Community</span>
+      </button>
+      <button class="af-nav-btn" onclick="window.location.href='/setting/index.html'" type="button" aria-label="Settings">
+        <span class="af-nav-icon">⚙️</span><span class="af-nav-label">Settings</span>
+      </button>
+    </nav>
   </div>
-</div>
 
-<!-- Pull loader (mobile only) -->
+</div><!-- /af-shell -->
+
+<!-- Pull loader -->
 <div id="afPullLoader"><div class="af-pull-spin"></div></div>
 
 <!-- Toast -->
@@ -1249,33 +901,17 @@ const NF_EDGE = STUDENT_URL + "/functions/v1/app-notifications-af";
 const HDRS = {'Content-Type':'application/json','apikey':STUDENT_KEY,'Authorization':'Bearer '+STUDENT_KEY};
 
 const $ = id => document.getElementById(id);
-const isDesktop = () => window.innerWidth >= 768;
-
-/* ── THEME ── */
-function applyTheme(dark) {
-  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-  localStorage.setItem('af_dark_mode', dark ? '1' : '0');
-}
 
 /* ── SPLASH ── */
 function hideSplash() {
   const s = $('afSplash');
-  if(!s) return;
-  if(sessionStorage.getItem('af_splash_shown')){ s.remove(); return; }
-  sessionStorage.setItem('af_splash_shown','1');
-  setTimeout(() => { s.classList.add('hidden'); setTimeout(() => s.remove(), 400); }, 1200);
+  if (!s) return;
+  if (sessionStorage.getItem('af_splash_shown')) { s.remove(); return; }
+  sessionStorage.setItem('af_splash_shown', '1');
+  setTimeout(() => { s.classList.add('hidden'); setTimeout(() => s.remove(), 400); }, 1400);
 }
 
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function awHeroFb() {
-  return '<div class="aw-hero-fb"><span>🎓</span></div>';
-}
-window.awHeroFb = awHeroFb;
-
-/* ── AUTH GATE STATE ── */
+/* ── AUTH STATE ── */
 function afIsLoggedIn() {
   return localStorage.getItem('af_student_logged_in') === 'true'
     && !!localStorage.getItem('af_student_uuid')
@@ -1284,15 +920,25 @@ function afIsLoggedIn() {
 
 function showAuthView(view) {
   const w = $('viewWelcome'), l = $('viewLogin');
-  if (view === 'login') { w.classList.add('hidden'); l.classList.remove('hidden'); clearAuthMsg(); }
-  else { l.classList.add('hidden'); w.classList.remove('hidden'); clearAuthMsg(); }
-  const inner = document.querySelector('.auth-inner');
-  if (inner) inner.scrollTop = 0;
+  if (view === 'login') {
+    w.classList.remove('visible'); l.classList.add('visible'); clearAuthMsg();
+    // scroll to top
+    const flow = $('authFlow'); if (flow) flow.scrollTop = 0;
+  } else {
+    l.classList.remove('visible'); w.classList.add('visible'); clearAuthMsg();
+  }
 }
 window.showAuthView = showAuthView;
 
-function showAuthMsg(type, text) { const b = $('alMsg'); b.className = 'al-msg ' + type; b.textContent = text || ''; }
-function clearAuthMsg() { const b = $('alMsg'); if(b){ b.className = 'al-msg'; b.textContent = ''; } }
+function showAuthMsg(type, text) {
+  const b = $('alMsg');
+  b.className = 'al-msg ' + type;
+  b.textContent = text || '';
+}
+function clearAuthMsg() {
+  const b = $('alMsg');
+  if (b) { b.className = 'al-msg'; b.textContent = ''; }
+}
 
 function enterGate() {
   document.body.classList.add('gate-active');
@@ -1303,7 +949,20 @@ function enterHome() {
   setTimeout(() => { syncStreak(false); checkNotifs(); }, 300);
 }
 
-/* ── EXTRACTED LOGIN FEATURE (from /student/index.html) ── */
+/* ── FALLBACKS ── */
+function awHeroFb() {
+  return '<div class="aw-hero-fb"><span>🎓</span><p>AcademeForge</p></div>';
+}
+window.awHeroFb = awHeroFb;
+
+function afBannerFb(n, emoji, title, sub) {
+  const bgs = ['linear-gradient(135deg,#4f46e5,#06b6d4)','linear-gradient(135deg,#7c3aed,#4f46e5)','linear-gradient(135deg,#0f172a,#312e81)'];
+  return '<div class="af-slide-fb" style="background:'+bgs[(n-1)%3]+'">'
+    +'<span style="font-size:44px">'+emoji+'</span><h3>'+title+'</h3><p>'+sub+'</p></div>';
+}
+window.afBannerFb = afBannerFb;
+
+/* ── LOGIN ── */
 const cleanPhone = v => String(v||'').trim().replace(/\D/g,'');
 
 function afGetDeviceId() {
@@ -1322,48 +981,49 @@ function afGetDeviceName() {
 let _afAuthSb = null;
 async function getAuthSb() {
   if (_afAuthSb) return _afAuthSb;
-  if (typeof supabase === 'undefined') await new Promise((res, rej) => {
-    const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-    s.onload = res; s.onerror = rej; document.head.appendChild(s);
-  });
   _afAuthSb = supabase.createClient(STUDENT_URL, STUDENT_KEY);
   return _afAuthSb;
 }
 
 function afSaveSession(student, token, deviceId) {
   localStorage.setItem('af_student_logged_in','true');
-  localStorage.setItem('af_session_token',    token||'');
-  localStorage.setItem('af_device_id',        deviceId||afGetDeviceId());
-  localStorage.setItem('af_student_uuid',     student.id||'');
-  localStorage.setItem('af_student_id',       student.student_id||student.mobile||student.phone||'');
-  localStorage.setItem('af_student_mobile',   student.mobile||student.phone||'');
-  localStorage.setItem('af_student_name',     student.name||'Student');
-  localStorage.setItem('af_student_email',    student.email||'');
+  localStorage.setItem('af_session_token', token||'');
+  localStorage.setItem('af_device_id', deviceId||afGetDeviceId());
+  localStorage.setItem('af_student_uuid', student.id||'');
+  localStorage.setItem('af_student_id', student.student_id||student.mobile||student.phone||'');
+  localStorage.setItem('af_student_mobile', student.mobile||student.phone||'');
+  localStorage.setItem('af_student_name', student.name||'Student');
+  localStorage.setItem('af_student_email', student.email||'');
 }
 
 async function doAcademeLogin() {
   const loginId = ($('alLoginId').value||'').trim();
   const cleanId = cleanPhone(loginId);
   const password = ($('alPassword').value||'').trim();
-  if (!loginId)  { showAuthMsg('err','Enter your Student ID / phone number.'); return; }
+  if (!loginId)  { showAuthMsg('err','Enter your Student ID or phone number.'); return; }
   if (!password) { showAuthMsg('err','Enter your password.'); return; }
+
+  const btn = $('alLoginBtn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span>Signing in…</span>'; }
   showAuthMsg('info','Checking your login…');
+
   try {
     const sb = await getAuthSb();
     const { data, error } = await sb.functions.invoke('student-login-af', {
-      body: { login_id: loginId, clean_login_id: cleanId, password, device_id: afGetDeviceId(), device_name: afGetDeviceName() }
+      body: { login_id:loginId, clean_login_id:cleanId, password, device_id:afGetDeviceId(), device_name:afGetDeviceName() }
     });
-    if (error) { showAuthMsg('err', error.message || 'Login failed.'); return; }
-    if (!data || !data.ok) { showAuthMsg('err', (data && data.message) || 'Login failed.'); return; }
+    if (error) { showAuthMsg('err', error.message||'Login failed.'); return; }
+    if (!data||!data.ok) { showAuthMsg('err',(data&&data.message)||'Login failed.'); return; }
     if (!data.student) { showAuthMsg('err','Login failed. Student data not received.'); return; }
-    const token = data.session_token || data.login_token || '';
+    const token = data.session_token||data.login_token||'';
     if (!token) { showAuthMsg('err','Login failed. Session token not received.'); return; }
-    afSaveSession(data.student, token, data.device_id || afGetDeviceId());
-    showAuthMsg('ok','Login successful!');
-    setTimeout(enterHome, 500);
-  } catch (e) {
-    showAuthMsg('err', (e && e.message) || 'Something went wrong. Please try again.');
+    afSaveSession(data.student, token, data.device_id||afGetDeviceId());
+    showAuthMsg('ok','Login successful! Welcome back 🎉');
+    setTimeout(enterHome, 600);
+  } catch(e) {
+    showAuthMsg('err',(e&&e.message)||'Something went wrong. Please try again.');
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<span>Log in</span><span>→</span>'; }
   }
 }
 window.doAcademeLogin = doAcademeLogin;
@@ -1371,158 +1031,123 @@ window.doAcademeLogin = doAcademeLogin;
 /* ── STREAK ── */
 function updateStreakBadge(n) {
   const el = $('afStreakCount');
-  const dt = $('dtStreakCount');
-  if(el) el.textContent = n;
-  if(dt) dt.textContent = n;
+  if (el) el.textContent = n;
 }
-
-async function handleStreakOnAuthChange() {
-  const uuid = localStorage.getItem('af_student_uuid') || '';
-  if(!uuid){ localStorage.setItem('af_streak','0'); updateStreakBadge(0); return; }
-  await syncStreak(true);
-}
-
 async function syncStreak(force) {
-  if(!force) updateStreakBadge(parseInt(localStorage.getItem('af_streak')||'0'));
-  const uuid = localStorage.getItem('af_student_uuid') || '';
-  if(!uuid){ updateStreakBadge(0); return; }
+  if (!force) updateStreakBadge(parseInt(localStorage.getItem('af_streak')||'0'));
+  const uuid = localStorage.getItem('af_student_uuid')||'';
+  if (!uuid) { updateStreakBadge(0); return; }
   try {
     const res = await fetch(LH_EDGE,{method:'POST',headers:HDRS,body:JSON.stringify({action:'mark',studentId:uuid})});
-    if(!res.ok) return;
+    if (!res.ok) return;
     const data = await res.json();
-    if(!data||!data.ok) return;
+    if (!data||!data.ok) return;
     const streak = Number(data.streak||0);
-    localStorage.setItem('af_streak',String(streak));
+    localStorage.setItem('af_streak', String(streak));
     updateStreakBadge(streak);
-  } catch(_) {}
+  } catch(_){}
 }
 
 /* ── NOTIFICATIONS ── */
 function goToNotif() {
-  localStorage.setItem('af_notif_last_seen',Date.now().toString());
-  const dot = $('afNotifDot'); if(dot) dot.style.display='none';
-  const ddot = $('dtNotifDot'); if(ddot) ddot.style.display='none';
+  localStorage.setItem('af_notif_last_seen', Date.now().toString());
+  const dot = $('afNotifDot'); if (dot) dot.style.display='none';
   window.location.href='/Notify/index.html';
 }
 window.goToNotif = goToNotif;
 
 async function checkNotifs() {
   const lastSeen = parseInt(localStorage.getItem('af_notif_last_seen')||'0');
-  const dot  = $('afNotifDot');
-  const ddot = $('dtNotifDot');
-  const showDot = () => { if(dot) dot.style.display='block'; if(ddot) ddot.style.display='block'; };
+  const dot = $('afNotifDot');
+  const showDot = () => { if (dot) dot.style.display='block'; };
   try {
     const cached = JSON.parse(localStorage.getItem('af_notif_cache')||'null');
-    if(Array.isArray(cached)&&cached.length>0)
-      if(new Date(cached[0].created_at).getTime()>lastSeen) showDot();
-  } catch(_) {}
+    if (Array.isArray(cached)&&cached.length>0)
+      if (new Date(cached[0].created_at).getTime()>lastSeen) showDot();
+  } catch(_){}
   try {
     const res = await fetch(NF_EDGE,{method:'POST',headers:HDRS,body:JSON.stringify({action:'list'})});
-    if(!res.ok) return;
+    if (!res.ok) return;
     const data = await res.json();
-    if(!data||!data.ok||!Array.isArray(data.notifications)) return;
-    try { localStorage.setItem('af_notif_cache',JSON.stringify(data.notifications)); } catch(_) {}
-    if(data.notifications.length>0 && new Date(data.notifications[0].created_at).getTime()>lastSeen)
-      showDot();
-  } catch(_) {}
+    if (!data||!data.ok||!Array.isArray(data.notifications)) return;
+    try { localStorage.setItem('af_notif_cache', JSON.stringify(data.notifications)); } catch(_){}
+    if (data.notifications.length>0 && new Date(data.notifications[0].created_at).getTime()>lastSeen) showDot();
+  } catch(_){}
 }
 
-/* ── MOBILE BANNER ── */
+/* ── BANNER SLIDESHOW ── */
 let _mSlideIdx=0, _mSlideTimer=null;
+
 function goToSlideMobile(idx) {
   const slides = document.querySelectorAll('#afBanner .af-slide');
   const dots   = document.querySelectorAll('#afBanner .af-dot');
-  if(!slides.length) return;
-  slides[_mSlideIdx].classList.remove('active');
-  if(dots[_mSlideIdx]) dots[_mSlideIdx].classList.remove('active');
+  if (!slides.length) return;
+
+  // Remove active from current — restore it to absolute so it doesn't take layout space
+  const cur = slides[_mSlideIdx];
+  cur.classList.remove('active');
+  cur.style.position='absolute';
+  if (dots[_mSlideIdx]) dots[_mSlideIdx].classList.remove('active');
+
   _mSlideIdx = (idx + slides.length) % slides.length;
-  slides[_mSlideIdx].classList.add('active');
-  if(dots[_mSlideIdx]) dots[_mSlideIdx].classList.add('active');
+
+  const next = slides[_mSlideIdx];
+  next.style.position=''; // restore to flow
+  next.classList.add('active');
+  if (dots[_mSlideIdx]) dots[_mSlideIdx].classList.add('active');
 }
 window.goToSlideMobile = goToSlideMobile;
 
-function afBannerFb(n, emoji, title, sub) {
-  const bgs = ['linear-gradient(135deg,#4f46e5,#06b6d4)','linear-gradient(135deg,#7c3aed,#4f46e5)','linear-gradient(135deg,#0f172a,#312e81)'];
-  return '<div class="af-slide-fb" style="background:'+bgs[(n-1)%3]+'">'
-    +'<span style="font-size:44px">'+emoji+'</span><h3>'+title+'</h3><p>'+sub+'</p></div>';
-}
-window.afBannerFb = afBannerFb;
-
+// Touch swipe on banner
 (function(){
   const banner = $('afBanner');
-  if(!banner) return;
-  let sx = 0;
+  if (!banner) return;
+  let sx=0;
   banner.addEventListener('touchstart', e=>{ sx=e.changedTouches[0].clientX; }, {passive:true});
   banner.addEventListener('touchend', e=>{
     const dx = e.changedTouches[0].clientX - sx;
-    if(Math.abs(dx)<40) return;
+    if (Math.abs(dx)<40) return;
     clearInterval(_mSlideTimer);
     goToSlideMobile(dx<0 ? _mSlideIdx+1 : _mSlideIdx-1);
-    startMobileBanner();
+    startBanner();
   }, {passive:true});
 })();
 
-function startMobileBanner() {
-  if(_mSlideTimer) clearInterval(_mSlideTimer);
+function startBanner() {
+  if (_mSlideTimer) clearInterval(_mSlideTimer);
   _mSlideTimer = setInterval(() => goToSlideMobile(_mSlideIdx+1), 4000);
 }
 
-/* ── DESKTOP BANNER ── */
-let _dSlideIdx=0, _dSlideTimer=null;
-function goToSlideDesktop(idx) {
-  const slides = document.querySelectorAll('#dtBanner .dt-slide');
-  const dots   = document.querySelectorAll('#dtBanner .dt-dot');
-  if(!slides.length) return;
-  slides[_dSlideIdx].classList.remove('active');
-  if(dots[_dSlideIdx]) dots[_dSlideIdx].classList.remove('active');
-  _dSlideIdx = (idx + slides.length) % slides.length;
-  slides[_dSlideIdx].classList.add('active');
-  if(dots[_dSlideIdx]) dots[_dSlideIdx].classList.add('active');
-}
-window.goToSlideDesktop = goToSlideDesktop;
-
-function dtBannerFb(n, emoji, title, sub) {
-  const bgs = ['linear-gradient(135deg,#4f46e5,#06b6d4)','linear-gradient(135deg,#7c3aed,#4f46e5)','linear-gradient(135deg,#0f172a,#312e81)'];
-  return '<div class="dt-slide-fb" style="background:'+bgs[(n-1)%3]+';width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#fff;font-family:var(--fd)">'
-    +'<span style="font-size:52px">'+emoji+'</span><h3 style="font-size:26px;font-weight:800">'+title+'</h3><p style="font-size:15px;opacity:.8">'+sub+'</p></div>';
-}
-window.dtBannerFb = dtBannerFb;
-
-function startDesktopBanner() {
-  if(_dSlideTimer) clearInterval(_dSlideTimer);
-  _dSlideTimer = setInterval(() => goToSlideDesktop(_dSlideIdx+1), 4500);
-}
-
-/* ── PULL TO REFRESH (mobile) ── */
+/* ── PULL TO REFRESH ── */
 (function(){
-  const page = $('afPage'), loader = $('afPullLoader');
-  if(!page||!loader) return;
+  const page=$('afPage'), loader=$('afPullLoader');
+  if (!page||!loader) return;
   const SHOW=80, READY=170;
   let startY=0, dist=0, ready=false;
   page.addEventListener('touchstart', e=>{
-    if(page.scrollTop>0) return;
+    if (page.scrollTop>0) return;
     startY=e.touches[0].clientY; dist=0; ready=false;
   }, {passive:true});
   page.addEventListener('touchmove', e=>{
-    if(page.scrollTop>0) return;
+    if (page.scrollTop>0) return;
     dist=e.touches[0].clientY-startY;
-    if(dist<SHOW){ loader.classList.remove('show','ready'); return; }
+    if (dist<SHOW){ loader.classList.remove('show','ready'); return; }
     loader.classList.add('show');
-    ready = dist>=READY;
-    loader.classList.toggle('ready', ready);
+    ready=dist>=READY;
+    loader.classList.toggle('ready',ready);
   }, {passive:true});
   page.addEventListener('touchend', ()=>{
-    if(!ready){ loader.classList.remove('show','ready'); return; }
+    if (!ready){ loader.classList.remove('show','ready'); return; }
     loader.classList.add('spin');
     setTimeout(()=>location.reload(), 500);
   }, {passive:true});
 })();
 
-/* ── PAGE SWIPE NAV (mobile) ── */
+/* ── PAGE SWIPE ── */
 (function(){
-  const page = $('afPage');
-  if(!page) return;
-  let sx=0, sy=0, st=0;
+  const page=$('afPage');
+  if (!page) return;
+  let sx=0,sy=0,st=0;
   page.addEventListener('touchstart', e=>{
     sx=e.changedTouches[0].clientX; sy=e.changedTouches[0].clientY; st=Date.now();
   }, {passive:true});
@@ -1530,30 +1155,29 @@ function startDesktopBanner() {
     const dx=e.changedTouches[0].clientX-sx;
     const dy=e.changedTouches[0].clientY-sy;
     const dt=Date.now()-st;
-    if(Math.abs(dy)>Math.abs(dx)) return;
-    if(Math.abs(dx)<90||dt>600) return;
-    if(e.target.closest('.af-banner')||e.target.closest('.af-ticker')) return;
-    if(dx<0) window.location.href='/student/index.html';
-    if(dx>0) window.location.href='/al/';
+    if (Math.abs(dy)>Math.abs(dx)) return;
+    if (Math.abs(dx)<90||dt>600) return;
+    if (e.target.closest('.af-banner')||e.target.closest('.af-ticker')) return;
+    if (dx<0) window.location.href='/student/index.html';
+    if (dx>0) window.location.href='/al/';
   }, {passive:true});
 })();
 
 /* ── TOAST ── */
-let _tTimer = null;
+let _tTimer=null;
 function afShowToast(message, type, title, duration) {
   type=type||'info'; duration=duration||2800;
   const icons={ok:'Done',err:'Error',warn:'Notice',info:'Info'};
-  const wrap = $('afToastWrap');
-  wrap.innerHTML = '';
-  if(_tTimer){ clearTimeout(_tTimer); _tTimer=null; }
-  const t = document.createElement('div');
-  t.className = 'af-toast af-toast-'+type;
-  t.innerHTML = '<div><p class="af-toast-title">'+(title||icons[type]||'Info')+'</p><p class="af-toast-msg">'+message+'</p></div>'
+  const wrap=$('afToastWrap'); wrap.innerHTML='';
+  if (_tTimer){ clearTimeout(_tTimer); _tTimer=null; }
+  const t=document.createElement('div');
+  t.className='af-toast af-toast-'+type;
+  t.innerHTML='<div><p class="af-toast-title">'+(title||icons[type])+'</p><p class="af-toast-msg">'+message+'</p></div>'
     +'<button class="af-toast-x" onclick="this.parentElement.remove()">×</button>';
   wrap.appendChild(t);
-  _tTimer = setTimeout(()=>t&&t.remove(), duration);
+  _tTimer=setTimeout(()=>t&&t.remove(), duration);
 }
-window.afShowToast = afShowToast;
+window.afShowToast=afShowToast;
 
 /* ── DEVTOOLS BLOCK ── */
 document.addEventListener('contextmenu', e=>e.preventDefault());
@@ -1562,43 +1186,28 @@ document.addEventListener('copy', e=>e.preventDefault());
 document.addEventListener('cut', e=>e.preventDefault());
 document.addEventListener('dragstart', e=>e.preventDefault());
 document.addEventListener('keydown', e=>{
-  if(e.key==='F12'||(e.ctrlKey&&e.shiftKey&&['I','J','C'].includes(e.key.toUpperCase()))||(e.ctrlKey&&e.key.toUpperCase()==='U'))
+  if (e.key==='F12'||(e.ctrlKey&&e.shiftKey&&['I','J','C'].includes(e.key.toUpperCase()))||(e.ctrlKey&&e.key.toUpperCase()==='U'))
     e.preventDefault();
 });
 
 /* ── SERVICE WORKER ── */
-if('serviceWorker' in navigator)
+if ('serviceWorker' in navigator)
   window.addEventListener('load', ()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
-
-/* ── OFFLINE ── */
-function openExternal(url) {
-  if(!navigator.onLine){ window.location.href='/offline/'; return; }
-  window.location.href=url;
-}
-window.openExternal = openExternal;
 
 /* ── STORAGE SYNC ── */
 window.addEventListener('storage', e=>{
-  if(e.key === 'af_dark_mode') {
-    document.documentElement.setAttribute(
-      'data-theme',
-      e.newValue === '1' ? 'dark' : 'light'
-    );
+  if (e.key==='af_dark_mode')
+    document.documentElement.setAttribute('data-theme', e.newValue==='1'?'dark':'light');
+  if (e.key==='af_student_logged_in'){
+    if (e.newValue==='true') enterHome(); else enterGate();
   }
-  if(e.key === 'af_student_logged_in'){
-    if(e.newValue === 'true') enterHome();
-    else enterGate();
-  }
-  if(['af_student_name','af_student_mobile','af_student_uuid'].includes(e.key)){
-    handleStreakOnAuthChange();
-  }
+  if (['af_student_name','af_student_mobile','af_student_uuid'].includes(e.key))
+    updateStreakBadge(parseInt(localStorage.getItem('af_streak')||'0'));
 });
 
 /* ── VISIBILITY ── */
 document.addEventListener('visibilitychange', ()=>{
-  if(document.visibilityState==='visible' && afIsLoggedIn()){
-    syncStreak(false);
-  }
+  if (document.visibilityState==='visible' && afIsLoggedIn()) syncStreak(false);
 });
 
 /* ── INIT ── */
@@ -1612,11 +1221,10 @@ function init() {
   } else {
     enterGate();
   }
-  startMobileBanner();
-  startDesktopBanner();
+  startBanner();
 }
 
-if(document.readyState==='loading')
+if (document.readyState==='loading')
   document.addEventListener('DOMContentLoaded', init);
 else
   init();
