@@ -227,7 +227,7 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
       <button class="af-nav-btn" onclick="window.location.href='/index.html'" type="button">
         <span class="af-nav-icon">🏠</span><span class="af-nav-label">Home</span>
       </button>
-      <button class="af-nav-btn" onclick="window.location.href='/Courses/index.html'" type="button">
+      <button class="af-nav-btn" onclick="window.location.href='/explore/index.html'" type="button">
         <span class="af-nav-icon">🧭</span><span class="af-nav-label">Explore</span>
       </button>
       <button class="af-nav-btn" onclick="window.location.href='/batches/index.html'" type="button">
@@ -505,7 +505,8 @@ function openCert(cert){
 
       <!-- Actions -->
       <div class="cert-detail-actions">
-        <button class="cert-dl-btn" onclick="downloadCert()">📥 Download Certificate</button>
+        <button class="cert-dl-btn" id="certDlBtn" onclick="downloadCert()">📥 Download Certificate</button>
+        <button class="cert-share-btn" id="viewFullCertBtn" onclick="viewFullCert()">🔍 Show Full Certificate</button>
         <button class="cert-share-btn" onclick="shareCert()">🔗 Share Certificate</button>
         <button class="cert-verify-btn" onclick="verifyCert()">✅ Verify on Portal</button>
       </div>
@@ -540,36 +541,103 @@ async function toDataURI(src){
   }
 }
 
-async function downloadCert(){
-  if(!_currentCertHtml){ afToast('Certificate not ready yet.','err'); return; }
-
-  afToast('Preparing download…');
-
-  // Inline all /IMG/... references as base64 so the file works offline
+/* Build a fully self-contained HTML string (images inlined as base64) */
+async function buildInlinedCertHTML(){
   const imgPaths = [
     '/IMG/AF LOGO 3.png',
     '/IMG/MSME-logo.png',
     '/IMG/af-stamp.png',
   ];
-
   let html = _currentCertHtml;
   for(const path of imgPaths){
     const dataUri = await toDataURI(path);
-    // Replace every occurrence (src="..." or src='...')
     html = html.split(`src="${path}"`).join(`src="${dataUri}"`);
     html = html.split(`src='${path}'`).join(`src='${dataUri}'`);
   }
+  return html;
+}
 
-  const blob = new Blob([html], { type:'text/html' });
-  const url  = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${_currentCert?.cert_id || 'certificate'}.html`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url), 4000);
-  afToast('Certificate downloaded! 🎓');
+/* Open the certificate full-screen in a new tab (works on Android too) */
+async function viewFullCert(){
+  if(!_currentCertHtml){ afToast('Certificate not ready yet.','err'); return; }
+  const btn = $('viewFullCertBtn');
+  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Loading\u2026'; }
+
+  const html = await buildInlinedCertHTML();
+
+  const win = window.open('', '_blank');
+  if(win){
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+  } else {
+    const blob = new Blob([html], {type:'text/html'});
+    const url = URL.createObjectURL(blob);
+    window.location.href = url;
+  }
+
+  if(btn){ btn.disabled = false; btn.innerHTML = '\uD83D\uDD0D Show Full Certificate'; }
+}
+window.viewFullCert = viewFullCert;
+
+async function downloadCert(){
+  if(!_currentCertHtml){ afToast('Certificate not ready yet.','err'); return; }
+
+  const btn = $('certDlBtn');
+  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Preparing\u2026'; }
+
+  const html = await buildInlinedCertHTML();
+  const filename = `${_currentCert?.cert_id || 'certificate'}.html`;
+
+  // Strategy 1: showSaveFilePicker (modern desktop browsers)
+  if(window.showSaveFilePicker){
+    try{
+      const fh = await window.showSaveFilePicker({
+        suggestedName: filename,
+        types:[{ description:'HTML Certificate', accept:{'text/html':['.html']} }]
+      });
+      const w = await fh.createWritable();
+      await w.write(html);
+      await w.close();
+      afToast('Certificate saved! \uD83C\uDF93');
+      if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDCE5 Download Certificate'; }
+      return;
+    } catch(e){ /* cancelled or unsupported */ }
+  }
+
+  // Strategy 2: data: URI — works on Android Chrome & mobile browsers
+  try{
+    const b64 = btoa(unescape(encodeURIComponent(html)));
+    const dataHref = `data:text/html;base64,${b64}`;
+    const a = document.createElement('a');
+    a.href = dataHref;
+    a.download = filename;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    afToast('Certificate downloaded! \uD83C\uDF93');
+    if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDCE5 Download Certificate'; }
+    return;
+  } catch(e){ /* too large or blocked */ }
+
+  // Strategy 3: blob URL (desktop fallback)
+  try{
+    const blob = new Blob([html], {type:'text/html'});
+    const url  = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 5000);
+    afToast('Certificate downloaded! \uD83C\uDF93');
+  } catch(e){
+    // Strategy 4: open in new tab — user can Save As manually
+    const win = window.open('','_blank');
+    if(win){ win.document.open(); win.document.write(html); win.document.close(); }
+    afToast('Opened in new tab \u2014 use Save As to download.','err');
+  }
+
+  if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDCE5 Download Certificate'; }
 }
 window.downloadCert = downloadCert;
 
