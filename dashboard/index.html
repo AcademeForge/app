@@ -523,9 +523,44 @@ function openCert(cert){
 }
 window.openCert = openCert;
 
-function downloadCert(){
+/* Convert an image URL to a base64 data URI so the downloaded HTML
+   is fully self-contained and works offline / from file:// */
+async function toDataURI(src){
+  try{
+    const res = await fetch(src);
+    const blob = await res.blob();
+    return await new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload  = () => resolve(r.result);
+      r.onerror = () => reject();
+      r.readAsDataURL(blob);
+    });
+  } catch(_){
+    return src; // fallback: leave as-is
+  }
+}
+
+async function downloadCert(){
   if(!_currentCertHtml){ afToast('Certificate not ready yet.','err'); return; }
-  const blob = new Blob([_currentCertHtml], { type:'text/html' });
+
+  afToast('Preparing download…');
+
+  // Inline all /IMG/... references as base64 so the file works offline
+  const imgPaths = [
+    '/IMG/AF LOGO 3.png',
+    '/IMG/MSME-logo.png',
+    '/IMG/af-stamp.png',
+  ];
+
+  let html = _currentCertHtml;
+  for(const path of imgPaths){
+    const dataUri = await toDataURI(path);
+    // Replace every occurrence (src="..." or src='...')
+    html = html.split(`src="${path}"`).join(`src="${dataUri}"`);
+    html = html.split(`src='${path}'`).join(`src='${dataUri}'`);
+  }
+
+  const blob = new Blob([html], { type:'text/html' });
   const url  = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -534,7 +569,7 @@ function downloadCert(){
   a.click();
   a.remove();
   setTimeout(()=>URL.revokeObjectURL(url), 4000);
-  afToast('Downloading certificate…');
+  afToast('Certificate downloaded! 🎓');
 }
 window.downloadCert = downloadCert;
 
