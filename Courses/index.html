@@ -744,7 +744,7 @@ function renderLessonBlocks(blocks){
     <div class="af-lesson-body">${html || '<p class="af-block-paragraph">No content yet for this lesson.</p>'}</div>
     <div id="checkSlot"></div>
     <div class="af-lesson-footer">
-      <button class="af-btn-continue" id="continueBtn" ${(_checkPassed||_isReviewMode)?'':'disabled'} onclick="handleContinue()">${_isReviewMode?'Next':'Continue'}</button>
+      <button class="af-btn-continue" id="continueBtn" ${(_checkPassed||_isReviewMode)?'':'disabled'} onclick="handleContinue()">${_isReviewMode?'Next':(_currentModule.module_type==='resource'?'Mark as complete':'Continue')}</button>
       <div class="af-lock-hint" id="lockHint" style="${(_checkPassed||_isReviewMode)?'display:none':''}">Solve the quick check above to unlock Continue</div>
     </div>
   `;
