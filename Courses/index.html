@@ -180,6 +180,12 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
   border:1.5px solid var(--bc);color:var(--t1);font-size:14.5px;font-weight:700;
 }
 .af-btn-secondary-outline:active{background:var(--grp)}
+.af-offline-banner{
+  margin:0 18px 14px;margin-top:14px;padding:10px 13px;border-radius:11px;
+  background:rgba(245,158,11,.10);border:1.5px solid rgba(245,158,11,.28);
+  font-size:12px;font-weight:700;color:#b45309;
+}
+[data-theme="dark"] .af-offline-banner{color:#fbbf24}
 .af-progress-wrap{display:flex;flex-direction:column;gap:6px}
 .af-progress-track{height:7px;background:var(--b1);border-radius:99px;overflow:hidden}
 .af-progress-fill{height:100%;background:linear-gradient(90deg,var(--p),var(--acc));border-radius:99px;transition:width .3s ease}
@@ -450,6 +456,121 @@ async function callCatalog(action, payload){
   }
 }
 
+/* ════════════════════════════════════════
+   OFFLINE LAYER
+   - "Download offline course" pulls the full course into localStorage.
+   - Reads fall back to the local copy when the network call fails or
+     the browser reports offline.
+   - Module completions / check answers / survey submissions made while
+     offline are queued locally and flushed to Supabase once back online.
+   ════════════════════════════════════════ */
+const OFFLINE_PREFIX = 'af_offline_course:';
+const OFFLINE_INDEX_KEY = 'af_offline_index'; // array of course_ids downloaded
+const OFFLINE_QUEUE_KEY = 'af_offline_sync_queue';
+
+function isOnline(){ return typeof navigator!=='undefined' ? navigator.onLine : true; }
+
+function getOfflineIndex(){
+  try{ return JSON.parse(localStorage.getItem(OFFLINE_INDEX_KEY) || '[]'); }catch(_){ return []; }
+}
+function setOfflineIndex(arr){ localStorage.setItem(OFFLINE_INDEX_KEY, JSON.stringify(arr)); }
+
+function isCourseDownloaded(courseId){ return getOfflineIndex().includes(courseId); }
+
+function getOfflineCourse(courseId){
+  try{ return JSON.parse(localStorage.getItem(OFFLINE_PREFIX+courseId)); }catch(_){ return null; }
+}
+
+function saveOfflineCourse(courseId, payload){
+  try{
+    localStorage.setItem(OFFLINE_PREFIX+courseId, JSON.stringify(payload));
+    const idx = getOfflineIndex();
+    if(!idx.includes(courseId)){ idx.push(courseId); setOfflineIndex(idx); }
+    return true;
+  }catch(e){
+    return false; // most likely quota exceeded
+  }
+}
+
+function removeOfflineCourse(courseId){
+  localStorage.removeItem(OFFLINE_PREFIX+courseId);
+  setOfflineIndex(getOfflineIndex().filter(id=>id!==courseId));
+}
+
+/* Local completion / progress mirror, used so the UI can reflect
+   offline progress immediately, before it's synced to Supabase. */
+function getLocalProgress(courseId){
+  try{ return JSON.parse(localStorage.getItem('af_local_progress:'+courseId) || 'null'); }catch(_){ return null; }
+}
+function setLocalProgress(courseId, obj){
+  localStorage.setItem('af_local_progress:'+courseId, JSON.stringify(obj));
+}
+
+/* Sync queue: actions recorded while offline, replayed in order once
+   back online. Each item mirrors a real callCatalog action. */
+function getSyncQueue(){
+  try{ return JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]'); }catch(_){ return []; }
+}
+function pushToSyncQueue(item){
+  const q = getSyncQueue();
+  q.push({ ...item, queued_at: new Date().toISOString() });
+  localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(q));
+}
+function clearSyncQueueUpTo(n){
+  const q = getSyncQueue();
+  localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(q.slice(n)));
+}
+
+async function flushSyncQueue(){
+  if(!isOnline()) return;
+  let q = getSyncQueue();
+  if(q.length===0) return;
+  let processed = 0;
+  for(const item of q){
+    const res = await callCatalog(item.action, item.payload);
+    if(!res.ok){ break; } // stop at first failure, retry rest later
+    processed++;
+  }
+  if(processed>0) clearSyncQueueUpTo(processed);
+  if(processed>0) afToast('Synced '+processed+' offline update'+(processed>1?'s':'')+'.', 'ok');
+}
+
+window.addEventListener('online', ()=>{ flushSyncQueue(); });
+
+/* Downloads a full course (course + every module/block/check/survey Q)
+   and stores it locally so it can be opened with zero network calls. */
+async function downloadCourseOffline(courseId, btn){
+  if(!isOnline()){
+    afToast('Connect to the internet to download this course.', 'err');
+    return false;
+  }
+  const originalText = btn ? btn.textContent : '';
+  if(btn){ btn.disabled = true; btn.textContent = 'Downloading…'; }
+
+  const data = await callCatalog('get_full_course', { course_id: courseId });
+  if(!data.ok){
+    afToast(data.message || 'Could not download this course.', 'err');
+    if(btn){ btn.disabled = false; btn.textContent = originalText; }
+    return false;
+  }
+
+  const ok = saveOfflineCourse(courseId, data);
+  if(!ok){
+    afToast('Not enough storage space to save this course offline.', 'err');
+    if(btn){ btn.disabled = false; btn.textContent = originalText; }
+    return false;
+  }
+
+  afToast('Course saved for offline use.', 'ok');
+  if(btn){ btn.disabled = false; }
+  return true;
+}
+
+function deleteOfflineCourse(courseId){
+  removeOfflineCourse(courseId);
+  afToast('Removed offline copy.', 'ok');
+}
+
 /* ── TOAST ── */
 function afToast(msg, type){
   const wrap = $('afToastWrap'); wrap.innerHTML='';
@@ -549,7 +670,7 @@ function renderCourseList(){
         <div class="af-course-pills">
           ${c.status==='completed' ? '<span class="af-pill af-pill-done">Completed</span>' : ''}
           ${c.status==='in_progress' ? '<span class="af-pill af-pill-progress">In progress · '+c.percent+'%</span>' : ''}
-          <span class="af-pill af-pill-offline">☁ Available offline</span>
+          ${isCourseDownloaded(c.id) ? '<span class="af-pill af-pill-offline">☁ Available offline</span>' : ''}
         </div>
       </div>
     </button>
@@ -567,26 +688,49 @@ window.goToCatalog = goToCatalog;
    ════════════════════════════════════════ */
 let _currentCourse = null;
 let _currentModules = [];
+let _usingOfflineCourse = false;
 
 async function openCourse(courseId){
   showView('viewDetail');
   $('detailPage').innerHTML = `<div style="padding:14px"><div class="af-skel" style="aspect-ratio:16/9;margin-bottom:16px"></div><div class="af-skel" style="height:18px;width:60%;margin-bottom:10px"></div><div class="af-skel" style="height:28px;width:90%;margin-bottom:16px"></div></div>`;
 
-  const data = await callCatalog('get_course', { course_id: courseId, student_id: getStudentId() });
-  if(!data.ok){
-    $('detailPage').innerHTML = `<div class="af-empty"><span>⚠️</span>${escapeHtml(data.message||'Could not load this course.')}</div>`;
+  let data = null;
+  let usedOffline = false;
+
+  if(isOnline()){
+    data = await callCatalog('get_course', { course_id: courseId, student_id: getStudentId() });
+  }
+  if(!data || !data.ok){
+    const offline = getOfflineCourse(courseId);
+    if(offline){
+      usedOffline = true;
+      const localProg = getLocalProgress(courseId);
+      data = {
+        ok: true,
+        course: offline.course,
+        modules: offline.modules.map(m=>({ ...m, is_done: (localProg?.done_module_ids||[]).includes(m.id) })),
+        progress: localProg ? { percent: localProg.percent, modules_done: localProg.modules_done, modules_total: localProg.modules_total, status: localProg.status } : null
+      };
+    }
+  }
+
+  if(!data || !data.ok){
+    $('detailPage').innerHTML = `<div class="af-empty"><span>⚠️</span>${escapeHtml((data&&data.message)||'Could not load this course. Connect to the internet or download it first.')}</div>`;
     return;
   }
   _currentCourse = data.course;
   _currentModules = data.modules || [];
+  _usingOfflineCourse = usedOffline;
   const progress = data.progress;
 
   $('detailTopTitle').textContent = _currentCourse.title;
 
   const percent = progress?.percent || 0;
   const isStarted = !!progress;
+  const downloaded = isCourseDownloaded(courseId);
 
   $('detailPage').innerHTML = `
+    ${usedOffline ? `<div class="af-offline-banner">📡 Viewing offline copy — some details may be out of date</div>` : ''}
     <img class="af-detail-hero" src="${_currentCourse.banner_image_url || _currentCourse.cover_image_url || fallbackImg()}" alt=""/>
     <div class="af-detail-body">
       <div class="af-detail-cat">${escapeHtml(_currentCourse.category)}</div>
@@ -616,7 +760,14 @@ async function openCourse(courseId){
         </div>
         <button class="af-btn-secondary-outline" onclick="enterModuleList()">Review course content</button>
       ` : `
-        <button class="af-btn-primary" onclick="enterModuleList()">${percent>0 ? 'Continue course' : 'Start course'}</button>
+        <button class="af-btn-primary" id="startCourseBtn" ${(!isOnline() && !downloaded) ? 'disabled' : ''} onclick="enterModuleList()">${percent>0 ? 'Continue course' : 'Start course'}</button>
+        ${(!isOnline() && !downloaded) ? `<div class="af-lock-hint">Connect to the internet, or download this course first</div>` : ''}
+      `}
+
+      ${downloaded ? `
+        <button class="af-btn-secondary-outline" id="offlineBtn" onclick="confirmRemoveOffline('${_currentCourse.id}')">☑ Downloaded — available offline</button>
+      ` : `
+        <button class="af-btn-secondary-outline" id="offlineBtn" onclick="handleDownloadClick('${_currentCourse.id}', this)" ${!isOnline()?'disabled':''}>⬇ Download offline course</button>
       `}
 
       <div class="af-section-h">About this course</div>
@@ -625,6 +776,18 @@ async function openCourse(courseId){
   `;
 }
 window.openCourse = openCourse;
+
+async function handleDownloadClick(courseId, btn){
+  const success = await downloadCourseOffline(courseId, btn);
+  if(success) openCourse(courseId); // re-render to flip button state
+}
+window.handleDownloadClick = handleDownloadClick;
+
+function confirmRemoveOffline(courseId){
+  deleteOfflineCourse(courseId);
+  openCourse(courseId);
+}
+window.confirmRemoveOffline = confirmRemoveOffline;
 
 function formatDate(iso){
   try{
@@ -695,9 +858,43 @@ async function openModule(moduleId){
   $('lessonPage').innerHTML = `<div style="padding:20px"><div class="af-skel" style="aspect-ratio:16/8;margin-bottom:16px"></div><div class="af-skel" style="height:24px;width:70%;margin-bottom:10px"></div><div class="af-skel" style="height:80px"></div></div>`;
   $('lessonProgFill').style.width='0%'; $('lessonProgPct').textContent='Progress: 0%';
 
-  const data = await callCatalog('get_module', { module_id: moduleId, student_id: getStudentId() });
-  if(!data.ok){
-    $('lessonPage').innerHTML = `<div class="af-empty"><span>⚠️</span>${escapeHtml(data.message||'Could not load this lesson.')}</div>`;
+  let data = null;
+
+  if(isOnline() && !_usingOfflineCourse){
+    data = await callCatalog('get_module', { module_id: moduleId, student_id: getStudentId() });
+  }
+
+  if(!data || !data.ok){
+    // Fall back to the locally downloaded copy of this course.
+    const offline = getOfflineCourse(_currentCourse.id);
+    if(offline){
+      const mod = offline.modules.find(m=>m.id===moduleId);
+      if(mod){
+        const localProg = getLocalProgress(_currentCourse.id);
+        const doneIds = localProg?.done_module_ids || [];
+        const idx = offline.modules.findIndex(m=>m.id===moduleId);
+        const next = idx>=0 && idx<offline.modules.length-1 ? offline.modules[idx+1] : null;
+        const surveyAnswers = {};
+        (getLocalSurveyAnswers(moduleId)||[]).forEach(a=>{ surveyAnswers[a.question_id]=a.selected_option; });
+
+        data = {
+          ok: true,
+          module: mod,
+          blocks: mod.blocks || [],
+          check: mod.check || null,
+          survey_questions: mod.survey_questions || [],
+          survey_answers: surveyAnswers,
+          is_done: doneIds.includes(moduleId),
+          next_module: next,
+          module_index: idx+1,
+          module_total: offline.modules.length
+        };
+      }
+    }
+  }
+
+  if(!data || !data.ok){
+    $('lessonPage').innerHTML = `<div class="af-empty"><span>⚠️</span>${escapeHtml((data&&data.message)||'Could not load this lesson. Connect to the internet or download the course first.')}</div>`;
     return;
   }
   _currentModule = data.module;
@@ -720,6 +917,10 @@ async function openModule(moduleId){
   }
 }
 window.openModule = openModule;
+
+function getLocalSurveyAnswers(moduleId){
+  try{ return JSON.parse(localStorage.getItem('af_local_survey:'+moduleId) || 'null'); }catch(_){ return null; }
+}
 
 function renderLessonBlocks(blocks){
   let html = '';
