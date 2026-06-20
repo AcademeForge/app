@@ -31,6 +31,8 @@
 
 /* ═══════════════════════════════════════════════════════════
    DESIGN TOKENS — DESKTOP (AMOLED dark-first)
+   These tokens live at :root, so they are available globally
+   (used by the Welcome / Login gate as well, regardless of viewport).
 ═══════════════════════════════════════════════════════════ */
 :root {
   --bg-primary:   #050505;
@@ -62,15 +64,6 @@
   --sh-card: 0 1px 3px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
   --sh-hover: 0 4px 24px rgba(124,58,237,.18), 0 1px 3px rgba(0,0,0,.5);
   --tr: 0.22s ease;
-
-  --qc-bg-start: #161622;
-  --qc-bg-end: #0f0f15;
-  --qc-bg-hover-start: #1c1c28;
-  --qc-bg-hover-end: #13131c;
-  --qc-border: #222230;
-  --qc-border-hover: #313146;
-  --qc-icon-bg: rgba(255, 255, 255, 0.05);
-  --qc-icon-border: rgba(255, 255, 255, 0.08);
 }
 
 [data-theme="light"] {
@@ -82,19 +75,10 @@
   --text-primary:   #0f0e2a;
   --text-secondary: #4b5563;
   --text-muted:     #9ca3af;
-
-  --qc-bg-start: #fbfbfe;
-  --qc-bg-end: #f2f3f8;
-  --qc-bg-hover-start: #f4f5fa;
-  --qc-bg-hover-end: #eaecf3;
-  --qc-border: rgba(79, 70, 229, 0.12);
-  --qc-border-hover: rgba(79, 70, 229, 0.24);
-  --qc-icon-bg: rgba(79, 70, 229, 0.05);
-  --qc-icon-border: rgba(79, 70, 229, 0.1);
 }
 
 /* ═══════════════════════════════════════════════════════════
-   MOBILE TOKENS — override for < 768px (from File 2)
+   MOBILE TOKENS — override for < 768px (home shell only)
 ═══════════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
   :root {
@@ -141,9 +125,10 @@ a { text-decoration: none; color: inherit; }
 img { display: block; max-width: 100%; }
 ul { list-style: none; }
 *, body, html { -webkit-user-select: none; -moz-user-select: none; user-select: none; -webkit-touch-callout: none; }
+input, textarea { -webkit-user-select: text; -moz-user-select: text; user-select: text; }
 
 /* ═══════════════════════════════════════════════════════════
-   SPLASH — Mobile version (colorful fire/warm gradient)
+   SPLASH
 ═══════════════════════════════════════════════════════════ */
 html.no-splash #afSplash { display: none !important; }
 #afSplash {
@@ -153,7 +138,6 @@ html.no-splash #afSplash { display: none !important; }
 }
 #afSplash.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 
-/* Mobile splash — warm fire gradient (File 2 style) */
 @media (max-width: 767px) {
   #afSplash {
     background: linear-gradient(135deg, #12050a 0%, #1a0f05 45%, #08060f 100%);
@@ -166,7 +150,6 @@ html.no-splash #afSplash { display: none !important; }
   .sp-bar { background: linear-gradient(90deg, #ff3b30, #ff8c00, #f8c75c, #fff1a8); }
 }
 
-/* Desktop splash — AMOLED dark (File 1 style) */
 @media (min-width: 768px) {
   #afSplash {
     background: linear-gradient(135deg, #050505 0%, #0B0B0F 50%, #120f2a 100%);
@@ -191,7 +174,95 @@ html.no-splash #afSplash { display: none !important; }
 @keyframes splashLoad { to { width: 100%; } }
 
 /* ═══════════════════════════════════════════════════════════
-   MOBILE SHELL (< 768px) — Design from File 2
+   AUTH GATE — Welcome + Login (shown before a session exists)
+   Pure AcademeForge branding, reuses the same brand tokens as
+   the rest of the app so light/dark mode stays in sync.
+═══════════════════════════════════════════════════════════ */
+#authFlow {
+  position: fixed; inset: 0; z-index: 5000;
+  display: none;
+  justify-content: center;
+  background: var(--bg-primary);
+}
+body.gate-active #authFlow { display: flex; }
+body.gate-active .af-shell { display: none !important; }
+body.gate-active .dt-layout { display: none !important; }
+body.gate-active #afPullLoader { display: none !important; }
+
+.auth-inner {
+  width: 100%; max-width: 430px;
+  height: 100%; height: 100dvh;
+  background: var(--bg-secondary);
+  display: flex; flex-direction: column;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+  position: relative;
+  box-shadow: 0 0 0 1px var(--border);
+}
+.auth-inner::-webkit-scrollbar { width: 0; }
+
+@media (min-width: 700px) {
+  #authFlow { align-items: center; padding: 24px 0; }
+  .auth-inner { height: 88vh; max-height: 880px; border-radius: 32px; overflow: hidden; box-shadow: var(--sh-hover); }
+}
+
+.auth-view { flex: 1; display: flex; flex-direction: column; min-height: 100%; }
+.auth-view.hidden { display: none; }
+
+/* Welcome view */
+.aw-topbar { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 26px 20px 16px; flex-shrink: 0; }
+.aw-logo { width: 36px; height: 36px; border-radius: 11px; object-fit: cover; }
+.aw-logo-fb { width: 36px; height: 36px; border-radius: 11px; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-family: var(--fd); font-weight: 800; font-size: 13px; color: #fff; }
+.aw-brand { font-family: var(--fd); font-size: 19px; font-weight: 900; color: var(--text-primary); letter-spacing: -.02em; }
+
+.aw-hero { width: 100%; aspect-ratio: 4/3; position: relative; overflow: hidden; background: linear-gradient(135deg, var(--primary), var(--secondary)); flex-shrink: 0; }
+.aw-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.aw-hero-fb { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+.aw-hero-fb span { font-size: 56px; }
+
+.aw-body { padding: 26px 24px 0; text-align: center; flex: 1; display: flex; flex-direction: column; }
+.aw-title { font-family: var(--fd); font-size: 19px; font-weight: 900; color: var(--text-primary); margin-bottom: 10px; letter-spacing: -.01em; }
+.aw-desc { font-size: 13.5px; line-height: 1.7; color: var(--text-secondary); font-weight: 600; margin-bottom: 24px; }
+.aw-btn { width: 100%; min-height: 50px; border-radius: var(--rf); font-size: 14.5px; font-weight: 800; margin-bottom: 12px; transition: transform var(--tr), opacity var(--tr); flex-shrink: 0; }
+.aw-btn:active { transform: scale(.985); opacity: .92; }
+.aw-btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; box-shadow: 0 4px 18px rgba(124,58,237,.32); }
+.aw-btn-outline { background: transparent; border: 1.5px solid var(--border-hover); color: var(--text-primary); }
+
+.aw-footer { margin-top: auto; padding: 20px 0 6px; text-align: center; font-size: 11.5px; color: var(--text-muted); flex-shrink: 0; }
+.aw-footer strong { color: var(--text-secondary); font-weight: 700; }
+
+/* Login view */
+.al-topbar { display: flex; align-items: center; padding: 18px 16px 0; flex-shrink: 0; }
+.al-back { width: 36px; height: 36px; border-radius: var(--r2); display: flex; align-items: center; justify-content: center; font-size: 18px; background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-primary); }
+.al-back:active { opacity: .7; }
+
+.al-body { padding: 6px 26px 24px; flex: 1; display: flex; flex-direction: column; }
+.al-logo-row { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 18px; margin-top: 6px; }
+.al-logo { width: 52px; height: 52px; border-radius: 16px; object-fit: cover; }
+.al-logo-fb { width: 52px; height: 52px; border-radius: 16px; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-family: var(--fd); font-weight: 800; font-size: 18px; color: #fff; }
+.al-title { font-family: var(--fd); font-size: 24px; font-weight: 900; color: var(--text-primary); text-align: center; letter-spacing: -.02em; }
+.al-sub { font-size: 13px; color: var(--text-muted); text-align: center; font-weight: 600; margin-top: 4px; }
+
+.al-label { display: block; font-size: 12.5px; font-weight: 800; color: var(--text-primary); margin: 16px 0 6px; }
+.al-input { width: 100%; min-height: 48px; padding: 13px 14px; border-radius: var(--r2); border: 1px solid var(--border); background: var(--bg-tertiary); color: var(--text-primary); font-size: 14px; font-weight: 700; outline: none; transition: border-color var(--tr), box-shadow var(--tr); }
+.al-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,.15); }
+.al-input::placeholder { color: var(--text-muted); font-weight: 600; }
+
+.al-forgot { margin-top: 12px; font-size: 12.5px; color: var(--text-secondary); font-weight: 600; text-align: left; }
+.al-forgot a { color: var(--primary-light); font-weight: 800; }
+
+.al-btn { width: 100%; min-height: 50px; border-radius: var(--r2); margin-top: 22px; font-size: 14.5px; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--primary), var(--secondary)); box-shadow: 0 4px 18px rgba(124,58,237,.32); flex-shrink: 0; }
+.al-btn:active { transform: scale(.985); }
+
+.al-msg { display: none; margin-top: 14px; padding: 11px 13px; border-radius: var(--r2); font-size: 12.5px; font-weight: 700; line-height: 1.5; }
+.al-msg.ok { display: block; background: rgba(16,185,129,.12); color: #10B981; border: 1px solid rgba(16,185,129,.22); }
+.al-msg.err { display: block; background: rgba(239,68,68,.12); color: #EF4444; border: 1px solid rgba(239,68,68,.22); }
+.al-msg.info { display: block; background: rgba(124,58,237,.12); color: var(--primary-light); border: 1px solid rgba(124,58,237,.22); }
+
+.al-signup { margin-top: auto; padding-top: 24px; text-align: center; font-size: 13px; color: var(--text-secondary); font-weight: 700; flex-shrink: 0; }
+.al-signup a { color: var(--primary-light); font-weight: 900; }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE SHELL (< 768px) — Home
 ═══════════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
   html { color-scheme: light; }
@@ -295,45 +366,6 @@ html.no-splash #afSplash { display: none !important; }
   .af-body { padding: 14px; display: flex; flex-direction: column; gap: 14px; }
   .af-sec-label { font-family: var(--fd); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--tm); margin-bottom: 4px; }
 
-  /* quick cards */
-  .af-quick-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .af-quick-card {
-    position: relative; overflow: hidden; min-height: 110px; border-radius: 20px;
-    padding: 13px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
-    cursor: pointer; border: 1.5px solid transparent;
-  }
-  .af-quick-card:active { opacity: .87; }
-
-  /* Logged-out: amber/orange */
-  .af-quick-card.qc-login {
-    background: linear-gradient(145deg, #f59e0b 0%, #f97316 55%, #ef4444 100%);
-    border-color: rgba(249,115,22,.45); box-shadow: 0 4px 16px rgba(249,115,22,.30);
-  }
-  /* Logged-out: emerald */
-  .af-quick-card.qc-profile-guest {
-    background: linear-gradient(145deg, #059669 0%, #10b981 55%, #34d399 100%);
-    border-color: rgba(16,185,129,.45); box-shadow: 0 4px 16px rgba(16,185,129,.28);
-  }
-  /* Logged-in: indigo */
-  .af-quick-card.qc-courses {
-    background: linear-gradient(145deg, #4f46e5 0%, #6366f1 55%, #818cf8 100%);
-    border-color: rgba(99,102,241,.55); box-shadow: 0 4px 16px rgba(79,70,229,.28);
-  }
-  /* Logged-in: rose/pink */
-  .af-quick-card.qc-profile-in {
-    background: linear-gradient(145deg, #db2777 0%, #ec4899 55%, #f472b6 100%);
-    border-color: rgba(236,72,153,.45); box-shadow: 0 4px 16px rgba(236,72,153,.28);
-  }
-
-  .af-quick-icon {
-    width: 44px; height: 44px; border-radius: 13px;
-    display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;
-    background: rgba(255,255,255,.22); border: 1.5px solid rgba(255,255,255,.25);
-  }
-  .af-quick-title { font-family: var(--fd); font-size: 13.5px; font-weight: 800; color: #fff; line-height: 1.15; }
-  .af-quick-sub { font-size: 11px; font-weight: 600; color: rgba(255,255,255,.85); line-height: 1.35; }
-  .af-quick-greeting { font-family: var(--fd); font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: rgba(255,255,255,.75); }
-
   /* wide card */
   .af-wide-card {
     border-radius: var(--r3); padding: 14px;
@@ -417,7 +449,7 @@ html.no-splash #afSplash { display: none !important; }
 }
 
 /* ═══════════════════════════════════════════════════════════
-   DESKTOP LAYOUT (≥ 768px) — Design from File 1
+   DESKTOP LAYOUT (≥ 768px) — Home
 ═══════════════════════════════════════════════════════════ */
 @media (min-width: 768px) {
   html { color-scheme: dark; }
@@ -564,41 +596,6 @@ html.no-splash #afSplash { display: none !important; }
   .dt-dot { width: 6px; height: 6px; border-radius: 99px; background: rgba(255,255,255,.35); border: none; cursor: pointer; transition: width .3s, background .3s; }
   .dt-dot.active { width: 22px; background: #fff; }
 
-  /* Quick access */
-  .dt-quick-section { margin-bottom: 24px; }
-  .dt-quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .dt-quick-card {
-    border-radius: var(--r3); padding: 18px 20px;
-    display: flex; align-items: center; gap: 14px;
-    cursor: pointer; border: 1px solid var(--border);
-    transition: transform var(--tr), box-shadow var(--tr), border-color var(--tr), background var(--tr);
-  }
-  .dt-quick-card:hover { transform: translateY(-2px); border-color: var(--border-hover); }
-  .dt-quick-card:active { opacity: .9; transform: translateY(0); }
-  .dt-quick-card.qc-courses,
-  .dt-quick-card.qc-profile-in,
-  .dt-quick-card.qc-login,
-  .dt-quick-card.qc-profile-guest {
-    background: linear-gradient(145deg, var(--qc-bg-start) 0%, var(--qc-bg-end) 100%);
-    border-color: var(--qc-border); box-shadow: var(--sh-card);
-  }
-  .dt-quick-card.qc-courses:hover,
-  .dt-quick-card.qc-profile-in:hover,
-  .dt-quick-card.qc-login:hover,
-  .dt-quick-card.qc-profile-guest:hover {
-    background: linear-gradient(145deg, var(--qc-bg-hover-start) 0%, var(--qc-bg-hover-end) 100%);
-    border-color: var(--qc-border-hover); box-shadow: var(--sh-hover);
-  }
-  .dt-quick-icon {
-    width: 48px; height: 48px; border-radius: 13px;
-    display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;
-    background: var(--qc-icon-bg); border: 1px solid var(--qc-icon-border);
-  }
-  .dt-quick-info { flex: 1; min-width: 0; }
-  .dt-quick-title { font-family: var(--fd); font-size: 15px; font-weight: 800; color: var(--text-primary); line-height: 1.2; }
-  .dt-quick-sub { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-top: 3px; }
-  .dt-quick-greeting { font-family: var(--fd); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); margin-top: 3px; }
-
   /* Featured */
   .dt-featured-section { margin-bottom: 24px; }
   .dt-featured-card {
@@ -645,7 +642,6 @@ html.no-splash #afSplash { display: none !important; }
   @media (min-width: 1600px) {
     .dt-main { padding: 32px 48px 72px; }
     .dt-tools-grid { gap: 16px; }
-    .dt-quick-grid { gap: 16px; }
   }
 
   /* Laptop adjustments */
@@ -656,7 +652,6 @@ html.no-splash #afSplash { display: none !important; }
     :root { --sidebar-w: 220px; }
     .dt-main { padding: 20px 20px 60px; }
     .dt-tools-grid { gap: 10px; }
-    .dt-quick-card { padding: 14px 16px; }
   }
 }
 
@@ -696,7 +691,6 @@ html.no-splash #afSplash { display: none !important; }
 .af-toast-msg   { font-size: 11.5px; margin: 0; line-height: 1.4; }
 .af-toast-x     { margin-left: auto; font-size: 17px; cursor: pointer; }
 
-/* Desktop toast overrides */
 @media (min-width: 768px) {
   .af-toast {
     background: var(--bg-secondary); color: var(--text-primary);
@@ -718,7 +712,69 @@ html.no-splash #afSplash { display: none !important; }
   <div class="sp-bar-wrap"><div class="sp-bar"></div></div>
 </div>
 
-<!-- ═══ MOBILE SHELL ═══ -->
+<!-- ═══ AUTH GATE (Welcome + Login) ═══ -->
+<div id="authFlow">
+  <div class="auth-inner">
+
+    <!-- WELCOME VIEW -->
+    <div id="viewWelcome" class="auth-view">
+      <div class="aw-topbar">
+        <img src="/IMG/AF LOGO 1.jpeg" alt="AcademeForge" class="aw-logo"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
+        <div class="aw-logo-fb" style="display:none;" aria-hidden="true">AF</div>
+        <span class="aw-brand">AcademeForge</span>
+      </div>
+
+      <div class="aw-hero" id="awHero">
+        <img src="/IMG/banner1.png" alt="AcademeForge" onerror="this.parentElement.innerHTML=awHeroFb()"/>
+      </div>
+
+      <div class="aw-body">
+        <h1 class="aw-title">Welcome to AcademeForge</h1>
+        <p class="aw-desc">Learning Beyond the Classroom — structured courses, smart learning tools, and a student community, all in one place.</p>
+        <button class="aw-btn aw-btn-primary" type="button" onclick="showAuthView('login')">Log in</button>
+        <button class="aw-btn aw-btn-outline" type="button" onclick="window.location.href='https://signup.academeforge.in'">Join for free</button>
+        <div class="aw-footer">
+          <strong>Developed by Devraj Kumar</strong><br>
+          Made with ❤️ in India
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGIN VIEW -->
+    <div id="viewLogin" class="auth-view hidden">
+      <div class="al-topbar">
+        <button class="al-back" type="button" onclick="showAuthView('welcome')" aria-label="Back">←</button>
+      </div>
+      <div class="al-body">
+        <div class="al-logo-row">
+          <img src="/IMG/AF LOGO 1.jpeg" alt="AcademeForge" class="al-logo"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
+          <div class="al-logo-fb" style="display:none;" aria-hidden="true">AF</div>
+        </div>
+        <h1 class="al-title">Log in</h1>
+        <p class="al-sub">Existing user? Log in with your Student ID</p>
+
+        <label class="al-label" for="alLoginId">Student ID / Phone Number</label>
+        <input id="alLoginId" class="al-input" type="tel" placeholder="Enter your Student ID or phone number" autocomplete="username"/>
+
+        <label class="al-label" for="alPassword">Password</label>
+        <input id="alPassword" class="al-input" type="password" placeholder="Enter your password" autocomplete="current-password"/>
+
+        <div class="al-forgot">Forgot password? <a href="https://reset.academeforge.in">Reset it here</a></div>
+
+        <button class="al-btn" type="button" onclick="doAcademeLogin()">Log in</button>
+
+        <div class="al-msg" id="alMsg"></div>
+
+        <div class="al-signup">New User? <a href="https://signup.academeforge.in">Sign up</a></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ MOBILE SHELL (Home) ═══ -->
 <div class="af-shell" id="afShell">
   <header class="af-topbar">
     <div class="af-brand">
@@ -776,10 +832,6 @@ html.no-splash #afSplash { display: none !important; }
 
     <div class="af-body">
       <div>
-        <div class="af-sec-label">Quick Access</div>
-        <div class="af-quick-row" id="afQuickRow"></div>
-      </div>
-      <div>
         <div class="af-sec-label">Featured</div>
         <button class="af-wide-card" onclick="window.location.href='/T/index.html'" type="button">
           <div class="af-wide-icon">🧪</div>
@@ -833,7 +885,7 @@ html.no-splash #afSplash { display: none !important; }
   </nav>
 </div>
 
-<!-- ═══ DESKTOP LAYOUT ═══ -->
+<!-- ═══ DESKTOP LAYOUT (Home) ═══ -->
 <div class="dt-layout">
 
   <header class="dt-header">
@@ -931,11 +983,6 @@ html.no-splash #afSplash { display: none !important; }
         </div>
       </section>
 
-      <section class="dt-quick-section">
-        <span class="dt-sec-label">Quick Access</span>
-        <div class="dt-quick-grid" id="dtQuickRow"></div>
-      </section>
-
       <section class="dt-featured-section">
         <span class="dt-sec-label">Featured</span>
         <button class="dt-featured-card" onclick="window.location.href='/T/index.html'" type="button">
@@ -1019,98 +1066,107 @@ function hideSplash() {
   setTimeout(() => { s.classList.add('hidden'); setTimeout(() => s.remove(), 400); }, 1200);
 }
 
-/* ── GREETING ── */
-function getGreeting() {
-  const h = new Date().getHours();
-  if(h>=5&&h<12)  return 'Good Morning';
-  if(h>=12&&h<17) return 'Good Afternoon';
-  if(h>=17&&h<21) return 'Good Evening';
-  return 'Good Night';
-}
-
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-/* ── QUICK CARDS (mobile) ── */
-function renderQuickCards() {
-  const row = $('afQuickRow');
-  if(!row) return;
-  const name   = localStorage.getItem('af_student_name') || '';
-  const mobile = localStorage.getItem('af_student_mobile') || localStorage.getItem('af_student_phone') || '';
-  const loggedIn = !!(name && mobile);
-  let leftCard, rightCard;
-  if(loggedIn) {
-    const firstName = escHtml(name.split(' ')[0]);
-    const greeting  = getGreeting();
-    leftCard = `<button class="af-quick-card qc-courses" onclick="window.location.href='/student/index.html'" type="button">
-      <div class="af-quick-icon">🎓</div>
-      <div class="af-quick-title">View Courses</div>
-      <div class="af-quick-sub">Your dashboard →</div>
-    </button>`;
-    rightCard = `<button class="af-quick-card qc-profile-in" onclick="window.location.href='/dash/index.html'" type="button">
-      <div class="af-quick-icon">👋</div>
-      <div class="af-quick-title">Hi, ${firstName}!</div>
-      <div class="af-quick-greeting">${greeting}</div>
-    </button>`;
-  } else {
-    leftCard = `<button class="af-quick-card qc-login" onclick="window.location.href='/student/index.html'" type="button">
-      <div class="af-quick-icon">🎓</div>
-      <div class="af-quick-title">Student Login</div>
-      <div class="af-quick-sub">Login to continue →</div>
-    </button>`;
-    rightCard = `<button class="af-quick-card qc-profile-guest" onclick="window.location.href='/student/index.html'" type="button">
-      <div class="af-quick-icon">👤</div>
-      <div class="af-quick-title">Hi, Student</div>
-      <div class="af-quick-sub">Login to view profile →</div>
-    </button>`;
-  }
-  row.innerHTML = leftCard + rightCard;
+function awHeroFb() {
+  return '<div class="aw-hero-fb"><span>🎓</span></div>';
+}
+window.awHeroFb = awHeroFb;
+
+/* ── AUTH GATE STATE ── */
+function afIsLoggedIn() {
+  return localStorage.getItem('af_student_logged_in') === 'true'
+    && !!localStorage.getItem('af_student_uuid')
+    && !!localStorage.getItem('af_student_name');
 }
 
-/* ── QUICK CARDS (desktop) ── */
-function renderDesktopQuickCards() {
-  const row = $('dtQuickRow');
-  if(!row) return;
-  const name   = localStorage.getItem('af_student_name') || '';
-  const mobile = localStorage.getItem('af_student_mobile') || localStorage.getItem('af_student_phone') || '';
-  const loggedIn = !!(name && mobile);
-  let leftCard, rightCard;
-  if(loggedIn) {
-    const firstName = escHtml(name.split(' ')[0]);
-    const greeting  = getGreeting();
-    leftCard = `<button class="dt-quick-card qc-courses" onclick="window.location.href='/student/index.html'" type="button">
-      <div class="dt-quick-icon">🎓</div>
-      <div class="dt-quick-info">
-        <div class="dt-quick-title">View Courses</div>
-        <div class="dt-quick-sub">Your dashboard →</div>
-      </div>
-    </button>`;
-    rightCard = `<button class="dt-quick-card qc-profile-in" onclick="window.location.href='/dash/index.html'" type="button">
-      <div class="dt-quick-icon">👋</div>
-      <div class="dt-quick-info">
-        <div class="dt-quick-title">Hi, ${firstName}!</div>
-        <div class="dt-quick-greeting">${greeting}</div>
-      </div>
-    </button>`;
-  } else {
-    leftCard = `<button class="dt-quick-card qc-login" onclick="window.location.href='/student/index.html'" type="button">
-      <div class="dt-quick-icon">🎓</div>
-      <div class="dt-quick-info">
-        <div class="dt-quick-title">Student Login</div>
-        <div class="dt-quick-sub">Login to continue →</div>
-      </div>
-    </button>`;
-    rightCard = `<button class="dt-quick-card qc-profile-guest" onclick="window.location.href='/student/index.html'" type="button">
-      <div class="dt-quick-icon">👤</div>
-      <div class="dt-quick-info">
-        <div class="dt-quick-title">Hi, Student</div>
-        <div class="dt-quick-sub">Login to view profile →</div>
-      </div>
-    </button>`;
-  }
-  row.innerHTML = leftCard + rightCard;
+function showAuthView(view) {
+  const w = $('viewWelcome'), l = $('viewLogin');
+  if (view === 'login') { w.classList.add('hidden'); l.classList.remove('hidden'); clearAuthMsg(); }
+  else { l.classList.add('hidden'); w.classList.remove('hidden'); clearAuthMsg(); }
+  const inner = document.querySelector('.auth-inner');
+  if (inner) inner.scrollTop = 0;
 }
+window.showAuthView = showAuthView;
+
+function showAuthMsg(type, text) { const b = $('alMsg'); b.className = 'al-msg ' + type; b.textContent = text || ''; }
+function clearAuthMsg() { const b = $('alMsg'); if(b){ b.className = 'al-msg'; b.textContent = ''; } }
+
+function enterGate() {
+  document.body.classList.add('gate-active');
+  showAuthView('welcome');
+}
+function enterHome() {
+  document.body.classList.remove('gate-active');
+  setTimeout(() => { syncStreak(false); checkNotifs(); }, 300);
+}
+
+/* ── EXTRACTED LOGIN FEATURE (from /student/index.html) ── */
+const cleanPhone = v => String(v||'').trim().replace(/\D/g,'');
+
+function afGetDeviceId() {
+  const k = 'af_device_id'; let id = localStorage.getItem(k);
+  if (!id) { id = 'afdev_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,12); localStorage.setItem(k,id); }
+  return id;
+}
+function afGetDeviceName() {
+  const ua = navigator.userAgent||'';
+  if (/Android/i.test(ua)) return 'Android WebView';
+  if (/iPhone|iPad/i.test(ua)) return 'iOS WebView';
+  if (/Windows/i.test(ua)) return 'Windows Browser';
+  return 'Web Browser';
+}
+
+let _afAuthSb = null;
+async function getAuthSb() {
+  if (_afAuthSb) return _afAuthSb;
+  if (typeof supabase === 'undefined') await new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    s.onload = res; s.onerror = rej; document.head.appendChild(s);
+  });
+  _afAuthSb = supabase.createClient(STUDENT_URL, STUDENT_KEY);
+  return _afAuthSb;
+}
+
+function afSaveSession(student, token, deviceId) {
+  localStorage.setItem('af_student_logged_in','true');
+  localStorage.setItem('af_session_token',    token||'');
+  localStorage.setItem('af_device_id',        deviceId||afGetDeviceId());
+  localStorage.setItem('af_student_uuid',     student.id||'');
+  localStorage.setItem('af_student_id',       student.student_id||student.mobile||student.phone||'');
+  localStorage.setItem('af_student_mobile',   student.mobile||student.phone||'');
+  localStorage.setItem('af_student_name',     student.name||'Student');
+  localStorage.setItem('af_student_email',    student.email||'');
+}
+
+async function doAcademeLogin() {
+  const loginId = ($('alLoginId').value||'').trim();
+  const cleanId = cleanPhone(loginId);
+  const password = ($('alPassword').value||'').trim();
+  if (!loginId)  { showAuthMsg('err','Enter your Student ID / phone number.'); return; }
+  if (!password) { showAuthMsg('err','Enter your password.'); return; }
+  showAuthMsg('info','Checking your login…');
+  try {
+    const sb = await getAuthSb();
+    const { data, error } = await sb.functions.invoke('student-login-af', {
+      body: { login_id: loginId, clean_login_id: cleanId, password, device_id: afGetDeviceId(), device_name: afGetDeviceName() }
+    });
+    if (error) { showAuthMsg('err', error.message || 'Login failed.'); return; }
+    if (!data || !data.ok) { showAuthMsg('err', (data && data.message) || 'Login failed.'); return; }
+    if (!data.student) { showAuthMsg('err','Login failed. Student data not received.'); return; }
+    const token = data.session_token || data.login_token || '';
+    if (!token) { showAuthMsg('err','Login failed. Session token not received.'); return; }
+    afSaveSession(data.student, token, data.device_id || afGetDeviceId());
+    showAuthMsg('ok','Login successful!');
+    setTimeout(enterHome, 500);
+  } catch (e) {
+    showAuthMsg('err', (e && e.message) || 'Something went wrong. Please try again.');
+  }
+}
+window.doAcademeLogin = doAcademeLogin;
 
 /* ── STREAK ── */
 function updateStreakBadge(n) {
@@ -1323,24 +1379,24 @@ window.openExternal = openExternal;
 
 /* ── STORAGE SYNC ── */
 window.addEventListener('storage', e=>{
-if(e.key === 'af_dark_mode') {
-  document.documentElement.setAttribute(
-    'data-theme',
-    e.newValue === '1' ? 'dark' : 'light'
-  );
-}
-  if(['af_student_name','af_student_phone','af_student_mobile','af_student_uuid'].includes(e.key)){
-    renderQuickCards();
-    renderDesktopQuickCards();
+  if(e.key === 'af_dark_mode') {
+    document.documentElement.setAttribute(
+      'data-theme',
+      e.newValue === '1' ? 'dark' : 'light'
+    );
+  }
+  if(e.key === 'af_student_logged_in'){
+    if(e.newValue === 'true') enterHome();
+    else enterGate();
+  }
+  if(['af_student_name','af_student_mobile','af_student_uuid'].includes(e.key)){
     handleStreakOnAuthChange();
   }
 });
 
 /* ── VISIBILITY ── */
 document.addEventListener('visibilitychange', ()=>{
-  if(document.visibilityState==='visible'){
-    renderQuickCards();
-    renderDesktopQuickCards();
+  if(document.visibilityState==='visible' && afIsLoggedIn()){
     syncStreak(false);
   }
 });
@@ -1348,13 +1404,16 @@ document.addEventListener('visibilitychange', ()=>{
 /* ── INIT ── */
 function init() {
   hideSplash();
-  renderQuickCards();
-  renderDesktopQuickCards();
+  if (afIsLoggedIn()) {
+    document.body.classList.remove('gate-active');
+    updateStreakBadge(parseInt(localStorage.getItem('af_streak')||'0'));
+    setTimeout(()=>syncStreak(false), 600);
+    setTimeout(checkNotifs, 1000);
+  } else {
+    enterGate();
+  }
   startMobileBanner();
   startDesktopBanner();
-  updateStreakBadge(parseInt(localStorage.getItem('af_streak')||'0'));
-  setTimeout(()=>syncStreak(false), 600);
-  setTimeout(checkNotifs, 1000);
 }
 
 if(document.readyState==='loading')
