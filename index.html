@@ -174,92 +174,208 @@ html.no-splash #afSplash { display: none !important; }
 @keyframes splashLoad { to { width: 100%; } }
 
 /* ═══════════════════════════════════════════════════════════
-   AUTH GATE — Welcome + Login (shown before a session exists)
-   Pure AcademeForge branding, reuses the same brand tokens as
-   the rest of the app so light/dark mode stays in sync.
+   AUTH GATE — Premium Welcome + Login
+   Enhanced with smooth animations, layered depth, and modern UI touches
 ═══════════════════════════════════════════════════════════ */
+
+/* Smooth entry animation for views */
+@keyframes viewFadeIn {
+  0% { opacity: 0; transform: translateY(12px) scale(0.99); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 #authFlow {
   position: fixed; inset: 0; z-index: 5000;
   display: none;
   justify-content: center;
   background: var(--bg-primary);
+  /* Optional: Add a subtle mesh gradient or blur background here for desktop */
 }
+
 body.gate-active #authFlow { display: flex; }
-body.gate-active .af-shell { display: none !important; }
-body.gate-active .dt-layout { display: none !important; }
+body.gate-active .af-shell,
+body.gate-active .dt-layout,
 body.gate-active #afPullLoader { display: none !important; }
 
 .auth-inner {
-  width: 100%; max-width: 430px;
+  width: 100%; max-width: 440px;
   height: 100%; height: 100dvh;
   background: var(--bg-secondary);
   display: flex; flex-direction: column;
   overflow-y: auto; -webkit-overflow-scrolling: touch;
   position: relative;
-  box-shadow: 0 0 0 1px var(--border);
 }
 .auth-inner::-webkit-scrollbar { width: 0; }
 
+/* Premium Desktop Card Feel */
 @media (min-width: 700px) {
-  #authFlow { align-items: center; padding: 24px 0; }
-  .auth-inner { height: 88vh; max-height: 880px; border-radius: 32px; overflow: hidden; box-shadow: var(--sh-hover); }
+  #authFlow { align-items: center; padding: 40px 0; }
+  .auth-inner { 
+    height: auto; 
+    min-height: 600px;
+    max-height: 85vh; 
+    border-radius: 24px; 
+    overflow: hidden; 
+    /* Layered shadows for a floating premium effect */
+    box-shadow: 0 0 0 1px var(--border), 
+                0 20px 40px -8px rgba(0,0,0,0.12), 
+                0 12px 16px -4px rgba(0,0,0,0.08); 
+  }
 }
 
-.auth-view { flex: 1; display: flex; flex-direction: column; min-height: 100%; }
+.auth-view { 
+  flex: 1; 
+  display: flex; 
+  flex-direction: column; 
+  min-height: 100%; 
+}
+.auth-view:not(.hidden) {
+  animation: viewFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 .auth-view.hidden { display: none; }
 
-/* Welcome view */
-.aw-topbar { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px 6px; flex-shrink: 0; }
-.aw-logo { width: 30px; height: 30px; border-radius: 9px; object-fit: cover; }
-.aw-logo-fb { width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-family: var(--fd); font-weight: 800; font-size: 12px; color: #fff; }
-.aw-brand { font-family: var(--fd); font-size: 17px; font-weight: 900; color: var(--text-primary); letter-spacing: -.02em; }
+/* --- Welcome View --- */
+.aw-topbar { 
+  display: flex; align-items: center; justify-content: center; gap: 10px; 
+  padding: 20px 20px 16px; flex-shrink: 0; 
+}
+.aw-logo, .aw-logo-fb { 
+  width: 32px; height: 32px; border-radius: 10px; object-fit: cover; 
+}
+.aw-logo-fb { 
+  background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+  display: flex; align-items: center; justify-content: center; 
+  font-family: var(--fd); font-weight: 800; font-size: 13px; color: #fff; 
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.2);
+}
+.aw-brand { 
+  font-family: var(--fd); font-size: 18px; font-weight: 800; 
+  color: var(--text-primary); letter-spacing: -0.03em; 
+}
 
-.aw-hero { width: 100%; aspect-ratio: 4/3; position: relative; overflow: hidden; background: linear-gradient(135deg, var(--primary), var(--secondary)); flex-shrink: 0; margin: 0; }
+.aw-hero { 
+  width: 100%; aspect-ratio: 4/3; position: relative; overflow: hidden; 
+  background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+  flex-shrink: 0; margin: 0; 
+}
+.aw-hero::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to top, var(--bg-secondary) 0%, transparent 40%);
+}
 .aw-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .aw-hero-fb { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-.aw-hero-fb span { font-size: 56px; }
+.aw-hero-fb span { font-size: 64px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15)); }
 
-.aw-body { padding: 10px 24px 0; text-align: center; flex: 1; display: flex; flex-direction: column; }
-.aw-title { font-family: var(--fd); font-size: 19px; font-weight: 900; color: var(--text-primary); margin: 0 0 8px; letter-spacing: -.01em; }
-.aw-desc { font-size: 13.5px; line-height: 1.6; color: var(--text-secondary); font-weight: 600; margin-bottom: 20px; }
-.aw-btn { width: 100%; min-height: 50px; border-radius: var(--rf); font-size: 14.5px; font-weight: 800; margin-bottom: 12px; transition: transform var(--tr), opacity var(--tr); flex-shrink: 0; }
-.aw-btn:active { transform: scale(.985); opacity: .92; }
-.aw-btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; box-shadow: 0 4px 18px rgba(124,58,237,.32); }
-.aw-btn-outline { background: transparent; border: 1.5px solid var(--border-hover); color: var(--text-primary); }
+.aw-body { 
+  padding: 0 32px 0; text-align: center; flex: 1; 
+  display: flex; flex-direction: column; justify-content: center;
+  position: relative; top: -20px; z-index: 10;
+}
+.aw-title { 
+  font-family: var(--fd); font-size: 24px; font-weight: 900; 
+  color: var(--text-primary); margin: 0 0 10px; letter-spacing: -0.02em; 
+}
+.aw-desc { 
+  font-size: 14px; line-height: 1.6; color: var(--text-secondary); 
+  font-weight: 500; margin-bottom: 32px; 
+}
 
-.aw-footer { margin-top: auto; padding: 20px 0 6px; text-align: center; font-size: 11.5px; color: var(--text-muted); flex-shrink: 0; }
-.aw-footer strong { color: var(--text-secondary); font-weight: 700; }
+/* Premium Buttons */
+.aw-btn { 
+  width: 100%; min-height: 52px; border-radius: 14px; font-size: 15px; 
+  font-weight: 700; margin-bottom: 14px; cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); flex-shrink: 0; 
+  border: none;
+}
+.aw-btn:hover { transform: translateY(-2px); }
+.aw-btn:active { transform: scale(0.97) translateY(0); }
 
-/* Login view */
-.al-topbar { display: flex; align-items: center; padding: 18px 16px 0; flex-shrink: 0; }
-.al-back { width: 36px; height: 36px; border-radius: var(--r2); display: flex; align-items: center; justify-content: center; font-size: 18px; background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-primary); }
-.al-back:active { opacity: .7; }
+.aw-btn-primary { 
+  background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+  color: #fff; 
+  box-shadow: 0 8px 24px rgba(124,58,237,0.25), inset 0 1px 1px rgba(255,255,255,0.2); 
+}
+.aw-btn-primary:hover { box-shadow: 0 12px 32px rgba(124,58,237,0.35), inset 0 1px 1px rgba(255,255,255,0.2); }
 
-.al-body { padding: 6px 26px 24px; flex: 1; display: flex; flex-direction: column; }
-.al-logo-row { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 18px; margin-top: 6px; }
-.al-logo { width: 52px; height: 52px; border-radius: 16px; object-fit: cover; }
-.al-logo-fb { width: 52px; height: 52px; border-radius: 16px; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-family: var(--fd); font-weight: 800; font-size: 18px; color: #fff; }
-.al-title { font-family: var(--fd); font-size: 24px; font-weight: 900; color: var(--text-primary); text-align: center; letter-spacing: -.02em; }
-.al-sub { font-size: 13px; color: var(--text-muted); text-align: center; font-weight: 600; margin-top: 4px; }
+.aw-btn-outline { 
+  background: var(--bg-tertiary); 
+  box-shadow: inset 0 0 0 1.5px var(--border); 
+  color: var(--text-primary); 
+}
+.aw-btn-outline:hover { background: var(--border-hover); box-shadow: inset 0 0 0 1.5px var(--text-muted); }
 
-.al-label { display: block; font-size: 12.5px; font-weight: 800; color: var(--text-primary); margin: 16px 0 6px; }
-.al-input { width: 100%; min-height: 48px; padding: 13px 14px; border-radius: var(--r2); border: 1px solid var(--border); background: var(--bg-tertiary); color: var(--text-primary); font-size: 14px; font-weight: 700; outline: none; transition: border-color var(--tr), box-shadow var(--tr); }
-.al-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,.15); }
-.al-input::placeholder { color: var(--text-muted); font-weight: 600; }
+.aw-footer { 
+  margin-top: auto; padding: 24px 0 16px; text-align: center; 
+  font-size: 12px; color: var(--text-muted); flex-shrink: 0; 
+}
+.aw-footer strong { color: var(--text-secondary); font-weight: 600; }
 
-.al-forgot { margin-top: 12px; font-size: 12.5px; color: var(--text-secondary); font-weight: 600; text-align: left; }
-.al-forgot a { color: var(--primary-light); font-weight: 800; }
+/* --- Login View --- */
+.al-topbar { 
+  display: flex; align-items: center; padding: 20px 24px 0; flex-shrink: 0; 
+}
+.al-back { 
+  width: 40px; height: 40px; border-radius: 12px; display: flex; 
+  align-items: center; justify-content: center; font-size: 18px; 
+  background: var(--bg-primary); border: 1px solid var(--border); 
+  color: var(--text-primary); cursor: pointer; transition: all 0.2s ease;
+}
+.al-back:hover { background: var(--bg-tertiary); transform: translateX(-2px); }
+.al-back:active { transform: scale(0.95); }
 
-.al-btn { width: 100%; min-height: 50px; border-radius: var(--r2); margin-top: 22px; font-size: 14.5px; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--primary), var(--secondary)); box-shadow: 0 4px 18px rgba(124,58,237,.32); flex-shrink: 0; }
-.al-btn:active { transform: scale(.985); }
+.al-body { padding: 12px 32px 32px; flex: 1; display: flex; flex-direction: column; }
+.al-logo-row { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 24px; }
+.al-logo { width: 56px; height: 56px; border-radius: 16px; object-fit: cover; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+.al-logo-fb { 
+  width: 56px; height: 56px; border-radius: 16px; 
+  background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+  display: flex; align-items: center; justify-content: center; 
+  font-family: var(--fd); font-weight: 800; font-size: 20px; color: #fff; 
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.2), 0 8px 24px rgba(124,58,237,0.25);
+}
+.al-title { font-family: var(--fd); font-size: 26px; font-weight: 900; color: var(--text-primary); text-align: center; letter-spacing: -0.03em; }
+.al-sub { font-size: 14px; color: var(--text-muted); text-align: center; font-weight: 500; margin-top: 6px; }
 
-.al-msg { display: none; margin-top: 14px; padding: 11px 13px; border-radius: var(--r2); font-size: 12.5px; font-weight: 700; line-height: 1.5; }
-.al-msg.ok { display: block; background: rgba(16,185,129,.12); color: #10B981; border: 1px solid rgba(16,185,129,.22); }
-.al-msg.err { display: block; background: rgba(239,68,68,.12); color: #EF4444; border: 1px solid rgba(239,68,68,.22); }
-.al-msg.info { display: block; background: rgba(124,58,237,.12); color: var(--primary-light); border: 1px solid rgba(124,58,237,.22); }
+/* Modern SaaS Inputs */
+.al-label { 
+  display: block; font-size: 13px; font-weight: 700; color: var(--text-primary); 
+  margin: 24px 0 8px; letter-spacing: -0.01em;
+}
+.al-input { 
+  width: 100%; min-height: 52px; padding: 0 16px; border-radius: 12px; 
+  background: var(--bg-primary); color: var(--text-primary); 
+  font-size: 15px; font-weight: 500; outline: none; border: none;
+  box-shadow: inset 0 0 0 1px var(--border), 0 2px 4px rgba(0,0,0,0.02);
+  transition: all 0.25s ease;
+}
+.al-input:focus { 
+  background: var(--bg-secondary);
+  box-shadow: inset 0 0 0 1.5px var(--primary), 0 0 0 4px rgba(124,58,237,0.15); 
+}
+.al-input::placeholder { color: var(--text-muted); font-weight: 400; }
 
-.al-signup { margin-top: auto; padding-top: 24px; text-align: center; font-size: 13px; color: var(--text-secondary); font-weight: 700; flex-shrink: 0; }
-.al-signup a { color: var(--primary-light); font-weight: 900; }
+.al-forgot { margin-top: 14px; font-size: 13px; color: var(--text-secondary); font-weight: 500; text-align: right; }
+.al-forgot a { color: var(--primary); font-weight: 700; text-decoration: none; transition: color 0.2s ease; }
+.al-forgot a:hover { color: var(--primary-light); text-decoration: underline; }
+
+.al-btn { 
+  width: 100%; min-height: 52px; border-radius: 14px; margin-top: 32px; 
+  font-size: 15px; font-weight: 700; color: #fff; cursor: pointer; border: none;
+  background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+  box-shadow: 0 8px 24px rgba(124,58,237,0.25), inset 0 1px 1px rgba(255,255,255,0.2); 
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); flex-shrink: 0; 
+}
+.al-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(124,58,237,0.35), inset 0 1px 1px rgba(255,255,255,0.2); }
+.al-btn:active { transform: scale(0.97) translateY(0); }
+
+.al-msg { display: none; margin-top: 16px; padding: 14px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; line-height: 1.5; animation: viewFadeIn 0.3s ease forwards;}
+.al-msg.ok { display: block; background: rgba(16,185,129,0.1); color: #10B981; box-shadow: inset 0 0 0 1px rgba(16,185,129,0.2); }
+.al-msg.err { display: block; background: rgba(239,68,68,0.1); color: #EF4444; box-shadow: inset 0 0 0 1px rgba(239,68,68,0.2); }
+.al-msg.info { display: block; background: rgba(124,58,237,0.1); color: var(--primary); box-shadow: inset 0 0 0 1px rgba(124,58,237,0.2); }
+
+.al-signup { margin-top: auto; padding-top: 32px; text-align: center; font-size: 14px; color: var(--text-secondary); font-weight: 500; flex-shrink: 0; }
+.al-signup a { color: var(--primary); font-weight: 800; text-decoration: none; transition: color 0.2s ease; }
+.al-signup a:hover { color: var(--primary-light); text-decoration: underline; }
 
 /* ═══════════════════════════════════════════════════════════
    MOBILE SHELL (< 768px) — Home
@@ -698,14 +814,6 @@ body.gate-active #afPullLoader { display: none !important; }
   }
   .af-toast-x { color: var(--text-muted); }
 }
-  .al-back{
-  border:none;
-  background:transparent;
-  font-size:22px;
-  cursor:pointer;
-  padding:6px 10px;
-  color:inherit;
-}
 </style>
 </head>
 <body>
@@ -724,133 +832,64 @@ body.gate-active #afPullLoader { display: none !important; }
 <div id="authFlow">
   <div class="auth-inner">
 
- <!-- WELCOME VIEW -->
-<div id="viewWelcome" class="auth-view">
+    <!-- WELCOME VIEW -->
+    <div id="viewWelcome" class="auth-view">
+      <div class="aw-topbar">
+        <img src="/IMG/AF LOGO 1.jpeg" alt="AcademeForge" class="aw-logo"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
+        <div class="aw-logo-fb" style="display:none;" aria-hidden="true">AF</div>
+        <span class="aw-brand">AcademeForge</span>
+      </div>
 
-  <header class="af-topbar">
-    <div class="af-brand">
-      <img src="/IMG/AF LOGO 1.jpeg" alt="AF" class="af-brand-logo"
-        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
-      <div class="af-brand-logo-fb" style="display:none;" aria-hidden="true">AF</div>
+      <div class="aw-hero" id="awHero">
+        <img src="/IMG/banner1.png" alt="AcademeForge" onerror="this.parentElement.innerHTML=awHeroFb()"/>
+      </div>
 
-      <div>
-        <div class="af-brand-name">AcademeForge</div>
-        <div class="af-brand-tag">Learning Beyond the Classroom</div>
+      <div class="aw-body">
+        <h1 class="aw-title">Welcome to AcademeForge</h1>
+        <p class="aw-desc">Learning Beyond the Classroom — structured courses, smart learning tools, and a student community, all in one place.</p>
+        <button class="aw-btn aw-btn-primary" type="button" onclick="showAuthView('login')">Log in</button>
+        <button class="aw-btn aw-btn-outline" type="button" onclick="window.location.href='https://signup.academeforge.in'">Join for free</button>
+        <div class="aw-footer">
+          <strong>Developed by Devraj Kumar</strong><br>
+          Made with ❤️ in India
+        </div>
       </div>
     </div>
-  </header>
 
-  <div class="aw-hero" id="awHero">
-    <img src="/IMG/banner1.png" alt="AcademeForge"
-      onerror="this.parentElement.innerHTML=awHeroFb()"/>
-  </div>
+    <!-- LOGIN VIEW -->
+    <div id="viewLogin" class="auth-view hidden">
+      <div class="al-topbar">
+        <button class="al-back" type="button" onclick="showAuthView('welcome')" aria-label="Back">←</button>
+      </div>
+      <div class="al-body">
+        <div class="al-logo-row">
+          <img src="/IMG/AF LOGO 1.jpeg" alt="AcademeForge" class="al-logo"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
+          <div class="al-logo-fb" style="display:none;" aria-hidden="true">AF</div>
+        </div>
+        <h1 class="al-title">Log in</h1>
+        <p class="al-sub">Existing user? Log in with your Student ID</p>
 
-  <div class="aw-body">
-    <h1 class="aw-title">Welcome to AcademeForge</h1>
-    <p class="aw-desc">
-      Learning Beyond the Classroom — structured courses, smart learning tools,
-      and a student community, all in one place.
-    </p>
+        <label class="al-label" for="alLoginId">Student ID / Phone Number</label>
+        <input id="alLoginId" class="al-input" type="tel" placeholder="Enter your Student ID or phone number" autocomplete="username"/>
 
-    <button class="aw-btn aw-btn-primary" type="button"
-      onclick="showAuthView('login')">
-      Log in
-    </button>
+        <label class="al-label" for="alPassword">Password</label>
+        <input id="alPassword" class="al-input" type="password" placeholder="Enter your password" autocomplete="current-password"/>
 
-    <button class="aw-btn aw-btn-outline" type="button"
-      onclick="window.location.href='https://signup.academeforge.in'">
-      Join for free
-    </button>
+        <div class="al-forgot">Forgot password? <a href="https://reset.academeforge.in">Reset it here</a></div>
 
-    <div class="aw-footer">
-      <strong>Developed by Devraj Kumar</strong><br>
-      Made with ❤️ in India
+        <button class="al-btn" type="button" onclick="doAcademeLogin()">Log in</button>
+
+        <div class="al-msg" id="alMsg"></div>
+
+        <div class="al-signup">New User? <a href="https://signup.academeforge.in">Sign up</a></div>
+      </div>
     </div>
-  </div>
 
+  </div>
 </div>
 
-<!-- LOGIN VIEW -->
-<div id="viewLogin" class="auth-view hidden">
-
-  <header class="af-topbar">
-
-    <div class="af-brand">
-      <img src="/IMG/AF LOGO 1.jpeg"
-           alt="AF"
-           class="af-brand-logo"
-           onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
-
-      <div class="af-brand-logo-fb"
-           style="display:none;"
-           aria-hidden="true">
-        AF
-      </div>
-
-      <div>
-        <div class="af-brand-name">AcademeForge</div>
-        <div class="af-brand-tag">Learning Beyond the Classroom</div>
-      </div>
-    </div>
-
-    <div class="af-topbar-actions">
-      <button
-        class="al-back"
-        type="button"
-        onclick="showAuthView('welcome')"
-        aria-label="Back">
-        ←
-      </button>
-    </div>
-
-  </header>
-
-  <div class="al-body">
-
-    <label class="al-label" for="alLoginId">
-      Student ID / Email / Phone Number
-    </label>
-
-    <input
-      id="alLoginId"
-      class="al-input"
-      type="text"
-      placeholder="Enter your Student ID, Email or Phone Number"
-      autocomplete="username" />
-
-    <label class="al-label" for="alPassword">
-      Password
-    </label>
-
-    <input
-      id="alPassword"
-      class="al-input"
-      type="password"
-      placeholder="Enter your password"
-      autocomplete="current-password" />
-
-    <div class="al-forgot">
-      Forgot password?
-      <a href="https://reset.academeforge.in">Reset it here</a>
-    </div>
-
-    <button
-      class="al-btn"
-      type="button"
-      onclick="doAcademeLogin()">
-      Log in
-    </button>
-
-    <div class="al-msg" id="alMsg"></div>
-
-    <div class="al-signup">
-      New User?
-      <a href="https://signup.academeforge.in">Sign up</a>
-    </div>
-
-  </div>
-
-</div>
 <!-- ═══ MOBILE SHELL (Home) ═══ -->
 <div class="af-shell" id="afShell">
   <header class="af-topbar">
