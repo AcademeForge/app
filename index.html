@@ -903,6 +903,11 @@ async function doAcademeLogin(){
     const token=data.session_token||data.login_token||'';
     if(!token){showAuthMsg('err','Login failed. Session token not received.');return;}
     afSaveSession(data.student,token,data.device_id||afGetDeviceId());
+
+    if (window.AFPush) {
+  AFPush.init(data.student.student_id || data.student.id, data.student.batch || 'All');
+}
+
     showAuthMsg('ok','Login successful! Welcome back 🎉');
     setTimeout(enterHome,600);
   }catch(e){
@@ -1070,6 +1075,22 @@ function init(){
     enterGate();
   }
   startBanner();
+}
+  if(afIsLoggedIn()){
+  document.body.classList.remove('gate-active');
+  updateStreakBadge(parseInt(localStorage.getItem('af_streak')||'0'));
+  setTimeout(()=>syncStreak(false),600);
+  setTimeout(checkNotifs,1000);
+
+  // ↓ ADD THIS
+  setTimeout(()=>{
+    if(window.AFPush){
+      AFPush.init(localStorage.getItem('af_student_id')||localStorage.getItem('af_student_uuid'), 'All');
+    }
+  },800);
+
+}else{
+  enterGate();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
 else init();
