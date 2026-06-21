@@ -316,12 +316,6 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
 
 /* ── DASHBOARD PANE (folded into Explore) ── */
 .dash-pane-body{display:flex;flex-direction:column;gap:16px}
-.profile-card{background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);border-radius:20px;padding:18px 16px;display:flex;align-items:center;gap:14px;box-shadow:0 8px 24px rgba(79,70,229,.35)}
-.profile-avatar{width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.2);border:3px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden}
-.profile-info{flex:1;min-width:0}
-.profile-name{font-family:var(--fd);font-size:16px;font-weight:800;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.profile-sub{font-size:11px;color:rgba(255,255,255,.75);margin-top:3px}
-.profile-badge{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);border-radius:99px;padding:4px 12px;font-size:10.5px;font-weight:700;color:#fff;flex-shrink:0}
 
 .stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .stat-card{background:var(--card-s);border:1.5px solid var(--bc);border-radius:16px;padding:13px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:var(--sh)}
@@ -369,8 +363,8 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
 
 /* ── CERT DETAIL VIEW (own full overlay, opened from Dashboard pane) ── */
 .cert-detail-wrap{padding:18px;display:flex;flex-direction:column;gap:16px}
-.cert-preview-frame{width:100%;aspect-ratio:1.414;border-radius:14px;overflow:hidden;border:1.5px solid var(--bc);background:var(--grp);position:relative}
-.cert-preview-frame iframe{width:250%;height:250%;transform:scale(0.4);transform-origin:top left;border:none;pointer-events:none}
+.cert-preview-frame{width:100%;height:auto;aspect-ratio:1.414;border-radius:14px;overflow:hidden;border:1.5px solid var(--bc);background:var(--grp);position:relative}
+.cert-preview-frame iframe{display:block;transform-origin:top left;border:none;pointer-events:none;object-fit:contain}
 .cert-badge-row{display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--ok-soft);border:1.5px solid var(--ok-b);border-radius:14px}
 .cert-badge-circle{width:40px;height:40px;border-radius:50%;background:var(--ok);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;flex-shrink:0}
 .cert-badge-info{flex:1}
@@ -882,17 +876,14 @@ async function openModule(moduleId){
     return;
   }
   _currentModule = data.module;
+  _currentModule.is_done = data.is_done;
   _currentCheck = data.check;
-  _checkPassed = !!data.is_done || !data.check;_currentModule = data.module;
-_currentModule.is_done = data.is_done;
 
-_currentCheck = data.check;
-
-if (_currentModule.module_type === 'survey') {
-  _checkPassed = !!data.is_done;
-} else {
-  _checkPassed = !!data.is_done || !data.check;
-}
+  if (_currentModule.module_type === 'survey') {
+    _checkPassed = !!data.is_done;
+  } else {
+    _checkPassed = !!data.is_done || !data.check;
+  }
   _currentModule._next = data.next_module;
   _isReviewMode = _isCourseCompleted();
 
@@ -1193,12 +1184,33 @@ async function loadDashboard(){
   renderDashboard(_dashData, _searchQuery);
 }
 
+let _dashTab = 'activity'; // 'activity' | 'certificates'
+
+function setDashTab(tab){
+  _dashTab = tab;
+  const a = $('dashTabActivityBtn'), c = $('dashTabCertBtn'), ind = $('dashTabsIndicator');
+  const ap = $('dashActivityPane'), cp = $('dashCertPane');
+  if(!a || !c || !ind || !ap || !cp) return;
+  a.classList.toggle('active', tab==='activity');
+  c.classList.toggle('active', tab==='certificates');
+  ind.style.transform = tab==='activity' ? 'translateX(0%)' : 'translateX(100%)';
+  ap.style.display = tab==='activity' ? 'flex' : 'none';
+  cp.style.display = tab==='certificates' ? 'flex' : 'none';
+}
+window.setDashTab = setDashTab;
+
+/* Resolve the real logged-in student's name for certificates — never
+   show the literal "Student" placeholder if we have anything better. */
+function resolveCertStudentName(cert){
+  const fromCert = cert && cert.student_name && cert.student_name !== 'Student' ? cert.student_name : null;
+  const fromDash = _dashData?.profile?.full_name;
+  const fromLocal = getStudentName();
+  return fromCert || fromDash || (fromLocal !== 'Student' ? fromLocal : null) || fromLocal || 'Student';
+}
+
 function renderDashboard(data, searchQuery){
   if(!data){ return; }
-  const { in_progress = [], completed = [], certificates = [], profile } = data;
-
-  const name = profile?.full_name || getStudentName();
-  const initials = name.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2) || 'S';
+  const { in_progress = [], completed = [], certificates = [] } = data;
 
   $('dashCertBadge').style.display = certificates.length ? 'inline-flex' : 'none';
   $('dashCertBadge').textContent = certificates.length;
@@ -1213,97 +1225,108 @@ function renderDashboard(data, searchQuery){
   const certByCourse = {};
   certificates.forEach(c => { certByCourse[c.course_id] = c; });
 
-  let html = '';
-
-  html += `
-    <div class="profile-card">
-      <div class="profile-avatar">${esc(initials)}</div>
-      <div class="profile-info">
-        <div class="profile-name">${esc(name)}</div>
-        <div class="profile-sub">AcademeForge Learner</div>
-      </div>
-      <div class="profile-badge">🏅 ${certificates.length} Cert${certificates.length!==1?'s':''}</div>
-    </div>`;
-
-  html += `
-    <div class="stats-row">
+  /* ════════ ACTIVITY TAB ════════ */
+  let activityHtml = '';
+  activityHtml += `
+    <div class="stats-row" style="grid-template-columns:1fr 1fr">
       <div class="stat-card"><div class="stat-num">${in_progress.length}</div><div class="stat-lbl">In Progress</div></div>
       <div class="stat-card"><div class="stat-num">${completed.length}</div><div class="stat-lbl">Completed</div></div>
-      <div class="stat-card"><div class="stat-num">${certificates.length}</div><div class="stat-lbl">Certificates</div></div>
     </div>`;
 
-  if(q && inProgressList.length===0 && completedList.length===0 && certList.length===0){
-    html += `<div class="af-empty"><span>📭</span>No dashboard items match your search.</div>`;
-    $('dashboardPane').innerHTML = html;
-    return;
-  }
+  if(q && inProgressList.length===0 && completedList.length===0){
+    activityHtml += `<div class="af-empty"><span>📭</span>No activity matches your search.</div>`;
+  } else {
+    if(inProgressList.length > 0){
+      activityHtml += `<div>
+        <div class="sec-h" style="margin-bottom:10px">
+          <div class="sec-title">📖 In Progress</div>
+          <div class="sec-see-all">${inProgressList.length} course${inProgressList.length!==1?'s':''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">`;
+      inProgressList.forEach(p => {
+        const course = p.af_courses || {};
+        const pct = p.percent || 0;
+        const thumb = course.cover_image_url || fallbackImg();
+        const courseId = course.id || p.course_id;
+        activityHtml += `
+          <button class="progress-card" onclick="openCourse('${esc(courseId)}')">
+            <img class="progress-card-thumb" src="${esc(thumb)}" alt="" loading="lazy" onerror="this.src='${fallbackImg()}'"/>
+            <div class="progress-card-body">
+              <div class="progress-card-cat">${esc(course.category||'Course')}</div>
+              <div class="progress-card-title">${esc(course.title||'Untitled')}</div>
+              <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+              <div class="progress-pct">${pct}% complete</div>
+            </div>
+          </button>`;
+      });
+      activityHtml += `</div></div>`;
+    }
 
-  if(inProgressList.length > 0){
-    html += `<div>
-      <div class="sec-h" style="margin-bottom:10px">
-        <div class="sec-title">📖 In Progress</div>
-        <div class="sec-see-all">${inProgressList.length} course${inProgressList.length!==1?'s':''}</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:10px">`;
-    inProgressList.forEach(p => {
-      const course = p.af_courses || {};
-      const pct = p.percent || 0;
-      const thumb = course.cover_image_url || fallbackImg();
-      const courseId = course.id || p.course_id;
-      html += `
-        <button class="progress-card" onclick="openCourse('${esc(courseId)}')">
-          <img class="progress-card-thumb" src="${esc(thumb)}" alt="" loading="lazy" onerror="this.src='${fallbackImg()}'"/>
-          <div class="progress-card-body">
-            <div class="progress-card-cat">${esc(course.category||'Course')}</div>
-            <div class="progress-card-title">${esc(course.title||'Untitled')}</div>
-            <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
-            <div class="progress-pct">${pct}% complete</div>
-          </div>
-        </button>`;
-    });
-    html += `</div></div>`;
-  }
+    if(completedList.length > 0){
+      activityHtml += `<div>
+        <div class="sec-h" style="margin-bottom:10px">
+          <div class="sec-title">✅ Completed Courses</div>
+          <div class="sec-see-all">${completedList.length} course${completedList.length!==1?'s':''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">`;
+      completedList.forEach(p => {
+        const course = p.af_courses || {};
+        const thumb = course.cover_image_url || fallbackImg();
+        const courseId = course.id || p.course_id;
+        const hasCert = !!certByCourse[courseId];
+        activityHtml += `
+          <div class="completed-card">
+            <img class="completed-thumb" src="${esc(thumb)}" alt="" loading="lazy" onerror="this.src='${fallbackImg()}'"/>
+            <div class="completed-body">
+              <div class="completed-cat">${esc(course.category||'Course')}</div>
+              <div class="completed-title">${esc(course.title||'Untitled')}</div>
+              <div class="completed-badge">✓ Completed · ${fmtDate(p.completed_at)}</div>
+              ${hasCert
+                ? `<button class="cert-ready-btn" onclick="openCert(${JSON.stringify(certByCourse[courseId]).replace(/"/g,'&quot;')})">🎓 View Certificate</button>`
+                : `<button class="cert-ready-btn" id="cert-btn-${esc(courseId)}" onclick="issueCert('${esc(courseId)}', this)">🎓 Get Certificate</button>`
+              }
+            </div>
+          </div>`;
+      });
+      activityHtml += `</div></div>`;
+    }
 
-  if(completedList.length > 0){
-    html += `<div>
-      <div class="sec-h" style="margin-bottom:10px">
-        <div class="sec-title">✅ Completed Courses</div>
-        <div class="sec-see-all">${completedList.length} course${completedList.length!==1?'s':''}</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:10px">`;
-    completedList.forEach(p => {
-      const course = p.af_courses || {};
-      const thumb = course.cover_image_url || fallbackImg();
-      const courseId = course.id || p.course_id;
-      const hasCert = !!certByCourse[courseId];
-      html += `
-        <div class="completed-card">
-          <img class="completed-thumb" src="${esc(thumb)}" alt="" loading="lazy" onerror="this.src='${fallbackImg()}'"/>
-          <div class="completed-body">
-            <div class="completed-cat">${esc(course.category||'Course')}</div>
-            <div class="completed-title">${esc(course.title||'Untitled')}</div>
-            <div class="completed-badge">✓ Completed · ${fmtDate(p.completed_at)}</div>
-            ${hasCert
-              ? `<button class="cert-ready-btn" onclick="openCert(${JSON.stringify(certByCourse[courseId]).replace(/"/g,'&quot;')})">🎓 View Certificate</button>`
-              : `<button class="cert-ready-btn" id="cert-btn-${esc(courseId)}" onclick="issueCert('${esc(courseId)}', this)">🎓 Get Certificate</button>`
-            }
-          </div>
+    if(in_progress.length === 0 && completed.length === 0){
+      activityHtml += `
+        <div class="af-empty">
+          <span>🎯</span>
+          <strong>Nothing here yet!</strong>
+          <span>Enroll in a course to start your learning journey.</span>
+          <button onclick="setActiveView('courses')" style="margin-top:8px;height:44px;padding:0 24px;border-radius:12px;background:var(--p);color:#fff;font-size:13px;font-weight:700;box-shadow:0 4px 14px rgba(79,70,229,.35)">Explore Courses</button>
         </div>`;
-    });
-    html += `</div></div>`;
+    }
   }
 
-  if(certList.length > 0){
-    html += `<div>
-      <div class="sec-h" style="margin-bottom:10px">
-        <div class="sec-title">🏆 My Certificates</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:12px">`;
+  /* ════════ CERTIFICATES TAB ════════ */
+  let certHtml = '';
+  certHtml += `
+    <div class="sec-h" style="margin-bottom:10px">
+      <div class="sec-title">🏆 My Certificates</div>
+      <div class="sec-see-all">${certificates.length} earned</div>
+    </div>`;
+
+  if(q && certList.length===0 && certificates.length>0){
+    certHtml += `<div class="af-empty"><span>📭</span>No certificates match your search.</div>`;
+  } else if(certificates.length === 0){
+    certHtml += `
+      <div class="af-empty">
+        <span>🎓</span>
+        <strong>No certificates yet</strong>
+        <span>Complete a course to earn your first certificate.</span>
+        <button onclick="setActiveView('courses')" style="margin-top:8px;height:44px;padding:0 24px;border-radius:12px;background:var(--p);color:#fff;font-size:13px;font-weight:700;box-shadow:0 4px 14px rgba(79,70,229,.35)">Explore Courses</button>
+      </div>`;
+  } else {
+    certHtml += `<div style="display:flex;flex-direction:column;gap:12px">`;
     certList.forEach(cert => {
       const isoDate = fmtDate(cert.issued_at);
       const verifyUrl = cert.verify_url || (VERIFY_BASE + cert.cert_id);
       const safeJson = JSON.stringify(cert).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
-      html += `
+      certHtml += `
         <div class="cert-card">
           <div class="cert-card-header">
             <div class="cert-card-icon">🎓</div>
@@ -1315,27 +1338,28 @@ function renderDashboard(data, searchQuery){
           <div class="cert-card-body">
             <div class="cert-card-meta">Issued: ${isoDate} · AcademeForge</div>
             <div class="cert-card-actions">
-              <button class="cert-action-btn primary" onclick="openCert(${safeJson})">🔍 View</button>
-              <button class="cert-action-btn" onclick="navigator.clipboard?.writeText('${esc(verifyUrl)}').then(()=>afToast('Link copied!'))">🔗 Share</button>
+              <button class="cert-action-btn primary" onclick="openCert(${safeJson})">👁 Preview</button>
+              <button class="cert-action-btn" id="certDlListBtn-${esc(cert.cert_id)}" onclick="downloadCertFromList(${safeJson}, this)">📥 Download</button>
               <button class="cert-action-btn" onclick="window.open('${esc(verifyUrl)}','_blank')">✅ Verify</button>
             </div>
           </div>
         </div>`;
     });
-    html += `</div></div>`;
+    certHtml += `</div>`;
   }
 
-  if(in_progress.length === 0 && completed.length === 0 && certificates.length === 0){
-    html += `
-      <div class="af-empty">
-        <span>🎯</span>
-        <strong>Nothing here yet!</strong>
-        <span>Enroll in a course to start your learning journey.</span>
-        <button onclick="setActiveView('courses')" style="margin-top:8px;height:44px;padding:0 24px;border-radius:12px;background:var(--p);color:#fff;font-size:13px;font-weight:700;box-shadow:0 4px 14px rgba(79,70,229,.35)">Explore Courses</button>
-      </div>`;
-  }
-
-  $('dashboardPane').innerHTML = html;
+  /* ════════ ASSEMBLE: Activity / Certificates tabs (same tab styling as Courses page) ════════ */
+  $('dashboardPane').innerHTML = `
+    <div class="af-tabs">
+      <div class="af-tabs-row">
+        <button class="af-tab-btn ${_dashTab==='activity'?'active':''}" id="dashTabActivityBtn" onclick="setDashTab('activity')">Activity</button>
+        <button class="af-tab-btn ${_dashTab==='certificates'?'active':''}" id="dashTabCertBtn" onclick="setDashTab('certificates')">Certificates</button>
+      </div>
+      <div class="af-tabs-track"><div class="af-tabs-indicator" id="dashTabsIndicator" style="transform:translateX(${_dashTab==='activity'?'0':'100'}%)"></div></div>
+    </div>
+    <div id="dashActivityPane" style="display:${_dashTab==='activity'?'flex':'none'};flex-direction:column;gap:16px">${activityHtml}</div>
+    <div id="dashCertPane" style="display:${_dashTab==='certificates'?'flex':'none'};flex-direction:column;gap:16px">${certHtml}</div>
+  `;
 }
 
 /* ── ISSUE CERTIFICATE ── */
@@ -1370,14 +1394,31 @@ function closeCertDetail(){
 }
 window.closeCertDetail = closeCertDetail;
 
-function openCert(cert){
-  _currentCert = cert;
+/* Scale the certificate iframe (native 1122×794) to exactly fill its
+   responsive container — no fixed px width/height, no horizontal
+   scroll, entire certificate always visible (object-fit:contain
+   equivalent for an iframe). Recomputed on resize/orientation change. */
+function fitCertPreviewFrame(){
+  const wrap = $('certPreviewFrame');
+  const frame = wrap && wrap.querySelector('iframe');
+  if(!wrap || !frame) return;
+  const w = wrap.clientWidth;
+  if(!w) return;
+  const scale = w / 1122;
+  frame.style.width = '1122px';
+  frame.style.height = '794px';
+  frame.style.transform = `scale(${scale})`;
+}
+window.addEventListener('resize', ()=>{
+  if($('viewCert')?.classList.contains('active')) fitCertPreviewFrame();
+});
 
-  const localName = getStudentName();
-  if (!cert.student_name || cert.student_name === 'Student') {
-    cert = Object.assign({}, cert, { student_name: localName || 'Student' });
-    _currentCert = cert;
-  }
+function openCert(cert){
+  // Always use the real logged-in student's name — never the
+  // hardcoded "Student" placeholder.
+  const resolvedName = resolveCertStudentName(cert);
+  cert = Object.assign({}, cert, { student_name: resolvedName });
+  _currentCert = cert;
 
   const page = $('certDetailPage');
   const isoDate = fmtDate(cert.issued_at);
@@ -1385,7 +1426,7 @@ function openCert(cert){
 
   _currentCertHtml = buildCertHTML({
     certId:      cert.cert_id,
-    studentName: cert.student_name || 'Student',
+    studentName: cert.student_name,
     courseTitle: cert.course_title || 'Course',
     issuedDate:  fmtDateLong(cert.issued_at),
     verifyUrl
@@ -1416,7 +1457,7 @@ function openCert(cert){
       </div>
 
       <div class="cert-detail-actions">
-        <button class="cert-dl-btn" id="certDlBtn" onclick="downloadCert()">📥 Download Certificate</button>
+        <button class="cert-dl-btn" id="certDlBtn" onclick="downloadCert()">📥 Download Certificate (PDF)</button>
         <button class="cert-share-btn" id="viewFullCertBtn" onclick="viewFullCert()">🔍 Show Full Certificate</button>
         <button class="cert-share-btn" onclick="shareCert()">🔗 Share Certificate</button>
         <button class="cert-verify-btn" onclick="verifyCert()">✅ Verify on Portal</button>
@@ -1430,13 +1471,15 @@ function openCert(cert){
   frame.setAttribute('sandbox', 'allow-same-origin allow-scripts');
   frame.srcdoc = _currentCertHtml;
   $('certPreviewFrame').appendChild(frame);
+  frame.addEventListener('load', fitCertPreviewFrame);
+  requestAnimationFrame(fitCertPreviewFrame);
 
   showView('viewCert');
 }
 window.openCert = openCert;
 
-/* Convert an image URL to a base64 data URI so the downloaded HTML
-   is fully self-contained and works offline / from file:// */
+/* Convert an image URL to a base64 data URI so the downloaded
+   certificate is fully self-contained and works offline / from file:// */
 async function toDataURI(src){
   try{
     const res = await fetch(src);
@@ -1452,20 +1495,25 @@ async function toDataURI(src){
   }
 }
 
-/* Build a fully self-contained HTML string (images inlined as base64) */
-async function buildInlinedCertHTML(){
+/* Inline the certificate's local images as base64 data URIs */
+async function inlineCertImages(html){
   const imgPaths = [
     '/IMG/AF LOGO 3.png',
     '/IMG/MSME-logo.png',
     '/IMG/af-stamp.png',
   ];
-  let html = _currentCertHtml;
+  let out = html;
   for(const path of imgPaths){
     const dataUri = await toDataURI(path);
-    html = html.split(`src="${path}"`).join(`src="${dataUri}"`);
-    html = html.split(`src='${path}'`).join(`src='${dataUri}'`);
+    out = out.split(`src="${path}"`).join(`src="${dataUri}"`);
+    out = out.split(`src='${path}'`).join(`src='${dataUri}'`);
   }
-  return html;
+  return out;
+}
+
+/* Build a fully self-contained HTML string (images inlined as base64) */
+async function buildInlinedCertHTML(){
+  return inlineCertImages(_currentCertHtml);
 }
 
 /* Open the certificate full-screen in a new tab (works on Android too) */
@@ -1491,66 +1539,168 @@ async function viewFullCert(){
 }
 window.viewFullCert = viewFullCert;
 
-async function downloadCert(){
-  if(!_currentCertHtml){ afToast('Certificate not ready yet.','err'); return; }
+/* ════════════════════════════════════════════════════════
+   REAL PDF GENERATION + ROBUST DOWNLOAD
+   (html2canvas + jsPDF, lazy-loaded only when a download is
+   actually requested, so the dashboard stays fast otherwise)
+   ════════════════════════════════════════════════════════ */
+let _certLibsPromise = null;
+function loadScript(src){
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = () => resolve(); s.onerror = () => reject(new Error('Failed to load '+src));
+    document.head.appendChild(s);
+  });
+}
+function ensureCertLibsLoaded(){
+  if(_certLibsPromise) return _certLibsPromise;
+  _certLibsPromise = Promise.all([
+    window.html2canvas ? Promise.resolve() : loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
+    window.jspdf       ? Promise.resolve() : loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
+  ]);
+  return _certLibsPromise;
+}
 
-  const btn = $('certDlBtn');
-  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Preparing\u2026'; }
+/* Render the (image-inlined) certificate HTML into a real PDF Blob */
+async function buildCertPdfBlob(inlinedHtml){
+  await ensureCertLibsLoaded();
 
-  const html = await buildInlinedCertHTML();
-  const filename = `${_currentCert?.cert_id || 'certificate'}.html`;
+  const hidden = document.createElement('iframe');
+  hidden.style.cssText = 'position:fixed;left:-9999px;top:0;width:1122px;height:794px;border:0;opacity:0;pointer-events:none;';
+  hidden.setAttribute('sandbox', 'allow-same-origin allow-scripts');
+  document.body.appendChild(hidden);
 
-  // Strategy 1: showSaveFilePicker (modern desktop browsers)
+  await new Promise(resolve => {
+    hidden.onload = () => setTimeout(resolve, 350); // let webfonts settle before rasterizing
+    hidden.srcdoc = inlinedHtml;
+  });
+
+  const doc = hidden.contentDocument;
+  const target = (doc && (doc.querySelector('.cert') || doc.body)) || doc.body;
+
+  let canvas;
+  try{
+    canvas = await window.html2canvas(target, { scale:2, useCORS:true, backgroundColor:'#ffffff', width:1122, height:794 });
+  } finally {
+    document.body.removeChild(hidden);
+  }
+
+  const imgData = canvas.toDataURL('image/png', 1.0);
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation:'landscape', unit:'px', format:[1122,794] });
+  pdf.addImage(imgData, 'PNG', 0, 0, 1122, 794);
+  return pdf.output('blob');
+}
+
+function blobToBase64(blob){
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload  = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(blob);
+  });
+}
+
+/* Multi-strategy download that actually works on website, APK, and
+   inside Android WebView builds. data: URI is tried before blob: URL
+   because most WebViews only surface a real file-download (via their
+   DownloadListener) for data:/http(s): URLs — blob: URLs typically
+   resolve to nothing outside a full browser. If the host app wraps
+   this page in a WebView, it must implement WebView.setDownloadListener
+   to catch these and write the bytes to the Downloads folder. */
+async function downloadBlob(blob, filename, mime){
   if(window.showSaveFilePicker){
     try{
       const fh = await window.showSaveFilePicker({
         suggestedName: filename,
-        types:[{ description:'HTML Certificate', accept:{'text/html':['.html']} }]
+        types:[{ description:'Certificate', accept:{ [mime]: ['.'+filename.split('.').pop()] } }]
       });
       const w = await fh.createWritable();
-      await w.write(html);
+      await w.write(blob);
       await w.close();
-      afToast('Certificate saved! \uD83C\uDF93');
-      if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDCE5 Download Certificate'; }
-      return;
-    } catch(e){ /* cancelled or unsupported */ }
+      return true;
+    } catch(e){ /* cancelled, or no real user-gesture context — fall through */ }
   }
 
-  // Strategy 2: data: URI — works on Android Chrome & mobile browsers
   try{
-    const b64 = btoa(unescape(encodeURIComponent(html)));
-    const dataHref = `data:text/html;base64,${b64}`;
+    const base64 = await blobToBase64(blob);
     const a = document.createElement('a');
-    a.href = dataHref;
+    a.href = base64;
     a.download = filename;
     a.style.display = 'none';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    afToast('Certificate downloaded! \uD83C\uDF93');
-    if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDCE5 Download Certificate'; }
-    return;
-  } catch(e){ /* too large or blocked */ }
+    return true;
+  } catch(e){ /* too large or blocked — fall through */ }
 
-  // Strategy 3: blob URL (desktop fallback)
   try{
-    const blob = new Blob([html], {type:'text/html'});
-    const url  = URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url; a.download = filename;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    setTimeout(()=>URL.revokeObjectURL(url), 5000);
-    afToast('Certificate downloaded! \uD83C\uDF93');
+    setTimeout(()=>URL.revokeObjectURL(url), 8000);
+    return true;
+  } catch(e){ /* fall through */ }
+
+  try{
+    const url = URL.createObjectURL(blob);
+    const win = window.open(url, '_blank');
+    if(!win) throw new Error('popup blocked');
+    return true;
+  } catch(e){ return false; }
+}
+
+async function downloadCert(){
+  if(!_currentCertHtml || !_currentCert){ afToast('Certificate not ready yet.','err'); return; }
+
+  const btn = $('certDlBtn');
+  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Generating PDF\u2026'; }
+
+  try{
+    const inlined = await buildInlinedCertHTML();
+    const blob = await buildCertPdfBlob(inlined);
+    const filename = `${_currentCert.cert_id || 'certificate'}.pdf`;
+    const ok = await downloadBlob(blob, filename, 'application/pdf');
+    afToast(ok ? 'Certificate downloaded! \uD83C\uDF93' : 'Could not download. Please try again.', ok ? undefined : 'err');
   } catch(e){
-    // Strategy 4: open in new tab — user can Save As manually
-    const win = window.open('','_blank');
-    if(win){ win.document.open(); win.document.write(html); win.document.close(); }
-    afToast('Opened in new tab \u2014 use Save As to download.','err');
+    afToast('Could not generate the certificate PDF. Please try again.', 'err');
   }
 
-  if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDCE5 Download Certificate'; }
+  if(btn){ btn.disabled=false; btn.innerHTML='\uD83D\uDCE5 Download Certificate (PDF)'; }
 }
 window.downloadCert = downloadCert;
+
+/* Download straight from the Certificates tab list, without opening
+   the full detail view first. */
+async function downloadCertFromList(cert, btn){
+  const resolvedName = resolveCertStudentName(cert);
+  const safeCert = Object.assign({}, cert, { student_name: resolvedName });
+  const verifyUrl = safeCert.verify_url || (VERIFY_BASE + safeCert.cert_id);
+
+  const html = buildCertHTML({
+    certId:      safeCert.cert_id,
+    studentName: safeCert.student_name,
+    courseTitle: safeCert.course_title || 'Course',
+    issuedDate:  fmtDateLong(safeCert.issued_at),
+    verifyUrl
+  });
+
+  const origLabel = btn ? btn.innerHTML : '';
+  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="spin"></span>'; }
+
+  try{
+    const inlined = await inlineCertImages(html);
+    const blob = await buildCertPdfBlob(inlined);
+    const ok = await downloadBlob(blob, `${safeCert.cert_id || 'certificate'}.pdf`, 'application/pdf');
+    afToast(ok ? 'Certificate downloaded! \uD83C\uDF93' : 'Could not download. Please try again.', ok ? undefined : 'err');
+  } catch(e){
+    afToast('Could not generate the certificate PDF. Please try again.', 'err');
+  }
+
+  if(btn){ btn.disabled = false; btn.innerHTML = origLabel || '📥 Download'; }
+}
+window.downloadCertFromList = downloadCertFromList;
 
 function shareCert(){
   if(!_currentCert) return;
