@@ -52,10 +52,6 @@ a{text-decoration:none;color:inherit;}
 .hdr{position:sticky;top:0;z-index:101;height:var(--hdr-h);background:var(--nav);border-bottom:1px solid var(--b1);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;}
 .hdr-title{font-family:var(--fd);font-size:15px;font-weight:800;color:var(--t1);flex:1;}
 .hdr-count{font-size:10px;color:var(--tm);font-weight:700;background:var(--grp);border:1px solid var(--b1);padding:3px 8px;border-radius:var(--rf);}
-.hdr-logout{height:30px;padding:0 12px;border-radius:var(--rf);font-size:11px;font-weight:800;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);color:var(--err);}
-.hdr-logout:active{opacity:.7;}
-.hdr-refresh{width:30px;height:30px;border-radius:var(--r1);background:var(--grp);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;color:var(--t2);flex-shrink:0;}
-.hdr-refresh:active{opacity:.7;}
 
 /* ── TOP SEGMENTED TABS (Batches / Student) ── */
 .main-tabs{position:sticky;top:var(--hdr-h);z-index:100;display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px 12px;height:var(--tabs-h);background:var(--nav);border-bottom:1px solid var(--b1);flex-shrink:0;}
@@ -64,8 +60,6 @@ a{text-decoration:none;color:inherit;}
 .main-tab-btn:active{transform:scale(.97);}
 
 /* ── CACHE BAR ── */
-.cache-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;background:rgba(79,70,229,.05);border-bottom:1px solid var(--b1);font-size:11px;color:var(--tm);font-weight:600;flex-shrink:0;}
-.cache-bar button{font-size:11px;color:var(--p);font-weight:800;background:none;border:none;cursor:pointer;padding:0;}
 
 /* ── PAGE ── */
 .page{flex:1;overflow-y:scroll;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;padding:12px 12px calc(var(--nav-h) + 20px + env(safe-area-inset-bottom,0px));min-height:0;-webkit-transform:translateZ(0);transform:translateZ(0);}
@@ -228,24 +222,12 @@ input{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
   <header class="hdr">
     <span class="hdr-title" id="hdrTitle">Batches 📚</span>
     <span class="hdr-count" id="hdrCount">5 available</span>
-    <button class="hdr-logout hidden" id="hdrLogout" onclick="doLogout()">Logout</button>
-    <button class="hdr-refresh" onclick="handleRefresh()" title="Refresh">↻</button>
   </header>
 
   <!-- single nav houses both sections — switch between them here -->
   <div class="main-tabs">
     <button class="main-tab-btn active" id="mainTabBatches" onclick="switchTab('batches')">📚 Batches</button>
     <button class="main-tab-btn" id="mainTabStudent" onclick="switchTab('student')">🎓 Student</button>
-  </div>
-
-  <!-- cache bars -->
-  <div class="cache-bar hidden" id="cacheBarBatches">
-    <span id="cacheTimeBatches">Loaded from cache</span>
-    <span>Pull down to refresh</span>
-  </div>
-  <div class="cache-bar hidden" id="cacheBarStudent">
-    <span id="cacheTimeStudent">Loaded from cache</span>
-    <button onclick="forceRefreshCourses()">↻ Refresh</button>
   </div>
 
   <div class="page" id="page">
@@ -377,8 +359,8 @@ input{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
 
   <nav class="bnav">
     <button class="bnav-btn" onclick="window.location.href='/index.html'"><span class="bnav-icon">🏠</span><span class="bnav-label">Home</span></button>
-    <button class="bnav-btn" onclick="window.location.href='/student/index.html'"><span class="bnav-icon">🎓</span><span class="bnav-label">Student</span></button>
-    <button class="bnav-btn active"><span class="bnav-icon">📚</span><span class="bnav-label">Batches</span></button>
+    <button class="bnav-btn" onclick="window.location.href='/student/index.html'"><span class="bnav-icon">🧭</span><span class="bnav-label">Explore</span></button>
+    <button class="bnav-btn active"><span class="bnav-icon">💡</span><span class="bnav-label">Student</span></button>
     <button class="bnav-btn" onclick="window.location.href='/community/index.html'"><span class="bnav-icon">💬</span><span class="bnav-label">Community</span></button>
     <button class="bnav-btn" onclick="window.location.href='/setting/index.html'"><span class="bnav-icon">⚙️</span><span class="bnav-label">Settings</span></button>
   </nav>
@@ -490,9 +472,6 @@ function cacheGet(key, ttl) {
 function cacheSet(key, data) {
   try { localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch(_){}
 }
-function cacheTimestamp(key) {
-  try { const r = localStorage.getItem(key); if(!r) return 0; return JSON.parse(r).ts||0; } catch(_){ return 0; }
-}
 function cacheClear(keyOrPrefix) {
   try {
     Object.keys(localStorage).forEach(k => {
@@ -537,12 +516,9 @@ function switchTab(tab) {
   $id('viewBatches').classList.toggle('hidden', tab!=='batches');
   $id('viewStudent').classList.toggle('hidden', tab!=='student');
   $id('hdrCount').classList.toggle('hidden', tab!=='batches');
-  $id('cacheBarBatches').classList.toggle('hidden', tab!=='batches' || !$id('cacheBarBatches').dataset.show);
-  $id('cacheBarStudent').classList.toggle('hidden', tab!=='student' || !$id('cacheBarStudent').dataset.show);
 
   if (tab === 'batches') {
     $id('hdrTitle').textContent = 'Batches 📚';
-    $id('hdrLogout').classList.add('hidden');
   } else {
     $id('hdrTitle').textContent = 'Student 🎓';
     loadStudentData(false);
@@ -778,11 +754,6 @@ async function initBatches(force) {
   if (cachedEnrolled && !force) {
     enrolledSlugs = cachedEnrolled;
     renderBatches(BATCHES);
-    const ts = cacheTimestamp(ENROLLED_KEY);
-    const mins = Math.round((Date.now()-ts)/60000);
-    $id('cacheTimeBatches').textContent = mins < 1 ? 'Updated just now' : `Last updated ${mins}m ago`;
-    $id('cacheBarBatches').dataset.show = '1';
-    if (activeTab==='batches') $id('cacheBarBatches').classList.remove('hidden');
     return;
   }
 
@@ -790,8 +761,6 @@ async function initBatches(force) {
   if (s.id) {
     try { await loadEnrolled(); renderBatches(BATCHES); } catch(_) {}
   }
-  $id('cacheBarBatches').dataset.show = '';
-  $id('cacheBarBatches').classList.add('hidden');
 }
 
 /* ════════════════════════════════════════════════════════
@@ -806,7 +775,6 @@ function showStudentPanel(name) {
   const el = $id('panel' + name.charAt(0).toUpperCase() + name.slice(1));
   if (el) el.classList.remove('hidden');
   $id('page').scrollTop = 0;
-  $id('hdrLogout').classList.toggle('hidden', name === 'noAuth');
 }
 
 let _studentLoadedOnce = false;
@@ -832,18 +800,11 @@ async function loadCourses(force) {
       enrolledCourses = cached;
       renderCourseCards();
       showStudentPanel('courses');
-      const ts = cacheTimestamp(COURSES_KEY);
-      const mins = Math.round((Date.now()-ts)/60000);
-      $id('cacheTimeStudent').textContent = mins > 0 ? `Last updated ${mins}m ago` : 'Updated just now';
-      $id('cacheBarStudent').dataset.show = '1';
-      if (activeTab==='student') $id('cacheBarStudent').classList.remove('hidden');
       return;
     }
   }
 
   $id('courseCards').innerHTML = '<p class="loading-text">Loading your courses…</p>';
-  $id('cacheBarStudent').dataset.show = '';
-  $id('cacheBarStudent').classList.add('hidden');
   showStudentPanel('courses');
 
   const res = await edgeCall('student-courses-af', { student_id: uuid });
@@ -1013,17 +974,6 @@ function renderNotes(notes) {
 
 function openVideo(url) { if(!url){showToast('Video not available yet.','warn','Locked');return;} window.open(url,'_blank'); }
 function openPdf(url)   { if(!url){showToast('PDF not available yet.','warn','Locked');return;} window.open(url,'_blank'); }
-
-/* logout just clears the local session — there's no login form on this
-   page anymore, so after logout the Student tab simply shows panelNoAuth */
-function doLogout() {
-  ['af_student_logged_in','af_student_uuid','af_student_id','af_student_mobile','af_student_name','af_student_email','af_session_token','af_student_phone'].forEach(k => localStorage.removeItem(k));
-  cacheClear(COURSES_KEY);
-  enrolledCourses=[]; selectedCourse=null; learningMode='lectures';
-  $id('cacheBarStudent').classList.add('hidden');
-  showStudentPanel('noAuth');
-  showToast('Logged out 👋','ok');
-}
 
 /* ════════════════════════════════════════════════════════
    INIT
