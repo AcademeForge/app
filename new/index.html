@@ -528,24 +528,32 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
   </div>
 
   <!-- ════════ SHARED BOTTOM NAV ════════ -->
-  <nav class="af-bnav" id="afBnav">
-    <button class="af-nav-btn" data-tab="home" onclick="navTap('home')" type="button">
-      <span class="af-nav-icon">🏠</span><span class="af-nav-label">Home</span>
-    </button>
-    <button class="af-nav-btn" data-tab="explore" onclick="navTap('explore')" type="button">
-      <span class="af-nav-icon">🧭</span><span class="af-nav-label">Explore</span>
-    </button>
-    <button class="af-nav-btn" data-tab="batches" onclick="navTap('batches')" type="button">
-      <span class="af-nav-icon">📚</span><span class="af-nav-label">Batches</span>
-    </button>
-    <button class="af-nav-btn" data-tab="community" onclick="navTap('community')" type="button">
-      <span class="af-nav-icon">💬</span><span class="af-nav-label">Community</span>
-    </button>
-    <button class="af-nav-btn" data-tab="dashboard" onclick="navTap('dashboard')" type="button">
-      <span class="af-nav-icon">🎓</span><span class="af-nav-label">Dashboard</span>
-    </button>
-  </nav>
+<nav class="af-bnav" id="afBnav">
+  <button class="af-nav-btn" data-tab="home" onclick="navTap('home')" type="button">
+    <span class="af-nav-icon">🏠</span>
+    <span class="af-nav-label">Home</span>
+  </button>
 
+  <button class="af-nav-btn active" data-tab="explore" onclick="navTap('explore')" type="button">
+    <span class="af-nav-icon">🧭</span>
+    <span class="af-nav-label">Explore</span>
+  </button>
+
+  <button class="af-nav-btn" data-tab="batches" onclick="navTap('batches')" type="button">
+    <span class="af-nav-icon">📚</span>
+    <span class="af-nav-label">Batches</span>
+  </button>
+
+  <button class="af-nav-btn" data-tab="community" onclick="navTap('community')" type="button">
+    <span class="af-nav-icon">💬</span>
+    <span class="af-nav-label">Community</span>
+  </button>
+
+  <button class="af-nav-btn" data-tab="settings" onclick="navTap('settings')" type="button">
+    <span class="af-nav-icon">⚙️</span>
+    <span class="af-nav-label">Settings</span>
+  </button>
+</nav>
   <!-- ════════ OVERLAY: COURSE DETAIL ════════ -->
   <div class="af-overlay" id="overlayDetail">
     <div class="af-ov-topbar">
@@ -660,17 +668,18 @@ function closeOverlay(id){ $(id).classList.remove('open'); }
 
 /* ════════════════════════════════════════════════════════
    APP SHELL — single shared bottom nav + swipeable carousel
-   between the five primary sections. Home / Batches /
-   Community keep their real, separate routes (per "preserve
-   existing routes where needed") — only Explore and
-   Dashboard are merged into this page as true in-app tabs.
+   between the five primary sections.
    ════════════════════════════════════════════════════════ */
-const TABS = ['home','explore','batches','community','dashboard'];
+
+const TABS = ['home','explore','batches','community','settings'];
+
 const ROUTES = {
   home: '/index.html',
   batches: '/batches/index.html',
-  community: '/community/index.html'
+  community: '/community/indix.html',
+  settings: '/setting/index.html'
 };
+
 let _tabIndex = 1; // start on Explore
 let _exploreLoaded = false;
 let _carouselWidth = 0;
@@ -678,7 +687,9 @@ let _carouselWidth = 0;
 const carousel = $('afCarousel');
 const viewport = $('carouselViewport');
 
-function carouselSlotWidth(){ return viewport.clientWidth; }
+function carouselSlotWidth(){
+  return viewport.clientWidth;
+}
 
 function applyCarouselTransform(px, animate){
   carousel.classList.toggle('animating', !!animate);
@@ -693,63 +704,89 @@ function updateBnavActive(tab){
 
 function renderHeader(tab){
   const hdr = $('afHeader');
+
   if(tab==='explore'){
     hdr.innerHTML = `
       <div class="af-search-row">
         <div class="af-search-box">
           <span class="af-search-ic">🔍</span>
-          <input id="exploreSearchInput" type="text" placeholder="Search courses" value="${esc(_searchQuery)}" oninput="onSearchInput(this.value)"/>
+          <input
+            id="exploreSearchInput"
+            type="text"
+            placeholder="Search courses"
+            value="${esc(_searchQuery)}"
+            oninput="onSearchInput(this.value)"
+          />
         </div>
         <button class="af-icon-btn" id="filterBtn" onclick="toggleFilterMenu()">⚙</button>
       </div>`;
-  } else if(tab==='dashboard'){
-    const name = _dashName || 'Student';
-    const initials = name.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2) || 'S';
+  } else {
+    const titles = {
+      home:'Home',
+      batches:'Batches',
+      community:'Community',
+      settings:'Settings'
+    };
+
     hdr.innerHTML = `
       <div class="af-header-row">
-        <div class="af-dash-profile" style="flex:1;min-width:0">
-          <div class="af-dash-avatar">${esc(initials)}</div>
-          <div class="af-dash-namewrap">
-            <div class="af-dash-name">${esc(name)}</div>
-          </div>
-        </div>
-        <div class="af-cert-badge">🏅 ${_dashCertCount}</div>
+        <div class="af-header-title">${titles[tab] || ''}</div>
       </div>`;
-  } else {
-    const titles = {home:'Home', batches:'Batches', community:'Community'};
-    hdr.innerHTML = `<div class="af-header-row"><div class="af-header-title">${titles[tab]||''}</div></div>`;
   }
 }
 
 function goToIndex(idx, animate){
   idx = Math.max(0, Math.min(TABS.length-1, idx));
+
   const tab = TABS[idx];
+
   _tabIndex = idx;
   _carouselWidth = carouselSlotWidth();
+
   applyCarouselTransform(-idx*_carouselWidth, animate);
+
   updateBnavActive(tab);
   renderHeader(tab);
 
-  if(tab==='explore' && !_exploreLoaded){ _exploreLoaded = true; loadCourses(); }
-  if(tab==='dashboard'){ loadDashboard(); }
+  if(tab==='explore' && !_exploreLoaded){
+    _exploreLoaded = true;
+    loadCourses();
+  }
 
   if(ROUTES[tab]){
     const delay = animate ? 360 : 0;
-    setTimeout(()=>{ window.location.href = ROUTES[tab]; }, delay);
+
+    setTimeout(()=>{
+      window.location.href = ROUTES[tab];
+    }, delay);
   }
 }
 
 function navTap(tab){
   const idx = TABS.indexOf(tab);
+
   if(idx===-1) return;
-  if(ROUTES[tab]){ window.location.href = ROUTES[tab]; return; }
+
+  if(ROUTES[tab]){
+    window.location.href = ROUTES[tab];
+    return;
+  }
+
   goToIndex(idx, true);
 }
+
 window.navTap = navTap;
 
 /* ── SWIPE GESTURE — horizontal only, never fights vertical scroll ── */
+
 (function initSwipe(){
-  let active=false, locked=null, x0=0, y0=0, startPx=0;
+
+  let active = false;
+  let locked = null;
+  let x0 = 0;
+  let y0 = 0;
+  let startPx = 0;
+
   const THRESHOLD_RATIO = 0.16;
 
   function overlayOpen(){
@@ -757,53 +794,96 @@ window.navTap = navTap;
   }
 
   viewport.addEventListener('touchstart', e=>{
+
     if(overlayOpen()) return;
-    if(e.target.closest('.af-chip-row, .af-filter-menu, input, textarea, button')) { /* allow inner scroll/tap, still permit gesture start outside */ }
+
     const t = e.touches[0];
-    x0 = t.clientX; y0 = t.clientY;
-    active = true; locked = null;
+
+    x0 = t.clientX;
+    y0 = t.clientY;
+
+    active = true;
+    locked = null;
+
     _carouselWidth = carouselSlotWidth();
-    startPx = -_tabIndex*_carouselWidth;
+    startPx = -_tabIndex * _carouselWidth;
+
   }, {passive:true});
 
   viewport.addEventListener('touchmove', e=>{
+
     if(!active || overlayOpen()) return;
+
     const t = e.touches[0];
-    const dx = t.clientX - x0, dy = t.clientY - y0;
+
+    const dx = t.clientX - x0;
+    const dy = t.clientY - y0;
+
     if(locked===null){
-      if(Math.abs(dx) > 8 || Math.abs(dy) > 8){
+      if(Math.abs(dx)>8 || Math.abs(dy)>8){
         locked = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
       }
     }
+
     if(locked==='h'){
+
       if(e.cancelable) e.preventDefault();
+
       let next = startPx + dx;
-      // resistance at edges
-      const min = -(TABS.length-1)*_carouselWidth, max = 0;
-      if(next>max) next = max + (next-max)*0.35;
-      if(next<min) next = min + (next-min)*0.35;
+
+      const min = -(TABS.length-1) * _carouselWidth;
+      const max = 0;
+
+      if(next > max){
+        next = max + (next-max)*0.35;
+      }
+
+      if(next < min){
+        next = min + (next-min)*0.35;
+      }
+
       applyCarouselTransform(next, false);
     }
+
   }, {passive:false});
 
   viewport.addEventListener('touchend', e=>{
+
     if(!active) return;
+
     active = false;
-    if(locked!=='h'){ locked=null; return; }
+
+    if(locked!=='h'){
+      locked = null;
+      return;
+    }
+
     const t = e.changedTouches[0];
     const dx = t.clientX - x0;
+
     let targetIdx = _tabIndex;
-    if(Math.abs(dx) > _carouselWidth*THRESHOLD_RATIO){
-      targetIdx += dx<0 ? 1 : -1;
+
+    if(Math.abs(dx) > _carouselWidth * THRESHOLD_RATIO){
+      targetIdx += dx < 0 ? 1 : -1;
     }
+
     goToIndex(targetIdx, true);
+
     locked = null;
+
   }, {passive:true});
 
   window.addEventListener('resize', ()=>{
+
     _carouselWidth = carouselSlotWidth();
-    applyCarouselTransform(-_tabIndex*_carouselWidth, false);
+
+    applyCarouselTransform(
+      -_tabIndex * _carouselWidth,
+      false
+    );
+
   });
+
 })();
 
 /* ════════════════════════════════════════════════════════
