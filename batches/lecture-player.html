@@ -35,14 +35,50 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html{font-size:15px;-webkit-text-size-adjust:100%;height:100%;height:100dvh;background:#000;}
 body{
-  font-family:var(--fb);background:var(--bg);color:var(--t1);
+  font-family:var(--fb);background:#000;color:var(--t1);
   height:100%;height:100dvh;overflow:hidden;
-  display:flex;flex-direction:column;
+  display:flex;align-items:center;justify-content:center;
   -webkit-user-select:none;user-select:none;
   -webkit-touch-callout:none;
 }
 button{font-family:var(--fb);cursor:pointer;border:none;background:none;color:inherit;}
 input{font-family:var(--fb);}
+
+/* ── MOBILE PLAYER SHELL ──
+   On a real phone this just fills the viewport. On a laptop/desktop
+   it renders as a phone-shaped frame centered on the page. In
+   fullscreen (.fs-mode) it always goes edge-to-edge, frame removed. */
+.player-shell{
+  width:100%;height:100%;height:100dvh;
+  max-width:480px;
+  background:var(--bg);
+  display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+}
+@media(min-width:560px){
+  body{background:#05050d;}
+  .player-shell{
+    height:min(900px,calc(100dvh - 32px));
+    border:8px solid #202637;
+    border-radius:40px;
+    box-shadow:0 30px 90px rgba(0,0,0,.65);
+  }
+}
+.fs-mode .player-shell{
+  max-width:none;width:100vw;height:100vh;height:100dvh;
+  border:none;border-radius:0;box-shadow:none;
+}
+/* If we're fullscreen but the screen itself is still portrait-shaped
+   (orientation lock unsupported/blocked — common in iOS / some WebViews),
+   force the player to render rotated so it still appears landscape. */
+@media(orientation:portrait){
+  .fs-mode .player-shell{
+    position:fixed;top:0;left:100%;
+    width:100vh;height:100vw;
+    transform-origin:0 0;
+    transform:rotate(90deg);
+  }
+}
 
 /* ── TOPBAR ── */
 .topbar{
@@ -224,6 +260,41 @@ input{font-family:var(--fb);}
   border-radius:var(--rf);padding:4px 10px;
 }
 
+/* ── LECTURE INFO — "Description" header + chapter/lecture/description body ──
+   Sits under the video on the black area. Hidden in fullscreen/landscape. */
+.lecture-info{
+  flex-shrink:0;
+  display:flex;flex-direction:column;
+  max-height:38vh;
+  overflow:hidden;
+}
+.lecture-info-header{
+  flex-shrink:0;
+  background:#000;
+  padding:13px 16px;
+  font-family:var(--fd);font-size:15px;font-weight:800;color:#fff;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.lecture-info-body{
+  flex:1;min-height:0;
+  overflow-y:auto;
+  background:var(--surface);
+  padding:14px 16px 18px;
+}
+.lecture-info-chapter{
+  font-size:10.5px;font-weight:800;color:var(--pl);
+  text-transform:uppercase;letter-spacing:.06em;
+  margin-bottom:5px;
+}
+.lecture-info-title{
+  font-family:var(--fd);font-size:15px;font-weight:900;color:var(--t1);
+  line-height:1.32;margin-bottom:6px;
+}
+.lecture-info-desc{
+  font-size:12.5px;color:var(--t2);font-weight:600;line-height:1.65;
+}
+.fs-mode .lecture-info{display:none;}
+
 /* ── CONTROLS ── */
 .controls{
   background:rgba(12,11,29,.97);
@@ -382,6 +453,7 @@ input{font-family:var(--fb);}
 /* Landscape */
 @media(orientation:landscape) and (max-height:500px){
   .topbar{height:44px;}
+  .lecture-info{display:none;}
   .controls{padding:4px 16px 4px;}
   .seek-row{padding:6px 0 2px;}
   .ctrl-row{height:52px;}
@@ -478,6 +550,7 @@ input{font-family:var(--fb);}
 </head>
 <body>
 
+<div class="player-shell" id="playerShell">
 <!-- TOP BAR -->
 <header class="topbar">
   <button class="back-btn" id="backBtn" onclick="goBack()" aria-label="Go back">
@@ -568,6 +641,16 @@ input{font-family:var(--fb);}
   </div>
 </div>
 
+<!-- LECTURE INFO — "Description" header + chapter/lecture/description (hidden in fullscreen/landscape) -->
+<div class="lecture-info" id="lectureInfo">
+  <div class="lecture-info-header">Description</div>
+  <div class="lecture-info-body">
+    <div class="lecture-info-chapter" id="infoChapter">AcademeForge</div>
+    <div class="lecture-info-title" id="infoLectureTitle">Loading lecture…</div>
+    <div class="lecture-info-desc" id="infoLectureDesc">Lecture description will appear here.</div>
+  </div>
+</div>
+
 <!-- CONTROLS -->
 <div class="controls" id="controls">
   <div class="seek-row">
@@ -607,6 +690,7 @@ input{font-family:var(--fb);}
     </button>
   </div>
 </div>
+</div><!-- /player-shell -->
 
 <!-- SPEED PANEL -->
 <div class="speed-overlay" id="speedOverlay" onclick="closeSpeedPanel()"></div>
@@ -639,13 +723,58 @@ input{font-family:var(--fb);}
 /* ═══════════════════════════════════════════════
    URL PARAMS
 ═══════════════════════════════════════════════ */
-const params   = new URLSearchParams(location.search);
-const videoId  = params.get('v') || '';
-const rawTitle = params.get('title') || 'Lecture';
-const backUrl  = params.get('back') || '';
+const params = new URLSearchParams(location.search);
 
-document.getElementById('lectureTitle').textContent = decodeURIComponent(rawTitle);
-document.title = decodeURIComponent(rawTitle) + ' · AcademeForge';
+function safeDecode(s) {
+  if (!s) return '';
+  try { return decodeURIComponent(s); } catch(_) { return s; }
+}
+
+/* Data handed off by the batches/courses page (sessionStorage) when the
+   user taps "Watch", with URL-param fallback so the player can still be
+   opened directly via a link. */
+const handoff = {
+  url:     sessionStorage.getItem('af_lecture_url')         || '',
+  title:   sessionStorage.getItem('af_lecture_title')       || '',
+  desc:    sessionStorage.getItem('af_lecture_description') || '',
+  chapter: sessionStorage.getItem('af_lecture_chapter')      || '',
+  course:  sessionStorage.getItem('af_lecture_course')       || '',
+};
+
+const rawSource  = handoff.url     || params.get('v') || params.get('url') || '';
+const rawTitle   = handoff.title   || safeDecode(params.get('title'))   || 'Lecture';
+const rawDesc    = handoff.desc    || safeDecode(params.get('desc'))    || '';
+const rawChapter = handoff.chapter || safeDecode(params.get('chapter')) || '';
+const rawCourse  = handoff.course  || safeDecode(params.get('course'))  || '';
+const backUrl    = params.get('back') || '';
+
+/* Accepts a bare YouTube video ID OR a full URL (watch / youtu.be / embed / shorts) */
+function extractYouTubeId(src) {
+  if (!src) return '';
+  src = src.trim();
+  if (/^[\w-]{6,20}$/.test(src) && !/^https?:/i.test(src)) return src;
+  try {
+    const u = new URL(src);
+    if (/youtu\.be$/i.test(u.hostname)) return u.pathname.slice(1);
+    if (u.searchParams.get('v')) return u.searchParams.get('v');
+    const m = u.pathname.match(/\/(?:embed|shorts)\/([^/?]+)/);
+    if (m) return m[1];
+  } catch(_) {}
+  const m2 = src.match(/[?&]v=([^&]+)/) || src.match(/youtu\.be\/([^?&]+)/) || src.match(/\/(?:embed|shorts)\/([^/?&]+)/);
+  return m2 ? m2[1] : src;
+}
+const videoId = extractYouTubeId(rawSource);
+
+document.getElementById('lectureTitle').textContent = rawTitle;
+document.title = rawTitle + ' · AcademeForge';
+
+/* Black-area info block under the video: chapter name / lecture name / description */
+document.getElementById('infoLectureTitle').textContent = rawTitle;
+document.getElementById('infoLectureDesc').textContent  = rawDesc || 'No description available for this lecture.';
+const infoChapterEl = document.getElementById('infoChapter');
+if (rawChapter)     infoChapterEl.textContent = rawChapter;
+else if (rawCourse) infoChapterEl.textContent = rawCourse;
+else                 infoChapterEl.style.display = 'none';
 
 /* ═══════════════════════════════════════════════
    DEVICE / ENV DETECTION
@@ -702,7 +831,7 @@ const QUALITIES = [
 ═══════════════════════════════════════════════ */
 function goBack() {
   if (backUrl) { location.href = decodeURIComponent(backUrl); return; }
-  if (history.length > 1) { history.back(); } else { location.href = '/student/index.html'; }
+  if (history.length > 1) { history.back(); } else { location.href = '/batches/index.html'; }
 }
 
 /* ═══════════════════════════════════════════════
@@ -945,10 +1074,24 @@ function toggleFullscreen() {
   const el = document.documentElement;
   if (!isFullscreen) {
     const rq = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
-    if (rq) rq.call(el).catch(()=>{});
+    const lockLandscape = () => {
+      try {
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock('landscape').catch(()=>{});
+        }
+      } catch(_) {}
+    };
+    if (rq) {
+      const res = rq.call(el);
+      // Orientation lock must run AFTER fullscreen is actually granted,
+      // otherwise most browsers silently reject it.
+      if (res && res.then) { res.then(lockLandscape).catch(lockLandscape); }
+      else { setTimeout(lockLandscape, 50); }
+    } else {
+      lockLandscape();
+    }
     document.body.style.position='fixed'; document.body.style.inset='0';
     document.documentElement.classList.add('fs-mode');
-    try { screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(()=>{}); } catch(_) {}
     isFullscreen = true; updateFsIcon();
   } else {
     const ex = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
@@ -967,7 +1110,12 @@ function updateFsIcon() {
 function syncFsState(active) {
   isFullscreen = !!active;
   document.documentElement.classList.toggle('fs-mode', isFullscreen);
-  if (!isFullscreen) { document.body.style.position=''; document.body.style.inset=''; try{screen.orientation&&screen.orientation.unlock&&screen.orientation.unlock();}catch(_){} }
+  if (isFullscreen) {
+    try { screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(()=>{}); } catch(_) {}
+  } else {
+    document.body.style.position=''; document.body.style.inset='';
+    try{screen.orientation&&screen.orientation.unlock&&screen.orientation.unlock();}catch(_){}
+  }
   updateFsIcon();
 }
 document.addEventListener('fullscreenchange',       ()=>syncFsState(!!document.fullscreenElement));
