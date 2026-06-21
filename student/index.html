@@ -883,7 +883,16 @@ async function openModule(moduleId){
   }
   _currentModule = data.module;
   _currentCheck = data.check;
+  _checkPassed = !!data.is_done || !data.check;_currentModule = data.module;
+_currentModule.is_done = data.is_done;
+
+_currentCheck = data.check;
+
+if (_currentModule.module_type === 'survey') {
+  _checkPassed = !!data.is_done;
+} else {
   _checkPassed = !!data.is_done || !data.check;
+}
   _currentModule._next = data.next_module;
   _isReviewMode = _isCourseCompleted();
 
@@ -943,8 +952,8 @@ let _surveyQuestions = [];
 function renderSurvey(questions, existingAnswers){
   _surveyQuestions = questions;
   _surveyAnswers = { ...existingAnswers };
-  const alreadyDone = _checkPassed;
-
+ const alreadyDone = !!_currentModule.is_done;
+  
   if(questions.length === 0){
     $('lessonPage').innerHTML = `<div class="af-empty"><span>📊</span>This survey isn't set up yet.</div>`;
     return;
