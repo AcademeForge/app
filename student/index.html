@@ -139,7 +139,6 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
    Also reused for the Dashboard's Activity / Certificates tabs. */
 .af-tabs{
   display:flex;flex-direction:column;gap:8px;
-  margin-top:10px;
   background:var(--card-s);
   border:1.5px solid var(--bc);
   border-radius:14px;
@@ -450,7 +449,7 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
         </div>
 
         <!-- COURSES PANE -->
-        <div id="coursesPane" style="display:flex;flex-direction:column;gap:14px">
+        <div id="coursesPane" style="display:flex;flex-direction:column;gap:10px">
           <div class="af-filter-wrap" id="categoryFilterWrap">
             <button class="af-filter-btn" id="filterBtn" onclick="toggleFilterMenu()">
               <span id="filterLabel">All Courses</span><span class="chev">▾</span>
@@ -1359,7 +1358,7 @@ function renderDashboard(data, searchQuery){
 
   /* ════════ ASSEMBLE: Activity / Certificates tabs (same tab styling as Courses page) ════════ */
   $('dashboardPane').innerHTML = `
-    <div class="af-tabs">
+    <div class="af-tabs" style="margin-top:1px">
       <div class="af-tabs-row">
         <button class="af-tab-btn ${_dashTab==='activity'?'active':''}" id="dashTabActivityBtn" onclick="setDashTab('activity')">Activity</button>
         <button class="af-tab-btn ${_dashTab==='certificates'?'active':''}" id="dashTabCertBtn" onclick="setDashTab('certificates')">Certificates</button>
