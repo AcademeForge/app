@@ -422,6 +422,9 @@ let razorpayLoaded   = false;
 let enrolledCourses  = [];
 let selectedCourse   = null;
 let learningMode     = 'lectures';
+let currentChapters       = [];
+let selectedChapterTitle  = '';
+let selectedChapterNumber = '';
 
 /* ─── HELPERS ────────────────────────────────────────────── */
 const $id = id => document.getElementById(id);
@@ -887,6 +890,7 @@ async function loadChapters() {
   renderChapters(chapters);
 }
 function renderChapters(chapters) {
+  currentChapters = Array.isArray(chapters) ? chapters : [];
   const list = $id('sChapterList');
   if (!chapters.length) { list.innerHTML='<p class="empty-text">No chapters available yet.</p>'; return; }
   list.innerHTML = chapters.map(ch => {
@@ -902,6 +906,9 @@ function renderChapters(chapters) {
 }
 
 async function openChapterContent(chapterId, isLocked) {
+  const chObj = currentChapters.find(c => String(c.id)===String(chapterId));
+  selectedChapterTitle  = chObj ? safe(chObj.title,'') : '';
+  selectedChapterNumber = chObj ? safe(chObj.chapter_number,'') : '';
   if (isLocked===true) {
     $id('sContentTitle').textContent='🔒 Chapter Locked';
     $id('sContentSubtitle').textContent='This chapter will unlock after content upload.';
@@ -936,7 +943,7 @@ function renderLectures(lectures) {
     const locked = lec.is_locked===true||!lec.video_url;
     const watchBtn = locked
       ? '<button class="content-action locked-action" disabled>Locked</button>'
-      : '<button class="content-action" data-url="'+esc(lec.video_url)+'" data-title="Lecture '+lec.lecture_number+': '+esc(lec.title)+'" data-duration="'+esc(safe(lec.duration,''))+'" onclick="openVideo(this)">Watch</button>';
+      : '<button class="content-action" data-url="'+esc(lec.video_url)+'" data-title="Lecture '+lec.lecture_number+': '+esc(lec.title)+'" data-duration="'+esc(safe(lec.duration,''))+'" data-desc="'+esc(safe(lec.description,''))+'" onclick="openVideo(this)">Watch</button>';
     return '<div class="content-item '+(locked?'locked':'unlocked')+'"><div class="content-main"><strong>'+(locked?'\u{1F512}':'\u25B6\uFE0F')+' Lecture '+lec.lecture_number+': '+esc(lec.title)+'</strong><small>'+esc(safe(lec.description,'Lecture details will be available soon.'))+'</small><span class="duration">\u23F1 '+esc(safe(lec.duration,'10-15 min'))+'</span></div>'+watchBtn+'</div>';
   }).join('');
 }
@@ -976,12 +983,18 @@ function openVideo(btn) {
   const url      = btn.dataset.url      || '';
   const title    = btn.dataset.title    || 'Lecture';
   const duration = btn.dataset.duration || '';
+  const desc     = btn.dataset.desc     || '';
   if(!url){showToast('Video not available yet.','warn','Locked');return;}
+  const chapterLabel = selectedChapterTitle
+    ? ('Chapter '+(selectedChapterNumber||'')+': '+selectedChapterTitle).replace('Chapter : ','Chapter ')
+    : '';
   try {
-    sessionStorage.setItem('af_lecture_url',      url);
-    sessionStorage.setItem('af_lecture_title',    title);
-    sessionStorage.setItem('af_lecture_duration', duration);
-    sessionStorage.setItem('af_lecture_course',   selectedCourse ? (selectedCourse.title||'') : '');
+    sessionStorage.setItem('af_lecture_url',         url);
+    sessionStorage.setItem('af_lecture_title',       title);
+    sessionStorage.setItem('af_lecture_duration',    duration);
+    sessionStorage.setItem('af_lecture_description', desc);
+    sessionStorage.setItem('af_lecture_chapter',     chapterLabel);
+    sessionStorage.setItem('af_lecture_course',      selectedCourse ? (selectedCourse.title||'') : '');
   } catch(_){}
   window.location.href = '/batches/lecture-player.html';
 }
