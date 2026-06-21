@@ -26,26 +26,34 @@
   --card:rgba(255,255,255,.85); --card-s:#fff;
   --nav:rgba(255,255,255,.94); --hdr:rgba(255,255,255,.97);
   --inp:#f4f5fb; --grp:rgba(79,70,229,.06);
-  --t1:#0f0e2a; --t2:#4b5563; --tm:#9ca3af;
+  --t1:#0f0e2a; --t2:#4b5563; --tm:#5b6478;
   --b1:rgba(79,70,229,.12); --bc:rgba(79,70,229,.18);
   --sh:0 2px 12px rgba(79,70,229,.08),0 1px 3px rgba(0,0,0,.04);
   --she:0 8px 32px rgba(79,70,229,.14);
   --shell-border:#c7cbea;
-  --nav-h:62px;
+  --nav-h:64px;
   --fd:'Sora',sans-serif;
   --fb:'Inter',sans-serif;
   --ok-soft:rgba(34,197,94,.12); --ok-b:rgba(34,197,94,.28);
+  --warn-soft:rgba(245,158,11,.12); --warn-b:rgba(245,158,11,.28);
+  /* 8pt spacing scale */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px; --sp-7:32px; --sp-8:40px;
+  /* focus ring (accessibility) */
+  --focus-ring:0 0 0 3px rgba(79,70,229,.35);
+  --ease:cubic-bezier(.4,0,.2,1);
+  --ease-spring:cubic-bezier(.34,1.56,.64,1);
 }
 [data-theme="dark"] {
   --bg:#0c0b1d; --shell:#120f2a;
   --card:rgba(30,27,60,.82); --card-s:#1e1b3c;
   --nav:rgba(18,15,42,.97); --hdr:rgba(18,15,42,.98);
   --inp:#1e1b3c; --grp:rgba(129,140,248,.08);
-  --t1:#f0eeff; --t2:#a5a3c2; --tm:#6b6a8a;
+  --t1:#f0eeff; --t2:#a5a3c2; --tm:#9290b5;
   --b1:rgba(129,140,248,.14); --bc:rgba(129,140,248,.22);
   --sh:0 2px 12px rgba(0,0,0,.32); --she:0 8px 32px rgba(0,0,0,.44);
   --shell-border:#202637;
   --p-soft:rgba(129,140,248,.12);
+  --focus-ring:0 0 0 3px rgba(129,140,248,.4);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{font-size:15px;-webkit-text-size-adjust:100%}
@@ -64,6 +72,11 @@ img{display:block;max-width:100%}
 ul{list-style:none}
 *,body,html{-webkit-user-select:none;-moz-user-select:none;user-select:none}
 input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
+
+/* Accessible focus states — visible only for keyboard nav, never on touch/click */
+:focus{outline:none}
+:focus-visible{outline:none;box-shadow:var(--focus-ring);border-radius:10px}
+button:focus-visible,a:focus-visible,input:focus-visible{box-shadow:var(--focus-ring)}
 
 .af-shell{ width:min(100%,460px); height:100dvh; background:var(--shell); position:relative; display:flex; flex-direction:column; overflow:hidden; }
 @media(min-width:520px){
@@ -182,26 +195,37 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
 
 /* Course cards */
 .af-course-card{
-  border-radius:13px;overflow:hidden;background:var(--card-s);
+  border-radius:14px;overflow:hidden;background:var(--card-s);
   border:1px solid var(--b1);box-shadow:none;width:100%;text-align:left;
-  display:flex;gap:0;
+  display:flex;gap:0;transition:border-color .2s var(--ease),transform .15s var(--ease),background .2s var(--ease);
 }
-.af-course-card:active{opacity:.92}
-.af-course-img{width:74px;flex-shrink:0;aspect-ratio:1;object-fit:cover;background:var(--grp)}
-.af-course-body{flex:1;min-width:0;padding:9px 11px;display:flex;flex-direction:column;gap:3px;justify-content:center}
-.af-course-cat{font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--tm)}
-.af-course-title{font-family:var(--fd);font-size:12.5px;font-weight:800;color:var(--t1);line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.af-course-pills{display:flex;gap:5px;margin-top:2px;flex-wrap:wrap}
-.af-pill{font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px}
-.af-pill-done{background:rgba(34,197,94,.14);color:#15803d}
+.af-course-card:active{transform:scale(.985);background:var(--grp)}
+@media(hover:hover){
+  .af-course-card:hover{border-color:var(--bc)}
+}
+.af-course-img-wrap{width:76px;flex-shrink:0;position:relative;background:var(--grp)}
+.af-course-img{width:76px;height:100%;flex-shrink:0;aspect-ratio:1;object-fit:cover;background:var(--grp)}
+.af-course-img-ring{position:absolute;inset:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+.af-course-body{flex:1;min-width:0;padding:var(--sp-2) var(--sp-3);display:flex;flex-direction:column;gap:4px;justify-content:center}
+.af-course-cat{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tm)}
+.af-course-title{font-family:var(--fd);font-size:12.5px;font-weight:800;color:var(--t1);line-height:1.28;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.af-course-pills{display:flex;align-items:center;gap:5px;margin-top:1px;flex-wrap:wrap}
+.af-pill{font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px;display:inline-flex;align-items:center;gap:4px}
+.af-pill-done{background:rgba(34,197,94,.14);color:#14693a}
 [data-theme="dark"] .af-pill-done{color:#4ade80}
-.af-pill-progress{background:rgba(245,158,11,.14);color:#b45309}
+.af-pill-progress{background:rgba(245,158,11,.14);color:#b45309;padding:2px 7px 2px 2px}
 [data-theme="dark"] .af-pill-progress{color:#fbbf24}
+.af-pill-progress-ring{width:13px;height:13px;flex-shrink:0}
 .af-pill-offline{background:var(--grp);color:var(--t2);display:flex;align-items:center;gap:3px}
 
-.af-empty{padding:40px 20px;text-align:center;color:var(--tm);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:10px}
-.af-empty span{font-size:30px}
-.af-empty strong{color:var(--t2);font-size:13.5px}
+.af-empty{padding:var(--sp-8) var(--sp-5);text-align:center;color:var(--t2);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:var(--sp-2)}
+.af-empty-ic{
+  width:56px;height:56px;border-radius:50%;background:var(--p-soft);
+  display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:var(--sp-1);
+}
+.af-empty span{font-size:24px}
+.af-empty strong{color:var(--t1);font-size:14.5px;font-family:var(--fd);font-weight:800}
+.af-empty p{color:var(--t2);font-size:13px;line-height:1.5;max-width:260px}
 
 /* ── COURSE DETAIL ── */
 .af-detail-hero{width:100%;aspect-ratio:16/9;object-fit:cover;flex-shrink:0}
@@ -352,16 +376,33 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
 .af-complete-sub{font-size:13.5px;color:var(--t2);line-height:1.6}
 
 /* ── DASHBOARD PANE (folded into Explore) ── */
-.dash-pane-body{display:flex;flex-direction:column;gap:16px}
+.dash-pane-body{display:flex;flex-direction:column;gap:var(--sp-4)}
 
-.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.stat-card{
-  background:var(--card-s);border:1px solid var(--bc);border-radius:12px;
-  padding:9px 10px;display:flex;flex-direction:row;align-items:baseline;gap:6px;
-  box-shadow:none;
+/* Insights header — real-data hero stat (completion ring) + compact
+   stat rows. Replaces the old flat 2-card row with something that
+   actually surfaces progress at a glance. */
+.insights-card{
+  display:flex;align-items:center;gap:var(--sp-4);
+  background:var(--card-s);border:1px solid var(--bc);border-radius:18px;
+  padding:var(--sp-4);box-shadow:var(--sh);
 }
-.stat-num{font-family:var(--fd);font-size:18px;font-weight:900;color:var(--t1);line-height:1}
-.stat-lbl{font-size:10px;font-weight:600;color:var(--tm);letter-spacing:.01em;line-height:1.2}
+.insights-ring-wrap{position:relative;width:64px;height:64px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.insights-ring{width:64px;height:64px}
+.insights-ring-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.insights-ring-num{font-family:var(--fd);font-size:15px;font-weight:900;color:var(--t1);line-height:1.1}
+.insights-ring-sub{font-size:8px;font-weight:700;color:var(--tm);text-transform:uppercase;letter-spacing:.04em}
+.insights-stats{flex:1;display:flex;flex-direction:column;gap:var(--sp-2);min-width:0}
+.insights-stat-row{display:flex;align-items:baseline;gap:var(--sp-2)}
+.insights-stat-num{font-family:var(--fd);font-size:16px;font-weight:900;color:var(--t1);line-height:1;min-width:34px}
+.insights-stat-lbl{font-size:11px;font-weight:600;color:var(--t2)}
+
+.insight-chips{display:flex;flex-direction:column;gap:var(--sp-2)}
+.insight-chip{
+  display:flex;align-items:center;gap:var(--sp-2);font-size:11.5px;font-weight:600;color:var(--t2);
+  background:var(--grp);border:1px solid var(--b1);border-radius:11px;padding:8px 11px;line-height:1.4;
+}
+.insight-chip-ic{font-size:14px;flex-shrink:0}
+.insight-chip strong{color:var(--t1);font-weight:700}
 
 .sec-h{display:flex;align-items:center;justify-content:space-between}
 .sec-title{font-family:var(--fd);font-size:14.5px;font-weight:800;color:var(--t1)}
@@ -383,7 +424,7 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
 .completed-body{flex:1;padding:10px 12px;display:flex;flex-direction:column;gap:6px;min-width:0}
 .completed-cat{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--tm)}
 .completed-title{font-family:var(--fd);font-size:13px;font-weight:800;color:var(--t1);line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.completed-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#15803d;background:var(--ok-soft);border:1px solid var(--ok-b);border-radius:99px;padding:3px 10px;width:fit-content}
+.completed-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#14693a;background:var(--ok-soft);border:1px solid var(--ok-b);border-radius:99px;padding:3px 10px;width:fit-content}
 [data-theme="dark"] .completed-badge{color:#4ade80}
 .cert-ready-btn{width:100%;margin-top:2px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--ok) 0%,#16a34a 100%);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 3px 10px rgba(34,197,94,.3)}
 .cert-ready-btn:active{transform:scale(.97)}
@@ -419,7 +460,7 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
 .cert-dl-btn:active{transform:scale(.98)}
 .cert-share-btn{width:100%;height:46px;border-radius:14px;background:transparent;border:1.5px solid var(--bc);color:var(--t1);font-size:13.5px;font-weight:700}
 .cert-share-btn:active{background:var(--grp)}
-.cert-verify-btn{width:100%;height:46px;border-radius:14px;background:var(--ok-soft);border:1.5px solid var(--ok-b);color:#15803d;font-size:13.5px;font-weight:700}
+.cert-verify-btn{width:100%;height:46px;border-radius:14px;background:var(--ok-soft);border:1.5px solid var(--ok-b);color:#14693a;font-size:13.5px;font-weight:700}
 [data-theme="dark"] .cert-verify-btn{color:#4ade80}
 .verify-inline{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--ok);padding:6px 12px;background:var(--ok-soft);border-radius:99px;border:1px solid var(--ok-b);width:fit-content}
 
@@ -427,14 +468,24 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
 .af-bnav{
   position:absolute;bottom:0;left:0;right:0;z-index:999;height:var(--nav-h);
   background:var(--nav);border-top:1px solid var(--b1);
-  display:flex;align-items:center;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px);
+  display:flex;align-items:center;padding:0 6px;padding-bottom:env(safe-area-inset-bottom,0px);
+  backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
 }
-.af-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:100%;border-radius:10px;padding:6px 4px;position:relative}
-.af-nav-btn::before{content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--p);border-radius:99px;transition:width .15s ease}
-.af-nav-btn.active::before{width:22px}
-.af-nav-icon{font-size:19px;line-height:1}
-.af-nav-label{font-size:9.5px;font-weight:700;color:var(--tm)}
-.af-nav-btn.active .af-nav-label{color:var(--p)}
+.af-nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  min-height:48px;height:100%;border-radius:14px;padding:6px 4px;position:relative;
+  transition:transform .15s var(--ease);
+}
+.af-nav-btn:active{transform:scale(.92)}
+.af-nav-icon-wrap{
+  width:38px;height:26px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  background:transparent;transition:background .25s var(--ease),transform .25s var(--ease-spring);
+}
+.af-nav-btn.active .af-nav-icon-wrap{background:var(--p-soft);transform:translateY(-1px)}
+.af-nav-icon{font-size:18px;line-height:1;transition:transform .25s var(--ease-spring);filter:grayscale(.15);opacity:.75}
+.af-nav-btn.active .af-nav-icon{transform:scale(1.12);filter:none;opacity:1}
+.af-nav-label{font-size:9.5px;font-weight:700;color:var(--tm);transition:color .2s ease,font-weight .2s ease}
+.af-nav-btn.active .af-nav-label{color:var(--p);font-weight:800}
 
 /* Loading skeleton */
 .af-skel{background:linear-gradient(90deg,var(--grp) 25%,var(--b1) 50%,var(--grp) 75%);background-size:200% 100%;animation:skel 1.4s ease infinite;border-radius:14px}
@@ -445,14 +496,21 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
 
 /* Toast */
 .af-toast-wrap{position:absolute;bottom:calc(var(--nav-h) + 14px);left:14px;right:14px;z-index:99999;pointer-events:none}
-.af-toast{display:flex;align-items:flex-start;gap:12px;background:var(--card-s);color:var(--t1);border:1px solid var(--bc);border-radius:13px;padding:11px 13px;box-shadow:var(--she);pointer-events:auto}
+.af-toast{
+  display:flex;align-items:flex-start;gap:10px;background:var(--card-s);color:var(--t1);
+  border:1px solid var(--bc);border-radius:13px;padding:11px 13px;box-shadow:var(--she);
+  pointer-events:auto;opacity:0;transform:translateY(10px) scale(.97);
+  transition:opacity .22s var(--ease),transform .22s var(--ease);
+}
+.af-toast.show{opacity:1;transform:translateY(0) scale(1)}
+.af-toast-ic{font-size:15px;line-height:1.3;flex-shrink:0}
 .af-toast-ok{border-left:4px solid #22c55e}
 .af-toast-err{border-left:4px solid #ef4444}
 .af-toast-title{font-size:12px;font-weight:700;margin:0 0 2px}
 .af-toast-msg{font-size:11.5px;margin:0;line-height:1.4}
 
 @media (prefers-reduced-motion: reduce){
-  .af-nav-btn, .progress-fill, .af-tab-btn::after, .view-switch-btn, .af-hdr-search-wrap, .af-hdr-search-btn, .af-topbar-headline{transition:none!important}
+  .af-nav-btn, .af-nav-icon-wrap, .af-nav-icon, .progress-fill, .af-tab-btn::after, .view-switch-btn, .af-hdr-search-wrap, .af-hdr-search-btn, .af-topbar-headline, .af-toast, .af-course-card, .progress-card, .insights-ring circle{transition:none!important}
 }
 </style>
 </head>
@@ -504,10 +562,7 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
 
         <!-- DASHBOARD PANE -->
         <div id="dashboardPane" class="dash-pane-body" style="display:none">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <div class="af-skel" style="height:44px;border-radius:12px"></div>
-            <div class="af-skel" style="height:44px;border-radius:12px"></div>
-          </div>
+          <div class="af-skel" style="height:96px;border-radius:18px"></div>
           <div class="af-skel" style="height:80px;border-radius:16px"></div>
           <div class="af-skel" style="height:80px;border-radius:16px"></div>
         </div>
@@ -515,21 +570,21 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
       </div>
     </div>
 
-    <nav class="af-bnav">
-      <button class="af-nav-btn" onclick="window.location.href='/index.html'" type="button">
-        <span class="af-nav-icon">🏠</span><span class="af-nav-label">Home</span>
+    <nav class="af-bnav" role="navigation" aria-label="Main">
+      <button class="af-nav-btn" onclick="window.location.href='/index.html'" type="button" aria-label="Home">
+        <span class="af-nav-icon-wrap"><span class="af-nav-icon">🏠</span></span><span class="af-nav-label">Home</span>
       </button>
-      <button class="af-nav-btn active" type="button">
-        <span class="af-nav-icon">🧭</span><span class="af-nav-label">Explore</span>
+      <button class="af-nav-btn active" type="button" aria-current="page" aria-label="Explore">
+        <span class="af-nav-icon-wrap"><span class="af-nav-icon">🧭</span></span><span class="af-nav-label">Explore</span>
       </button>
-      <button class="af-nav-btn" onclick="window.location.href='/batches/index.html'" type="button">
-        <span class="af-nav-icon">📚</span><span class="af-nav-label">Batches</span>
+      <button class="af-nav-btn" onclick="window.location.href='/batches/index.html'" type="button" aria-label="Batches">
+        <span class="af-nav-icon-wrap"><span class="af-nav-icon">📚</span></span><span class="af-nav-label">Batches</span>
       </button>
-      <button class="af-nav-btn" onclick="window.location.href='/community/index.html'" type="button">
-        <span class="af-nav-icon">💬</span><span class="af-nav-label">Community</span>
+      <button class="af-nav-btn" onclick="window.location.href='/community/index.html'" type="button" aria-label="Community">
+        <span class="af-nav-icon-wrap"><span class="af-nav-icon">💬</span></span><span class="af-nav-label">Community</span>
       </button>
-      <button class="af-nav-btn" onclick="window.location.href='/setting/index.html'" type="button">
-        <span class="af-nav-icon">⚙️</span><span class="af-nav-label">Settings</span>
+      <button class="af-nav-btn" onclick="window.location.href='/setting/index.html'" type="button" aria-label="Settings">
+        <span class="af-nav-icon-wrap"><span class="af-nav-icon">⚙️</span></span><span class="af-nav-label">Settings</span>
       </button>
     </nav>
   </div>
@@ -537,7 +592,7 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
   <!-- ════════ VIEW: COURSE DETAIL ════════ -->
   <div class="af-view" id="viewDetail">
     <header class="af-topbar">
-      <button class="af-back" onclick="goToCatalog()">←</button>
+      <button class="af-back" onclick="goToCatalog()" aria-label="Back to Explore">←</button>
       <div class="af-topbar-title" id="detailTopTitle">Course</div>
     </header>
     <div class="af-page no-nav-pad" id="detailPage"></div>
@@ -546,7 +601,7 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
   <!-- ════════ VIEW: MODULE LIST ════════ -->
   <div class="af-view" id="viewModules">
     <header class="af-topbar">
-      <button class="af-back" onclick="closeModuleList()">✕</button>
+      <button class="af-back" onclick="closeModuleList()" aria-label="Close course content">✕</button>
       <div class="af-topbar-title">Course content</div>
     </header>
     <div class="af-page no-nav-pad" id="modulesPage"></div>
@@ -555,13 +610,13 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
   <!-- ════════ VIEW: LESSON PLAYER ════════ -->
   <div class="af-view" id="viewLesson">
     <header class="af-topbar">
-      <button class="af-back" onclick="backFromLesson()">←</button>
-      <span class="af-help">?</span>
+      <button class="af-back" onclick="backFromLesson()" aria-label="Back to course content">←</button>
+      <span class="af-help" role="img" aria-label="Help">?</span>
       <div class="af-topbar-title" style="text-align:right">Lesson</div>
-      <button class="af-toc-btn" onclick="openModuleListFromLesson()">☰</button>
+      <button class="af-toc-btn" onclick="openModuleListFromLesson()" aria-label="Open table of contents">☰</button>
     </header>
     <div class="af-lesson-progress-row">
-      <div class="af-lesson-progress-track"><div class="af-lesson-progress-fill2" id="lessonProgFill" style="width:0%"></div></div>
+      <div class="af-lesson-progress-track" role="progressbar" aria-label="Lesson progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="lessonProgTrack"><div class="af-lesson-progress-fill2" id="lessonProgFill" style="width:0%"></div></div>
       <span class="af-lesson-progress-pct" id="lessonProgPct">Progress: 0%</span>
     </div>
     <div class="af-page no-nav-pad" id="lessonPage"></div>
@@ -570,7 +625,7 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
   <!-- ════════ VIEW: CERTIFICATE DETAIL ════════ -->
   <div class="af-view" id="viewCert">
     <header class="af-topbar">
-      <button class="af-back" onclick="closeCertDetail()">←</button>
+      <button class="af-back" onclick="closeCertDetail()" aria-label="Back to Explore">←</button>
       <div class="af-topbar-title">My Certificate</div>
     </header>
     <div class="af-page no-nav-pad" id="certDetailPage"></div>
@@ -633,15 +688,95 @@ function fallbackImg(){ return 'https://images.unsplash.com/photo-1501504905252-
 function formatDate(iso){ try{ return new Date(iso).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }); }catch(_){ return ''; } }
 function fmtDate(iso){ try{ return new Date(iso).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}); }catch(_){ return iso||''; } }
 function fmtDateLong(iso){ try{ return new Date(iso).toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'}); }catch(_){ return iso||''; } }
+/* Larger circular ring for the dashboard hero stat — same approach as
+   miniRing but sized for a headline metric, with a percent label slot. */
+function heroRing(pct, size=64, stroke=7){
+  const r = (size/2) - (stroke/2) - 1;
+  const c = size/2;
+  const circumference = 2 * Math.PI * r;
+  const clamped = Math.min(100,Math.max(0,pct));
+  const offset = circumference * (1 - clamped/100);
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" aria-hidden="true">
+    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--b1)" stroke-width="${stroke}"/>
+    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="url(#heroRingGrad)" stroke-width="${stroke}"
+      stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"
+      stroke-linecap="round" transform="rotate(-90 ${c} ${c})"
+      style="transition:stroke-dashoffset 1s var(--ease)"/>
+    <defs>
+      <linearGradient id="heroRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="var(--p)"/>
+        <stop offset="100%" stop-color="var(--acc)"/>
+      </linearGradient>
+    </defs>
+  </svg>`;
+}
+
+/* Compute genuine, non-fabricated learning insights from the real
+   in_progress / completed / certificates arrays the backend returns.
+   No streaks, XP, or made-up gamification — only what the data supports. */
+function computeDashboardInsights(in_progress, completed, certificates){
+  const totalEnrolled = in_progress.length + completed.length;
+  const completionRate = totalEnrolled > 0 ? Math.round((completed.length / totalEnrolled) * 100) : 0;
+
+  const avgActiveProgress = in_progress.length > 0
+    ? Math.round(in_progress.reduce((sum,p)=> sum + (p.percent||0), 0) / in_progress.length)
+    : 0;
+
+  // This-month completions, derived from real completed_at timestamps
+  const now = new Date();
+  const thisMonthCompletions = completed.filter(p=>{
+    const d = p.completed_at ? new Date(p.completed_at) : null;
+    return d && d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth();
+  }).length;
+
+  // Most recent real milestone across completions and certificates
+  const milestones = [
+    ...completed.map(p=>({ type:'completed', date:p.completed_at, title:(p.af_courses||{}).title })),
+    ...certificates.map(c=>({ type:'certificate', date:c.issued_at, title:c.course_title }))
+  ].filter(m=>m.date).sort((a,b)=> new Date(b.date) - new Date(a.date));
+  const latestMilestone = milestones[0] || null;
+
+  return { completionRate, avgActiveProgress, thisMonthCompletions, latestMilestone, totalEnrolled };
+}
+/* Tiny inline SVG ring for showing real percent-complete data in compact spaces
+   (course card pills, etc). r=5 keeps it crisp at 13x13 box. */
+function miniRing(pct, size=13){
+  const r = (size/2) - 1.5;
+  const c = size/2;
+  const circumference = 2 * Math.PI * r;
+  const offset = circumference * (1 - Math.min(100,Math.max(0,pct))/100);
+  return `<svg class="af-pill-progress-ring" viewBox="0 0 ${size} ${size}" aria-hidden="true">
+    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="currentColor" stroke-opacity=".22" stroke-width="2"/>
+    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"
+      stroke-linecap="round" transform="rotate(-90 ${c} ${c})"/>
+  </svg>`;
+}
+function setLessonProgress(pct){
+  $('lessonProgFill').style.width = pct+'%';
+  $('lessonProgPct').textContent = 'Progress: '+pct+'%';
+  const track = $('lessonProgTrack');
+  if(track) track.setAttribute('aria-valuenow', String(pct));
+}
 
 /* ── TOAST ── */
 function afToast(msg, type){
-  const wrap = $('afToastWrap'); wrap.innerHTML='';
+  const wrap = $('afToastWrap');
+  const existing = wrap.querySelector('.af-toast');
+  if(existing) existing.remove();
   const t = document.createElement('div');
-  t.className = 'af-toast af-toast-' + (type==='err' ? 'err' : 'ok');
-  t.innerHTML = '<div><p class="af-toast-title">'+(type==='err'?'Notice':'Done')+'</p><p class="af-toast-msg">'+msg+'</p></div>';
+  const isErr = type==='err';
+  t.className = 'af-toast af-toast-' + (isErr ? 'err' : 'ok');
+  t.setAttribute('role','alert');
+  t.setAttribute('aria-live','assertive');
+  const icon = isErr ? '⚠️' : '✓';
+  t.innerHTML = '<span class="af-toast-ic">'+icon+'</span><div><p class="af-toast-title">'+(isErr?'Notice':'Done')+'</p><p class="af-toast-msg">'+msg+'</p></div>';
   wrap.appendChild(t);
-  setTimeout(()=>t.remove(), 2700);
+  requestAnimationFrame(()=> t.classList.add('show'));
+  setTimeout(()=>{
+    t.classList.remove('show');
+    setTimeout(()=>t.remove(), 220);
+  }, 2700);
 }
 
 /* ── DARK MODE — preserved exactly: localStorage + storage event sync ── */
@@ -776,7 +911,7 @@ async function loadCourses(){
     student_id: getStudentId()
   });
   if(!data.ok){
-    $('courseList').innerHTML = `<div class="af-empty"><span>⚠️</span>${escapeHtml(data.message||'Could not load courses.')}</div>`;
+    $('courseList').innerHTML = `<div class="af-empty" role="status"><span>⚠️</span>${escapeHtml(data.message||'Could not load courses.')}</div>`;
     return;
   }
   _categories = ['All Courses', ...(data.categories||[])];
@@ -802,19 +937,22 @@ function renderCourseList(){
   }
 
   if(list.length===0){
-    $('courseList').innerHTML = `<div class="af-empty"><span>📭</span>${_searchQuery.trim() ? 'No courses match your search.' : 'No courses in this category yet.'}</div>`;
+    $('courseList').innerHTML = `<div class="af-empty" role="status"><span>📭</span>${_searchQuery.trim() ? 'No courses match your search.' : 'No courses in this category yet.'}</div>`;
     return;
   }
 
   $('courseList').innerHTML = list.map(c => `
     <button class="af-course-card" onclick="openCourse('${c.id}')">
-      <img class="af-course-img" src="${c.cover_image_url||fallbackImg()}" alt="${escapeHtml(c.title)}" loading="lazy"/>
+      <div class="af-course-img-wrap">
+        <img class="af-course-img" src="${c.cover_image_url||fallbackImg()}" alt="${escapeHtml(c.title)}" loading="lazy"/>
+        <div class="af-course-img-ring"></div>
+      </div>
       <div class="af-course-body">
         <div class="af-course-cat">${escapeHtml(c.category)}</div>
         <div class="af-course-title">${escapeHtml(c.title)}</div>
         <div class="af-course-pills">
-          ${c.status==='completed' ? '<span class="af-pill af-pill-done">Completed</span>' : ''}
-          ${c.status==='in_progress' ? '<span class="af-pill af-pill-progress">In progress · '+c.percent+'%</span>' : ''}
+          ${c.status==='completed' ? '<span class="af-pill af-pill-done">✓ Completed</span>' : ''}
+          ${c.status==='in_progress' ? '<span class="af-pill af-pill-progress">'+miniRing(c.percent)+c.percent+'% done</span>' : ''}
           <span class="af-pill af-pill-offline">☁ Certificate Available</span>
         </div>
       </div>
@@ -837,7 +975,7 @@ async function openCourse(courseId){
 
   const data = await callCatalog('get_course', { course_id: courseId, student_id: getStudentId() });
   if(!data.ok){
-    $('detailPage').innerHTML = `<div class="af-empty"><span>⚠️</span>${escapeHtml(data.message||'Could not load this course.')}</div>`;
+    $('detailPage').innerHTML = `<div class="af-empty" role="status"><span>⚠️</span>${escapeHtml(data.message||'Could not load this course.')}</div>`;
     return;
   }
   _currentCourse = data.course;
@@ -864,7 +1002,7 @@ async function openCourse(courseId){
 
       ${isStarted ? `
         <div class="af-progress-wrap">
-          <div class="af-progress-track"><div class="af-progress-fill" style="width:${percent}%"></div></div>
+          <div class="af-progress-track" role="progressbar" aria-label="Course progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><div class="af-progress-fill" style="width:${percent}%"></div></div>
           <div class="af-progress-label"><span>${percent}% complete</span><span>${progress.modules_done}/${progress.modules_total} modules</span></div>
         </div>
       ` : ''}
@@ -910,7 +1048,7 @@ function renderModuleList(){
 
   $('modulesPage').innerHTML = `
     <div class="af-mod-head">
-      <div class="af-mod-progress-top"><div class="af-mod-progress-fill" style="width:${percent}%"></div></div>
+      <div class="af-mod-progress-top" role="progressbar" aria-label="Module completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}"><div class="af-mod-progress-fill" style="width:${percent}%"></div></div>
       <div class="af-mod-progress-text">Progress: ${percent}%</div>
       <div class="af-mod-course-card">
         <img class="af-mod-course-thumb" src="${_currentCourse.cover_image_url||fallbackImg()}" alt=""/>
@@ -948,11 +1086,11 @@ function _isCourseCompleted(){
 async function openModule(moduleId){
   showView('viewLesson');
   $('lessonPage').innerHTML = `<div style="padding:20px"><div class="af-skel" style="aspect-ratio:16/8;margin-bottom:16px"></div><div class="af-skel" style="height:24px;width:70%;margin-bottom:10px"></div><div class="af-skel" style="height:80px"></div></div>`;
-  $('lessonProgFill').style.width='0%'; $('lessonProgPct').textContent='Progress: 0%';
+  setLessonProgress(0);
 
   const data = await callCatalog('get_module', { module_id: moduleId, student_id: getStudentId() });
   if(!data.ok){
-    $('lessonPage').innerHTML = `<div class="af-empty"><span>⚠️</span>${escapeHtml(data.message||'Could not load this lesson.')}</div>`;
+    $('lessonPage').innerHTML = `<div class="af-empty" role="status"><span>⚠️</span>${escapeHtml(data.message||'Could not load this lesson.')}</div>`;
     return;
   }
   _currentModule = data.module;
@@ -968,8 +1106,7 @@ async function openModule(moduleId){
   _isReviewMode = _isCourseCompleted();
 
   const pct = data.module_total>0 ? Math.round(((data.module_index-1)/data.module_total)*100) : 0;
-  $('lessonProgFill').style.width = pct+'%';
-  $('lessonProgPct').textContent = 'Progress: '+pct+'%';
+  setLessonProgress(pct);
 
   if(_currentModule.module_type === 'survey'){
     renderSurvey(data.survey_questions||[], data.survey_answers||{});
@@ -1026,7 +1163,7 @@ function renderSurvey(questions, existingAnswers){
  const alreadyDone = !!_currentModule.is_done;
   
   if(questions.length === 0){
-    $('lessonPage').innerHTML = `<div class="af-empty"><span>📊</span>This survey isn't set up yet.</div>`;
+    $('lessonPage').innerHTML = `<div class="af-empty" role="status"><span>📊</span>This survey isn't set up yet.</div>`;
     return;
   }
 
@@ -1197,7 +1334,7 @@ function showCompletionScreen(){
       <button class="af-btn-primary" style="margin-top:10px" onclick="finishToDetail()">Back to course</button>
     </div>
   `;
-  $('lessonProgFill').style.width='100%'; $('lessonProgPct').textContent='Progress: 100%';
+  setLessonProgress(100);
 }
 
 function finishToDetail(){
@@ -1235,7 +1372,7 @@ async function loadDashboard(){
 
   if(!sid){
     $('dashboardPane').innerHTML = `
-      <div class="af-empty">
+      <div class="af-empty" role="status">
         <span>🔒</span>
         <strong>Sign in to see your dashboard</strong>
       </div>`;
@@ -1244,16 +1381,13 @@ async function loadDashboard(){
   }
 
   $('dashboardPane').innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <div class="af-skel" style="height:44px;border-radius:12px"></div>
-      <div class="af-skel" style="height:44px;border-radius:12px"></div>
-    </div>
+    <div class="af-skel" style="height:96px;border-radius:18px"></div>
     <div class="af-skel" style="height:80px;border-radius:16px"></div>
     <div class="af-skel" style="height:80px;border-radius:16px"></div>`;
 
   const data = await callDash('get_dashboard', { student_id: sid });
   if(!data.ok){
-    $('dashboardPane').innerHTML = `<div class="af-empty"><span>⚠️</span>${escapeHtml(data.message||'Could not load your dashboard.')}</div>`;
+    $('dashboardPane').innerHTML = `<div class="af-empty" role="status"><span>⚠️</span>${escapeHtml(data.message||'Could not load your dashboard.')}</div>`;
     return;
   }
 
@@ -1304,14 +1438,55 @@ function renderDashboard(data, searchQuery){
 
   /* ════════ ACTIVITY TAB ════════ */
   let activityHtml = '';
-  activityHtml += `
-    <div class="stats-row" style="grid-template-columns:1fr 1fr">
-      <div class="stat-card"><div class="stat-num">${in_progress.length}</div><div class="stat-lbl">In Progress</div></div>
-      <div class="stat-card"><div class="stat-num">${completed.length}</div><div class="stat-lbl">Completed</div></div>
-    </div>`;
+
+  const hasAnyEnrollment = (in_progress.length + completed.length) > 0;
+  if(!hasAnyEnrollment){
+    // Nothing to show insights about yet — skip straight to the empty state
+    // below rather than rendering a hollow "0% everything" header.
+  } else {
+    const insights = computeDashboardInsights(in_progress, completed, certificates);
+    activityHtml += `
+      <div class="insights-card">
+        <div class="insights-ring-wrap">
+          <div class="insights-ring">${heroRing(insights.completionRate)}</div>
+          <div class="insights-ring-label">
+            <span class="insights-ring-num">${insights.completionRate}%</span>
+            <span class="insights-ring-sub">complete</span>
+          </div>
+        </div>
+        <div class="insights-stats">
+          <div class="insights-stat-row">
+            <span class="insights-stat-num">${in_progress.length}</span>
+            <span class="insights-stat-lbl">In progress</span>
+          </div>
+          <div class="insights-stat-row">
+            <span class="insights-stat-num">${completed.length}</span>
+            <span class="insights-stat-lbl">Completed</span>
+          </div>
+          ${in_progress.length > 0 ? `
+          <div class="insights-stat-row">
+            <span class="insights-stat-num">${insights.avgActiveProgress}%</span>
+            <span class="insights-stat-lbl">Avg. active progress</span>
+          </div>` : ''}
+        </div>
+      </div>
+      ${insights.thisMonthCompletions > 0 || insights.latestMilestone ? `
+      <div class="insight-chips">
+        ${insights.thisMonthCompletions > 0 ? `
+          <div class="insight-chip">
+            <span class="insight-chip-ic">📈</span>
+            <span>${insights.thisMonthCompletions} course${insights.thisMonthCompletions!==1?'s':''} finished this month</span>
+          </div>` : ''}
+        ${insights.latestMilestone ? `
+          <div class="insight-chip">
+            <span class="insight-chip-ic">${insights.latestMilestone.type==='certificate'?'🎓':'✅'}</span>
+            <span>Latest: ${insights.latestMilestone.type==='certificate'?'certificate earned for':'finished'} <strong>${esc(insights.latestMilestone.title||'a course')}</strong></span>
+          </div>` : ''}
+      </div>` : ''}`;
+  }
 
   if(q && inProgressList.length===0 && completedList.length===0){
-    activityHtml += `<div class="af-empty"><span>📭</span>No activity matches your search.</div>`;
+    activityHtml += `<div class="af-empty" role="status"><span>📭</span>No activity matches your search.</div>`;
   } else {
     if(inProgressList.length > 0){
       activityHtml += `<div>
@@ -1331,7 +1506,7 @@ function renderDashboard(data, searchQuery){
             <div class="progress-card-body">
               <div class="progress-card-cat">${esc(course.category||'Course')}</div>
               <div class="progress-card-title">${esc(course.title||'Untitled')}</div>
-              <div class="progress-track"><div class="progress-fill" data-pct="${pct}" style="width:0%"></div></div>
+              <div class="progress-track" role="progressbar" aria-label="${esc(course.title||'Course')} progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><div class="progress-fill" data-pct="${pct}" style="width:0%"></div></div>
               <div class="progress-pct">${pct}% complete</div>
             </div>
           </button>`;
@@ -1370,7 +1545,7 @@ function renderDashboard(data, searchQuery){
 
     if(in_progress.length === 0 && completed.length === 0){
       activityHtml += `
-        <div class="af-empty">
+        <div class="af-empty" role="status">
           <span>🎯</span>
           <strong>Nothing here yet!</strong>
           <span>Enroll in a course to start your learning journey.</span>
@@ -1388,10 +1563,10 @@ function renderDashboard(data, searchQuery){
     </div>`;
 
   if(q && certList.length===0 && certificates.length>0){
-    certHtml += `<div class="af-empty"><span>📭</span>No certificates match your search.</div>`;
+    certHtml += `<div class="af-empty" role="status"><span>📭</span>No certificates match your search.</div>`;
   } else if(certificates.length === 0){
     certHtml += `
-      <div class="af-empty">
+      <div class="af-empty" role="status">
         <span>🎓</span>
         <strong>No certificates yet</strong>
         <span>Complete a course to earn your first certificate.</span>
