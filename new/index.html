@@ -155,8 +155,6 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
 .af-empty span{font-size:30px}
 .af-empty strong{color:var(--t2);font-size:13.5px}
 </style>
-</head>
-<body>
 <style>
 /* ════════════════════════════════════════════════════════
    EXPLORE — filter dropdown, sort tabs, course cards
@@ -423,6 +421,7 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
 .cert-detail-actions{display:flex;flex-direction:column;gap:8px}
 .cert-dl-btn{width:100%;height:48px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);color:#fff;font-size:13.5px;font-weight:700;box-shadow:0 4px 16px rgba(79,70,229,.35)}
 .cert-dl-btn:active{transform:scale(.98)}
+.cert-dl-btn:disabled{opacity:.55;pointer-events:none}
 .cert-share-btn{width:100%;height:44px;border-radius:14px;background:transparent;border:1.5px solid var(--bc);color:var(--t1);font-size:13px;font-weight:700}
 .cert-share-btn:active{background:var(--grp)}
 .cert-verify-btn{width:100%;height:44px;border-radius:14px;background:var(--ok-soft);border:1.5px solid var(--ok-b);color:#15803d;font-size:13px;font-weight:700}
@@ -528,32 +527,24 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
   </div>
 
   <!-- ════════ SHARED BOTTOM NAV ════════ -->
-<nav class="af-bnav" id="afBnav">
-  <button class="af-nav-btn" data-tab="home" onclick="navTap('home')" type="button">
-    <span class="af-nav-icon">🏠</span>
-    <span class="af-nav-label">Home</span>
-  </button>
+  <nav class="af-bnav" id="afBnav">
+    <button class="af-nav-btn" data-tab="home" onclick="navTap('home')" type="button">
+      <span class="af-nav-icon">🏠</span><span class="af-nav-label">Home</span>
+    </button>
+    <button class="af-nav-btn" data-tab="explore" onclick="navTap('explore')" type="button">
+      <span class="af-nav-icon">🧭</span><span class="af-nav-label">Explore</span>
+    </button>
+    <button class="af-nav-btn" data-tab="batches" onclick="navTap('batches')" type="button">
+      <span class="af-nav-icon">📚</span><span class="af-nav-label">Batches</span>
+    </button>
+    <button class="af-nav-btn" data-tab="community" onclick="navTap('community')" type="button">
+      <span class="af-nav-icon">💬</span><span class="af-nav-label">Community</span>
+    </button>
+    <button class="af-nav-btn" data-tab="dashboard" onclick="navTap('dashboard')" type="button">
+      <span class="af-nav-icon">🎓</span><span class="af-nav-label">Dashboard</span>
+    </button>
+  </nav>
 
-  <button class="af-nav-btn active" data-tab="explore" onclick="navTap('explore')" type="button">
-    <span class="af-nav-icon">🧭</span>
-    <span class="af-nav-label">Explore</span>
-  </button>
-
-  <button class="af-nav-btn" data-tab="batches" onclick="navTap('batches')" type="button">
-    <span class="af-nav-icon">📚</span>
-    <span class="af-nav-label">Batches</span>
-  </button>
-
-  <button class="af-nav-btn" data-tab="community" onclick="navTap('community')" type="button">
-    <span class="af-nav-icon">💬</span>
-    <span class="af-nav-label">Community</span>
-  </button>
-
-  <button class="af-nav-btn" data-tab="settings" onclick="navTap('settings')" type="button">
-    <span class="af-nav-icon">⚙️</span>
-    <span class="af-nav-label">Settings</span>
-  </button>
-</nav>
   <!-- ════════ OVERLAY: COURSE DETAIL ════════ -->
   <div class="af-overlay" id="overlayDetail">
     <div class="af-ov-topbar">
@@ -618,7 +609,18 @@ const VERIFY_BASE = "https://cert.academeforge.in/verify?id=";
 
 const $ = id => document.getElementById(id);
 
-function getStudentId(){ return localStorage.getItem('af_student_uuid') || null; }
+/* ── FIX: identity must match the rest of the app (Community page
+   stores af_student_email / af_student_mobile / af_student_name —
+   there is no af_student_uuid anywhere). Falling back to that key
+   meant this page always behaved "logged out" toward the backend. ── */
+function getStudentId(){
+  return localStorage.getItem('af_student_uuid')
+      || localStorage.getItem('af_student_email')
+      || localStorage.getItem('af_student_mobile')
+      || null;
+}
+function getStudentName(){ return localStorage.getItem('af_student_name') || 'Student'; }
+function isLoggedIn(){ return !!getStudentId(); }
 
 async function callCatalog(action, payload){
   try{
@@ -630,7 +632,7 @@ async function callCatalog(action, payload){
 }
 async function callDash(action, payload = {}){
   try{
-    const res = await fetch(DASH_EDGE, {method:'POST', headers:HDRS, body:JSON.stringify({action, ...payload})});
+    const res = await fetch(DASH_EDGE, {method:'POST', headers:HDRS, body:JSON.stringify({action, student_id:getStudentId(), ...payload})});
     return await res.json();
   }catch(e){
     return {ok:false, message:'Network error.'};
@@ -668,18 +670,17 @@ function closeOverlay(id){ $(id).classList.remove('open'); }
 
 /* ════════════════════════════════════════════════════════
    APP SHELL — single shared bottom nav + swipeable carousel
-   between the five primary sections.
+   between the five primary sections. Home / Batches /
+   Community keep their real, separate routes (per "preserve
+   existing routes where needed") — only Explore and
+   Dashboard are merged into this page as true in-app tabs.
    ════════════════════════════════════════════════════════ */
-
-const TABS = ['home','explore','batches','community','settings'];
-
+const TABS = ['home','explore','batches','community','dashboard'];
 const ROUTES = {
   home: '/index.html',
   batches: '/batches/index.html',
-  community: '/community/indix.html',
-  settings: '/setting/index.html'
+  community: '/community/index.html'
 };
-
 let _tabIndex = 1; // start on Explore
 let _exploreLoaded = false;
 let _carouselWidth = 0;
@@ -687,9 +688,7 @@ let _carouselWidth = 0;
 const carousel = $('afCarousel');
 const viewport = $('carouselViewport');
 
-function carouselSlotWidth(){
-  return viewport.clientWidth;
-}
+function carouselSlotWidth(){ return viewport.clientWidth; }
 
 function applyCarouselTransform(px, animate){
   carousel.classList.toggle('animating', !!animate);
@@ -704,89 +703,63 @@ function updateBnavActive(tab){
 
 function renderHeader(tab){
   const hdr = $('afHeader');
-
   if(tab==='explore'){
     hdr.innerHTML = `
       <div class="af-search-row">
         <div class="af-search-box">
           <span class="af-search-ic">🔍</span>
-          <input
-            id="exploreSearchInput"
-            type="text"
-            placeholder="Search courses"
-            value="${esc(_searchQuery)}"
-            oninput="onSearchInput(this.value)"
-          />
+          <input id="exploreSearchInput" type="text" placeholder="Search courses" value="${esc(_searchQuery)}" oninput="onSearchInput(this.value)"/>
         </div>
         <button class="af-icon-btn" id="filterBtn" onclick="toggleFilterMenu()">⚙</button>
       </div>`;
-  } else {
-    const titles = {
-      home:'Home',
-      batches:'Batches',
-      community:'Community',
-      settings:'Settings'
-    };
-
+  } else if(tab==='dashboard'){
+    const name = _dashName || getStudentName() || 'Student';
+    const initials = name.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2) || 'S';
     hdr.innerHTML = `
       <div class="af-header-row">
-        <div class="af-header-title">${titles[tab] || ''}</div>
+        <div class="af-dash-profile" style="flex:1;min-width:0">
+          <div class="af-dash-avatar">${esc(initials)}</div>
+          <div class="af-dash-namewrap">
+            <div class="af-dash-name">${esc(name)}</div>
+          </div>
+        </div>
+        <div class="af-cert-badge">🏅 ${_dashCertCount}</div>
       </div>`;
+  } else {
+    const titles = {home:'Home', batches:'Batches', community:'Community'};
+    hdr.innerHTML = `<div class="af-header-row"><div class="af-header-title">${titles[tab]||''}</div></div>`;
   }
 }
 
 function goToIndex(idx, animate){
   idx = Math.max(0, Math.min(TABS.length-1, idx));
-
   const tab = TABS[idx];
-
   _tabIndex = idx;
   _carouselWidth = carouselSlotWidth();
-
   applyCarouselTransform(-idx*_carouselWidth, animate);
-
   updateBnavActive(tab);
   renderHeader(tab);
 
-  if(tab==='explore' && !_exploreLoaded){
-    _exploreLoaded = true;
-    loadCourses();
-  }
+  if(tab==='explore' && !_exploreLoaded){ _exploreLoaded = true; loadCourses(); }
+  if(tab==='dashboard'){ loadDashboard(); }
 
   if(ROUTES[tab]){
     const delay = animate ? 360 : 0;
-
-    setTimeout(()=>{
-      window.location.href = ROUTES[tab];
-    }, delay);
+    setTimeout(()=>{ window.location.href = ROUTES[tab]; }, delay);
   }
 }
 
 function navTap(tab){
   const idx = TABS.indexOf(tab);
-
   if(idx===-1) return;
-
-  if(ROUTES[tab]){
-    window.location.href = ROUTES[tab];
-    return;
-  }
-
+  if(ROUTES[tab]){ window.location.href = ROUTES[tab]; return; }
   goToIndex(idx, true);
 }
-
 window.navTap = navTap;
 
 /* ── SWIPE GESTURE — horizontal only, never fights vertical scroll ── */
-
 (function initSwipe(){
-
-  let active = false;
-  let locked = null;
-  let x0 = 0;
-  let y0 = 0;
-  let startPx = 0;
-
+  let active=false, locked=null, x0=0, y0=0, startPx=0;
   const THRESHOLD_RATIO = 0.16;
 
   function overlayOpen(){
@@ -794,96 +767,53 @@ window.navTap = navTap;
   }
 
   viewport.addEventListener('touchstart', e=>{
-
     if(overlayOpen()) return;
-
+    if(e.target.closest('.af-chip-row, .af-filter-menu, input, textarea, button')) { /* allow inner scroll/tap, still permit gesture start outside */ }
     const t = e.touches[0];
-
-    x0 = t.clientX;
-    y0 = t.clientY;
-
-    active = true;
-    locked = null;
-
+    x0 = t.clientX; y0 = t.clientY;
+    active = true; locked = null;
     _carouselWidth = carouselSlotWidth();
-    startPx = -_tabIndex * _carouselWidth;
-
+    startPx = -_tabIndex*_carouselWidth;
   }, {passive:true});
 
   viewport.addEventListener('touchmove', e=>{
-
     if(!active || overlayOpen()) return;
-
     const t = e.touches[0];
-
-    const dx = t.clientX - x0;
-    const dy = t.clientY - y0;
-
+    const dx = t.clientX - x0, dy = t.clientY - y0;
     if(locked===null){
-      if(Math.abs(dx)>8 || Math.abs(dy)>8){
+      if(Math.abs(dx) > 8 || Math.abs(dy) > 8){
         locked = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
       }
     }
-
     if(locked==='h'){
-
       if(e.cancelable) e.preventDefault();
-
       let next = startPx + dx;
-
-      const min = -(TABS.length-1) * _carouselWidth;
-      const max = 0;
-
-      if(next > max){
-        next = max + (next-max)*0.35;
-      }
-
-      if(next < min){
-        next = min + (next-min)*0.35;
-      }
-
+      // resistance at edges
+      const min = -(TABS.length-1)*_carouselWidth, max = 0;
+      if(next>max) next = max + (next-max)*0.35;
+      if(next<min) next = min + (next-min)*0.35;
       applyCarouselTransform(next, false);
     }
-
   }, {passive:false});
 
   viewport.addEventListener('touchend', e=>{
-
     if(!active) return;
-
     active = false;
-
-    if(locked!=='h'){
-      locked = null;
-      return;
-    }
-
+    if(locked!=='h'){ locked=null; return; }
     const t = e.changedTouches[0];
     const dx = t.clientX - x0;
-
     let targetIdx = _tabIndex;
-
-    if(Math.abs(dx) > _carouselWidth * THRESHOLD_RATIO){
-      targetIdx += dx < 0 ? 1 : -1;
+    if(Math.abs(dx) > _carouselWidth*THRESHOLD_RATIO){
+      targetIdx += dx<0 ? 1 : -1;
     }
-
     goToIndex(targetIdx, true);
-
     locked = null;
-
   }, {passive:true});
 
   window.addEventListener('resize', ()=>{
-
     _carouselWidth = carouselSlotWidth();
-
-    applyCarouselTransform(
-      -_tabIndex * _carouselWidth,
-      false
-    );
-
+    applyCarouselTransform(-_tabIndex*_carouselWidth, false);
   });
-
 })();
 
 /* ════════════════════════════════════════════════════════
@@ -1372,6 +1302,10 @@ function finishToDetail(){
   closeOverlay('overlayLesson');
   closeOverlay('overlayModules');
   openCourse(_currentCourse.id);
+  // The course they just finished may now have a fresh certificate —
+  // refresh dashboard data in the background so the badge/cert count
+  // is correct next time the Dashboard tab is opened.
+  _dashLoaded = false;
 }
 window.finishToDetail = finishToDetail;
 
@@ -1386,7 +1320,457 @@ function openModuleListFromLesson(){
 }
 window.openModuleListFromLesson = openModuleListFromLesson;
 
+/* ════════════════════════════════════════════════════════
+   DASHBOARD — FIX: this whole section was missing from the
+   original file. goToIndex() already called loadDashboard()
+   and renderHeader() already read _dashName / _dashCertCount,
+   but nothing ever defined them, so opening the Dashboard tab
+   threw a ReferenceError and silently broke the whole script
+   (which is also why Explore/swipe/everything else looked dead).
+   ════════════════════════════════════════════════════════ */
+let _dashName = '';
+let _dashCertCount = 0;
+let _dashLoaded = false;
+let _dashStats = null;
+let _dashInProgress = [];
+let _dashCompleted = [];
+let _dashCertificates = [];
 
-  </script>
+async function loadDashboard(){
+  const sid = getStudentId();
+
+  if(!sid){
+    $('dashBody').innerHTML = `
+      <div class="af-empty">
+        <span>🔒</span>
+        <strong>Log in to see your dashboard</strong>
+        <span>Track your progress, completed courses, and certificates once you're logged in.</span>
+      </div>`;
+    _dashName = getStudentName();
+    _dashCertCount = 0;
+    renderHeader('dashboard');
+    return;
+  }
+
+  if(_dashLoaded){
+    renderDashboard();
+    return;
+  }
+
+  $('dashBody').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
+      <div class="af-skel" style="height:64px"></div>
+      <div class="af-skel" style="height:64px"></div>
+      <div class="af-skel" style="height:64px"></div>
+    </div>
+    <div class="af-skel" style="height:64px"></div>
+    <div class="af-skel" style="height:64px"></div>`;
+
+  const data = await callDash('get_dashboard', { student_id: sid });
+
+  if(!data.ok){
+    $('dashBody').innerHTML = `<div class="af-empty"><span>⚠️</span>${escapeHtml(data.message||'Could not load your dashboard.')}</div>`;
+    return;
+  }
+
+  _dashName = data.student_name || getStudentName();
+  _dashStats = data.stats || { courses_enrolled:0, courses_completed:0, certificates_earned:0 };
+  _dashInProgress = data.in_progress || [];
+  _dashCompleted = data.completed || [];
+  _dashCertificates = data.certificates || [];
+  _dashCertCount = _dashCertificates.length;
+  _dashLoaded = true;
+
+  renderHeader('dashboard');
+  renderDashboard();
+}
+
+function renderDashboard(){
+  const stats = _dashStats || { courses_enrolled:0, courses_completed:0, certificates_earned:0 };
+
+  const statsHtml = `
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num">${stats.courses_enrolled||0}</div><div class="stat-lbl">Enrolled</div></div>
+      <div class="stat-card"><div class="stat-num">${stats.courses_completed||0}</div><div class="stat-lbl">Completed</div></div>
+      <div class="stat-card"><div class="stat-num">${stats.certificates_earned||0}</div><div class="stat-lbl">Certificates</div></div>
+    </div>`;
+
+  const inProgressHtml = `
+    <div>
+      <div class="sec-h">
+        <div class="sec-title">📘 In progress</div>
+        <span class="sec-count">${_dashInProgress.length}</span>
+      </div>
+      ${_dashInProgress.length === 0
+        ? `<div class="af-empty"><span>📭</span>No courses in progress yet.</div>`
+        : `<div style="display:flex;flex-direction:column;gap:9px">
+            ${_dashInProgress.map(c => `
+              <button class="progress-card" onclick="dashOpenCourse('${c.course_id}')">
+                <img class="progress-card-thumb" src="${c.cover_image_url||fallbackImg()}" alt=""/>
+                <div class="progress-card-body">
+                  <div class="progress-card-cat">${escapeHtml(c.category||'')}</div>
+                  <div class="progress-card-title">${escapeHtml(c.title)}</div>
+                  <div class="progress-track"><div class="progress-fill" style="width:${c.percent||0}%"></div></div>
+                  <div class="progress-pct">${c.percent||0}% complete</div>
+                </div>
+              </button>`).join('')}
+          </div>`}
+    </div>`;
+
+  const completedHtml = `
+    <div>
+      <div class="sec-h">
+        <div class="sec-title">✅ Completed</div>
+        <span class="sec-count">${_dashCompleted.length}</span>
+      </div>
+      ${_dashCompleted.length === 0
+        ? `<div class="af-empty"><span>🎯</span>No completed courses yet.</div>`
+        : `<div style="display:flex;flex-direction:column;gap:9px">
+            ${_dashCompleted.map(c => `
+              <div class="completed-card">
+                <img class="completed-thumb" src="${c.cover_image_url||fallbackImg()}" alt=""/>
+                <div class="completed-body">
+                  <div class="completed-cat">${escapeHtml(c.category||'')}</div>
+                  <div class="completed-title">${escapeHtml(c.title)}</div>
+                  <div class="completed-row">
+                    <span class="completed-badge">✓ Completed ${c.completed_at ? '· '+fmtDate(c.completed_at) : ''}</span>
+                    ${c.has_certificate
+                      ? (c.certificate_id
+                          ? `<button class="cert-ready-btn" onclick="openCertDetail('${c.certificate_id}')">🎓 View certificate</button>`
+                          : `<button class="cert-ready-btn loading" onclick="issueCertificate('${c.course_id}', this)">🎓 Generate certificate</button>`)
+                      : ''}
+                  </div>
+                </div>
+              </div>`).join('')}
+          </div>`}
+    </div>`;
+
+  const certificatesHtml = `
+    <div>
+      <div class="sec-h">
+        <div class="sec-title">🏅 My Certificates</div>
+        <span class="sec-count">${_dashCertificates.length}</span>
+      </div>
+      ${_dashCertificates.length === 0
+        ? `<div class="af-empty"><span>🏅</span>Certificates you earn will show up here.</div>`
+        : `<div style="display:flex;flex-direction:column;gap:9px">
+            ${_dashCertificates.map(cert => `
+              <div class="cert-card">
+                <div class="cert-card-icon">🎓</div>
+                <div class="cert-card-info">
+                  <div class="cert-card-title">${escapeHtml(cert.course_title)}</div>
+                  <div class="cert-card-meta">ID: ${escapeHtml(cert.certificate_id)} · ${fmtDate(cert.issued_at)}</div>
+                </div>
+                <div class="cert-card-actions">
+                  <button class="cert-mini-btn primary" onclick="openCertDetail('${cert.certificate_id}')">→</button>
+                </div>
+              </div>`).join('')}
+          </div>`}
+    </div>`;
+
+  $('dashBody').innerHTML = statsHtml + inProgressHtml + completedHtml + certificatesHtml;
+}
+
+function dashOpenCourse(courseId){
+  goToIndex(TABS.indexOf('explore'), true);
+  setTimeout(()=>openCourse(courseId), 380);
+}
+window.dashOpenCourse = dashOpenCourse;
+
+async function issueCertificate(courseId, btnEl){
+  const sid = getStudentId();
+  if(!sid){ afToast('Please log in first.', 'err'); return; }
+  if(btnEl){ btnEl.classList.add('loading'); btnEl.textContent = 'Generating…'; }
+
+  const data = await callDash('issue_certificate', { student_id: sid, course_id: courseId });
+  if(!data.ok){
+    afToast(data.message || 'Could not generate certificate yet.', 'err');
+    if(btnEl){ btnEl.classList.remove('loading'); btnEl.textContent = '🎓 Generate certificate'; }
+    return;
+  }
+
+  afToast('Certificate generated!', 'ok');
+  _dashLoaded = false;
+  await loadDashboard();
+  if(data.certificate_id) openCertDetail(data.certificate_id);
+}
+window.issueCertificate = issueCertificate;
+
+/* ════════════════════════════════════════════════════════
+   CERTIFICATE DETAIL — preview iframe scaled to container,
+   download / share / verify actions
+   ════════════════════════════════════════════════════════ */
+let _currentCert = null;
+
+async function openCertDetail(certId){
+  openOverlay('overlayCert');
+  $('certDetailPage').innerHTML = `<div style="padding:16px"><div class="af-skel" style="height:220px;margin-bottom:14px"></div><div class="af-skel" style="height:60px;margin-bottom:10px"></div><div class="af-skel" style="height:48px"></div></div>`;
+
+  const data = await callDash('get_certificate', { student_id: getStudentId(), certificate_id: certId });
+  if(!data.ok){
+    $('certDetailPage').innerHTML = `<div class="af-empty"><span>⚠️</span>${escapeHtml(data.message||'Could not load this certificate.')}</div>`;
+    return;
+  }
+
+  _currentCert = data.certificate;
+  renderCertDetail(_currentCert);
+}
+window.openCertDetail = openCertDetail;
+
+function renderCertDetail(cert){
+  const verifyUrl = VERIFY_BASE + encodeURIComponent(cert.certificate_id);
+  const html = buildCertHTML({
+    certId: cert.certificate_id,
+    studentName: cert.student_name,
+    courseTitle: cert.course_title,
+    issuedDate: fmtDateLong(cert.issued_at),
+    verifyUrl: verifyUrl
+  });
+  const blob = new Blob([html], {type:'text/html'});
+  const blobUrl = URL.createObjectURL(blob);
+
+  $('certDetailPage').innerHTML = `
+    <div class="cert-detail-wrap">
+      <div class="cert-preview-frame" id="certPreviewFrame" style="height:220px">
+        <iframe id="certPreviewIframe" src="${blobUrl}" width="1122" height="794"></iframe>
+      </div>
+
+      <div class="cert-badge-row">
+        <div class="cert-badge-circle">✓</div>
+        <div class="cert-badge-info">
+          <div class="cert-badge-title">Certificate of Completion</div>
+          <div class="cert-badge-sub">Issued ${fmtDate(cert.issued_at)}</div>
+        </div>
+      </div>
+
+      <div class="cert-meta-card">
+        <div class="cert-meta-row"><span class="ic">🎓</span> ${escapeHtml(cert.course_title)}</div>
+        <div class="cert-meta-row"><span class="ic">🆔</span> ${escapeHtml(cert.certificate_id)}</div>
+        <div class="cert-meta-row"><span class="ic">📅</span> ${fmtDateLong(cert.issued_at)}</div>
+        <div class="verify-inline">🟢 Verified by AcademeForge</div>
+      </div>
+
+      <div class="cert-detail-actions">
+        <button class="cert-dl-btn" onclick="downloadCertificate()">⬇ Download certificate</button>
+        <button class="cert-share-btn" onclick="shareCertificate()">↗ Share certificate</button>
+        <button class="cert-verify-btn" onclick="verifyCertificate()">🔎 Verify online</button>
+      </div>
+    </div>
+  `;
+
+  requestAnimationFrame(()=>{
+    const frame = $('certPreviewFrame');
+    if(!frame) return;
+    const w = frame.clientWidth;
+    const scale = w / 1122;
+    frame.style.height = (794 * scale) + 'px';
+    const iframe = $('certPreviewIframe');
+    if(iframe){
+      iframe.style.width = '1122px';
+      iframe.style.height = '794px';
+      iframe.style.transform = `scale(${scale})`;
+    }
+  });
+}
+
+function downloadCertificate(){
+  if(!_currentCert) return;
+  const verifyUrl = VERIFY_BASE + encodeURIComponent(_currentCert.certificate_id);
+  const html = buildCertHTML({
+    certId: _currentCert.certificate_id,
+    studentName: _currentCert.student_name,
+    courseTitle: _currentCert.course_title,
+    issuedDate: fmtDateLong(_currentCert.issued_at),
+    verifyUrl: verifyUrl
+  });
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `AcademeForge-Certificate-${_currentCert.certificate_id}.html`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  afToast('Certificate downloaded.', 'ok');
+}
+window.downloadCertificate = downloadCertificate;
+
+async function shareCertificate(){
+  if(!_currentCert) return;
+  const verifyUrl = VERIFY_BASE + encodeURIComponent(_currentCert.certificate_id);
+  const shareText = `I just completed "${_currentCert.course_title}" on AcademeForge! Verify my certificate: ${verifyUrl}`;
+  if(navigator.share){
+    try{
+      await navigator.share({ title:'My AcademeForge Certificate', text:shareText, url:verifyUrl });
+    }catch(e){ /* user cancelled share — no-op */ }
+  } else if(navigator.clipboard){
+    try{
+      await navigator.clipboard.writeText(shareText);
+      afToast('Share link copied to clipboard.', 'ok');
+    }catch(e){
+      afToast('Could not copy link.', 'err');
+    }
+  } else {
+    afToast('Sharing is not supported on this device.', 'err');
+  }
+}
+window.shareCertificate = shareCertificate;
+
+function verifyCertificate(){
+  if(!_currentCert) return;
+  window.open(VERIFY_BASE + encodeURIComponent(_currentCert.certificate_id), '_blank');
+}
+window.verifyCertificate = verifyCertificate;
+
+/* ════════════════════════════════════════════════════════
+   CERTIFICATE GENERATION — template, issuing, naming and
+   download logic copied verbatim (unchanged) from the
+   original Dashboard module.
+   ════════════════════════════════════════════════════════ */
+function buildCertHTML(opts){
+  const { certId, studentName, courseTitle, issuedDate, verifyUrl } = opts;
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Poppins:wght@400;600;700;800&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1122px;height:794px;overflow:hidden;background:#fff;font-family:'Poppins',sans-serif}
+.cert{width:1122px;height:794px;background:radial-gradient(circle at 10% 10%,rgba(34,197,94,.07),transparent 40%),radial-gradient(circle at 90% 90%,rgba(59,130,246,.05),transparent 40%),#fff;display:flex;flex-direction:column;padding:40px 52px;position:relative;overflow:hidden}
+.border-outer{position:absolute;inset:14px;border:2.5px solid #16a34a;border-radius:18px;pointer-events:none}
+.border-inner{position:absolute;inset:22px;border:1px dashed rgba(22,163,74,.28);border-radius:13px;pointer-events:none}
+.corner{position:absolute;width:38px;height:38px}
+.corner svg{width:100%;height:100%}
+.tl{top:18px;left:18px}.tr{top:18px;right:18px;transform:scaleX(-1)}.bl{bottom:18px;left:18px;transform:scaleY(-1)}.br{bottom:18px;right:18px;transform:scale(-1)}
+.header{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:5}
+.brand{display:flex;align-items:center;gap:12px}
+.logo-box{width:58px;height:58px;border-radius:14px;background:none;padding:0;overflow:hidden;box-shadow:0 4px 14px rgba(79,70,229,.35)}
+.brand-text h1{font-size:28px;font-weight:800;color:#0f172a;line-height:1}
+.brand-text p{font-size:11px;color:#64748b;margin-top:4px}
+.msme{width:110px;height:56px;border:none;padding:0;background:transparent;display:flex;align-items:center;justify-content:center}
+.accent{height:4px;border-radius:2px;margin:14px 0 18px;background:linear-gradient(90deg,#16a34a,#22c55e,rgba(134,239,172,.5),transparent);position:relative;z-index:5}
+.content{position:relative;z-index:5;text-align:center;flex:1;display:flex;flex-direction:column;justify-content:center}
+.tag{font-size:9px;letter-spacing:5px;font-weight:700;color:#64748b;text-transform:uppercase}
+.heading{font-size:36px;font-weight:800;color:#15803d;margin-top:8px}
+.awarded{margin-top:12px;font-size:13px;color:#64748b}
+.student-name{font-family:'Playfair Display',serif;font-size:44px;font-weight:700;font-style:italic;color:#0f172a;margin-top:6px;line-height:1.1}
+.course-label{margin-top:10px;font-size:14px;font-weight:600;color:#64748b}
+.course-title{font-size:22px;font-weight:800;color:#0f172a;margin-top:4px}
+.desc{margin:10px auto 0;font-size:12px;color:#475569;line-height:1.75;width:78%}
+.info-row{display:flex;justify-content:center;gap:10px;margin-top:16px}
+.info-card{min-width:120px;background:#fff;border:1px solid #e2e8f0;padding:10px 14px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.info-card h4{color:#94a3b8;font-size:8px;letter-spacing:2px;text-transform:uppercase;font-weight:700}
+.info-card p{margin-top:4px;color:#0f172a;font-size:11px;font-weight:800}
+.footer{position:relative;z-index:5;display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-top:14px}
+.sig-line{width:170px;height:2px;background:#111827;margin-bottom:7px}
+.sig-name{font-size:14px;font-weight:800;color:#111827}
+.sig-role{font-size:10px;color:#64748b;margin-top:3px;line-height:1.5}
+.digital{margin-top:8px;display:flex;align-items:flex-start;gap:7px;padding:8px 10px;border-radius:12px;background:#fff;border:1px solid #e2e8f0;width:240px}
+.v-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;margin-top:3px;flex-shrink:0}
+.v-text{font-size:8px;color:#64748b;line-height:1.7}
+.stamp{width:88px;height:88px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:transparent}
+.stamp-wrap{display:flex;flex-direction:column;align-items:center;gap:8px}
+.note{position:relative;z-index:5;margin-top:10px;text-align:center;color:#94a3b8;font-size:9px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="cert">
+  <div class="border-outer"></div>
+  <div class="border-inner"></div>
+  <div class="corner tl"><svg viewBox="0 0 40 40" fill="none"><path d="M2 2L22 2L22 6L6 6L6 22L2 22Z" fill="#16a34a" opacity=".75"/><path d="M2 2L9 2L9 9L2 9Z" fill="#16a34a"/><circle cx="2" cy="2" r="2.5" fill="#16a34a"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 40 40" fill="none"><path d="M2 2L22 2L22 6L6 6L6 22L2 22Z" fill="#16a34a" opacity=".75"/><path d="M2 2L9 2L9 9L2 9Z" fill="#16a34a"/><circle cx="2" cy="2" r="2.5" fill="#16a34a"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 40 40" fill="none"><path d="M2 2L22 2L22 6L6 6L6 22L2 22Z" fill="#16a34a" opacity=".75"/><path d="M2 2L9 2L9 9L2 9Z" fill="#16a34a"/><circle cx="2" cy="2" r="2.5" fill="#16a34a"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 40 40" fill="none"><path d="M2 2L22 2L22 6L6 6L6 22L2 22Z" fill="#16a34a" opacity=".75"/><path d="M2 2L9 2L9 9L2 9Z" fill="#16a34a"/><circle cx="2" cy="2" r="2.5" fill="#16a34a"/></svg></div>
+
+  <div class="header">
+    <div class="brand">
+      <div class="logo-box">
+        <img src="/IMG/AF LOGO 3.png" style="width:100%;height:100%;object-fit:contain" alt="AcademeForge"/>
+      </div>
+      <div class="brand-text">
+        <h1>AcademeForge</h1>
+        <p>Building Skills. Creating Opportunities.</p>
+      </div>
+    </div>
+    <div class="msme">
+      <img src="/IMG/MSME-logo.png" style="width:100%;height:100%;object-fit:contain" alt="MSME Registered"/>
+    </div>
+  </div>
+  <div class="accent"></div>
+
+  <div class="content">
+    <div class="tag">OFFICIAL COMPLETION CERTIFICATE</div>
+    <div class="heading">CERTIFICATE OF COMPLETION</div>
+    <div class="awarded">This certificate is proudly awarded to</div>
+    <div class="student-name">${esc(studentName)}</div>
+    <div class="course-label">for successfully completing</div>
+    <div class="course-title">${esc(courseTitle)}</div>
+    <div class="desc">This certificate recognises the dedication, effort, and commitment demonstrated throughout the course. AcademeForge is proud to acknowledge this achievement.</div>
+    <div class="info-row">
+      <div class="info-card"><h4>Certificate ID</h4><p>${esc(certId)}</p></div>
+      <div class="info-card"><h4>Issue Date</h4><p>${esc(issuedDate)}</p></div>
+      <div class="info-card"><h4>Issued By</h4><p>AcademeForge</p></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>
+      <div class="sig-line"></div>
+      <div class="sig-name">Devraj Kumar</div>
+      <div class="sig-role">Founder &amp; CEO, AcademeForge</div>
+      <div class="digital">
+        <div class="v-dot"></div>
+        <div class="v-text"><strong>Digitally Verified</strong><br>Devraj Kumar · Founder &amp; CEO<br>${esc(issuedDate)}</div>
+      </div>
+    </div>
+    <div class="stamp-wrap">
+      <div class="stamp">
+        <img src="/IMG/af-stamp.png" style="width:100%;height:100%;object-fit:contain" alt="AcademeForge Stamp"/>
+      </div>
+      <div style="font-size:8px;color:#94a3b8;text-align:center;margin-top:2px">Verify at<br>cert.academeforge.in</div>
+    </div>
+  </div>
+  <div class="note">Verify this certificate at: ${esc(verifyUrl)} · contact@academeforge.in · academeforge.in</div>
+</div>
+</body>
+</html>`;
+}
+
+/* ════════════════════════════════════════════════════════
+   BOOT — FIX: the original file never called goToIndex() (or
+   anything else) on load. Every function below this point was
+   fully defined but nothing ever ran, so the header stayed
+   empty, Explore never fetched courses, and the Dashboard tab
+   (which only existed as a loading skeleton in the HTML) never
+   rendered. This is the root cause of "it doesn't open like
+   Community" — Community has its own init() wired to
+   DOMContentLoaded; this page had no equivalent.
+   ════════════════════════════════════════════════════════ */
+function boot(){
+  _carouselWidth = carouselSlotWidth();
+  // If the URL carries a hash like #dashboard or #explore, honor it;
+  // otherwise default to Explore (index 1), matching the original
+  // "start on Explore" comment on _tabIndex.
+  const hashTab = (window.location.hash || '').replace('#','');
+  const startIdx = TABS.includes(hashTab) ? TABS.indexOf(hashTab) : 1;
+  goToIndex(startIdx, false);
+}
+
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', boot);
+} else {
+  boot();
+}
+
+window.addEventListener('storage', e=>{
+  if(['af_student_email','af_student_mobile','af_student_name'].includes(e.key)){
+    _dashLoaded = false;
+    if(TABS[_tabIndex] === 'dashboard') loadDashboard();
+    if(TABS[_tabIndex] === 'explore') loadCourses();
+  }
+});
+</script>
 </body>
 </html>
