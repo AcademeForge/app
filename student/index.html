@@ -722,10 +722,29 @@ let _sortMode = 'newest'; // newest | popular
 let _allCourses = [];
 
 function toggleFilterMenu(){
-  $('filterMenu').classList.toggle('open');
-  $('filterBtn').classList.toggle('open');
+  const isOpen = $('filterMenu').classList.contains('open');
+  if(isOpen){ closeFilterMenu(); } else { openFilterMenu(); }
 }
 window.toggleFilterMenu = toggleFilterMenu;
+
+function openFilterMenu(){
+  $('filterMenu').classList.add('open');
+  $('filterBtn').classList.add('open');
+}
+function closeFilterMenu(){
+  $('filterMenu').classList.remove('open');
+  $('filterBtn').classList.remove('open');
+}
+
+// Close the "All Courses" dropdown when tapping anywhere else on the page
+// (another button, a tab, the list, the search icon, etc.)
+document.addEventListener('click', (e)=>{
+  const wrap = $('categoryFilterWrap');
+  if(!wrap) return;
+  if($('filterMenu').classList.contains('open') && !wrap.contains(e.target)){
+    closeFilterMenu();
+  }
+}, true);
 
 function renderFilterMenu(){
   const menu = $('filterMenu');
@@ -737,7 +756,7 @@ function renderFilterMenu(){
 function selectCategory(cat){
   _selectedCategory = cat;
   $('filterLabel').textContent = cat;
-  toggleFilterMenu();
+  closeFilterMenu();
   loadCourses();
 }
 window.selectCategory = selectCategory;
