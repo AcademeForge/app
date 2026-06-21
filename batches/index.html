@@ -1006,7 +1006,7 @@ document.addEventListener('DOMContentLoaded', init);
     if (diffX > threshold) {
       // swipe right: Student → Batches, or Batches → Home
       if (activeTab === 'student') switchTab('batches');
-      else window.location.href = "/index.html";
+      else window.location.href = "/student/index.html";
     }
     if (diffX < -threshold) {
       // swipe left: Batches → Student, or Student → Community
