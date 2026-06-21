@@ -1803,12 +1803,29 @@ async function buildCertPdfBlob(inlinedHtml){
   document.body.appendChild(hidden);
 
   await new Promise(resolve => {
-    hidden.onload = () => setTimeout(resolve, 350); // let webfonts settle before rasterizing
+    hidden.onload = () => resolve();
     hidden.srcdoc = inlinedHtml;
   });
 
   const doc = hidden.contentDocument;
   const target = (doc && (doc.querySelector('.cert') || doc.body)) || doc.body;
+
+  /* Wait for the iframe's webfonts (Cinzel / Poppins / Playfair Display) to
+     ACTUALLY finish loading before rasterizing. A blind setTimeout(350) is
+     not reliable — on slower connections the fonts swap in mid-capture,
+     which is what causes overlapping/collapsed/garbled text in the PDF.
+     We race document.fonts.ready against a generous safety timeout so a
+     stalled font request can never hang the download forever. */
+  await Promise.race([
+    (async () => {
+      try {
+        if(doc && doc.fonts && doc.fonts.ready) await doc.fonts.ready;
+      } catch(e) {}
+      // double rAF: let layout settle one more frame after fonts apply
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    })(),
+    new Promise(r => setTimeout(r, 4000))
+  ]);
 
   let canvas;
   try{
