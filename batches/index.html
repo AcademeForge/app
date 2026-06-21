@@ -4,11 +4,7 @@
 <script>
 !function(){
   var dark = localStorage.getItem('af_dark_mode');
-
-  document.documentElement.setAttribute(
-    'data-theme',
-    dark === '1' ? 'dark' : 'light'
-  );
+  document.documentElement.setAttribute('data-theme', dark === '1' ? 'dark' : 'light');
 }();
 </script>
 <meta charset="UTF-8"/>
@@ -25,7 +21,7 @@
 <style>
 
 /* ═══════════════════════════════════════════════════════════
-   DESIGN TOKENS — shared with Home + Settings
+   DESIGN TOKENS
 ═══════════════════════════════════════════════════════════ */
 :root {
   --bg-primary:   #050505;
@@ -33,18 +29,15 @@
   --bg-tertiary:  #121218;
   --border:       #1D1D26;
   --border-hover: #2D2D3A;
-
   --primary:        #7C3AED;
   --primary-light:  #A855F7;
   --secondary:      #2563EB;
   --success:        #10B981;
   --warning:        #F59E0B;
   --danger:         #EF4444;
-
   --text-primary:   #FFFFFF;
   --text-secondary: #B8B8C7;
   --text-muted:     #7A7A8C;
-
   --sidebar-w: 260px;
   --header-h:  72px;
   --nav-h:     60px;
@@ -55,7 +48,6 @@
   --sh-hover: 0 4px 24px rgba(124,58,237,.18), 0 1px 3px rgba(0,0,0,.5);
   --tr: 0.22s ease;
 }
-
 [data-theme="light"] {
   --bg-primary:   #f0f2ff;
   --bg-secondary: #ffffff;
@@ -85,11 +77,10 @@ img { display: block; max-width: 100%; }
 input { -webkit-user-select: text; -moz-user-select: text; user-select: text; }
 
 /* ═══════════════════════════════════════════════════════════
-   MOBILE SHELL (< 768px) — ORIGINAL, UNTOUCHED
+   MOBILE SHELL (< 768px)
 ═══════════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
   body { display: flex; justify-content: center; overflow: hidden; }
-
   :root {
     --p:#4f46e5;--p2:#3730a3;--pl:#818cf8;
     --acc:#06b6d4;--ok:#22c55e;--err:#ef4444;--warn:#f59e0b;
@@ -123,6 +114,10 @@ input { -webkit-user-select: text; -moz-user-select: text; user-select: text; }
   .mob-page { flex:1;overflow-y:scroll;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;padding:12px 12px calc(var(--nav-h) + 20px + env(safe-area-inset-bottom,0px));min-height:0;-webkit-transform:translateZ(0);transform:translateZ(0); }
   .mob-page::-webkit-scrollbar { width:2px; }
   .mob-page::-webkit-scrollbar-thumb { background:var(--bc);border-radius:99px; }
+
+  /* panels inside mob-page */
+  .mob-panel { display:none; }
+  .mob-panel.active { display:block; }
 
   .cache-bar { display:flex;align-items:center;justify-content:space-between;padding:6px 14px;background:rgba(79,70,229,.05);border-bottom:1px solid var(--b1);font-size:11px;color:var(--tm);font-weight:600; }
   .cache-bar span { opacity:.7; }
@@ -160,7 +155,7 @@ input { -webkit-user-select: text; -moz-user-select: text; user-select: text; }
   .arrow-btn { width:42px;height:42px;border-radius:var(--r2);background:var(--grp);border:1px solid var(--b1);font-size:20px;font-weight:800;color:var(--t1);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
   .arrow-btn:active { transform:scale(.95); }
 
-  /* DETAIL */
+  /* BATCH DETAIL */
   .detail-wrap { display:none;flex-direction:column;gap:0; }
   .detail-wrap.active { display:flex; }
   .back-btn { display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:var(--r2);background:var(--grp);border:1px solid var(--b1);color:var(--p);font-size:12.5px;font-weight:800;margin-bottom:12px;align-self:flex-start; }
@@ -186,6 +181,62 @@ input { -webkit-user-select: text; -moz-user-select: text; user-select: text; }
   .info-box li { list-style:disc; }
   .state-msg { text-align:center;padding:32px 16px;font-size:13px;color:var(--tm);font-weight:600; }
 
+  /* ── STUDENT PANEL (MOBILE) ── */
+  .stu-welcome-card { border-radius:20px;background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);padding:18px 16px;margin-bottom:12px; }
+  .stu-welcome-name { font-family:var(--fd);font-size:18px;font-weight:900;color:var(--t1);margin-bottom:4px; }
+  .stu-welcome-sub { font-size:12.5px;color:var(--t2);line-height:1.6;font-weight:600; }
+  .stu-course-grid { display:flex;flex-direction:column;gap:10px; }
+  .stu-course-card { width:100%;border-radius:var(--r3);padding:14px;background:var(--card);border:1px solid var(--bc);display:flex;align-items:flex-start;gap:12px;text-align:left;cursor:pointer;box-shadow:var(--sh); }
+  .stu-course-card:active { transform:scale(.985); }
+  .stu-course-icon { width:48px;height:48px;min-width:48px;border-radius:var(--r2);display:grid;place-items:center;font-size:24px;background:linear-gradient(135deg,rgba(79,70,229,.10),rgba(6,182,212,.08));border:1px solid var(--b1);flex-shrink:0; }
+  .stu-course-body h3 { font-size:15px;font-weight:900;color:var(--t1);line-height:1.25;margin-bottom:4px; }
+  .stu-course-body p { font-size:12px;color:var(--t2);line-height:1.5;font-weight:600; }
+  .stu-not-enrolled { text-align:center;padding:32px 16px; }
+  .stu-not-enrolled-icon { font-size:40px;margin-bottom:10px; }
+  .stu-not-enrolled h2 { font-size:17px;font-weight:900;color:var(--err);margin-bottom:6px; }
+  .stu-not-enrolled p { font-size:12.5px;color:var(--t2);font-weight:700;line-height:1.6;margin-bottom:4px; }
+  .stu-not-logged { text-align:center;padding:32px 16px;border-radius:20px;background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh); }
+  .stu-not-logged p { font-size:13px;color:var(--t2);font-weight:700;margin-bottom:14px;line-height:1.6; }
+  .stu-login-btn { display:inline-block;padding:12px 24px;border-radius:var(--r2);font-size:14px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--p),var(--p2));box-shadow:var(--shb); }
+
+  /* STUDENT COURSE DETAIL (mobile) */
+  .stu-detail-wrap { display:none;flex-direction:column;gap:0; }
+  .stu-detail-wrap.active { display:flex; }
+  .stu-detail-card { border-radius:20px;overflow:hidden;background:var(--card);border:1px solid var(--bc);box-shadow:var(--sh);margin-bottom:12px; }
+  .stu-detail-head { display:flex;gap:12px;align-items:flex-start;padding:16px;margin-bottom:0; }
+  .stu-detail-icon { width:56px;height:56px;min-width:56px;border-radius:var(--r3);display:grid;place-items:center;font-size:30px;background:linear-gradient(135deg,rgba(79,70,229,.10),rgba(6,182,212,.08));border:1px solid var(--b1);flex-shrink:0; }
+  .stu-detail-title-wrap h2 { font-size:17px;font-weight:900;color:var(--t1);line-height:1.2; }
+  .stu-detail-title-wrap p { font-size:12px;color:var(--t2);margin-top:4px;font-weight:600;line-height:1.5; }
+  .stu-continue-btn { width:100%;margin:12px 0 0;padding:13px;border-radius:var(--r2);font-size:14px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--p),var(--p2));box-shadow:var(--shb);text-align:center; }
+  .stu-continue-btn:active { transform:scale(.98); }
+
+  /* Learning mode grid */
+  .stu-learning-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 16px; }
+  .stu-learning-btn { border-radius:var(--r3);padding:16px 12px;background:var(--card);border:1px solid var(--bc);cursor:pointer;text-align:center;box-shadow:var(--sh); }
+  .stu-learning-btn:active { transform:scale(.985); }
+  .stu-learning-btn span { display:block;font-size:30px;margin-bottom:6px; }
+  .stu-learning-btn strong { display:block;font-size:14px;font-weight:900;color:var(--t1); }
+  .stu-learning-btn small { display:block;margin-top:4px;font-size:11px;color:var(--t2);font-weight:600;line-height:1.4; }
+
+  /* Chapter / Content lists */
+  .stu-chapter-list,.stu-content-list { display:grid;gap:8px; }
+  .stu-chapter-item { border-radius:var(--r2);padding:12px;background:var(--card);border:1px solid var(--bc);display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:var(--sh);cursor:pointer; }
+  .stu-chapter-item:active { transform:scale(.985); }
+  .stu-chapter-main strong { display:block;font-size:13px;font-weight:900;color:var(--t1);line-height:1.3; }
+  .stu-chapter-main small { display:block;font-size:11px;color:var(--t2);margin-top:3px;font-weight:600;line-height:1.4; }
+  .stu-chapter-status { white-space:nowrap;padding:5px 9px;border-radius:var(--rf);font-size:10.5px;font-weight:900;flex-shrink:0; }
+  .stu-chapter-item.locked .stu-chapter-status { background:rgba(239,68,68,.10);color:var(--err); }
+  .stu-chapter-item.unlocked .stu-chapter-status { background:rgba(34,197,94,.10);color:var(--ok); }
+  .stu-content-item { border-radius:var(--r2);padding:12px;background:var(--card);border:1px solid var(--bc);display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:var(--sh); }
+  .stu-content-main strong { display:block;font-size:13px;font-weight:900;color:var(--t1);line-height:1.3; }
+  .stu-content-main small { display:block;font-size:11px;color:var(--t2);margin-top:3px;font-weight:600; }
+  .stu-duration { display:inline-block;margin-top:4px;color:var(--ok);font-size:11px;font-weight:900; }
+  .stu-content-action { border-radius:var(--r1);padding:8px 11px;flex-shrink:0;background:linear-gradient(135deg,var(--ok),#16a34a);color:#fff;font-size:11.5px;font-weight:900; }
+  .stu-content-action:disabled,.stu-locked-action { background:rgba(239,68,68,.10);color:var(--err);cursor:not-allowed; }
+  .stu-loading { padding:12px;border-radius:var(--r2);font-size:12.5px;font-weight:800;background:rgba(79,70,229,.07);color:var(--p); }
+  .stu-empty { padding:12px;border-radius:var(--r2);font-size:12.5px;font-weight:700;background:var(--grp);color:var(--t2);text-align:center; }
+  .stu-error { padding:12px;border-radius:var(--r2);font-size:12.5px;font-weight:800;background:rgba(239,68,68,.08);color:var(--err); }
+
   .mob-bnav { position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;z-index:999;height:var(--nav-h);background:var(--nav);border-top:1px solid var(--b1);display:flex;align-items:center;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px); }
   .mob-bnav-btn { flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:100%;border-radius:var(--r2);padding:6px 4px;position:relative; }
   .mob-bnav-btn::before { content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--p);border-radius:99px;transition:width .15s ease; }
@@ -199,7 +250,7 @@ input { -webkit-user-select: text; -moz-user-select: text; user-select: text; }
 }
 
 /* ═══════════════════════════════════════════════════════════
-   DESKTOP (≥ 768px) — REDESIGNED
+   DESKTOP (≥ 768px)
 ═══════════════════════════════════════════════════════════ */
 @media (min-width: 768px) {
   body { overflow: auto; display: block; }
@@ -207,7 +258,6 @@ input { -webkit-user-select: text; -moz-user-select: text; user-select: text; }
 
   .dt-layout { display: flex; flex-direction: column; min-height: 100vh; background: var(--bg-primary); }
 
-  /* ── HEADER ── */
   .dt-header {
     position: fixed; top: 0; left: 0; right: 0; z-index: 200;
     height: var(--header-h);
@@ -233,10 +283,8 @@ input { -webkit-user-select: text; -moz-user-select: text; user-select: text; }
   .dt-notif:hover { background: var(--bg-secondary); border-color: var(--border-hover); }
   .dt-notif-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); border: 2px solid var(--bg-primary); display: none; }
 
-  /* ── BODY WRAP ── */
   .dt-body-wrap { display: flex; margin-top: var(--header-h); min-height: calc(100vh - var(--header-h)); }
 
-  /* ── SIDEBAR ── */
   .dt-sidebar { width: var(--sidebar-w); flex-shrink: 0; background: var(--bg-secondary); border-right: 1px solid var(--border); position: fixed; top: var(--header-h); bottom: 0; left: 0; display: flex; flex-direction: column; padding: 20px 12px; overflow-y: auto; z-index: 100; }
   .dt-sidebar::-webkit-scrollbar { width: 0; }
 
@@ -252,17 +300,18 @@ input { -webkit-user-select: text; -moz-user-select: text; user-select: text; }
   .dt-sidebar-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border); font-size: 11.5px; color: var(--text-muted); line-height: 1.6; padding-left: 2px; }
   .dt-sidebar-footer strong { color: var(--text-secondary); font-weight: 700; }
 
-  /* ── MAIN ── */
   .dt-main { margin-left: var(--sidebar-w); flex: 1; min-width: 0; padding: 40px 44px 80px; overflow-y: auto; height: calc(100vh - var(--header-h)); }
   .dt-main::-webkit-scrollbar { width: 4px; }
   .dt-main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
 
-  /* ── PAGE HEAD ── */
+  /* panels inside dt-main */
+  .dt-panel { display: none; }
+  .dt-panel.active { display: block; }
+
   .dt-page-head { margin-bottom: 32px; }
   .dt-page-title { font-family: var(--fd); font-size: 28px; font-weight: 900; color: var(--text-primary); letter-spacing: -.03em; margin-bottom: 4px; }
   .dt-page-sub { font-size: 13.5px; color: var(--text-muted); font-weight: 500; }
 
-  /* ── TOOLBAR ── */
   .dt-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
   .dt-search-box { flex: 1; display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 14px; border-radius: var(--r2); background: var(--bg-secondary); border: 1px solid var(--border); transition: border-color var(--tr); }
   .dt-search-box:focus-within { border-color: var(--primary); }
@@ -273,218 +322,142 @@ input { -webkit-user-select: text; -moz-user-select: text; user-select: text; }
   .dt-refresh-btn { width: 42px; height: 42px; border-radius: var(--r2); background: var(--bg-secondary); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 17px; cursor: pointer; color: var(--text-muted); transition: color var(--tr), border-color var(--tr); flex-shrink: 0; }
   .dt-refresh-btn:hover { border-color: var(--border-hover); color: var(--text-primary); }
 
-  /* Cache bar — minimal inline indicator */
   .dt-cache-bar { display: none; font-size: 11px; color: var(--text-muted); margin-bottom: 16px; font-weight: 600; letter-spacing: .01em; }
 
-  /* ── BATCH GRID ── */
-  .dt-batch-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-  }
+  .dt-batch-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
   @media (max-width: 1280px) { .dt-batch-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 900px)  { .dt-batch-grid { grid-template-columns: 1fr; } }
 
-  /* ── BATCH CARD ── */
-  .dt-batch-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: var(--r4);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    cursor: pointer;
-    transition: border-color var(--tr), transform var(--tr);
-    position: relative;
-  }
+  .dt-batch-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--r4); overflow: hidden; display: flex; flex-direction: column; cursor: pointer; transition: border-color var(--tr), transform var(--tr); position: relative; }
   .dt-batch-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
   .dt-batch-card.enrolled { border-color: rgba(16,185,129,.3); }
   .dt-batch-card.enrolled:hover { border-color: rgba(16,185,129,.55); }
 
-  .dt-batch-thumb {
-    position: relative;
-    aspect-ratio: 16/8;
-    overflow: hidden;
-    background: var(--bg-tertiary);
-  }
-  .dt-batch-thumb img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform .45s cubic-bezier(.22,.61,.36,1);
-  }
+  .dt-batch-thumb { position: relative; aspect-ratio: 16/8; overflow: hidden; background: var(--bg-tertiary); }
+  .dt-batch-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .45s cubic-bezier(.22,.61,.36,1); }
   .dt-batch-card:hover .dt-batch-thumb img { transform: scale(1.05); }
 
-  .dt-enrolled-ribbon {
-    position: absolute; top: 10px; left: 10px;
-    display: flex; align-items: center; gap: 4px;
-    padding: 3px 9px;
-    background: rgba(16,185,129,.88);
-    border-radius: var(--rf);
-    font-size: 10px; font-weight: 800; color: #fff;
-    backdrop-filter: blur(6px);
-    letter-spacing: .03em;
-  }
+  .dt-enrolled-ribbon { position: absolute; top: 10px; left: 10px; display: flex; align-items: center; gap: 4px; padding: 3px 9px; background: rgba(16,185,129,.88); border-radius: var(--rf); font-size: 10px; font-weight: 800; color: #fff; backdrop-filter: blur(6px); letter-spacing: .03em; }
 
   .dt-batch-body { padding: 16px 18px 18px; flex: 1; display: flex; flex-direction: column; gap: 0; }
-
   .dt-batch-meta { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; }
-  .dt-batch-cat {
-    padding: 2px 8px; border-radius: var(--rf);
-    background: rgba(245,158,11,.10); border: 1px solid rgba(245,158,11,.18);
-    color: var(--warning); font-size: 9px; font-weight: 900;
-    text-transform: uppercase; letter-spacing: .07em;
-  }
-  .dt-batch-lang {
-    padding: 2px 8px; border-radius: var(--rf);
-    background: var(--bg-tertiary); border: 1px solid var(--border);
-    color: var(--text-muted); font-size: 9px; font-weight: 800;
-  }
-
+  .dt-batch-cat { padding: 2px 8px; border-radius: var(--rf); background: rgba(245,158,11,.10); border: 1px solid rgba(245,158,11,.18); color: var(--warning); font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: .07em; }
+  .dt-batch-lang { padding: 2px 8px; border-radius: var(--rf); background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-muted); font-size: 9px; font-weight: 800; }
   .dt-batch-title { font-family: var(--fd); font-size: 14.5px; font-weight: 800; line-height: 1.35; color: var(--text-primary); margin-bottom: 6px; }
   .dt-batch-sub { font-size: 12px; color: var(--text-secondary); line-height: 1.65; flex: 1; margin-bottom: 16px; }
 
-  .dt-batch-footer {
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    padding-top: 14px;
-    border-top: 1px solid var(--border);
-    margin-top: auto;
-  }
-
+  .dt-batch-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-top: 14px; border-top: 1px solid var(--border); margin-top: auto; }
   .dt-price-block { display: flex; flex-direction: column; gap: 1px; }
   .dt-price-main { display: flex; align-items: baseline; gap: 6px; }
   .dt-price-main strong { font-family: var(--fd); font-size: 18px; font-weight: 900; color: var(--text-primary); }
   .dt-price-main del { font-size: 11px; color: var(--text-muted); }
   .dt-price-off { font-size: 10px; font-weight: 800; color: var(--success); letter-spacing: .02em; }
 
-  .dt-buy-btn {
-    padding: 8px 18px;
-    border-radius: var(--r2);
-    font-size: 12px; font-weight: 900;
-    color: #fff;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    cursor: pointer;
-    transition: opacity var(--tr), transform var(--tr);
-    white-space: nowrap;
-    letter-spacing: .01em;
-  }
+  .dt-buy-btn { padding: 8px 18px; border-radius: var(--r2); font-size: 12px; font-weight: 900; color: #fff; background: linear-gradient(135deg, var(--primary), var(--secondary)); cursor: pointer; transition: opacity var(--tr), transform var(--tr); white-space: nowrap; letter-spacing: .01em; }
   .dt-buy-btn:hover { opacity: .88; transform: translateY(-1px); }
   .dt-buy-btn:active { transform: scale(.97); opacity: 1; }
   .dt-buy-btn.enrolled-btn { background: linear-gradient(135deg, var(--success), #059669); cursor: default; }
   .dt-buy-btn.enrolled-btn:hover { transform: none; opacity: 1; }
-
   .dt-state-msg { text-align: center; padding: 64px 16px; font-size: 14px; color: var(--text-muted); font-weight: 600; grid-column: 1/-1; }
 
-  /* ── MODAL OVERLAY ── */
-  .dt-modal-overlay {
-    position: fixed; inset: 0; z-index: 500;
-    background: rgba(0,0,0,.7);
-    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-    display: flex; align-items: center; justify-content: center;
-    padding: 24px;
-    opacity: 0; visibility: hidden;
-    transition: opacity .22s ease, visibility .22s ease;
-  }
+  /* ── DESKTOP STUDENT PANEL ── */
+  .dt-student-header { margin-bottom: 32px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .dt-student-welcome { flex: 1; }
+  .dt-student-welcome h2 { font-family: var(--fd); font-size: 22px; font-weight: 900; color: var(--text-primary); margin-bottom: 4px; }
+  .dt-student-welcome p { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+  .dt-courses-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; }
+  @media (max-width: 1280px) { .dt-courses-grid { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 900px)  { .dt-courses-grid { grid-template-columns: 1fr; } }
+  .dt-course-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--r4); padding: 20px; cursor: pointer; transition: border-color var(--tr), transform var(--tr); display: flex; gap: 16px; align-items: flex-start; }
+  .dt-course-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+  .dt-course-icon { width: 52px; height: 52px; min-width: 52px; border-radius: var(--r2); display: grid; place-items: center; font-size: 26px; background: linear-gradient(135deg,rgba(124,58,237,.12),rgba(37,99,235,.08)); border: 1px solid var(--border); flex-shrink: 0; }
+  .dt-course-body h3 { font-family: var(--fd); font-size: 15px; font-weight: 800; color: var(--text-primary); line-height: 1.25; margin-bottom: 6px; }
+  .dt-course-body p { font-size: 12px; color: var(--text-secondary); line-height: 1.6; font-weight: 600; }
+  .dt-stu-not-logged { text-align: center; padding: 80px 24px; }
+  .dt-stu-not-logged p { font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.7; }
+  .dt-stu-login-link { display: inline-block; padding: 12px 28px; border-radius: var(--r2); font-size: 14px; font-weight: 900; color: #fff; background: linear-gradient(135deg, var(--primary), var(--secondary)); }
+
+  /* Desktop student course detail pane */
+  .dt-stu-detail { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--r4); padding: 28px; margin-bottom: 24px; }
+  .dt-stu-detail-head { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 20px; }
+  .dt-stu-detail-icon { width: 64px; height: 64px; min-width: 64px; border-radius: var(--r3); display: grid; place-items: center; font-size: 32px; background: linear-gradient(135deg,rgba(124,58,237,.12),rgba(37,99,235,.08)); border: 1px solid var(--border); flex-shrink: 0; }
+  .dt-stu-detail-head h2 { font-family: var(--fd); font-size: 22px; font-weight: 900; color: var(--text-primary); line-height: 1.2; margin-bottom: 6px; }
+  .dt-stu-detail-head p { font-size: 13px; color: var(--text-secondary); font-weight: 600; line-height: 1.5; }
+  .dt-info-box { background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: var(--r3); padding: 16px 18px 16px 22px; margin-bottom: 12px; position: relative; overflow: hidden; }
+  .dt-info-box::before { content:''; position:absolute; top:0; left:0; width:3px; height:100%; border-radius:99px; background:linear-gradient(180deg,var(--primary),var(--secondary)); }
+  .dt-info-box h3 { font-size: 13px; font-weight: 900; color: var(--text-primary); margin-bottom: 8px; }
+  .dt-info-box p,.dt-info-box li { font-size: 12.5px; color: var(--text-secondary); line-height: 1.7; }
+  .dt-info-box ul { padding-left: 16px; }
+  .dt-info-box li { list-style: disc; }
+  .dt-continue-btn { padding: 12px 28px; border-radius: var(--r2); font-size: 14px; font-weight: 900; color: #fff; background: linear-gradient(135deg, var(--primary), var(--secondary)); cursor: pointer; transition: opacity var(--tr); }
+  .dt-continue-btn:hover { opacity: .88; }
+  .dt-back-link { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: var(--r2); background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-secondary); font-size: 13px; font-weight: 700; margin-bottom: 20px; cursor: pointer; }
+  .dt-back-link:hover { border-color: var(--border-hover); color: var(--text-primary); }
+
+  /* Desktop chapter / content lists */
+  .dt-chapter-list,.dt-content-list { display: grid; gap: 10px; }
+  .dt-chapter-item { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--r3); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; transition: border-color var(--tr); }
+  .dt-chapter-item:hover { border-color: var(--border-hover); }
+  .dt-chapter-item.locked { opacity: .7; cursor: not-allowed; }
+  .dt-chapter-main strong { display: block; font-size: 14px; font-weight: 800; color: var(--text-primary); line-height: 1.3; }
+  .dt-chapter-main small { display: block; font-size: 12px; color: var(--text-muted); margin-top: 3px; font-weight: 600; }
+  .dt-chapter-status { white-space: nowrap; padding: 5px 10px; border-radius: var(--rf); font-size: 11px; font-weight: 800; flex-shrink: 0; }
+  .dt-chapter-item.locked .dt-chapter-status { background: rgba(239,68,68,.10); color: var(--danger); }
+  .dt-chapter-item.unlocked .dt-chapter-status { background: rgba(16,185,129,.10); color: var(--success); }
+  .dt-content-item { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--r3); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .dt-content-main strong { display: block; font-size: 14px; font-weight: 800; color: var(--text-primary); line-height: 1.3; }
+  .dt-content-main small { display: block; font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .dt-duration { display: inline-block; margin-top: 4px; color: var(--success); font-size: 11px; font-weight: 900; }
+  .dt-content-action { padding: 9px 16px; border-radius: var(--r2); flex-shrink: 0; background: linear-gradient(135deg, var(--success), #059669); color: #fff; font-size: 12px; font-weight: 900; cursor: pointer; }
+  .dt-content-action:disabled { background: rgba(239,68,68,.10); color: var(--danger); cursor: not-allowed; }
+  .dt-stu-loading { padding: 14px; border-radius: var(--r2); font-size: 13px; font-weight: 800; background: rgba(124,58,237,.07); color: var(--primary-light); }
+  .dt-stu-empty { padding: 14px; border-radius: var(--r2); font-size: 13px; font-weight: 700; background: var(--bg-tertiary); color: var(--text-muted); text-align: center; }
+  .dt-stu-error { padding: 14px; border-radius: var(--r2); font-size: 13px; font-weight: 800; background: rgba(239,68,68,.08); color: var(--danger); }
+
+  /* Desktop learning mode grid */
+  .dt-learning-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+  .dt-learning-btn { border-radius: var(--r3); padding: 24px 20px; background: var(--bg-secondary); border: 1px solid var(--border); cursor: pointer; text-align: center; transition: border-color var(--tr), transform var(--tr); }
+  .dt-learning-btn:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+  .dt-learning-btn span { display: block; font-size: 34px; margin-bottom: 10px; }
+  .dt-learning-btn strong { display: block; font-size: 16px; font-weight: 900; color: var(--text-primary); }
+  .dt-learning-btn small { display: block; margin-top: 5px; font-size: 12px; color: var(--text-muted); font-weight: 600; line-height: 1.4; }
+
+  /* ── MODAL OVERLAY (batch detail) ── */
+  .dt-modal-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(0,0,0,.7); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; padding: 24px; opacity: 0; visibility: hidden; transition: opacity .22s ease, visibility .22s ease; }
   .dt-modal-overlay.open { opacity: 1; visibility: visible; }
-
-  .dt-modal {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    width: 100%;
-    max-width: 720px;
-    height: min(600px, 88vh);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 32px 80px rgba(0,0,0,.6);
-    transform: translateY(16px) scale(.98);
-    transition: transform .28s cubic-bezier(.22,.61,.36,1);
-  }
+  .dt-modal { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 24px; width: 100%; max-width: 720px; height: min(600px, 88vh); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 32px 80px rgba(0,0,0,.6); transform: translateY(16px) scale(.98); transition: transform .28s cubic-bezier(.22,.61,.36,1); }
   .dt-modal-overlay.open .dt-modal { transform: translateY(0) scale(1); }
-
-  /* modal layout: left image + right content */
   .dt-modal-inner { display: flex; flex: 1; min-height: 0; overflow: hidden; }
-
-  .dt-modal-left {
-    width: 260px; flex-shrink: 0;
-    position: relative; overflow: hidden;
-    background: var(--bg-tertiary);
-    min-height: 420px;
-  }
-  .dt-modal-left img {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
-    object-fit: cover; display: block;
-  }
-  .dt-modal-left-overlay {
-    position: absolute; inset: 0;
-    background: linear-gradient(to bottom, transparent 40%, rgba(5,5,5,.8) 100%);
-  }
-  .dt-modal-left-badge {
-    position: absolute; bottom: 16px; left: 16px;
-    display: flex; flex-direction: column; gap: 4px;
-  }
+  .dt-modal-left { width: 260px; flex-shrink: 0; position: relative; overflow: hidden; background: var(--bg-tertiary); min-height: 420px; }
+  .dt-modal-left img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .dt-modal-left-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(5,5,5,.8) 100%); }
+  .dt-modal-left-badge { position: absolute; bottom: 16px; left: 16px; display: flex; flex-direction: column; gap: 4px; }
   .dt-modal-price-main { font-family: var(--fd); font-size: 26px; font-weight: 900; color: #fff; line-height: 1; }
   .dt-modal-price-sub { display: flex; align-items: center; gap: 6px; }
   .dt-modal-price-del { font-size: 12px; color: rgba(255,255,255,.5); text-decoration: line-through; }
   .dt-modal-price-off { font-size: 11px; font-weight: 800; color: var(--success); }
-
   .dt-modal-right { flex: 1; overflow-y: auto; padding: 24px 24px 24px 20px; display: flex; flex-direction: column; }
   .dt-modal-right::-webkit-scrollbar { width: 3px; }
   .dt-modal-right::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
-
-  .dt-modal-close {
-    position: absolute; top: 14px; right: 14px; z-index: 10;
-    width: 32px; height: 32px;
-    border-radius: var(--r2);
-    background: var(--bg-tertiary); border: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; cursor: pointer; color: var(--text-muted);
-    transition: background var(--tr), color var(--tr);
-  }
+  .dt-modal-close { position: absolute; top: 14px; right: 14px; z-index: 10; width: 32px; height: 32px; border-radius: var(--r2); background: var(--bg-tertiary); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; color: var(--text-muted); transition: background var(--tr), color var(--tr); }
   .dt-modal-close:hover { background: rgba(239,68,68,.12); border-color: rgba(239,68,68,.25); color: var(--danger); }
-
   .dt-modal-meta { display: flex; gap: 7px; margin-bottom: 10px; flex-wrap: wrap; }
   .dt-modal-title { font-family: var(--fd); font-size: 19px; font-weight: 900; color: var(--text-primary); line-height: 1.25; margin-bottom: 8px; }
   .dt-modal-desc { font-size: 12.5px; color: var(--text-secondary); line-height: 1.75; margin-bottom: 18px; }
-
-  .dt-modal-buy-btn {
-    width: 100%; padding: 12px;
-    border-radius: var(--r3);
-    font-family: var(--fd); font-size: 14px; font-weight: 800;
-    color: #fff;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    cursor: pointer; margin-bottom: 18px;
-    transition: opacity var(--tr), transform var(--tr);
-  }
+  .dt-modal-buy-btn { width: 100%; padding: 12px; border-radius: var(--r3); font-family: var(--fd); font-size: 14px; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--primary), var(--secondary)); cursor: pointer; margin-bottom: 18px; transition: opacity var(--tr), transform var(--tr); }
   .dt-modal-buy-btn:hover { opacity: .88; transform: translateY(-1px); }
   .dt-modal-buy-btn:active { transform: scale(.98); }
   .dt-modal-buy-btn.enrolled-btn { background: linear-gradient(135deg, var(--success), #059669); cursor: default; }
   .dt-modal-buy-btn.enrolled-btn:hover { transform: none; opacity: 1; }
-
   .dt-modal-section { margin-bottom: 14px; }
-  .dt-modal-section-title {
-    font-size: 10.5px; font-weight: 800; color: var(--text-muted);
-    text-transform: uppercase; letter-spacing: .08em;
-    margin-bottom: 8px;
-  }
+  .dt-modal-section-title { font-size: 10.5px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
   .dt-modal-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
-  .dt-modal-list li {
-    display: flex; align-items: flex-start; gap: 8px;
-    font-size: 12.5px; color: var(--text-secondary); line-height: 1.6;
-  }
-  .dt-modal-list li::before {
-    content: '›'; color: var(--primary-light);
-    font-size: 15px; line-height: 1.4; flex-shrink: 0; font-weight: 700;
-  }
+  .dt-modal-list li { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; }
+  .dt-modal-list li::before { content: '›'; color: var(--primary-light); font-size: 15px; line-height: 1.4; flex-shrink: 0; font-weight: 700; }
   .dt-modal-detail-text { font-size: 12.5px; color: var(--text-secondary); line-height: 1.75; }
-
-  /* ── FOOTER ── */
   .dt-footer { text-align: center; padding: 16px; font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--border); margin-top: 40px; }
   .dt-footer strong { color: var(--text-secondary); font-weight: 700; }
 
-  /* Tablet sidebar collapse */
   @media (min-width: 768px) and (max-width: 1023px) {
     :root { --sidebar-w: 68px; }
     .dt-nav-item { padding: 10px; justify-content: center; }
@@ -493,7 +466,6 @@ input { -webkit-user-select: text; -moz-user-select: text; user-select: text; }
     .dt-sidebar { padding: 16px 8px; align-items: center; }
     .dt-main { padding: 28px 20px 60px; }
   }
-
   @media (max-width: 1280px) { .dt-main { padding: 36px 32px 80px; } }
 }
 
@@ -511,36 +483,24 @@ input { -webkit-user-select: text; -moz-user-select: text; user-select: text; }
 .af-toast-x { margin-left: auto; font-size: 17px; cursor: pointer; color: var(--text-muted); }
 
 @media (max-width: 767px) {
-  .af-toast-wrap { bottom: calc(60px + 12px); background: none; border: none; box-shadow: none; }
+  .af-toast-wrap { bottom: calc(60px + 12px); }
   .af-toast { background: var(--surface, #fff); border: 1px solid var(--bc, rgba(79,70,229,.15)); }
 }
 
-  *{
-  -webkit-user-select:none !important;
-  -moz-user-select:none !important;
-  user-select:none !important;
-  -webkit-touch-callout:none !important;
-}
-
-input,
-textarea,
-[contenteditable="true"]{
-  -webkit-user-select:text !important;
-  -moz-user-select:text !important;
-  user-select:text !important;
-}
+*{ -webkit-user-select:none !important; -moz-user-select:none !important; user-select:none !important; -webkit-touch-callout:none !important; }
+input, textarea, [contenteditable="true"]{ -webkit-user-select:text !important; -moz-user-select:text !important; user-select:text !important; }
 </style>
 </head>
 <body>
 
 <!-- ══════════════════════════════════════════════
-     MOBILE SHELL (< 768px) — ORIGINAL UNTOUCHED
+     MOBILE SHELL
 ══════════════════════════════════════════════ -->
 <div class="mob-shell">
   <header class="mob-hdr">
-    <span class="mob-hdr-title">Batches 📚</span>
-    <span class="mob-hdr-count" id="mobBatchCount">5 available</span>
-    <button class="mob-hdr-refresh" onclick="forceRefresh()" title="Refresh">↻</button>
+    <span class="mob-hdr-title" id="mobHdrTitle">Batches 📚</span>
+    <span class="mob-hdr-count" id="mobBatchCount" style="display:none">5 available</span>
+    <button class="mob-hdr-refresh" id="mobRefreshBtn" onclick="forceRefresh()" title="Refresh" style="display:none">↻</button>
   </header>
 
   <div class="cache-bar" id="mobCacheBar" style="display:none;">
@@ -549,50 +509,132 @@ textarea,
   </div>
 
   <div class="mob-page" id="mobPage">
-    <div id="mobListView">
-      <div class="search-box">
-        <span>🔍</span>
-        <input id="mobSearchInput" type="text" placeholder="Search batches…" oninput="filterBatches('mob')"/>
+
+    <!-- ── BATCHES PANEL ── -->
+    <div class="mob-panel active" id="mobBatchPanel">
+      <div id="mobListView">
+        <div class="search-box">
+          <span>🔍</span>
+          <input id="mobSearchInput" type="text" placeholder="Search batches…" oninput="filterBatches('mob')"/>
+        </div>
+        <div class="batch-grid" id="mobBatchGrid"></div>
       </div>
-      <div class="batch-grid" id="mobBatchGrid"></div>
+      <div class="detail-wrap" id="mobDetailView">
+        <button class="back-btn" onclick="showMobList()">← Back to Batches</button>
+        <div class="detail-card">
+          <img id="mobDetailImg" src="" alt="" class="detail-img"/>
+          <div class="detail-body">
+            <div class="detail-head">
+              <h2 id="mobDetailTitle">Batch</h2>
+              <span class="batch-lang" id="mobDetailLang">HINGLISH</span>
+            </div>
+            <p class="batch-cat" id="mobDetailCat" style="margin-bottom:10px;">Target</p>
+            <p class="detail-desc" id="mobDetailDesc"></p>
+            <div class="detail-price-row">
+              <strong id="mobDetailPrice">₹49</strong>
+              <del id="mobDetailOld">₹99</del>
+              <span id="mobDetailOff">51% OFF</span>
+            </div>
+            <button class="detail-buy-btn" id="mobDetailBuyBtn" onclick="buySelected()">Buy Now</button>
+          </div>
+        </div>
+        <div class="info-box"><h3>📌 What you will learn</h3><ul id="mobDetailLearn"></ul></div>
+        <div class="info-box"><h3>🏫 Batch Facilities</h3><ul id="mobDetailFacilities"></ul></div>
+        <div class="info-box"><h3>🧾 Batch Details</h3><p id="mobDetailFull"></p></div>
+      </div>
     </div>
 
-    <div class="detail-wrap" id="mobDetailView">
-      <button class="back-btn" onclick="showMobList()">← Back to Batches</button>
-      <div class="detail-card">
-        <img id="mobDetailImg" src="" alt="" class="detail-img"/>
-        <div class="detail-body">
-          <div class="detail-head">
-            <h2 id="mobDetailTitle">Batch</h2>
-            <span class="batch-lang" id="mobDetailLang">HINGLISH</span>
-          </div>
-          <p class="batch-cat" id="mobDetailCat" style="margin-bottom:10px;">Target</p>
-          <p class="detail-desc" id="mobDetailDesc"></p>
-          <div class="detail-price-row">
-            <strong id="mobDetailPrice">₹49</strong>
-            <del id="mobDetailOld">₹99</del>
-            <span id="mobDetailOff">51% OFF</span>
-          </div>
-          <button class="detail-buy-btn" id="mobDetailBuyBtn" onclick="buySelected()">Buy Now</button>
+    <!-- ── STUDENT PANEL ── -->
+    <div class="mob-panel" id="mobStudentPanel">
+      <!-- STATE: not logged in -->
+      <div id="mobStuNotLogged" style="display:none;">
+        <div class="stu-not-logged">
+          <div style="font-size:40px;margin-bottom:12px;">🔒</div>
+          <p>Please login with your Student ID to access your courses and learning content.</p>
+          <a href="/student/index.html" class="stu-login-btn">Login / Create ID</a>
         </div>
       </div>
-      <div class="info-box"><h3>📌 What you will learn</h3><ul id="mobDetailLearn"></ul></div>
-      <div class="info-box"><h3>🏫 Batch Facilities</h3><ul id="mobDetailFacilities"></ul></div>
-      <div class="info-box"><h3>🧾 Batch Details</h3><p id="mobDetailFull"></p></div>
+      <!-- STATE: no courses -->
+      <div id="mobStuNoCourse" style="display:none;">
+        <div class="stu-not-enrolled">
+          <div class="stu-not-enrolled-icon">😬</div>
+          <h2>Not Enrolled Yet</h2>
+          <p id="mobStuNoCourseMsg">You are not enrolled in any batch.</p>
+          <p>Please enroll from the Batches section.</p>
+        </div>
+      </div>
+      <!-- STATE: course list -->
+      <div id="mobStuCourseListView" style="display:none;">
+        <div class="stu-welcome-card">
+          <div class="stu-welcome-name" id="mobStuWelcome">Welcome Student</div>
+          <div class="stu-welcome-sub">Your enrolled programs are ready to explore.</div>
+          <div class="stu-course-grid" id="mobStuCourseGrid"></div>
+        </div>
+      </div>
+      <!-- STATE: course detail -->
+      <div class="stu-detail-wrap" id="mobStuDetailView">
+        <button class="back-btn" onclick="showMobStuCourseList()">← Back to Courses</button>
+        <div class="stu-detail-card">
+          <div class="stu-detail-head">
+            <div class="stu-detail-icon" id="mobStuDetailIcon">📘</div>
+            <div class="stu-detail-title-wrap">
+              <h2 id="mobStuDetailTitle">Course</h2>
+              <p id="mobStuDetailIntro"></p>
+            </div>
+          </div>
+          <div class="info-box" style="margin:0 16px 0;"><h3>📌 Course Details</h3><p id="mobStuDetailDetails"></p></div>
+          <div class="info-box" style="margin:12px 16px 0;"><h3>🏫 Facilities</h3><ul id="mobStuDetailFacilities"></ul></div>
+          <button class="stu-continue-btn" onclick="showMobLearning()">Continue Learning</button>
+        </div>
+      </div>
+      <!-- STATE: learning choice -->
+      <div class="stu-detail-wrap" id="mobStuLearningView">
+        <button class="back-btn" onclick="showMobStuDetail()">← Back</button>
+        <div class="detail-card" style="border-radius:20px;">
+          <div class="detail-body">
+            <div class="batch-title" id="mobStuLearningTitle" style="margin-bottom:10px;"></div>
+            <div class="stu-learning-grid">
+              <button class="stu-learning-btn" onclick="openMobLearningMode('lectures')"><span>🎥</span><strong>Lectures</strong><small>Chapter-wise video lecture list</small></button>
+              <button class="stu-learning-btn" onclick="openMobLearningMode('notes')"><span>📝</span><strong>Notes</strong><small>Chapter-wise study notes</small></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- STATE: chapters -->
+      <div class="stu-detail-wrap" id="mobStuChaptersView">
+        <button class="back-btn" onclick="showMobLearning()">← Back</button>
+        <div class="detail-card" style="border-radius:20px;">
+          <div class="detail-body">
+            <div class="batch-title" id="mobStuChapterModeTitle" style="margin-bottom:10px;"></div>
+            <div class="stu-chapter-list" id="mobStuChapterList"></div>
+          </div>
+        </div>
+      </div>
+      <!-- STATE: content -->
+      <div class="stu-detail-wrap" id="mobStuContentView">
+        <button class="back-btn" onclick="showMobStuChapters()">← Back to Chapters</button>
+        <div class="detail-card" style="border-radius:20px;">
+          <div class="detail-body">
+            <div class="batch-title" id="mobStuContentTitle" style="margin-bottom:4px;"></div>
+            <div class="stu-content-list" id="mobStuContentList"></div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
+
+  </div><!-- /mob-page -->
 
   <nav class="mob-bnav">
     <button class="mob-bnav-btn" onclick="window.location.href='/index.html'"><span class="mob-bnav-icon">🏠</span><span class="mob-bnav-label">Home</span></button>
-    <button class="mob-bnav-btn" onclick="window.location.href='/student/index.html'"><span class="mob-bnav-icon">🎓</span><span class="mob-bnav-label">Student</span></button>
-    <button class="mob-bnav-btn active"><span class="mob-bnav-icon">📚</span><span class="mob-bnav-label">Batches</span></button>
+    <button class="mob-bnav-btn" id="mobNavStudent" onclick="switchMobTab('student')"><span class="mob-bnav-icon">🎓</span><span class="mob-bnav-label">Student</span></button>
+    <button class="mob-bnav-btn active" id="mobNavBatches" onclick="switchMobTab('batches')"><span class="mob-bnav-icon">📚</span><span class="mob-bnav-label">Batches</span></button>
     <button class="mob-bnav-btn" onclick="window.location.href='/community/indix.html'"><span class="mob-bnav-icon">💬</span><span class="mob-bnav-label">Community</span></button>
     <button class="mob-bnav-btn" onclick="window.location.href='/setting/index.html'"><span class="mob-bnav-icon">⚙️</span><span class="mob-bnav-label">Settings</span></button>
   </nav>
 </div>
 
 <!-- ══════════════════════════════════════════════
-     DESKTOP (≥ 768px) — REDESIGNED
+     DESKTOP
 ══════════════════════════════════════════════ -->
 <div class="dt-layout">
 
@@ -620,17 +662,16 @@ textarea,
 
   <div class="dt-body-wrap">
 
-    <!-- SIDEBAR -->
     <aside class="dt-sidebar">
       <div class="dt-nav-section">
         <span class="dt-nav-label-text">Navigation</span>
         <button class="dt-nav-item" onclick="window.location.href='/index.html'" type="button">
           <span class="dt-nav-icon-wrap">🏠</span><span>Home</span>
         </button>
-        <button class="dt-nav-item" onclick="window.location.href='/student/index.html'" type="button">
+        <button class="dt-nav-item" id="dtNavStudent" onclick="switchDtTab('student')" type="button">
           <span class="dt-nav-icon-wrap">🎓</span><span>Student</span>
         </button>
-        <button class="dt-nav-item active" type="button">
+        <button class="dt-nav-item active" id="dtNavBatches" onclick="switchDtTab('batches')" type="button">
           <span class="dt-nav-icon-wrap">📚</span><span>Batches</span>
         </button>
         <button class="dt-nav-item" onclick="window.location.href='/community/index.html'" type="button">
@@ -640,49 +681,122 @@ textarea,
           <span class="dt-nav-icon-wrap">⚙️</span><span>Settings</span>
         </button>
       </div>
-
       <div class="dt-sidebar-footer">
         <strong>Developed by Devraj Kumar</strong><br>Made with ❤️ in India
       </div>
     </aside>
 
-    <!-- MAIN -->
     <main class="dt-main">
-      <div class="dt-page-head">
-        <div class="dt-page-title">Batches</div>
-        <div class="dt-page-sub">Browse and enroll in available learning batches</div>
-      </div>
 
-      <!-- TOOLBAR -->
-      <div class="dt-toolbar">
-        <div class="dt-search-box">
-          <span>🔍</span>
-          <input id="dtSearchInput" type="text" placeholder="Search batches…" oninput="filterBatches('dt')"/>
+      <!-- ── BATCHES PANEL (desktop) ── -->
+      <div class="dt-panel active" id="dtBatchPanel">
+        <div class="dt-page-head">
+          <div class="dt-page-title">Batches</div>
+          <div class="dt-page-sub">Browse and enroll in available learning batches</div>
         </div>
-        <span class="dt-batch-count" id="dtBatchCount">5 batches</span>
-        <button class="dt-refresh-btn" onclick="forceRefresh()" title="Refresh">↻</button>
+        <div class="dt-toolbar">
+          <div class="dt-search-box">
+            <span>🔍</span>
+            <input id="dtSearchInput" type="text" placeholder="Search batches…" oninput="filterBatches('dt')"/>
+          </div>
+          <span class="dt-batch-count" id="dtBatchCount">5 batches</span>
+          <button class="dt-refresh-btn" onclick="forceRefresh()" title="Refresh">↻</button>
+        </div>
+        <div class="dt-cache-bar" id="dtCacheBar"><span id="dtCacheTime">Loaded from cache</span></div>
+        <div class="dt-batch-grid" id="dtBatchGrid"></div>
+        <footer class="dt-footer">
+          <strong>Developed by Devraj Kumar</strong> &nbsp;·&nbsp; Made with ❤️ in India &nbsp;·&nbsp; AcademeForge
+        </footer>
       </div>
 
-      <!-- CACHE BAR -->
-      <div class="dt-cache-bar" id="dtCacheBar">
-        <span id="dtCacheTime">Loaded from cache</span>
+      <!-- ── STUDENT PANEL (desktop) ── -->
+      <div class="dt-panel" id="dtStudentPanel">
+        <!-- not logged in -->
+        <div id="dtStuNotLogged" style="display:none;">
+          <div class="dt-stu-not-logged">
+            <div style="font-size:48px;margin-bottom:16px;">🔒</div>
+            <p>Please login with your Student ID to access your courses and learning content.</p>
+            <a href="/student/index.html" class="dt-stu-login-link">Login / Create ID</a>
+          </div>
+        </div>
+        <!-- no courses -->
+        <div id="dtStuNoCourse" style="display:none;">
+          <div class="dt-page-head">
+            <div class="dt-page-title">My Courses</div>
+            <div class="dt-page-sub" id="dtStuNoCourseMsg">You are not enrolled in any batch yet.</div>
+          </div>
+          <div style="text-align:center;padding:40px 0;">
+            <div style="font-size:48px;margin-bottom:16px;">😬</div>
+            <p style="font-size:14px;color:var(--text-secondary);font-weight:600;margin-bottom:20px;">Enroll in a batch to start learning.</p>
+            <button onclick="switchDtTab('batches')" style="padding:12px 28px;border-radius:var(--r2);font-size:14px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--primary),var(--secondary));cursor:pointer;">Browse Batches</button>
+          </div>
+        </div>
+        <!-- course list -->
+        <div id="dtStuCourseListView" style="display:none;">
+          <div class="dt-student-header">
+            <div class="dt-student-welcome">
+              <h2 id="dtStuWelcome">Welcome, Student</h2>
+              <p>Your enrolled programs are ready to explore.</p>
+            </div>
+          </div>
+          <div class="dt-courses-grid" id="dtStuCourseGrid"></div>
+        </div>
+        <!-- course detail -->
+        <div id="dtStuDetailView" style="display:none;">
+          <button class="dt-back-link" onclick="showDtStuCourseList()">← Back to Courses</button>
+          <div class="dt-stu-detail">
+            <div class="dt-stu-detail-head">
+              <div class="dt-stu-detail-icon" id="dtStuDetailIcon">📘</div>
+              <div>
+                <h2 id="dtStuDetailTitle">Course Name</h2>
+                <p id="dtStuDetailIntro"></p>
+              </div>
+            </div>
+            <div class="dt-info-box"><h3>📌 Course Details</h3><p id="dtStuDetailDetails"></p></div>
+            <div class="dt-info-box"><h3>🏫 Facilities</h3><ul id="dtStuDetailFacilities"></ul></div>
+            <button class="dt-continue-btn" onclick="showDtLearning()">Continue Learning →</button>
+          </div>
+        </div>
+        <!-- learning choice -->
+        <div id="dtStuLearningView" style="display:none;">
+          <button class="dt-back-link" onclick="showDtStuDetail()">← Back to Course</button>
+          <div class="dt-page-head">
+            <div class="dt-page-title" id="dtStuLearningTitle">Start Learning</div>
+            <div class="dt-page-sub">Select what you want to access.</div>
+          </div>
+          <div class="dt-learning-grid">
+            <button class="dt-learning-btn" onclick="openDtLearningMode('lectures')"><span>🎥</span><strong>Lectures</strong><small>Chapter-wise video lecture list</small></button>
+            <button class="dt-learning-btn" onclick="openDtLearningMode('notes')"><span>📝</span><strong>Notes</strong><small>Chapter-wise study notes</small></button>
+          </div>
+        </div>
+        <!-- chapters -->
+        <div id="dtStuChaptersView" style="display:none;">
+          <button class="dt-back-link" onclick="showDtLearning()">← Back</button>
+          <div class="dt-page-head">
+            <div class="dt-page-title" id="dtStuChapterModeTitle">Lectures</div>
+            <div class="dt-page-sub">Select a chapter to continue.</div>
+          </div>
+          <div class="dt-chapter-list" id="dtStuChapterList"></div>
+        </div>
+        <!-- content -->
+        <div id="dtStuContentView" style="display:none;">
+          <button class="dt-back-link" onclick="showDtStuChapters()">← Back to Chapters</button>
+          <div class="dt-page-head">
+            <div class="dt-page-title" id="dtStuContentTitle">Chapter Content</div>
+            <div class="dt-page-sub">Select and study one by one.</div>
+          </div>
+          <div class="dt-content-list" id="dtStuContentList"></div>
+        </div>
       </div>
 
-      <!-- BATCH GRID -->
-      <div class="dt-batch-grid" id="dtBatchGrid"></div>
-
-      <footer class="dt-footer">
-        <strong>Developed by Devraj Kumar</strong> &nbsp;·&nbsp; Made with ❤️ in India &nbsp;·&nbsp; AcademeForge
-      </footer>
     </main>
   </div>
 
-  <!-- MODAL OVERLAY (replaces slide panel) -->
+  <!-- BATCH DETAIL MODAL -->
   <div class="dt-modal-overlay" id="dtModalOverlay" onclick="closeDtModal()">
     <div class="dt-modal" onclick="event.stopPropagation()" style="position:relative;">
       <button class="dt-modal-close" onclick="closeDtModal()" type="button">×</button>
       <div class="dt-modal-inner">
-        <!-- Left: image + price badge -->
         <div class="dt-modal-left">
           <img id="dtModalImg" src="" alt=""/>
           <div class="dt-modal-left-overlay"></div>
@@ -694,13 +808,11 @@ textarea,
             </div>
           </div>
         </div>
-        <!-- Right: content -->
         <div class="dt-modal-right">
           <div class="dt-modal-meta" id="dtModalMeta"></div>
           <div class="dt-modal-title" id="dtModalTitle"></div>
           <div class="dt-modal-desc" id="dtModalDesc"></div>
           <button class="dt-modal-buy-btn" id="dtModalBuyBtn" onclick="buySelected()">Buy Now →</button>
-
           <div class="dt-modal-section">
             <div class="dt-modal-section-title">What you'll learn</div>
             <ul class="dt-modal-list" id="dtModalLearn"></ul>
@@ -720,7 +832,6 @@ textarea,
 
 </div><!-- /dt-layout -->
 
-<!-- TOAST -->
 <div class="af-toast-wrap" id="afToastWrap"></div>
 
 <script>
@@ -735,6 +846,10 @@ const BATCH_OLD    = 99;
 const DISCOUNT     = Math.round(((BATCH_OLD - BATCH_PRICE) / BATCH_OLD) * 100);
 const CACHE_KEY    = 'af_batches_cache_v1';
 const ENROLLED_KEY = 'af_enrolled_cache_v1';
+const COURSES_KEY  = 'af_student_courses_v1';
+const CHAPTERS_PFX = 'af_chapters_v1_';
+const LECTURES_PFX = 'af_lectures_v1_';
+const NOTES_PFX    = 'af_notes_v1_';
 const CACHE_TTL_MS = 30 * 60 * 1000;
 
 /* ─── STATIC BATCH DATA ───────────────────────────────────── */
@@ -745,7 +860,6 @@ const COURSE_IDS = {
   "freelancing":           "7fd5fc14-1ce8-46f8-9cbb-5fab1abb5cd9",
   "ai-prompt-engineering": "0e6d4d11-0afc-4070-bbf2-23950cc71da0"
 };
-
 const BATCHES = [
   {id:"video-editing",courseSlug:"video-editing",courseId:COURSE_IDS["video-editing"],image:"/IMG/Course 1.jpeg",category:"Target",language:"HINGLISH",title:"Video & Media Editing Mastery",subtitle:"Learn editing, storytelling, reels, shorts, and professional content creation.",status:"Beta Mode",price:BATCH_PRICE,oldPrice:BATCH_OLD,details:"A practical batch for learners who want to build strong video editing skills for reels, shorts, YouTube content, social media creatives, and professional digital projects.",learn:["Timeline editing and clean workflow","Reels, shorts, and social media video structure","Transitions, captions, audio sync, and color correction","Content planning and storytelling basics","Project-based editing practice"],facilities:["Chapter-wise learning","Lecture and notes support","Practice-based tasks","Future certificate support","Batch access after successful purchase"]},
   {id:"graphic-design",courseSlug:"graphic-design",courseId:COURSE_IDS["graphic-design"],image:"/IMG/Course 2.jpeg",category:"Target",language:"HINGLISH",title:"Creative & Graphic Design Mastery",subtitle:"Design posters, thumbnails, banners, brand creatives, and visual content.",status:"Beta Mode",price:BATCH_PRICE,oldPrice:BATCH_OLD,details:"A creative batch focused on design fundamentals, social media creatives, thumbnails, posters, brand layouts, typography, and portfolio-ready visual design practice.",learn:["Design principles and layout basics","Poster, banner, and thumbnail design","Typography, color balance, and spacing","Brand-style social media creatives","Portfolio-focused design practice"],facilities:["Design practice tasks","Creative assignments","Notes for quick revision","Portfolio guidance","Future project review"]},
@@ -758,13 +872,18 @@ const BATCHES = [
 let enrolledSlugs = [];
 let selectedBatch = null;
 let razorpayLoaded = false;
+let enrolledCourses = [];
+let selectedCourse = null;
+let learningMode = 'lectures';
+let mobTab = 'batches';
+let dtTab  = 'batches';
 
 /* ─── HELPERS ─────────────────────────────────────────────── */
 const $id = id => document.getElementById(id);
 const isDesktop = () => window.innerWidth >= 768;
 const esc = t => String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const safe = (v,fb) => (v===null||v===undefined||v==='')?fb||'':v;
 function isEnrolled(slug){ return enrolledSlugs.includes(slug); }
-
 function getStudent(){
   return {
     id:         localStorage.getItem('af_student_uuid')   || '',
@@ -774,141 +893,136 @@ function getStudent(){
     email:      localStorage.getItem('af_student_email')  || ''
   };
 }
+function isLoggedIn(){ return !!(localStorage.getItem('af_student_uuid')); }
 
-/* ─── THEME SYNC (cross-page) ─────────────────────────────── */
+/* ─── THEME SYNC ─────────────────────────────────────────── */
 window.addEventListener('storage', e => {
-  if (e.key === 'af_dark_mode') {
-    document.documentElement.setAttribute(
-      'data-theme',
-      e.newValue === '1' ? 'dark' : 'light'
-    );
-  }
+  if (e.key === 'af_dark_mode')
+    document.documentElement.setAttribute('data-theme', e.newValue === '1' ? 'dark' : 'light');
 });
-
-function updateStreakBadge(n) {
-  const el = $id('dtStreakCount');
-  if (el) el.textContent = n;
-}
+function updateStreakBadge(n){ const el=$id('dtStreakCount'); if(el) el.textContent=n; }
 
 /* ─── TOAST ─────────────────────────────────────────────── */
 let _tt = null;
 function showToast(msg, type='info', title=''){
-  const wrap = $id('afToastWrap');
-  if (!wrap) return;
-  wrap.innerHTML = '';
-  if (_tt){ clearTimeout(_tt); _tt = null; }
-  const labels = {ok:'Done',info:'Info',err:'Error',warn:'Notice'};
-  const d = document.createElement('div');
-  d.className = 'af-toast af-toast-' + type;
-  d.innerHTML = `<div><p class="af-toast-title">${title||labels[type]||'Info'}</p><p class="af-toast-msg">${msg}</p></div><button class="af-toast-x" onclick="this.parentElement.remove()">×</button>`;
+  const wrap=$id('afToastWrap'); if(!wrap) return;
+  wrap.innerHTML='';
+  if(_tt){ clearTimeout(_tt); _tt=null; }
+  const labels={ok:'Done',info:'Info',err:'Error',warn:'Notice'};
+  const d=document.createElement('div');
+  d.className='af-toast af-toast-'+type;
+  d.innerHTML=`<div><p class="af-toast-title">${title||labels[type]||'Info'}</p><p class="af-toast-msg">${msg}</p></div><button class="af-toast-x" onclick="this.parentElement.remove()">×</button>`;
   wrap.appendChild(d);
-  _tt = setTimeout(() => d && d.remove(), 2600);
+  _tt=setTimeout(()=>d&&d.remove(),2600);
 }
 
 /* ─── CACHE ─────────────────────────────────────────────── */
-function cacheGet(key) {
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    const obj = JSON.parse(raw);
-    if (Date.now() - obj.ts > CACHE_TTL_MS) return null;
-    return obj.data;
-  } catch(_){ return null; }
+function cacheGet(key){
+  try{ const raw=localStorage.getItem(key); if(!raw) return null; const obj=JSON.parse(raw); if(Date.now()-obj.ts>CACHE_TTL_MS) return null; return obj.data; }catch(_){ return null; }
 }
-function cacheSet(key, data) {
-  try { localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch(_){}
+function cacheSet(key,data){ try{ localStorage.setItem(key,JSON.stringify({ts:Date.now(),data})); }catch(_){} }
+function cacheClear(key){ try{ localStorage.removeItem(key); }catch(_){} }
+function cacheClearPrefix(prefix){ try{ Object.keys(localStorage).filter(k=>k.startsWith(prefix)).forEach(k=>localStorage.removeItem(k)); }catch(_){} }
+
+function showCacheBar(ts){
+  const mins=Math.round((Date.now()-ts)/60000);
+  const txt=mins<1?'Updated just now':`Last updated ${mins}m ago`;
+  const mob=$id('mobCacheBar'),mobT=$id('mobCacheTime');
+  if(mob&&mobT){ mobT.textContent=txt; mob.style.display='flex'; }
+  const dt=$id('dtCacheBar'),dtT=$id('dtCacheTime');
+  if(dt&&dtT){ dtT.textContent=txt; dt.style.display='block'; }
 }
-function cacheClear(key) {
-  try { localStorage.removeItem(key); } catch(_){}
+function hideCacheBar(){
+  const mob=$id('mobCacheBar'); if(mob) mob.style.display='none';
+  const dt=$id('dtCacheBar');  if(dt)  dt.style.display='none';
 }
 
-function showCacheBar(ts) {
-  const mins = Math.round((Date.now() - ts) / 60000);
-  const txt = mins < 1 ? 'Updated just now' : `Last updated ${mins}m ago`;
-
-  const mob = $id('mobCacheBar');
-  const mobT = $id('mobCacheTime');
-  if (mob && mobT) { mobT.textContent = txt; mob.style.display = 'flex'; }
-
-  const dt = $id('dtCacheBar');
-  const dtT = $id('dtCacheTime');
-  if (dt && dtT) { dtT.textContent = txt; dt.style.display = 'block'; }
-}
-function hideCacheBar() {
-  const mob = $id('mobCacheBar'); if (mob) mob.style.display = 'none';
-  const dt  = $id('dtCacheBar');  if (dt)  dt.style.display  = 'none';
-}
-
-/* ─── SUPABASE LAZY ──────────────────────────────────────── */
-let _sbClient = null;
-function getSb() {
-  if (_sbClient) return _sbClient;
-  if (typeof supabase !== 'undefined') _sbClient = supabase.createClient(STUDENT_URL, STUDENT_KEY);
+/* ─── SUPABASE ────────────────────────────────────────────── */
+let _sbClient=null;
+function getSb(){
+  if(_sbClient) return _sbClient;
+  if(typeof supabase!=='undefined') _sbClient=supabase.createClient(STUDENT_URL,STUDENT_KEY);
   return _sbClient;
 }
-async function edgeCall(fn, payload) {
-  try {
-    if (!navigator.onLine) return { ok:false, message:'No internet connection.' };
-    const sb = getSb();
-    if (!sb) return { ok:false, message:'SDK not ready.' };
-    const { data, error } = await sb.functions.invoke(fn, { body: payload||{} });
-    if (error) return { ok:false, message: error.message||'Request failed.' };
-    return data || { ok:false, message:'Empty response.' };
-  } catch(e) { return { ok:false, message: e.message||'Request failed.' }; }
+async function edgeCall(fn,payload){
+  try{
+    if(!navigator.onLine) return{ok:false,message:'No internet connection.'};
+    const sb=getSb();
+    if(!sb) return{ok:false,message:'SDK not ready.'};
+    const{data,error}=await sb.functions.invoke(fn,{body:payload||{}});
+    if(error) return{ok:false,message:error.message||'Request failed.'};
+    return data||{ok:false,message:'Empty response.'};
+  }catch(e){ return{ok:false,message:e.message||'Request failed.'}; }
 }
 
-async function loadEnrolled() {
-  enrolledSlugs = [];
-  const cached = cacheGet(ENROLLED_KEY);
-  if (cached && Array.isArray(cached)) { enrolledSlugs = cached; return; }
-  const s = getStudent();
-  if (!s.id) return;
-  try {
-    const res = await edgeCall('batch-enrolled-af', { student_id: s.id });
-    if (!res || !res.ok) return;
-    const ids = Array.isArray(res.course_ids) ? res.course_ids : [];
-    enrolledSlugs = BATCHES.filter(b => ids.includes(b.courseId)).map(b => b.courseSlug);
-    cacheSet(ENROLLED_KEY, enrolledSlugs);
-  } catch(_) {}
+/* ─── ENROLLED BATCH CHECK ───────────────────────────────── */
+async function loadEnrolled(){
+  enrolledSlugs=[];
+  const cached=cacheGet(ENROLLED_KEY);
+  if(cached&&Array.isArray(cached)){ enrolledSlugs=cached; return; }
+  const s=getStudent(); if(!s.id) return;
+  try{
+    const res=await edgeCall('batch-enrolled-af',{student_id:s.id});
+    if(!res||!res.ok) return;
+    const ids=Array.isArray(res.course_ids)?res.course_ids:[];
+    enrolledSlugs=BATCHES.filter(b=>ids.includes(b.courseId)).map(b=>b.courseSlug);
+    cacheSet(ENROLLED_KEY,enrolledSlugs);
+  }catch(_){}
 }
 
-/* ─── RENDER MOBILE ──────────────────────────────────────── */
-function renderMobBatches(list) {
-  const grid = $id('mobBatchGrid');
-  const lbl  = $id('mobBatchCount');
-  if (lbl) lbl.textContent = list.length + ' available';
-  if (!list.length) { grid.innerHTML = '<div class="state-msg">No batches found.</div>'; return; }
-  grid.innerHTML = list.map(b => {
-    const enrolled = isEnrolled(b.courseSlug);
-    return `<div class="batch-card${enrolled?' enrolled':''}">
+/* ═══════════════════════════════════════════════════════════
+   TAB SWITCHING
+═══════════════════════════════════════════════════════════ */
+function switchMobTab(tab){
+  mobTab=tab;
+  // update nav
+  $id('mobNavBatches').classList.toggle('active',tab==='batches');
+  $id('mobNavStudent').classList.toggle('active',tab==='student');
+  // update header
+  $id('mobHdrTitle').textContent = tab==='batches' ? 'Batches 📚' : 'Student 🎓';
+  $id('mobBatchCount').style.display = tab==='batches' ? '' : 'none';
+  $id('mobRefreshBtn').style.display = tab==='batches' ? '' : 'none';
+  // toggle panels
+  $id('mobBatchPanel').classList.toggle('active', tab==='batches');
+  $id('mobStudentPanel').classList.toggle('active', tab==='student');
+  // init student if switching to it
+  if(tab==='student') initMobStudent();
+  $id('mobPage').scrollTop=0;
+}
+function switchDtTab(tab){
+  dtTab=tab;
+  $id('dtNavBatches').classList.toggle('active',tab==='batches');
+  $id('dtNavStudent').classList.toggle('active',tab==='student');
+  $id('dtBatchPanel').classList.toggle('active',tab==='batches');
+  $id('dtStudentPanel').classList.toggle('active',tab==='student');
+  const main=$id('dtStudentPanel').parentElement;
+  if(main) main.scrollTop=0;
+  if(tab==='student') initDtStudent();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BATCHES — RENDER
+═══════════════════════════════════════════════════════════ */
+function renderMobBatches(list){
+  const grid=$id('mobBatchGrid'),lbl=$id('mobBatchCount');
+  if(lbl) lbl.textContent=list.length+' available';
+  if(!list.length){ grid.innerHTML='<div class="state-msg">No batches found.</div>'; return; }
+  grid.innerHTML=list.map(b=>{
+    const enrolled=isEnrolled(b.courseSlug);
+    return`<div class="batch-card${enrolled?' enrolled':''}">
       <div class="batch-img-wrap" onclick="openMobDetail('${b.id}')">
-        <img class="batch-img" src="${esc(b.image)}" alt="${esc(b.title)}" loading="lazy"
-          onerror="this.style.background='linear-gradient(135deg,#4f46e5,#06b6d4)';this.src=''"/>
+        <img class="batch-img" src="${esc(b.image)}" alt="${esc(b.title)}" loading="lazy" onerror="this.style.background='linear-gradient(135deg,#4f46e5,#06b6d4)';this.src=''"/>
       </div>
       <div class="batch-body">
-        <div class="batch-meta">
-          <span class="batch-cat">${esc(b.category)}</span>
-          <span class="batch-lang">${esc(b.language)}</span>
-        </div>
+        <div class="batch-meta"><span class="batch-cat">${esc(b.category)}</span><span class="batch-lang">${esc(b.language)}</span></div>
         <div class="batch-title" onclick="openMobDetail('${b.id}')">${esc(b.title)}</div>
         <div class="batch-sub">${esc(b.subtitle)}</div>
-        <div class="batch-status">
-          <span class="batch-dot${enrolled?' ok':''}"></span>
-          <span>${enrolled?'Enrolled':esc(b.status)}</span>
-          <span>|</span>
-          <span>${enrolled?'Access active':'Test Payment'}</span>
-        </div>
+        <div class="batch-status"><span class="batch-dot${enrolled?' ok':''}"></span><span>${enrolled?'Enrolled':esc(b.status)}</span><span>|</span><span>${enrolled?'Access active':'Test Payment'}</span></div>
         ${enrolled?'<div class="enrolled-tag">✓ Already Enrolled</div>':''}
         <div class="batch-price-row">
-          <div>
-            <div class="price-line"><strong>₹${b.price}</strong><del>₹${b.oldPrice}</del></div>
-            <div class="price-off">${DISCOUNT}% OFF</div>
-          </div>
+          <div><div class="price-line"><strong>₹${b.price}</strong><del>₹${b.oldPrice}</del></div><div class="price-off">${DISCOUNT}% OFF</div></div>
           <div class="batch-btns">
-            ${enrolled
-              ? `<button class="buy-btn enrolled-btn" disabled>Enrolled ✓</button>`
-              : `<button class="buy-btn" onclick="buyDirect('${b.id}',this)">Buy Now</button>`
-            }
+            ${enrolled?`<button class="buy-btn enrolled-btn" disabled>Enrolled ✓</button>`:`<button class="buy-btn" onclick="buyDirect('${b.id}',this)">Buy Now</button>`}
             <button class="arrow-btn" onclick="openMobDetail('${b.id}')">›</button>
           </div>
         </div>
@@ -917,362 +1031,581 @@ function renderMobBatches(list) {
   }).join('');
 }
 
-/* ─── RENDER DESKTOP ─────────────────────────────────────── */
-function renderDtBatches(list) {
-  const grid = $id('dtBatchGrid');
-  const lbl  = $id('dtBatchCount');
-  if (lbl) lbl.textContent = list.length + (list.length === 1 ? ' batch' : ' batches');
-  if (!list.length) { grid.innerHTML = '<div class="dt-state-msg">No batches found.</div>'; return; }
-  grid.innerHTML = list.map(b => {
-    const enrolled = isEnrolled(b.courseSlug);
-    return `<div class="dt-batch-card${enrolled?' enrolled':''}" onclick="openDtModal('${b.id}')">
+function renderDtBatches(list){
+  const grid=$id('dtBatchGrid'),lbl=$id('dtBatchCount');
+  if(lbl) lbl.textContent=list.length+(list.length===1?' batch':' batches');
+  if(!list.length){ grid.innerHTML='<div class="dt-state-msg">No batches found.</div>'; return; }
+  grid.innerHTML=list.map(b=>{
+    const enrolled=isEnrolled(b.courseSlug);
+    return`<div class="dt-batch-card${enrolled?' enrolled':''}" onclick="openDtModal('${b.id}')">
       <div class="dt-batch-thumb">
-        <img src="${esc(b.image)}" alt="${esc(b.title)}" loading="lazy"
-          onerror="this.style.background='linear-gradient(135deg,#7c3aed,#2563eb)';this.src=''"/>
-        ${enrolled ? '<div class="dt-enrolled-ribbon">✓ Enrolled</div>' : ''}
+        <img src="${esc(b.image)}" alt="${esc(b.title)}" loading="lazy" onerror="this.style.background='linear-gradient(135deg,#7c3aed,#2563eb)';this.src=''"/>
+        ${enrolled?'<div class="dt-enrolled-ribbon">✓ Enrolled</div>':''}
       </div>
       <div class="dt-batch-body">
-        <div class="dt-batch-meta">
-          <span class="dt-batch-cat">${esc(b.category)}</span>
-          <span class="dt-batch-lang">${esc(b.language)}</span>
-        </div>
+        <div class="dt-batch-meta"><span class="dt-batch-cat">${esc(b.category)}</span><span class="dt-batch-lang">${esc(b.language)}</span></div>
         <div class="dt-batch-title">${esc(b.title)}</div>
         <div class="dt-batch-sub">${esc(b.subtitle)}</div>
         <div class="dt-batch-footer">
-          <div class="dt-price-block">
-            <div class="dt-price-main"><strong>₹${b.price}</strong><del>₹${b.oldPrice}</del></div>
-            <div class="dt-price-off">${DISCOUNT}% OFF</div>
-          </div>
-          ${enrolled
-            ? `<button class="dt-buy-btn enrolled-btn" onclick="event.stopPropagation()" disabled>Enrolled ✓</button>`
-            : `<button class="dt-buy-btn" onclick="event.stopPropagation();buyDirect('${b.id}',this)">Buy Now</button>`
-          }
+          <div class="dt-price-block"><div class="dt-price-main"><strong>₹${b.price}</strong><del>₹${b.oldPrice}</del></div><div class="dt-price-off">${DISCOUNT}% OFF</div></div>
+          ${enrolled?`<button class="dt-buy-btn enrolled-btn" onclick="event.stopPropagation()" disabled>Enrolled ✓</button>`:`<button class="dt-buy-btn" onclick="event.stopPropagation();buyDirect('${b.id}',this)">Buy Now</button>`}
         </div>
       </div>
     </div>`;
   }).join('');
 }
 
-/* ─── FILTER ─────────────────────────────────────────────── */
-function filterBatches(target) {
-  const inputId = target === 'dt' ? 'dtSearchInput' : 'mobSearchInput';
-  const q = ($id(inputId)?.value || '').trim().toLowerCase();
-  const filtered = !q ? BATCHES : BATCHES.filter(b =>
-    b.title.toLowerCase().includes(q) ||
-    b.subtitle.toLowerCase().includes(q) ||
-    b.courseSlug.toLowerCase().includes(q)
-  );
-  if (target === 'dt') renderDtBatches(filtered);
+function filterBatches(target){
+  const inputId=target==='dt'?'dtSearchInput':'mobSearchInput';
+  const q=($id(inputId)?.value||'').trim().toLowerCase();
+  const filtered=!q?BATCHES:BATCHES.filter(b=>b.title.toLowerCase().includes(q)||b.subtitle.toLowerCase().includes(q)||b.courseSlug.toLowerCase().includes(q));
+  if(target==='dt') renderDtBatches(filtered);
   else renderMobBatches(filtered);
 }
 
-/* ─── MOBILE DETAIL ──────────────────────────────────────── */
-function showMobList() {
-  $id('mobListView').style.display = 'block';
+/* ─── MOBILE BATCH DETAIL ─────────────────────────────────── */
+function showMobList(){
+  $id('mobListView').style.display='block';
   $id('mobDetailView').classList.remove('active');
-  $id('mobPage').scrollTop = 0;
+  $id('mobPage').scrollTop=0;
 }
-
-function openMobDetail(id) {
-  const b = BATCHES.find(x => x.id === id);
-  if (!b) return;
-  selectedBatch = b;
-  const enrolled = isEnrolled(b.courseSlug);
-  $id('mobDetailImg').src        = b.image;
-  $id('mobDetailTitle').textContent = b.title;
-  $id('mobDetailLang').textContent  = b.language;
-  $id('mobDetailCat').textContent   = b.category;
-  $id('mobDetailDesc').textContent  = b.subtitle;
-  $id('mobDetailPrice').textContent = '₹' + b.price;
-  $id('mobDetailOld').textContent   = '₹' + b.oldPrice;
-  $id('mobDetailOff').textContent   = DISCOUNT + '% OFF';
-  $id('mobDetailFull').textContent  = b.details;
-  $id('mobDetailLearn').innerHTML      = b.learn.map(i => `<li>${esc(i)}</li>`).join('');
-  $id('mobDetailFacilities').innerHTML = b.facilities.map(i => `<li>${esc(i)}</li>`).join('');
-  const btn = $id('mobDetailBuyBtn');
-  if (enrolled) { btn.textContent = 'Already Enrolled ✓'; btn.disabled = true; btn.classList.add('enrolled-btn'); }
-  else { btn.textContent = 'Buy Now'; btn.disabled = false; btn.classList.remove('enrolled-btn'); }
-  $id('mobListView').style.display = 'none';
+function openMobDetail(id){
+  const b=BATCHES.find(x=>x.id===id); if(!b) return;
+  selectedBatch=b;
+  const enrolled=isEnrolled(b.courseSlug);
+  $id('mobDetailImg').src=b.image;
+  $id('mobDetailTitle').textContent=b.title;
+  $id('mobDetailLang').textContent=b.language;
+  $id('mobDetailCat').textContent=b.category;
+  $id('mobDetailDesc').textContent=b.subtitle;
+  $id('mobDetailPrice').textContent='₹'+b.price;
+  $id('mobDetailOld').textContent='₹'+b.oldPrice;
+  $id('mobDetailOff').textContent=DISCOUNT+'% OFF';
+  $id('mobDetailFull').textContent=b.details;
+  $id('mobDetailLearn').innerHTML=b.learn.map(i=>`<li>${esc(i)}</li>`).join('');
+  $id('mobDetailFacilities').innerHTML=b.facilities.map(i=>`<li>${esc(i)}</li>`).join('');
+  const btn=$id('mobDetailBuyBtn');
+  if(enrolled){ btn.textContent='Already Enrolled ✓';btn.disabled=true;btn.classList.add('enrolled-btn'); }
+  else{ btn.textContent='Buy Now';btn.disabled=false;btn.classList.remove('enrolled-btn'); }
+  $id('mobListView').style.display='none';
   $id('mobDetailView').classList.add('active');
-  $id('mobPage').scrollTop = 0;
+  $id('mobPage').scrollTop=0;
 }
 
 /* ─── DESKTOP MODAL ──────────────────────────────────────── */
-function openDtModal(id) {
-  const b = BATCHES.find(x => x.id === id);
-  if (!b) return;
-  selectedBatch = b;
-  const enrolled = isEnrolled(b.courseSlug);
-
-  $id('dtModalImg').src    = b.image;
-  $id('dtModalPrice').textContent = '₹' + b.price;
-  $id('dtModalOld').textContent   = '₹' + b.oldPrice;
-  $id('dtModalOff').textContent   = DISCOUNT + '% OFF';
-  $id('dtModalTitle').textContent = b.title;
-  $id('dtModalDesc').textContent  = b.subtitle;
-  $id('dtModalFull').textContent  = b.details;
-  $id('dtModalMeta').innerHTML =
-    `<span class="dt-batch-cat">${esc(b.category)}</span><span class="dt-batch-lang">${esc(b.language)}</span>`;
-  $id('dtModalLearn').innerHTML      = b.learn.map(i => `<li>${esc(i)}</li>`).join('');
-  $id('dtModalFacilities').innerHTML = b.facilities.map(i => `<li>${esc(i)}</li>`).join('');
-
-  const btn = $id('dtModalBuyBtn');
-  if (enrolled) { btn.textContent = 'Already Enrolled ✓'; btn.disabled = true; btn.classList.add('enrolled-btn'); }
-  else { btn.textContent = 'Buy Now →'; btn.disabled = false; btn.classList.remove('enrolled-btn'); }
-
+function openDtModal(id){
+  const b=BATCHES.find(x=>x.id===id); if(!b) return;
+  selectedBatch=b;
+  const enrolled=isEnrolled(b.courseSlug);
+  $id('dtModalImg').src=b.image;
+  $id('dtModalPrice').textContent='₹'+b.price;
+  $id('dtModalOld').textContent='₹'+b.oldPrice;
+  $id('dtModalOff').textContent=DISCOUNT+'% OFF';
+  $id('dtModalTitle').textContent=b.title;
+  $id('dtModalDesc').textContent=b.subtitle;
+  $id('dtModalFull').textContent=b.details;
+  $id('dtModalMeta').innerHTML=`<span class="dt-batch-cat">${esc(b.category)}</span><span class="dt-batch-lang">${esc(b.language)}</span>`;
+  $id('dtModalLearn').innerHTML=b.learn.map(i=>`<li>${esc(i)}</li>`).join('');
+  $id('dtModalFacilities').innerHTML=b.facilities.map(i=>`<li>${esc(i)}</li>`).join('');
+  const btn=$id('dtModalBuyBtn');
+  if(enrolled){ btn.textContent='Already Enrolled ✓';btn.disabled=true;btn.classList.add('enrolled-btn'); }
+  else{ btn.textContent='Buy Now →';btn.disabled=false;btn.classList.remove('enrolled-btn'); }
   $id('dtModalOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow='hidden';
 }
-
-function closeDtModal() {
+function closeDtModal(){
   $id('dtModalOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-  selectedBatch = null;
+  document.body.style.overflow='';
+  selectedBatch=null;
 }
+function closeDtDetail(){ closeDtModal(); }
 
-/* Backwards compat alias used in buySelected() */
-function closeDtDetail() { closeDtModal(); }
-
-/* ─── RAZORPAY LAZY ──────────────────────────────────────── */
-function loadRazorpay() {
-  return new Promise((resolve, reject) => {
-    if (razorpayLoaded && typeof Razorpay !== 'undefined') { resolve(); return; }
-    const s = document.createElement('script');
-    s.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    s.onload  = () => { razorpayLoaded = true; resolve(); };
-    s.onerror = () => reject(new Error('Razorpay failed to load.'));
-    document.head.appendChild(s);
-  });
-}
-function loadSupabaseSDK() {
-  return new Promise((resolve, reject) => {
-    if (typeof supabase !== 'undefined') { resolve(); return; }
-    const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-    s.onload  = resolve;
-    s.onerror = () => reject(new Error('Supabase SDK failed to load.'));
-    document.head.appendChild(s);
-  });
-}
-
-/* ─── BUY ────────────────────────────────────────────────── */
-function buyDirect(id, btn) {
-  const b = BATCHES.find(x => x.id === id);
-  if (!b) return;
-  if (isEnrolled(b.courseSlug)) { showToast('You already have access to this batch.','ok','Enrolled'); return; }
-  selectedBatch = b;
-  startPayment(b, btn);
-}
-function buySelected() {
-  if (!selectedBatch) return;
-  if (isEnrolled(selectedBatch.courseSlug)) { showToast('You already have access.','ok','Enrolled'); return; }
-  const btn = isDesktop() ? $id('dtModalBuyBtn') : $id('mobDetailBuyBtn');
-  startPayment(selectedBatch, btn);
-}
-
-async function startPayment(batch, btn) {
-  const s = getStudent();
-  if (!s.id) { showToast('Please login first to purchase a batch.','warn','Login Required'); return; }
-  if (!batch.courseId) { showToast('Course ID missing.','err','Error'); return; }
-  if (btn) { btn.disabled = true; btn.textContent = 'Loading…'; }
-  try {
-    await loadSupabaseSDK();
-    await loadRazorpay();
-    if (btn) btn.textContent = 'Checking…';
-    const check = await edgeCall('batch-course-check-af', { course_id:batch.courseId, course_slug:batch.courseSlug });
-    if (!check || !check.ok) throw new Error(check?.message || 'Course verification failed.');
-    if (btn) btn.textContent = 'Opening Payment…';
-    const options = {
-      key: RAZORPAY_KEY, amount: batch.price * 100, currency: 'INR',
-      name: 'AcademeForge', description: batch.title, image: '',
-      prefill: { name:s.name, email:s.email, contact:s.mobile },
-      notes: { student_uuid:s.id, student_id:s.student_id, course_id:batch.courseId, course_slug:batch.courseSlug, batch_title:batch.title },
-      method: { upi:true, card:true, netbanking:true, wallet:true, paylater:false, emi:false },
-      theme: { color:'#7C3AED' },
-      handler: async function(response) {
-        try {
-          if (btn) btn.textContent = 'Adding Access…';
-          await grantAccess(batch, response);
-          cacheClear(ENROLLED_KEY);
-          await loadEnrolled();
-          showToast('Batch access added successfully!','ok','Payment Successful');
-          renderMobBatches(BATCHES);
-          renderDtBatches(BATCHES);
-          showMobList();
-          closeDtModal();
-        } catch(err) {
-          showToast(err.message || 'Access update failed.','err','Error');
-          if (btn) { btn.disabled = false; btn.textContent = 'Buy Now'; }
-        }
-      },
-      modal: {
-        ondismiss: function() {
-          if (btn) { btn.disabled = false; btn.textContent = 'Buy Now'; }
-          showToast('Payment cancelled.','warn','Cancelled');
-        }
-      }
-    };
-    const rzp = new Razorpay(options);
-    rzp.on('payment.failed', function(r) {
-      showToast(r?.error?.description || 'Payment failed.','err','Payment Failed');
-      if (btn) { btn.disabled = false; btn.textContent = 'Buy Now'; }
-    });
-    rzp.open();
-  } catch(err) {
-    showToast(err.message || 'Something went wrong.','err','Error');
-    if (btn) { btn.disabled = false; btn.textContent = 'Buy Now'; }
+/* ═══════════════════════════════════════════════════════════
+   STUDENT — shared edge helpers
+═══════════════════════════════════════════════════════════ */
+async function loadStudentCourses(force){
+  if(!force){
+    const cached=cacheGet(COURSES_KEY);
+    if(cached&&Array.isArray(cached)&&cached.length){ enrolledCourses=cached; return{ok:true,fromCache:true}; }
   }
+  const uuid=localStorage.getItem('af_student_uuid');
+  if(!uuid) return{ok:false,message:'Not logged in'};
+  const res=await edgeCall('student-courses-af',{student_id:uuid});
+  if(!res||!res.ok) return res||{ok:false,message:'Failed'};
+  enrolledCourses=Array.isArray(res.courses)?res.courses:[];
+  cacheSet(COURSES_KEY,enrolledCourses);
+  return{ok:true};
 }
 
-async function grantAccess(batch, paymentResponse) {
-  const s = getStudent();
-  if (!s.id) throw new Error('Student session not found.');
-  const res = await edgeCall('batch-grant-access-af', {
-    student_uuid:s.id, student_id:s.student_id, student_name:s.name,
-    mobile:s.mobile, email:s.email,
-    course_id:batch.courseId, course_slug:batch.courseSlug, batch_id:batch.id, batch_title:batch.title,
-    amount:batch.price, currency:'INR',
-    razorpay_payment_id: paymentResponse.razorpay_payment_id || '',
-    razorpay_order_id:   paymentResponse.razorpay_order_id   || '',
-    razorpay_signature:  paymentResponse.razorpay_signature  || ''
+function extractYouTubeId(url){
+  if(!url) return null;
+  const str=String(url).trim();
+  if(/^[A-Za-z0-9_-]{11}$/.test(str)) return str;
+  const sm=str.match(/youtu\.be\/([A-Za-z0-9_-]{11})/); if(sm) return sm[1];
+  const wm=str.match(/[?&]v=([A-Za-z0-9_-]{11})/); if(wm) return wm[1];
+  const em=str.match(/(?:embed|shorts)\/([A-Za-z0-9_-]{11})/); if(em) return em[1];
+  return null;
+}
+function openVideo(url,title){
+  if(!url){ showToast('Video not available yet.','warn','Locked'); return; }
+  const vid=extractYouTubeId(url);
+  if(!vid){ showToast('Invalid video URL.','err','Error'); return; }
+  const t=encodeURIComponent(title||'Lecture');
+  const back=encodeURIComponent(location.href);
+  location.href='/lecture-player.html?v='+vid+'&title='+t+'&back='+back;
+}
+function openPdf(url){ if(!url){ showToast('PDF not available yet.','warn','Locked'); return; } window.open(url,'_blank'); }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE STUDENT PANEL
+═══════════════════════════════════════════════════════════ */
+function hideMobStuAll(){
+  ['mobStuNotLogged','mobStuNoCourse','mobStuCourseListView'].forEach(id=>$id(id).style.display='none');
+  ['mobStuDetailView','mobStuLearningView','mobStuChaptersView','mobStuContentView'].forEach(id=>$id(id).classList.remove('active'));
+}
+async function initMobStudent(){
+  if(!isLoggedIn()){ hideMobStuAll(); $id('mobStuNotLogged').style.display=''; return; }
+  const name=localStorage.getItem('af_student_name')||'Student';
+  $id('mobStuWelcome').textContent='Welcome '+name;
+  hideMobStuAll();
+  $id('mobStuCourseListView').style.display='';
+  $id('mobStuCourseGrid').innerHTML='<div class="stu-loading">Loading your courses…</div>';
+  const res=await loadStudentCourses();
+  if(!res.ok||!enrolledCourses.length){
+    hideMobStuAll();
+    $id('mobStuNoCourse').style.display='';
+    $id('mobStuNoCourseMsg').textContent=(!res.ok&&res.message)||'You are not enrolled in any batch.';
+    return;
+  }
+  renderMobStuCourses();
+}
+function renderMobStuCourses(){
+  $id('mobStuCourseGrid').innerHTML=enrolledCourses.map(c=>`
+    <button class="stu-course-card" onclick="openMobStuDetail('${c.id}')">
+      <div class="stu-course-icon">${esc(safe(c.icon,'📘'))}</div>
+      <div class="stu-course-body"><h3>${esc(safe(c.title,'Course'))}</h3><p>${esc(safe(c.short_description,''))}</p></div>
+    </button>`).join('');
+}
+function showMobStuCourseList(){
+  hideMobStuAll();
+  $id('mobStuCourseListView').style.display='';
+  $id('mobPage').scrollTop=0;
+}
+function openMobStuDetail(courseId){
+  selectedCourse=enrolledCourses.find(c=>String(c.id)===String(courseId));
+  if(!selectedCourse){ showToast('Course not found.','err','Error'); return; }
+  hideMobStuAll();
+  $id('mobStuDetailIcon').textContent=safe(selectedCourse.icon,'📘');
+  $id('mobStuDetailTitle').textContent=safe(selectedCourse.title,'Course');
+  $id('mobStuDetailIntro').textContent=safe(selectedCourse.short_description,'');
+  $id('mobStuDetailDetails').textContent=safe(selectedCourse.details,'Details coming soon.');
+  let fac=[];
+  if(Array.isArray(selectedCourse.facilities)) fac=selectedCourse.facilities;
+  else if(typeof selectedCourse.facilities==='string'){ try{ const p=JSON.parse(selectedCourse.facilities);fac=Array.isArray(p)?p:[]; }catch(_){ fac=selectedCourse.facilities.split(',').map(x=>x.trim()).filter(Boolean); } }
+  $id('mobStuDetailFacilities').innerHTML=fac.length?fac.map(i=>`<li>${esc(i)}</li>`).join(''):'<li>Facilities coming soon.</li>';
+  $id('mobStuDetailView').classList.add('active');
+  $id('mobPage').scrollTop=0;
+}
+function showMobStuDetail(){
+  hideMobStuAll();
+  $id('mobStuDetailView').classList.add('active');
+  $id('mobPage').scrollTop=0;
+}
+function showMobLearning(){
+  if(!selectedCourse) return;
+  hideMobStuAll();
+  $id('mobStuLearningTitle').textContent=safe(selectedCourse.icon,'📘')+' '+safe(selectedCourse.title,'Course');
+  $id('mobStuLearningView').classList.add('active');
+  $id('mobPage').scrollTop=0;
+}
+async function openMobLearningMode(mode){
+  learningMode=mode;
+  $id('mobStuChapterModeTitle').textContent=mode==='lectures'?'🎥 Lectures':'📝 Notes';
+  hideMobStuAll();
+  $id('mobStuChaptersView').classList.add('active');
+  await loadMobChapters();
+  $id('mobPage').scrollTop=0;
+}
+async function loadMobChapters(){
+  const list=$id('mobStuChapterList');
+  if(!selectedCourse){ list.innerHTML='<div class="stu-error">Course not selected.</div>'; return; }
+  const cKey=CHAPTERS_PFX+selectedCourse.id;
+  const cached=cacheGet(cKey);
+  if(cached&&Array.isArray(cached)){ renderMobChapters(cached); return; }
+  list.innerHTML='<div class="stu-loading">Loading chapters…</div>';
+  const res=await edgeCall('student-chapters-af',{course_id:selectedCourse.id});
+  if(!res||!res.ok){ list.innerHTML=`<div class="stu-error">${esc(safe(res?.message,'Unable to load chapters.'))}</div>`; return; }
+  const chapters=Array.isArray(res.chapters)?res.chapters:[];
+  cacheSet(cKey,chapters);
+  renderMobChapters(chapters);
+}
+function renderMobChapters(chapters){
+  const list=$id('mobStuChapterList');
+  if(!chapters.length){ list.innerHTML='<div class="stu-empty">No chapters available yet.</div>'; return; }
+  list.innerHTML=chapters.map(ch=>{
+    const locked=ch.is_locked===true;
+    return`<div class="stu-chapter-item ${locked?'locked':'unlocked'}" onclick="openMobChapterContent('${ch.id}',${locked})">
+      <div class="stu-chapter-main"><strong>${locked?'🔒':'🔓'} Chapter ${ch.chapter_number}: ${esc(ch.title)}</strong><small>${esc(safe(ch.description,''))}</small></div>
+      <span class="stu-chapter-status">${locked?'Locked':'Unlocked'}</span>
+    </div>`;
+  }).join('');
+}
+async function openMobChapterContent(chapterId,isLocked){
+  hideMobStuAll();
+  $id('mobStuContentView').classList.add('active');
+  if(isLocked===true){
+    $id('mobStuContentTitle').textContent='🔒 Chapter Locked';
+    $id('mobStuContentList').innerHTML='<div class="stu-error">This chapter is currently locked.</div>';
+    return;
+  }
+  if(learningMode==='notes') await loadMobNotes(chapterId);
+  else await loadMobLectures(chapterId);
+  $id('mobPage').scrollTop=0;
+}
+function showMobStuChapters(){
+  hideMobStuAll();
+  $id('mobStuChaptersView').classList.add('active');
+  $id('mobPage').scrollTop=0;
+}
+async function loadMobLectures(chapterId){
+  $id('mobStuContentTitle').textContent='🎥 Lectures';
+  const list=$id('mobStuContentList');
+  const cKey=LECTURES_PFX+chapterId;
+  const cached=cacheGet(cKey);
+  if(cached&&Array.isArray(cached)){ renderMobLectures(cached); return; }
+  list.innerHTML='<div class="stu-loading">Loading lectures…</div>';
+  const res=await edgeCall('student-lectures-af',{chapter_id:chapterId});
+  if(!res||!res.ok){ list.innerHTML=`<div class="stu-error">${esc(safe(res?.message,'Unable to load lectures.'))}</div>`; return; }
+  const lectures=Array.isArray(res.lectures)?res.lectures:[];
+  cacheSet(cKey,lectures); renderMobLectures(lectures);
+}
+function renderMobLectures(lectures){
+  const list=$id('mobStuContentList');
+  if(!lectures.length){ list.innerHTML='<div class="stu-empty">No lectures available yet.</div>'; return; }
+  list.innerHTML=lectures.map(lec=>{
+    const locked=lec.is_locked===true||!lec.video_url;
+    return`<div class="stu-content-item ${locked?'locked':'unlocked'}">
+      <div class="stu-content-main"><strong>${locked?'🔒':'▶️'} Lecture ${lec.lecture_number}: ${esc(lec.title)}</strong><small>${esc(safe(lec.description,''))}</small><span class="stu-duration">⏱ ${esc(safe(lec.duration,'10-15 min'))}</span></div>
+      ${locked?`<button class="stu-content-action stu-locked-action" disabled>Locked</button>`:`<button class="stu-content-action" onclick="openVideo('${lec.video_url}','${esc(lec.title||'')}')">Watch</button>`}
+    </div>`;
+  }).join('');
+}
+async function loadMobNotes(chapterId){
+  $id('mobStuContentTitle').textContent='📝 Notes';
+  const list=$id('mobStuContentList');
+  const cKey=NOTES_PFX+chapterId;
+  const cached=cacheGet(cKey);
+  if(cached&&Array.isArray(cached)){ renderMobNotes(cached); return; }
+  list.innerHTML='<div class="stu-loading">Loading notes…</div>';
+  const res=await edgeCall('student-notes-af',{chapter_id:chapterId});
+  if(!res||!res.ok){ list.innerHTML=`<div class="stu-error">${esc(safe(res?.message,'Unable to load notes.'))}</div>`; return; }
+  const notes=Array.isArray(res.notes)?res.notes:[];
+  cacheSet(cKey,notes); renderMobNotes(notes);
+}
+function renderMobNotes(notes){
+  const list=$id('mobStuContentList');
+  if(!notes.length){ list.innerHTML='<div class="stu-empty">No notes available yet.</div>'; return; }
+  list.innerHTML=notes.map(n=>{
+    const locked=n.is_locked===true||!n.pdf_url;
+    return`<div class="stu-content-item ${locked?'locked':'unlocked'}">
+      <div class="stu-content-main"><strong>${locked?'🔒':'📄'} Lecture ${n.note_number} Notes</strong><small>${esc(safe(n.title,''))}</small></div>
+      ${locked?`<button class="stu-content-action stu-locked-action" disabled>Locked</button>`:`<button class="stu-content-action" onclick="openPdf('${n.pdf_url}')">Open PDF</button>`}
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DESKTOP STUDENT PANEL
+═══════════════════════════════════════════════════════════ */
+function hideDtStuAll(){
+  ['dtStuNotLogged','dtStuNoCourse','dtStuCourseListView','dtStuDetailView','dtStuLearningView','dtStuChaptersView','dtStuContentView'].forEach(id=>$id(id).style.display='none');
+}
+async function initDtStudent(){
+  hideDtStuAll();
+  if(!isLoggedIn()){ $id('dtStuNotLogged').style.display=''; return; }
+  const name=localStorage.getItem('af_student_name')||'Student';
+  $id('dtStuWelcome').textContent='Welcome, '+name;
+  $id('dtStuCourseListView').style.display='';
+  $id('dtStuCourseGrid').innerHTML='<div class="dt-stu-loading" style="grid-column:1/-1">Loading your courses…</div>';
+  const res=await loadStudentCourses();
+  if(!res.ok||!enrolledCourses.length){
+    hideDtStuAll();
+    $id('dtStuNoCourse').style.display='';
+    $id('dtStuNoCourseMsg').textContent=(!res.ok&&res.message)||'You are not enrolled in any batch yet.';
+    return;
+  }
+  renderDtStuCourses();
+}
+function renderDtStuCourses(){
+  $id('dtStuCourseGrid').innerHTML=enrolledCourses.map(c=>`
+    <div class="dt-course-card" onclick="openDtStuDetail('${c.id}')">
+      <div class="dt-course-icon">${esc(safe(c.icon,'📘'))}</div>
+      <div class="dt-course-body"><h3>${esc(safe(c.title,'Course'))}</h3><p>${esc(safe(c.short_description,''))}</p></div>
+    </div>`).join('');
+}
+function showDtStuCourseList(){
+  hideDtStuAll();
+  const name=localStorage.getItem('af_student_name')||'Student';
+  $id('dtStuWelcome').textContent='Welcome, '+name;
+  $id('dtStuCourseListView').style.display='';
+  renderDtStuCourses();
+}
+function openDtStuDetail(courseId){
+  selectedCourse=enrolledCourses.find(c=>String(c.id)===String(courseId));
+  if(!selectedCourse){ showToast('Course not found.','err','Error'); return; }
+  hideDtStuAll();
+  $id('dtStuDetailIcon').textContent=safe(selectedCourse.icon,'📘');
+  $id('dtStuDetailTitle').textContent=safe(selectedCourse.title,'Course');
+  $id('dtStuDetailIntro').textContent=safe(selectedCourse.short_description,'');
+  $id('dtStuDetailDetails').textContent=safe(selectedCourse.details,'Details coming soon.');
+  let fac=[];
+  if(Array.isArray(selectedCourse.facilities)) fac=selectedCourse.facilities;
+  else if(typeof selectedCourse.facilities==='string'){ try{ const p=JSON.parse(selectedCourse.facilities);fac=Array.isArray(p)?p:[]; }catch(_){ fac=selectedCourse.facilities.split(',').map(x=>x.trim()).filter(Boolean); } }
+  $id('dtStuDetailFacilities').innerHTML=fac.length?fac.map(i=>`<li>${esc(i)}</li>`).join(''):'<li>Facilities coming soon.</li>';
+  $id('dtStuDetailView').style.display='';
+  $id('dt-main-el')?.scrollTo(0,0);
+}
+function showDtStuDetail(){
+  hideDtStuAll();
+  $id('dtStuDetailView').style.display='';
+}
+function showDtLearning(){
+  if(!selectedCourse) return;
+  hideDtStuAll();
+  $id('dtStuLearningTitle').textContent=safe(selectedCourse.icon,'📘')+' '+safe(selectedCourse.title,'Course');
+  $id('dtStuLearningView').style.display='';
+}
+async function openDtLearningMode(mode){
+  learningMode=mode;
+  $id('dtStuChapterModeTitle').textContent=mode==='lectures'?'🎥 Lectures':'📝 Notes';
+  hideDtStuAll();
+  $id('dtStuChaptersView').style.display='';
+  await loadDtChapters();
+}
+async function loadDtChapters(){
+  const list=$id('dtStuChapterList');
+  if(!selectedCourse){ list.innerHTML='<div class="dt-stu-error">Course not selected.</div>'; return; }
+  const cKey=CHAPTERS_PFX+selectedCourse.id;
+  const cached=cacheGet(cKey);
+  if(cached&&Array.isArray(cached)){ renderDtChapters(cached); return; }
+  list.innerHTML='<div class="dt-stu-loading">Loading chapters…</div>';
+  const res=await edgeCall('student-chapters-af',{course_id:selectedCourse.id});
+  if(!res||!res.ok){ list.innerHTML=`<div class="dt-stu-error">${esc(safe(res?.message,'Unable to load chapters.'))}</div>`; return; }
+  const chapters=Array.isArray(res.chapters)?res.chapters:[];
+  cacheSet(cKey,chapters); renderDtChapters(chapters);
+}
+function renderDtChapters(chapters){
+  const list=$id('dtStuChapterList');
+  if(!chapters.length){ list.innerHTML='<div class="dt-stu-empty">No chapters available yet.</div>'; return; }
+  list.innerHTML=chapters.map(ch=>{
+    const locked=ch.is_locked===true;
+    return`<div class="dt-chapter-item ${locked?'locked':'unlocked'}" onclick="${locked?'':"`openDtChapterContent('${ch.id}',false)`}">
+      <div class="dt-chapter-main"><strong>${locked?'🔒':'🔓'} Chapter ${ch.chapter_number}: ${esc(ch.title)}</strong><small>${esc(safe(ch.description,''))}</small></div>
+      <span class="dt-chapter-status">${locked?'Locked':'Unlocked'}</span>
+    </div>`;
+  }).join('');
+}
+function showDtStuChapters(){
+  hideDtStuAll();
+  $id('dtStuChaptersView').style.display='';
+}
+async function openDtChapterContent(chapterId,isLocked){
+  hideDtStuAll();
+  $id('dtStuContentView').style.display='';
+  if(isLocked===true){
+    $id('dtStuContentTitle').textContent='🔒 Chapter Locked';
+    $id('dtStuContentList').innerHTML='<div class="dt-stu-error">This chapter is currently locked.</div>';
+    return;
+  }
+  if(learningMode==='notes') await loadDtNotes(chapterId);
+  else await loadDtLectures(chapterId);
+}
+async function loadDtLectures(chapterId){
+  $id('dtStuContentTitle').textContent='🎥 Lectures';
+  const list=$id('dtStuContentList');
+  const cKey=LECTURES_PFX+chapterId;
+  const cached=cacheGet(cKey);
+  if(cached&&Array.isArray(cached)){ renderDtLectures(cached); return; }
+  list.innerHTML='<div class="dt-stu-loading">Loading lectures…</div>';
+  const res=await edgeCall('student-lectures-af',{chapter_id:chapterId});
+  if(!res||!res.ok){ list.innerHTML=`<div class="dt-stu-error">${esc(safe(res?.message,'Unable to load lectures.'))}</div>`; return; }
+  const lectures=Array.isArray(res.lectures)?res.lectures:[];
+  cacheSet(cKey,lectures); renderDtLectures(lectures);
+}
+function renderDtLectures(lectures){
+  const list=$id('dtStuContentList');
+  if(!lectures.length){ list.innerHTML='<div class="dt-stu-empty">No lectures available yet.</div>'; return; }
+  list.innerHTML=lectures.map(lec=>{
+    const locked=lec.is_locked===true||!lec.video_url;
+    return`<div class="dt-content-item ${locked?'locked':'unlocked'}">
+      <div class="dt-content-main"><strong>${locked?'🔒':'▶️'} Lecture ${lec.lecture_number}: ${esc(lec.title)}</strong><small>${esc(safe(lec.description,''))}</small><span class="dt-duration">⏱ ${esc(safe(lec.duration,'10-15 min'))}</span></div>
+      ${locked?`<button class="dt-content-action" disabled>Locked</button>`:`<button class="dt-content-action" onclick="openVideo('${lec.video_url}','${esc(lec.title||'')}')">Watch</button>`}
+    </div>`;
+  }).join('');
+}
+async function loadDtNotes(chapterId){
+  $id('dtStuContentTitle').textContent='📝 Notes';
+  const list=$id('dtStuContentList');
+  const cKey=NOTES_PFX+chapterId;
+  const cached=cacheGet(cKey);
+  if(cached&&Array.isArray(cached)){ renderDtNotes(cached); return; }
+  list.innerHTML='<div class="dt-stu-loading">Loading notes…</div>';
+  const res=await edgeCall('student-notes-af',{chapter_id:chapterId});
+  if(!res||!res.ok){ list.innerHTML=`<div class="dt-stu-error">${esc(safe(res?.message,'Unable to load notes.'))}</div>`; return; }
+  const notes=Array.isArray(res.notes)?res.notes:[];
+  cacheSet(cKey,notes); renderDtNotes(notes);
+}
+function renderDtNotes(notes){
+  const list=$id('dtStuContentList');
+  if(!notes.length){ list.innerHTML='<div class="dt-stu-empty">No notes available yet.</div>'; return; }
+  list.innerHTML=notes.map(n=>{
+    const locked=n.is_locked===true||!n.pdf_url;
+    return`<div class="dt-content-item ${locked?'locked':'unlocked'}">
+      <div class="dt-content-main"><strong>${locked?'🔒':'📄'} Lecture ${n.note_number} Notes</strong><small>${esc(safe(n.title,''))}</small></div>
+      ${locked?`<button class="dt-content-action" disabled>Locked</button>`:`<button class="dt-content-action" onclick="openPdf('${n.pdf_url}')">Open PDF</button>`}
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RAZORPAY / PAYMENT (unchanged from original)
+═══════════════════════════════════════════════════════════ */
+function loadRazorpay(){
+  return new Promise((resolve,reject)=>{
+    if(razorpayLoaded&&typeof Razorpay!=='undefined'){ resolve(); return; }
+    const s=document.createElement('script'); s.src='https://checkout.razorpay.com/v1/checkout.js';
+    s.onload=()=>{ razorpayLoaded=true; resolve(); }; s.onerror=()=>reject(new Error('Razorpay failed to load.')); document.head.appendChild(s);
   });
-  if (!res || !res.ok) throw new Error(res?.message || 'Access update failed.');
+}
+function loadSupabaseSDK(){
+  return new Promise((resolve,reject)=>{
+    if(typeof supabase!=='undefined'){ resolve(); return; }
+    const s=document.createElement('script'); s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    s.onload=resolve; s.onerror=()=>reject(new Error('Supabase SDK failed to load.')); document.head.appendChild(s);
+  });
+}
+function buyDirect(id,btn){
+  const b=BATCHES.find(x=>x.id===id); if(!b) return;
+  if(isEnrolled(b.courseSlug)){ showToast('You already have access to this batch.','ok','Enrolled'); return; }
+  selectedBatch=b; startPayment(b,btn);
+}
+function buySelected(){
+  if(!selectedBatch) return;
+  if(isEnrolled(selectedBatch.courseSlug)){ showToast('You already have access.','ok','Enrolled'); return; }
+  const btn=isDesktop()?$id('dtModalBuyBtn'):$id('mobDetailBuyBtn');
+  startPayment(selectedBatch,btn);
+}
+async function startPayment(batch,btn){
+  const s=getStudent();
+  if(!s.id){ showToast('Please login first to purchase a batch.','warn','Login Required'); return; }
+  if(!batch.courseId){ showToast('Course ID missing.','err','Error'); return; }
+  if(btn){ btn.disabled=true; btn.textContent='Loading…'; }
+  try{
+    await loadSupabaseSDK(); await loadRazorpay();
+    if(btn) btn.textContent='Checking…';
+    const check=await edgeCall('batch-course-check-af',{course_id:batch.courseId,course_slug:batch.courseSlug});
+    if(!check||!check.ok) throw new Error(check?.message||'Course verification failed.');
+    if(btn) btn.textContent='Opening Payment…';
+    const options={
+      key:RAZORPAY_KEY,amount:batch.price*100,currency:'INR',
+      name:'AcademeForge',description:batch.title,image:'',
+      prefill:{name:s.name,email:s.email,contact:s.mobile},
+      notes:{student_uuid:s.id,student_id:s.student_id,course_id:batch.courseId,course_slug:batch.courseSlug,batch_title:batch.title},
+      method:{upi:true,card:true,netbanking:true,wallet:true,paylater:false,emi:false},
+      theme:{color:'#7C3AED'},
+      handler:async function(response){
+        try{
+          if(btn) btn.textContent='Adding Access…';
+          await grantAccess(batch,response);
+          cacheClear(ENROLLED_KEY); await loadEnrolled();
+          showToast('Batch access added successfully!','ok','Payment Successful');
+          renderMobBatches(BATCHES); renderDtBatches(BATCHES);
+          showMobList(); closeDtModal();
+        }catch(err){ showToast(err.message||'Access update failed.','err','Error'); if(btn){ btn.disabled=false; btn.textContent='Buy Now'; } }
+      },
+      modal:{ ondismiss:function(){ if(btn){ btn.disabled=false; btn.textContent='Buy Now'; } showToast('Payment cancelled.','warn','Cancelled'); } }
+    };
+    const rzp=new Razorpay(options);
+    rzp.on('payment.failed',function(r){ showToast(r?.error?.description||'Payment failed.','err','Payment Failed'); if(btn){ btn.disabled=false; btn.textContent='Buy Now'; } });
+    rzp.open();
+  }catch(err){ showToast(err.message||'Something went wrong.','err','Error'); if(btn){ btn.disabled=false; btn.textContent='Buy Now'; } }
+}
+async function grantAccess(batch,paymentResponse){
+  const s=getStudent(); if(!s.id) throw new Error('Student session not found.');
+  const res=await edgeCall('batch-grant-access-af',{
+    student_uuid:s.id,student_id:s.student_id,student_name:s.name,mobile:s.mobile,email:s.email,
+    course_id:batch.courseId,course_slug:batch.courseSlug,batch_id:batch.id,batch_title:batch.title,
+    amount:batch.price,currency:'INR',
+    razorpay_payment_id:paymentResponse.razorpay_payment_id||'',
+    razorpay_order_id:paymentResponse.razorpay_order_id||'',
+    razorpay_signature:paymentResponse.razorpay_signature||''
+  });
+  if(!res||!res.ok) throw new Error(res?.message||'Access update failed.');
   return true;
 }
 
 /* ─── FORCE REFRESH ──────────────────────────────────────── */
-function forceRefresh() {
-  cacheClear(CACHE_KEY);
-  cacheClear(ENROLLED_KEY);
+function forceRefresh(){
+  cacheClear(CACHE_KEY); cacheClear(ENROLLED_KEY); cacheClear(COURSES_KEY);
+  cacheClearPrefix(CHAPTERS_PFX); cacheClearPrefix(LECTURES_PFX); cacheClearPrefix(NOTES_PFX);
   showToast('Refreshing…','info','↻');
   init(true);
 }
 
 /* ─── KEYBOARD ───────────────────────────────────────────── */
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeDtModal();
-});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeDtModal(); });
 
 /* ─── MOBILE SWIPE ───────────────────────────────────────── */
 (function(){
-  let sx = 0, sy = 0;
-  document.addEventListener('touchstart', e => {
-    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
-  }, { passive: true });
-  document.addEventListener('touchend', e => {
-    const dx = e.changedTouches[0].clientX - sx;
-    const dy = e.changedTouches[0].clientY - sy;
-    if (Math.abs(dy) > Math.abs(dx)) return;
-    const t = 80;
-    if (dx > t) window.location.href = '/student/index.html';
-    if (dx < -t) window.location.href = '/community/indix.html';
-  }, { passive: true });
+  let sx=0,sy=0;
+  document.addEventListener('touchstart',e=>{ sx=e.touches[0].clientX; sy=e.touches[0].clientY; },{passive:true});
+  document.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-sx;
+    const dy=e.changedTouches[0].clientY-sy;
+    if(Math.abs(dy)>Math.abs(dx)) return;
+    const t=80;
+    if(dx>t) window.location.href='/index.html';
+    if(dx<-t) window.location.href='/community/indix.html';
+  },{passive:true});
 })();
 
-
-
 /* ─── INIT ───────────────────────────────────────────────── */
-async function init(force) {
+async function init(force){
   renderMobBatches(BATCHES);
   renderDtBatches(BATCHES);
   updateStreakBadge(parseInt(localStorage.getItem('af_streak')||'0'));
 
-  const cachedEnrolled = cacheGet(ENROLLED_KEY);
-  if (cachedEnrolled && !force) {
-    enrolledSlugs = cachedEnrolled;
-    renderMobBatches(BATCHES);
-    renderDtBatches(BATCHES);
-    try {
-      const raw = localStorage.getItem(ENROLLED_KEY);
-      if (raw) { const obj = JSON.parse(raw); showCacheBar(obj.ts); }
-    } catch(_){}
+  const cachedEnrolled=cacheGet(ENROLLED_KEY);
+  if(cachedEnrolled&&!force){
+    enrolledSlugs=cachedEnrolled;
+    renderMobBatches(BATCHES); renderDtBatches(BATCHES);
+    try{ const raw=localStorage.getItem(ENROLLED_KEY); if(raw){ const obj=JSON.parse(raw); showCacheBar(obj.ts); } }catch(_){}
     return;
   }
-
-  const s = getStudent();
-  if (s.id) {
-    try {
-      await loadSupabaseSDK();
-      await loadEnrolled();
-      renderMobBatches(BATCHES);
-      renderDtBatches(BATCHES);
-    } catch(_) {}
+  const s=getStudent();
+  if(s.id){
+    try{ await loadSupabaseSDK(); await loadEnrolled(); renderMobBatches(BATCHES); renderDtBatches(BATCHES); }catch(_){}
   }
   hideCacheBar();
 }
 
-document.addEventListener('DOMContentLoaded', () => init(false));
+document.addEventListener('DOMContentLoaded',()=>init(false));
 
-  (() => {
-
-  document.addEventListener("contextmenu", e => e.preventDefault());
-
-  document.addEventListener("copy", e => e.preventDefault());
-
-  document.addEventListener("cut", e => e.preventDefault());
-
-  document.addEventListener("paste", e => e.preventDefault());
-
-  document.addEventListener("dragstart", e => e.preventDefault());
-
-  document.addEventListener("selectstart", e => e.preventDefault());
-
-  document.addEventListener("keydown", e => {
-
-    if (
-      e.ctrlKey &&
-      ["+", "-", "=", "_", "0"].includes(e.key)
-    ) {
-      e.preventDefault();
-    }
-
-    if (e.key === "F12") {
-      e.preventDefault();
-      return false;
-    }
-
-    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "i") {
-      e.preventDefault();
-      return false;
-    }
-
-    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "j") {
-      e.preventDefault();
-      return false;
-    }
-
-    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "c") {
-      e.preventDefault();
-      return false;
-    }
-
-    if (e.ctrlKey && e.key.toLowerCase() === "u") {
-      e.preventDefault();
-      return false;
-    }
-
-    if (e.ctrlKey && e.key.toLowerCase() === "s") {
-      e.preventDefault();
-      return false;
-    }
-
-    if (e.ctrlKey && e.key.toLowerCase() === "p") {
-      e.preventDefault();
-      return false;
-    }
-
+/* ─── SECURITY ───────────────────────────────────────────── */
+(()=>{
+  document.addEventListener("contextmenu",e=>e.preventDefault());
+  document.addEventListener("copy",e=>e.preventDefault());
+  document.addEventListener("cut",e=>e.preventDefault());
+  document.addEventListener("paste",e=>e.preventDefault());
+  document.addEventListener("dragstart",e=>e.preventDefault());
+  document.addEventListener("selectstart",e=>e.preventDefault());
+  document.addEventListener("keydown",e=>{
+    if(e.ctrlKey&&["+","-","=","_","0"].includes(e.key)) e.preventDefault();
+    if(e.key==="F12"){ e.preventDefault(); return false; }
+    if(e.ctrlKey&&e.shiftKey&&["i","j","c"].includes(e.key.toLowerCase())){ e.preventDefault(); return false; }
+    if(e.ctrlKey&&["u","s","p"].includes(e.key.toLowerCase())){ e.preventDefault(); return false; }
   });
-
-  document.addEventListener(
-    "wheel",
-    function(e) {
-      if (e.ctrlKey) {
-        e.preventDefault();
-      }
-    },
-    { passive: false }
-  );
-
+  document.addEventListener("wheel",function(e){ if(e.ctrlKey) e.preventDefault(); },{passive:false});
 })();
 </script>
 </body>
