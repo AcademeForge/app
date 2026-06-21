@@ -135,10 +135,19 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
 .af-filter-opt.sel{background:var(--p-soft);color:var(--p)}
 .af-filter-opt:active{background:var(--grp)}
 
-/* Secondary sort row (Newest / Most popular) — lives inside the Courses pane */
-.af-tabs{display:flex;flex-direction:column;gap:5px}
-.af-tabs-row{display:flex}
-.af-tab-btn{flex:1;text-align:center;font-size:11px;font-weight:700;color:var(--tm);padding-bottom:5px}
+/* Secondary sort row (Newest / Most popular) — lives inside the Courses pane.
+   Also reused for the Dashboard's Activity / Certificates tabs. */
+.af-tabs{
+  display:flex;flex-direction:column;gap:8px;
+  margin-top:10px;
+  background:var(--card-s);
+  border:1.5px solid var(--bc);
+  border-radius:14px;
+  padding:10px 12px 12px;
+  box-shadow:var(--sh);
+}
+.af-tabs-row{display:flex;gap:6px}
+.af-tab-btn{flex:1;text-align:center;font-size:11.5px;font-weight:700;color:var(--tm);padding-bottom:6px}
 .af-tab-btn.active{color:var(--t1)}
 .af-tabs-track{height:3px;background:var(--b1);border-radius:99px;display:flex;overflow:hidden}
 .af-tabs-indicator{height:100%;width:50%;background:linear-gradient(90deg,var(--p),var(--acc));border-radius:99px;transition:transform .25s ease}
@@ -1458,7 +1467,6 @@ function openCert(cert){
 
       <div class="cert-detail-actions">
         <button class="cert-dl-btn" id="certDlBtn" onclick="downloadCert()">📥 Download Certificate (PDF)</button>
-        <button class="cert-share-btn" id="viewFullCertBtn" onclick="viewFullCert()">🔍 Show Full Certificate</button>
         <button class="cert-share-btn" onclick="shareCert()">🔗 Share Certificate</button>
         <button class="cert-verify-btn" onclick="verifyCert()">✅ Verify on Portal</button>
       </div>
@@ -1515,29 +1523,6 @@ async function inlineCertImages(html){
 async function buildInlinedCertHTML(){
   return inlineCertImages(_currentCertHtml);
 }
-
-/* Open the certificate full-screen in a new tab (works on Android too) */
-async function viewFullCert(){
-  if(!_currentCertHtml){ afToast('Certificate not ready yet.','err'); return; }
-  const btn = $('viewFullCertBtn');
-  if(btn){ btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Loading\u2026'; }
-
-  const html = await buildInlinedCertHTML();
-
-  const win = window.open('', '_blank');
-  if(win){
-    win.document.open();
-    win.document.write(html);
-    win.document.close();
-  } else {
-    const blob = new Blob([html], {type:'text/html'});
-    const url = URL.createObjectURL(blob);
-    window.location.href = url;
-  }
-
-  if(btn){ btn.disabled = false; btn.innerHTML = '\uD83D\uDD0D Show Full Certificate'; }
-}
-window.viewFullCert = viewFullCert;
 
 /* ════════════════════════════════════════════════════════
    REAL PDF GENERATION + ROBUST DOWNLOAD
