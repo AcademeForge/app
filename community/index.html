@@ -45,7 +45,7 @@
 html{font-size:16px;-webkit-text-size-adjust:100%;height:100%;height:100dvh;}
 body{
   font-family:var(--font-body);background:var(--bg);color:var(--t1);
-  height:100%;height:100dvh;display:flex;justify-content:center;
+  height:100%;height:100dvh;display:flex;align-items:center;justify-content:center;
   overflow:hidden;transition:background .18s,color .18s;
 }
 button{font-family:var(--font-body);cursor:pointer;border:none;background:none;color:inherit;}
@@ -53,14 +53,23 @@ a{text-decoration:none;color:inherit;}
 
 /* SHELL */
 .shell{
-  width:100%;max-width:var(--shell);height:100%;height:100dvh;
+  width:min(100%,460px);height:100dvh;
   background:var(--surface);display:flex;flex-direction:column;
-  position:relative;box-shadow:0 0 0 1px var(--b1),var(--she);
-  overflow:hidden;transition:background .18s;
+  position:relative;overflow:hidden;
+  transition:background .18s;
 }
-@media(min-width:700px){
-  body{padding:24px 0 40px;height:auto;min-height:100dvh;overflow-y:auto;}
-  .shell{border-radius:40px;height:calc(100dvh - 64px);max-height:880px;}
+@media(min-width:520px){
+  body{background:var(--bg);}
+  .shell{
+    height:min(900px,calc(100dvh - 32px));
+    border:8px solid var(--bi);
+    border-radius:44px;
+    box-shadow:0 30px 90px rgba(0,0,0,.28);
+  }
+  [data-theme="dark"] .shell{
+    border-color:#202637;
+    box-shadow:0 30px 90px rgba(0,0,0,.75);
+  }
 }
 
 /* HEADER */
@@ -238,27 +247,25 @@ a{text-decoration:none;color:inherit;}
 
 /* BOTTOM NAV */
 .bnav{
-  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
-  width:100%;max-width:var(--shell);z-index:999;height:var(--nav-h);
-  background:var(--nav);
-  backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
-  border-top:1px solid var(--b1);display:flex;align-items:center;
+  position:absolute;bottom:0;left:0;right:0;z-index:999;height:var(--nav-h);
+  background:var(--nav);border-top:1px solid var(--b1);
+  display:flex;align-items:center;
   padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px);
+  transition:transform .18s ease,opacity .18s ease;
 }
+.bnav.kb-hidden{transform:translateY(110%);opacity:0;pointer-events:none;}
 .bnav-btn{
   flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:4px;height:100%;border-radius:var(--r2);padding:8px 4px;position:relative;
-  transition:all .12s var(--ease);
+  gap:3px;height:100%;border-radius:var(--r2);padding:6px 4px;position:relative;
 }
 .bnav-btn::before{
-  content:'';position:absolute;top:7px;left:50%;transform:translateX(-50%);
-  width:0;height:2.5px;background:linear-gradient(90deg,var(--p),var(--acc));
-  border-radius:99px;transition:width .2s var(--spring);
+  content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);
+  width:0;height:2px;background:var(--p);border-radius:99px;transition:width .15s ease;
 }
-.bnav-btn.active::before{width:26px;}
-.bnav-icon{font-size:21px;line-height:1;transition:transform .15s var(--spring);}
-.bnav-btn.active .bnav-icon{transform:scale(1.1);}
+.bnav-btn.active::before{width:24px;}
 .bnav-btn:active .bnav-icon{transform:scale(.88);}
+.bnav-icon{font-size:20px;line-height:1;transition:transform .15s var(--spring);}
+.bnav-btn.active .bnav-icon{transform:scale(1.08);}
 .bnav-label{font-size:10px;font-weight:700;color:var(--tm);transition:color .12s;}
 .bnav-btn.active .bnav-label{color:var(--p);}
 
@@ -286,7 +293,7 @@ a{text-decoration:none;color:inherit;}
 
 /* MODALS */
 .modal-ov{
-  position:fixed;inset:0;z-index:9000;
+  position:absolute;inset:0;z-index:9000;
   display:flex;align-items:flex-end;justify-content:center;
   background:rgba(0,0,0,.48);
   backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
@@ -294,7 +301,7 @@ a{text-decoration:none;color:inherit;}
 }
 .modal-ov.open {opacity:1;visibility:visible;}
 .modal-card{
-  width:100%;max-width:var(--shell);background:var(--surface);
+  width:100%;background:var(--surface);
   border-radius:var(--r4) var(--r4) 0 0;
   border:1px solid var(--bc);border-bottom:none;box-shadow:var(--she);
   transform:translateY(100%);transition:transform .30s var(--spring);
@@ -368,7 +375,7 @@ textarea.compose.over{border-color:var(--err);box-shadow:0 0 0 3px rgba(239,68,6
 
 /* ACTION MENU */
 .menu-sheet{
-  width:100%;max-width:var(--shell);background:var(--surface);
+  width:100%;background:var(--surface);
   border-radius:var(--r4) var(--r4) 0 0;
   padding:6px 10px calc(22px + env(safe-area-inset-bottom,0px));
   border:1px solid var(--bc);border-bottom:none;box-shadow:var(--she);
@@ -388,9 +395,9 @@ textarea.compose.over{border-color:var(--err);box-shadow:0 0 0 3px rgba(239,68,6
 
 /* TOAST */
 .toast-wrap{
-  position:fixed;left:50%;bottom:calc(var(--nav-h) + 14px);
+  position:absolute;left:50%;bottom:calc(var(--nav-h) + 14px);
   transform:translateX(-50%);z-index:99999;
-  width:min(90vw,400px);pointer-events:none;
+  width:min(90%,400px);pointer-events:none;
 }
 .toast{
   display:flex;align-items:flex-start;gap:10px;background:var(--surface);color:var(--t1);
@@ -465,89 +472,90 @@ textarea.compose{-webkit-user-select:text;-moz-user-select:text;user-select:text
       <span class="bnav-icon">🏠</span><span class="bnav-label">Home</span>
     </button>
     <button class="bnav-btn" onclick="window.location.href='/student/index.html'">
-      <span class="bnav-icon">🎓</span><span class="bnav-label">Student</span>
+      <span class="bnav-icon">🧭</span><span class="bnav-label">Explore</span>
     </button>
     <button class="bnav-btn" onclick="window.location.href='/batches/index.html'">
-      <span class="bnav-icon">📚</span><span class="bnav-label">Batches</span>
+      <span class="bnav-icon">💡</span><span class="bnav-label">Programs</span>
     </button>
     <button class="bnav-btn active">
-      <span class="bnav-icon">💬</span><span class="bnav-label">Community</span>
+      <span class="bnav-icon">🌐</span><span class="bnav-label">Community</span>
     </button>
     <button class="bnav-btn" onclick="window.location.href='/setting/index.html'">
       <span class="bnav-icon">⚙️</span><span class="bnav-label">Settings</span>
     </button>
   </nav>
-</div>
 
-<div class="toast-wrap" id="toastWrap"></div>
+  <div class="toast-wrap" id="toastWrap"></div>
 
-<div class="modal-ov" id="composerModal" onclick="nxCloseComposer()">
-  <div class="modal-card" onclick="event.stopPropagation()">
-    <div class="modal-drag"></div>
-    <div class="modal-head">
-      <div><h3>Create Post</h3><p>Text only · max 80 words</p></div>
-      <button class="modal-close" onclick="nxCloseComposer()">×</button>
-    </div>
-    <div class="modal-body">
-      <textarea class="compose" id="postInput" rows="6"
-        placeholder="Write something helpful, thoughtful, or interesting…"
-        oninput="nxPostTyping()"></textarea>
-      <div class="compose-foot">
-        <span id="postCount">0 / 80 words</span>
-        <button class="submit-btn" id="postSubmitBtn" onclick="nxCreatePost()" disabled>Post</button>
+  <div class="modal-ov" id="composerModal" onclick="nxCloseComposer()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-drag"></div>
+      <div class="modal-head">
+        <div><h3>Create Post</h3><p>Text only · max 80 words</p></div>
+        <button class="modal-close" onclick="nxCloseComposer()">×</button>
+      </div>
+      <div class="modal-body">
+        <textarea class="compose" id="postInput" rows="6"
+          placeholder="Write something helpful, thoughtful, or interesting…"
+          oninput="nxPostTyping()"></textarea>
+        <div class="compose-foot">
+          <span id="postCount">0 / 80 words</span>
+          <button class="submit-btn" id="postSubmitBtn" onclick="nxCreatePost()" disabled>Post</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<div class="modal-ov" id="commentsModal" onclick="nxCloseComments()">
-  <div class="modal-card" onclick="event.stopPropagation()">
-    <div class="modal-drag"></div>
-    <div class="modal-head">
-      <div><h3>Comments</h3><p id="commentsPreview">Join the discussion</p></div>
-      <button class="modal-close" onclick="nxCloseComments()">×</button>
-    </div>
-    <div class="comments-list" id="commentsList">
-      <div class="state-msg"><div class="spinner"></div></div>
-    </div>
-    <div class="comment-input-area">
-      <textarea class="compose" id="commentInput" rows="2"
-        placeholder="Write a comment…" oninput="nxCommentTyping()"
-        style="min-height:60px;"></textarea>
-      <div class="compose-foot">
-        <span id="commentCount">0 / 80 words</span>
-        <button class="submit-btn" id="commentSubmitBtn" onclick="nxCreateComment()" disabled>Comment</button>
+  <div class="modal-ov" id="commentsModal" onclick="nxCloseComments()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-drag"></div>
+      <div class="modal-head">
+        <div><h3>Comments</h3><p id="commentsPreview">Join the discussion</p></div>
+        <button class="modal-close" onclick="nxCloseComments()">×</button>
+      </div>
+      <div class="comments-list" id="commentsList">
+        <div class="state-msg"><div class="spinner"></div></div>
+      </div>
+      <div class="comment-input-area">
+        <textarea class="compose" id="commentInput" rows="2"
+          placeholder="Write a comment…" oninput="nxCommentTyping()"
+          style="min-height:60px;"></textarea>
+        <div class="compose-foot">
+          <span id="commentCount">0 / 80 words</span>
+          <button class="submit-btn" id="commentSubmitBtn" onclick="nxCreateComment()" disabled>Comment</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<div class="modal-ov" id="replyModal" onclick="nxCloseReply()">
-  <div class="modal-card" onclick="event.stopPropagation()">
-    <div class="modal-drag"></div>
-    <div class="modal-head">
-      <div><h3>Reply</h3><p id="replyTarget">Reply to comment</p></div>
-      <button class="modal-close" onclick="nxCloseReply()">×</button>
-    </div>
-    <div class="modal-body">
-      <textarea class="compose" id="replyInput" rows="4"
-        placeholder="Write your reply…" oninput="nxReplyTyping()"></textarea>
-      <div class="compose-foot">
-        <span id="replyCount">0 / 80 words</span>
-        <button class="submit-btn" id="replySubmitBtn" onclick="nxCreateReply()" disabled>Reply</button>
+  <div class="modal-ov" id="replyModal" onclick="nxCloseReply()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-drag"></div>
+      <div class="modal-head">
+        <div><h3>Reply</h3><p id="replyTarget">Reply to comment</p></div>
+        <button class="modal-close" onclick="nxCloseReply()">×</button>
+      </div>
+      <div class="modal-body">
+        <textarea class="compose" id="replyInput" rows="4"
+          placeholder="Write your reply…" oninput="nxReplyTyping()"></textarea>
+        <div class="compose-foot">
+          <span id="replyCount">0 / 80 words</span>
+          <button class="submit-btn" id="replySubmitBtn" onclick="nxCreateReply()" disabled>Reply</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<div class="modal-ov" id="menuModal" onclick="nxCloseMenu()">
-  <div class="menu-sheet" onclick="event.stopPropagation()">
-    <div class="modal-drag"></div>
-    <div class="menu-label">Options</div>
-    <button id="menuDeleteBtn" class="danger" onclick="nxDeleteTarget()">🗑 Delete</button>
-    <button onclick="nxCloseMenu()">Cancel</button>
+  <div class="modal-ov" id="menuModal" onclick="nxCloseMenu()">
+    <div class="menu-sheet" onclick="event.stopPropagation()">
+      <div class="modal-drag"></div>
+      <div class="menu-label">Options</div>
+      <button id="menuDeleteBtn" class="danger" onclick="nxDeleteTarget()">🗑 Delete</button>
+      <button onclick="nxCloseMenu()">Cancel</button>
+    </div>
   </div>
-</div>
+
+</div><!-- /shell -->
 
 <script>
 /* ── CACHE ── */
