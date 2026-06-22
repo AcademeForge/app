@@ -17,7 +17,7 @@
 <link rel="icon" type="image/jpeg" href="/IMG/AF%20LOGO%202.jpeg">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Sora:wght@700;800;900&display=swap" rel="stylesheet"/>
 <style>
-/* ── TOKENS (matched 1:1 to Explore module) ── */
+/* ── TOKENS (Matched with Design System) ── */
 :root {
   --p:#4f46e5; --p2:#3730a3; --pl:#818cf8; --p-soft:rgba(79,70,229,.10);
   --acc:#06b6d4; --acc2:#f59e0b;
@@ -32,16 +32,12 @@
   --sh:0 2px 12px rgba(79,70,229,.08),0 1px 3px rgba(0,0,0,.04);
   --she:0 8px 32px rgba(79,70,229,.14);
   --shell-border:#c7cbea;
-  --nav-h:64px; --hdr-h:54px;
+  --nav-h:64px;
   --fd:'Sora',sans-serif;
   --fb:'Inter',sans-serif;
-  --ok-soft:rgba(34,197,94,.12); --ok-b:rgba(34,197,94,.28);
-  --warn-soft:rgba(245,158,11,.12); --warn-b:rgba(245,158,11,.28);
-  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px; --sp-7:32px; --sp-8:40px;
-  --focus-ring:0 0 0 3px rgba(79,70,229,.35);
+  --r1:10px; --r2:14px; --r3:20px; --rf:9999px;
   --ease:cubic-bezier(.4,0,.2,1);
   --ease-spring:cubic-bezier(.34,1.56,.64,1);
-  --r1:10px; --r2:14px; --r3:20px; --rf:999px;
 }
 [data-theme="dark"] {
   --bg:#0c0b1d; --shell:#120f2a;
@@ -53,209 +49,177 @@
   --sh:0 2px 12px rgba(0,0,0,.32); --she:0 8px 32px rgba(0,0,0,.44);
   --shell-border:#202637;
   --p-soft:rgba(129,140,248,.12);
-  --focus-ring:0 0 0 3px rgba(129,140,248,.4);
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html{font-size:15px;-webkit-text-size-adjust:100%}
-html,body{height:100%;min-height:100dvh}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{font-size:15px;-webkit-text-size-adjust:100%;}
+html,body{height:100%;min-height:100dvh;}
 body{
   font-family:var(--fb); background:var(--bg); color:var(--t1);
   -webkit-font-smoothing:antialiased;
   display:flex;align-items:center;justify-content:center;
   overflow:hidden;
 }
-[data-theme="light"]{color-scheme:light}
-[data-theme="dark"]{color-scheme:dark}
-button{font-family:var(--fb);cursor:pointer;border:none;background:none;color:inherit}
-a{text-decoration:none;color:inherit}
-img{display:block;max-width:100%}
-ul{list-style:none}
-*,body,html{-webkit-user-select:none;-moz-user-select:none;user-select:none}
-input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text}
+[data-theme="light"]{color-scheme:light;}
+[data-theme="dark"]{color-scheme:dark;}
+button{font-family:var(--fb);cursor:pointer;border:none;background:none;color:inherit;}
+a{text-decoration:none;color:inherit;}
+img{display:block;max-width:100%;}
+ul{list-style:none;}
+html,body,*{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+textarea,input{-webkit-user-select:text;user-select:text;}
+:focus{outline:none;}
 
-:focus{outline:none}
-:focus-visible{outline:none;box-shadow:var(--focus-ring);border-radius:10px}
-button:focus-visible,a:focus-visible,input:focus-visible{box-shadow:var(--focus-ring)}
-
+/* ── SHELL ── */
 .af-shell{ width:min(100%,460px); height:100dvh; background:var(--shell); position:relative; display:flex; flex-direction:column; overflow:hidden; }
 @media(min-width:520px){
-  body{background:var(--bg)}
+  body{background:var(--bg);}
   .af-shell{ height:min(900px,calc(100dvh - 32px)); border:8px solid var(--shell-border); border-radius:44px; box-shadow:0 30px 90px rgba(0,0,0,.28); }
   [data-theme="dark"] .af-shell{ box-shadow:0 30px 90px rgba(0,0,0,.75); }
 }
 
 /* ── TOPBAR ── */
 .af-topbar{
-  flex-shrink:0;height:var(--hdr-h);background:var(--hdr);
+  flex-shrink:0;height:52px;background:var(--hdr);
   backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
   border-bottom:1px solid var(--b1);
   display:flex;align-items:center;padding:0 14px;gap:10px;z-index:100;
   position:relative;overflow:hidden;
 }
-.af-topbar-flex{flex:1;min-width:0;height:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative}
-.af-topbar-headline{font-family:var(--fd);font-weight:900;font-size:15px;color:var(--t1);transition:opacity .2s ease;white-space:nowrap}
-.af-hdr-search-btn{
-  width:32px;height:32px;border-radius:10px;background:var(--grp);border:1px solid var(--b1);
-  color:var(--t1);font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  transition:opacity .2s ease,transform .2s ease;
-}
-.af-hdr-search-btn:active{opacity:.7;transform:scale(.94)}
-.af-hdr-search-wrap{
-  position:absolute;top:50%;right:38px;transform:translateY(-50%);
-  width:0;height:36px;border-radius:11px;background:var(--inp);border:1.5px solid var(--b1);
-  display:flex;align-items:center;gap:7px;padding:0;overflow:hidden;
-  opacity:0;pointer-events:none;
-  transition:width .28s cubic-bezier(.4,0,.2,1),opacity .22s ease,padding .28s cubic-bezier(.4,0,.2,1);
-}
-.af-hdr-search-wrap.open{
-  width:min(100%,calc(100% - 40px));opacity:1;pointer-events:auto;padding:0 8px 0 12px;
-}
-.af-hdr-search-wrap .af-search-ic{font-size:12.5px;color:var(--tm);flex-shrink:0}
-.af-hdr-search-wrap input{
-  flex:1;min-width:0;background:none;border:none;outline:none;color:var(--t1);
-  font-size:12.5px;font-weight:500;font-family:var(--fb);
-}
-.af-hdr-search-wrap input::placeholder{color:var(--tm)}
-.af-hdr-search-close{
-  width:22px;height:22px;border-radius:50%;background:var(--grp);color:var(--t2);
-  font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
-.af-topbar-flex.searching .af-hdr-search-btn{opacity:0;pointer-events:none;transform:scale(.9)}
+.af-topbar-flex{flex:1;min-width:0;height:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative;}
+.af-topbar-headline{font-family:var(--fd);font-weight:900;font-size:15px;color:var(--t1);transition:opacity .2s ease;white-space:nowrap;}
 .af-back{
   width:34px;height:34px;border-radius:10px;background:var(--grp);
   border:1px solid var(--b1);color:var(--t1);font-size:17px;
   display:flex;align-items:center;justify-content:center;flex-shrink:0;
 }
-.af-back:active{opacity:.7}
-.af-topbar-title{font-family:var(--fd);font-size:14.5px;font-weight:800;color:var(--t1);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.af-back:active{opacity:.7;}
+.af-topbar-title{font-family:var(--fd);font-size:14.5px;font-weight:800;color:var(--t1);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
-.my-avatar-btn{
-  display:flex;align-items:center;gap:6px;height:32px;padding:0 10px;
-  border-radius:10px;font-size:12px;font-weight:700;color:var(--t2);
-  background:var(--grp);border:1px solid var(--b1);
-  transition:transform .15s; flex-shrink:0;
+.af-hdr-search-btn{
+  width:32px;height:32px;border-radius:10px;background:var(--grp);border:1px solid var(--b1);
+  color:var(--t1);font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:opacity .2s ease,transform .2s ease;
 }
-.my-avatar-btn:active{transform:scale(.95)}
-.my-avatar-btn span:last-child{max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.af-hdr-search-btn:active{opacity:.7;transform:scale(.94);}
+.af-hdr-search-wrap{
+  position:absolute;top:50%;right:0;transform:translateY(-50%);
+  width:0;height:36px;border-radius:11px;background:var(--inp);border:1.5px solid var(--b1);
+  display:flex;align-items:center;gap:7px;padding:0;overflow:hidden;
+  opacity:0;pointer-events:none;
+  transition:width .28s var(--ease),opacity .22s ease,padding .28s var(--ease);
+}
+.af-hdr-search-wrap.open{
+  width:min(58%,calc(100% - 78px));opacity:1;pointer-events:auto;padding:0 8px 0 12px;
+}
+.af-hdr-search-wrap input{
+  flex:1;min-width:0;background:none;border:none;outline:none;color:var(--t1);
+  font-size:12.5px;font-weight:500;font-family:var(--fb);
+}
+.af-hdr-search-close{
+  width:22px;height:22px;border-radius:50%;background:var(--grp);color:var(--t2);
+  font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+
+.my-avatar-btn{display:flex;align-items:center;gap:6px;height:32px;padding:0 11px;border-radius:10px;font-size:12px;font-weight:700;color:var(--t2);background:var(--inp);border:1px solid var(--b1);}
 
 /* ── PAGES / VIEW SWITCH ── */
-.af-view{ display:none; flex:1; min-height:0; flex-direction:column; overflow:hidden; }
+.af-view{ display:none; flex:1; min-height:0; flex-direction:column; overflow:hidden; background:var(--bg); }
 .af-view.active{ display:flex; }
 .af-page{
   flex:1;overflow-y:scroll;overflow-x:hidden;-webkit-overflow-scrolling:touch;
   overscroll-behavior-y:contain; min-height:0;
-  padding-bottom:calc(var(--nav-h) + 84px + env(safe-area-inset-bottom,0px));
+  padding-bottom:calc(var(--nav-h) + 20px + env(safe-area-inset-bottom,0px));
 }
 .af-page.no-nav-pad{ padding-bottom:24px; }
-.af-page::-webkit-scrollbar{width:2px}
-.af-page::-webkit-scrollbar-thumb{background:var(--bc);border-radius:99px}
-.af-body{padding:10px 12px;display:flex;flex-direction:column;gap:9px}
+.af-page::-webkit-scrollbar{display:none;}
 
-/* ── SEARCH RESULTS DROPDOWN ── */
-.search-results{
-  position:absolute;top:calc(100% + 4px);left:12px;right:12px;background:var(--card-s);
-  border:1px solid var(--bc);border-radius:14px;z-index:9999;box-shadow:var(--she);
-  max-height:280px;overflow-y:auto;display:flex;flex-direction:column;
-}
+/* ── TABS (Feed/Chats & Recent/Relevant) ── */
+.view-switch{display:flex;background:var(--inp);border:1.5px solid var(--b1);border-radius:11px;padding:3px;gap:3px;flex-shrink:0;margin:10px 14px 0;}
+.view-switch-btn{flex:1;height:32px;border-radius:9px;font-size:12.5px;font-weight:700;color:var(--t2);display:flex;align-items:center;justify-content:center;gap:5px;transition:background .2s,color .2s,box-shadow .2s;}
+.view-switch-btn.active{background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);color:#fff;box-shadow:0 2px 7px rgba(79,70,229,.32);}
 
-/* ── MODERN SEGMENTED TABS ── */
-.view-switch{display:flex;background:var(--inp);border:1.5px solid var(--b1);border-radius:11px;padding:3px;gap:3px;flex-shrink:0;margin:10px 12px 2px;}
-.view-switch-btn{flex:1;height:32px;border-radius:9px;font-size:12px;font-weight:700;color:var(--t2);display:flex;align-items:center;justify-content:center;gap:5px;transition:background .2s,color .2s,box-shadow .2s}
-.view-switch-btn.active{background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);color:#fff;box-shadow:0 2px 7px rgba(79,70,229,.32)}
-.view-switch-btn .vs-badge{font-size:10px;font-weight:800;background:var(--rose);padding:1px 6px;border-radius:99px;color:#fff;}
-.view-switch-btn:not(.active) .vs-badge{background:var(--grp);color:var(--tm)}
-
-/* ── SUB FILTERS (Relevant / Recent) ── */
-.af-tabs{display:flex;gap:24px;padding:2px 14px 0;border-bottom:1.5px solid var(--b1);flex-shrink:0;}
+.af-tabs{display:flex;gap:24px;padding:12px 16px 0;border-bottom:1.5px solid var(--b1);background:var(--shell);flex-shrink:0;}
 .af-tab-btn{
-  font-size:12px;font-weight:700;color:var(--tm);
-  padding:0 1px 9px;position:relative;transition:color .2s ease;
+  font-size:13px;font-weight:700;color:var(--tm);
+  padding:0 1px 10px;position:relative;transition:color .2s ease;
 }
 .af-tab-btn::after{
   content:'';position:absolute;left:0;right:0;bottom:-1.5px;height:2px;
   background:linear-gradient(90deg,var(--p),var(--acc));border-radius:99px;
-  transform:scaleX(0);transition:transform .25s cubic-bezier(.4,0,.2,1);
+  transform:scaleX(0);transition:transform .25s var(--ease);
 }
-.af-tab-btn.active{color:var(--t1)}
-.af-tab-btn.active::after{transform:scaleX(1)}
+.af-tab-btn.active{color:var(--t1);}
+.af-tab-btn.active::after{transform:scaleX(1);}
 
-/* ── AVATARS ── */
-.avatar{width:36px;height:36px;min-width:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--p);flex-shrink:0;color:#fff;box-shadow:0 2px 6px rgba(79,70,229,.2);}
-.avatar.initials{font-size:13px;font-weight:800;letter-spacing:.02em;}
-.avatar-lg{width:64px;height:64px;min-width:64px;border-radius:20px;font-size:32px;}
+/* ── UI COMPONENTS ── */
+.avatar{width:36px;height:36px;min-width:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--p-soft);color:var(--p);flex-shrink:0;cursor:pointer;border:1px solid var(--bc);}
+.avatar.initials{font-size:13px;font-weight:800;letter-spacing:.02em;background:var(--p);color:#fff;border:none;}
+.avatar-lg{width:64px;height:64px;min-width:64px;border-radius:18px;font-size:28px;}
 .avatar-lg.initials{font-size:22px;}
-.avatar-sm{width:32px;height:32px;min-width:32px;border-radius:10px;font-size:15px;box-shadow:0 1px 4px rgba(79,70,229,.15);}
-.avatar-sm.initials{font-size:12px;}
+.avatar-sm{width:30px;height:30px;min-width:30px;border-radius:9px;font-size:15px;}
+.avatar-sm.initials{font-size:11px;}
+
+.af-btn-primary{
+  height:44px;border-radius:12px;border:none;padding:0 20px;
+  background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);
+  color:#fff;font-size:14px;font-weight:700;box-shadow:0 4px 14px rgba(79,70,229,.35);
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+}
+.af-btn-primary:active{transform:scale(.98);opacity:.9;}
+.af-btn-primary:disabled{opacity:.4;pointer-events:none;}
+.af-btn-secondary-outline{
+  height:44px;border-radius:12px;background:transparent;padding:0 20px;
+  border:1.5px solid var(--bc);color:var(--t1);font-size:14px;font-weight:700;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+}
+.af-btn-secondary-outline:active{background:var(--grp);}
 
 .verified-badge{
-  display:inline-flex;align-items:center;justify-content:center;
-  width:14px;height:14px;margin-left:4px;border-radius:50%;
-  background:#1d9bf0;color:#fff;font-size:9px;font-weight:700;vertical-align:middle;
+  display:inline-flex; align-items:center; justify-content:center;
+  width:14px; height:14px; margin-left:4px; border-radius:50%;
+  background:#1d9bf0; color:#fff; font-size:9px; font-weight:700; vertical-align:middle;
 }
 
-/* ── USER ROW ── */
-.user-row{
-  display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;
-  border-bottom:1px solid var(--b1);transition:background .15s;
-}
-.user-row:last-child{border-bottom:none;}
-.user-row:active{background:var(--grp);}
-.user-row-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;}
-.user-row-name{font-family:var(--fd);font-size:13.5px;font-weight:800;color:var(--t1);line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.user-row-user{font-size:11.5px;color:var(--tm);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-
-/* ── POST CARD ── */
-.post-card{
-  background:var(--card-s);border:1px solid var(--bc);border-radius:16px;
-  padding:14px 16px;margin-bottom:10px;box-shadow:var(--sh);
-  display:flex;flex-direction:column;gap:10px;
-}
-.pin-badge{
-  display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;
-  color:var(--pin);background:var(--warn-soft);border-radius:var(--rf);
-  padding:3px 10px;width:fit-content;text-transform:uppercase;letter-spacing:.05em;
-  margin-bottom:-4px; border:1px solid var(--warn-b);
-}
-.post-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
-.post-author{display:flex;align-items:center;gap:10px;min-width:0;cursor:pointer;padding:2px 0;}
-.post-author:active{opacity:.7;}
-.post-meta{display:flex;flex-direction:column;justify-content:center;}
-.post-meta strong{font-family:var(--fd);font-size:13.5px;font-weight:800;color:var(--t1);line-height:1.2;}
-.post-meta small{font-size:11.5px;color:var(--tm);font-weight:600;margin-top:2px;}
-.menu-dot{
-  width:30px;height:30px;min-width:30px;border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:16px;color:var(--tm);background:var(--grp);border:1px solid transparent;
-  transition:all .15s;
-}
-.menu-dot:active{background:var(--inp);border-color:var(--bc);transform:scale(.95);}
-.post-text{font-size:14px;line-height:1.6;color:var(--t2);white-space:pre-wrap;word-break:break-word;}
-.post-actions{display:flex;align-items:center;gap:12px;padding-top:12px;border-top:1px solid var(--b1);margin-top:2px;}
-.action-btn{
-  font-size:12.5px;font-weight:700;color:var(--t2);display:flex;align-items:center;gap:6px;
-  padding:6px 12px;border-radius:10px;background:var(--grp);transition:all .15s;
-}
-.action-btn:active{transform:scale(.95);background:var(--inp);}
-.action-btn.liked{color:var(--rose);background:rgba(244,63,94,.1);}
-.action-btn .cnt{font-variant-numeric:tabular-nums;font-weight:800;}
-
-/* ── STATE ── */
-.state-msg{margin:40px auto;max-width:280px;text-align:center;color:var(--tm);font-size:13.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:12px;}
-.state-msg .icon{font-size:40px;margin-bottom:4px;}
+.state-msg{margin:40px auto;max-width:260px;text-align:center;color:var(--tm);font-size:13px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:12px;}
+.state-msg .icon{font-size:36px;}
 .spinner{width:28px;height:28px;border-radius:50%;border:3px solid var(--b1);border-top-color:var(--p);animation:spin .75s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.af-empty{padding:var(--sp-8) var(--sp-5);text-align:center;color:var(--t2);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:var(--sp-2)}
-.af-empty span{font-size:24px}
-.af-empty strong{color:var(--t1);font-size:14.5px;font-family:var(--fd);font-weight:800}
+
+/* ── POST CARDS ── */
+.post-list{padding:12px;display:flex;flex-direction:column;gap:12px;}
+.post-card{
+  background:var(--card-s); border:1px solid var(--b1); border-radius:16px;
+  padding:16px; box-shadow:var(--sh); transition:transform 0.15s var(--ease), border-color 0.2s;
+}
+.post-card.pinned{border-color:var(--pin);}
+.pin-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;color:var(--pin);background:var(--warn-soft);border:1px solid var(--warn-b);border-radius:99px;padding:3px 8px;margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em;}
+.post-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;}
+.post-author{display:flex;align-items:center;gap:10px;min-width:0;}
+.post-meta strong{display:block;font-family:var(--fd);font-size:14.5px;font-weight:800;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;cursor:pointer;}
+.post-meta small{display:block;margin-top:2px;font-size:11.5px;color:var(--tm);font-weight:600;cursor:pointer;}
+.menu-dot{width:28px;height:28px;min-width:28px;border-radius:var(--r1);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--tm);}
+.menu-dot:active{background:var(--grp);}
+.post-text{font-size:14px;line-height:1.65;color:var(--t2);white-space:pre-wrap;word-wrap:break-word;overflow-wrap:break-word;margin-bottom:14px;}
+.post-actions{display:flex;align-items:center;gap:16px;padding-top:12px;border-top:1px solid var(--b1);}
+.action-btn{font-size:12.5px;font-weight:700;color:var(--t2);display:flex;align-items:center;gap:5px;}
+.action-btn.liked{color:var(--rose);}
+.action-btn .cnt{font-variant-numeric:tabular-nums;}
+
+/* ── SEARCH RESULTS (Header) ── */
+.search-results{position:absolute;top:100%;left:12px;right:12px;background:var(--surface);border:1px solid var(--b1);border-top:none;border-radius:0 0 var(--r2) var(--r2);z-index:9999;box-shadow:var(--she);max-height:220px;overflow-y:auto;}
+.search-result-item{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--b1);}
+.search-result-item:last-child{border-bottom:none;}
+.search-result-item:active{background:var(--inp);}
+.search-result-name{font-family:var(--fd);font-size:13.5px;font-weight:800;color:var(--t1);}
+.search-result-user{font-size:11.5px;color:var(--tm);font-weight:600;}
+
+/* ── USERNAME BANNER ── */
+.username-banner{margin:12px 12px 0;padding:14px;border-radius:14px;background:var(--grp);border:1px solid var(--bc);display:flex;align-items:center;gap:10px;}
+.username-banner span.t{flex:1;font-size:13px;color:var(--t1);font-weight:600;}
 
 /* ── FAB ── */
-.fab{
-  position:absolute;right:20px;bottom:calc(var(--nav-h) + 20px);z-index:300;
-  width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);
-  color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;
-  box-shadow:0 8px 24px rgba(79,70,229,.4);transition:transform .2s;
-}
-.fab:active{transform:scale(.92);}
+.fab{position:absolute;right:18px;bottom:calc(var(--nav-h) + 18px);z-index:300;width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 8px 24px rgba(79,70,229,.4);}
+.fab:active{transform:scale(.94);}
 
 /* ── BOTTOM NAV ── */
 .af-bnav{
@@ -263,7 +227,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{box-shadow:var(--focus-
   background:var(--nav);border-top:1px solid var(--b1);
   display:flex;align-items:center;padding:0 6px;padding-bottom:env(safe-area-inset-bottom,0px);
   backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
-  transition:transform .18s ease,opacity .18s ease;
+  transition:transform .2s var(--ease),opacity .2s var(--ease);
 }
 .af-bnav.kb-hidden{transform:translateY(110%);opacity:0;pointer-events:none;}
 .af-nav-btn{
@@ -271,354 +235,236 @@ button:focus-visible,a:focus-visible,input:focus-visible{box-shadow:var(--focus-
   min-height:48px;height:100%;border-radius:14px;padding:6px 4px;position:relative;
   transition:transform .15s var(--ease);
 }
-.af-nav-btn:active{transform:scale(.92)}
+.af-nav-btn:active{transform:scale(.92);}
 .af-nav-icon-wrap{
   width:38px;height:26px;border-radius:11px;display:flex;align-items:center;justify-content:center;
   background:transparent;transition:background .25s var(--ease),transform .25s var(--ease-spring);
 }
-.af-nav-btn.active .af-nav-icon-wrap{background:var(--p-soft);transform:translateY(-1px)}
-.af-nav-icon{font-size:18px;line-height:1;transition:transform .25s var(--ease-spring);filter:grayscale(.15);opacity:.75}
-.af-nav-btn.active .af-nav-icon{transform:scale(1.12);filter:none;opacity:1}
-.af-nav-label{font-size:9.5px;font-weight:700;color:var(--tm);transition:color .2s ease,font-weight .2s ease}
-.af-nav-btn.active .af-nav-label{color:var(--p);font-weight:800}
+.af-nav-btn.active .af-nav-icon-wrap{background:var(--p-soft);transform:translateY(-1px);}
+.af-nav-icon{font-size:18px;line-height:1;transition:transform .25s var(--ease-spring);filter:grayscale(.15);opacity:.75;}
+.af-nav-btn.active .af-nav-icon{transform:scale(1.12);filter:none;opacity:1;}
+.af-nav-label{font-size:9.5px;font-weight:700;color:var(--tm);transition:color .2s ease,font-weight .2s ease;}
+.af-nav-btn.active .af-nav-label{color:var(--p);font-weight:800;}
 
-/* ── LOCKED ── */
-.locked-box{display:none;place-items:center;min-height:60dvh;padding:24px;}
-.locked-box.visible{display:grid;}
-.login-btn{
-  width:100%;height:52px;border-radius:14px;border:none;
-  background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);
-  color:#fff;font-size:15px;font-weight:700;box-shadow:0 4px 16px rgba(79,70,229,.35);
-  margin-top:20px;
+/* ── MODALS & SHEETS ── */
+.modal-ov{position:absolute;inset:0;z-index:9000;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5);opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s;backdrop-filter:blur(2px);}
+.modal-ov.open{opacity:1;visibility:visible;}
+.modal-card{width:100%;background:var(--shell);border-radius:24px 24px 0 0;border:1px solid var(--b1);border-bottom:none;transform:translateY(100%);transition:transform .3s var(--ease-spring);display:flex;flex-direction:column;max-height:90dvh;overflow:hidden;}
+.modal-ov.open .modal-card{transform:translateY(0);}
+.modal-drag{width:36px;height:5px;background:var(--b1);border-radius:99px;margin:12px auto 0;}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;border-bottom:1px solid var(--b1);flex-shrink:0;}
+.modal-head h3{font-family:var(--fd);font-size:16px;font-weight:800;color:var(--t1);}
+.modal-head p{font-size:12px;color:var(--tm);margin-top:2px;font-weight:500;}
+.modal-close{width:30px;height:30px;border-radius:10px;background:var(--grp);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--t2);}
+.modal-body{padding:16px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;flex:1;}
+textarea.compose,input.field{width:100%;resize:none;outline:none;border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.6;color:var(--t1);background:var(--inp);border:1.5px solid var(--b1);font-family:var(--fb);}
+textarea.compose:focus,input.field:focus{border-color:var(--p);}
+textarea.compose.over{border-color:var(--err);}
+.field-label{font-size:11.5px;font-weight:800;color:var(--tm);text-transform:uppercase;letter-spacing:.05em;}
+.compose-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;}
+.compose-foot span{font-size:12px;font-weight:700;color:var(--tm);}
+.compose-foot .warn{color:var(--err);}
+
+/* ── COMMENTS ── */
+.comments-list{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;min-height:60px;background:var(--bg);}
+.comment-input-area{padding:14px;border-top:1px solid var(--b1);flex-shrink:0;display:flex;flex-direction:column;gap:10px;background:var(--shell);}
+.cmt-card{background:var(--card-s);border:1px solid var(--b1);border-radius:14px;padding:12px;box-shadow:var(--sh);}
+.cmt-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.cmt-info strong{font-family:var(--fd);font-size:13px;font-weight:800;color:var(--t1);display:block;cursor:pointer;}
+.cmt-info small{font-size:11px;color:var(--tm);font-weight:600;}
+.cmt-text{font-size:13.5px;line-height:1.6;color:var(--t2);word-wrap:break-word;overflow-wrap:break-word;}
+.cmt-actions{display:flex;gap:16px;margin-top:10px;}
+.cmt-btn{font-size:12px;font-weight:700;color:var(--tm);}
+.view-replies-btn{font-size:12px;font-weight:700;color:var(--p);margin-top:10px;display:inline-block;}
+.replies-wrap{margin-top:10px;padding-left:14px;border-left:2px solid var(--b1);display:flex;flex-direction:column;gap:10px;}
+
+/* ── CHAT LIST ── */
+.chat-list{flex:1;overflow-y:auto;padding:12px;}
+.conv-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;background:var(--card-s);border:1px solid var(--b1);margin-bottom:10px;box-shadow:var(--sh);cursor:pointer;transition:transform .15s;}
+.conv-item:active{transform:scale(.98);background:var(--grp);}
+.conv-info{flex:1;min-width:0;}
+.conv-name{font-family:var(--fd);font-size:14px;font-weight:800;color:var(--t1);}
+.conv-preview{font-size:12.5px;color:var(--t2);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.conv-meta{flex-shrink:0;text-align:right;}
+.conv-time{font-size:11px;color:var(--tm);font-weight:600;}
+
+/* ── DM THREAD ── */
+.dm-screen{position:absolute;inset:0;z-index:1200;background:var(--bg);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .26s var(--ease);}
+.dm-screen.open{transform:translateX(0);}
+.dm-hdr{display:flex;align-items:center;gap:10px;padding:0 14px;height:64px;border-bottom:1px solid var(--b1);background:var(--hdr);backdrop-filter:blur(16px);flex-shrink:0;z-index:10;}
+.dm-hdr-info{flex:1;min-width:0;cursor:pointer;}
+.dm-hdr-name{font-family:var(--fd);font-size:15px;font-weight:800;color:var(--t1);}
+.dm-hdr-status{font-size:11.5px;color:var(--ok);font-weight:600;margin-top:2px;}
+.dm-messages{flex:1;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:8px;}
+.bubble-wrap{display:flex;align-items:flex-end;gap:8px;}
+.bubble-wrap.me{flex-direction:row-reverse;}
+.bubble-avatar-slot{width:30px;height:30px;flex-shrink:0;}
+.bubble{
+  max-width:75%;padding:10px 14px;border-radius:18px 18px 18px 4px;
+  font-size:14px;line-height:1.5;color:var(--t1);background:var(--card-s);
+  border:1px solid var(--b1);box-shadow:var(--sh);
+  word-break:normal;overflow-wrap:break-word;
 }
-.login-btn:active{transform:scale(.98);}
+.bubble-wrap.me .bubble{
+  background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);
+  color:#fff;border:none;border-radius:18px 18px 4px 18px;
+  box-shadow:0 4px 12px rgba(79,70,229,.2);
+}
+.bubble.deleted{
+  font-style:italic;opacity:0.6;background:transparent!important;
+  color:var(--tm)!important;border:1px dashed var(--tm);box-shadow:none!important;
+}
+.bubble-time{font-size:10px;color:var(--tm);font-weight:600;white-space:nowrap;margin-bottom:4px;}
+.bubble-wrap.consecutive{margin-top:-4px;}
+.bubble-wrap.consecutive .bubble-avatar-slot{visibility:hidden;}
+.dm-input-area{display:flex;align-items:flex-end;gap:10px;padding:12px 14px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--b1);background:var(--hdr);flex-shrink:0;}
+.dm-textarea{flex:1;resize:none;outline:none;border-radius:20px;padding:12px 16px;font-size:14px;line-height:1.5;color:var(--t1);background:var(--inp);border:1.5px solid var(--b1);font-family:var(--fb);max-height:120px;min-height:44px;}
+.dm-textarea:focus{border-color:var(--p);}
+.dm-send{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 4px 12px rgba(79,70,229,.3);}
+.dm-send:disabled{opacity:.4;box-shadow:none;}
+.dm-edit-banner{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--grp);font-size:12px;color:var(--t2);font-weight:600;border-top:1px solid var(--b1);}
+.dm-edit-banner button{color:var(--p);font-weight:800;}
+
+/* ── PROFILE SCREEN ── */
+.profile-screen{position:absolute;inset:0;z-index:1100;background:var(--bg);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .26s var(--ease);}
+.profile-screen.open{transform:translateX(0);}
 
 /* ── TOAST ── */
-.af-toast-wrap{position:absolute;bottom:calc(var(--nav-h) + 14px);left:14px;right:14px;z-index:99999;pointer-events:none;display:flex;flex-direction:column;gap:8px;}
+.af-toast-wrap{position:absolute;bottom:calc(var(--nav-h) + 14px);left:14px;right:14px;z-index:99999;pointer-events:none;}
 .af-toast{
   display:flex;align-items:flex-start;gap:10px;background:var(--card-s);color:var(--t1);
   border:1px solid var(--bc);border-radius:13px;padding:11px 13px;box-shadow:var(--she);
   pointer-events:auto;opacity:0;transform:translateY(10px) scale(.97);
   transition:opacity .22s var(--ease),transform .22s var(--ease);
 }
-.af-toast.show{opacity:1;transform:translateY(0) scale(1)}
-.af-toast-ic{font-size:15px;line-height:1.3;flex-shrink:0}
-.af-toast-ok{border-left:4px solid #22c55e}
-.af-toast-err{border-left:4px solid #ef4444}
-.af-toast-title{font-size:12px;font-weight:700;margin:0 0 2px}
+.af-toast.show{opacity:1;transform:translateY(0) scale(1);}
+.af-toast-ic{font-size:15px;line-height:1.3;flex-shrink:0;}
+.af-toast-ok{border-left:4px solid #22c55e;}
+.af-toast-err{border-left:4px solid #ef4444;}
+.af-toast-title{font-size:12px;font-weight:700;margin:0 0 2px;}
 .af-toast-msg{font-size:11.5px;margin:0;line-height:1.4;color:var(--t2);}
-
-/* ── MODALS (General) ── */
-.modal-ov{position:absolute;inset:0;z-index:9000;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5);opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s;}
-.modal-ov.open{opacity:1;visibility:visible;}
-.modal-card{width:100%;background:var(--surface);border-radius:24px 24px 0 0;border:1px solid var(--bc);border-bottom:none;transform:translateY(100%);transition:transform .26s var(--ease);display:flex;flex-direction:column;max-height:90dvh;overflow:hidden;box-shadow:var(--she);}
-.modal-ov.open .modal-card{transform:translateY(0);}
-.modal-drag{width:40px;height:5px;background:var(--b1);border-radius:99px;margin:12px auto 0;}
-.modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 12px;border-bottom:1px solid var(--b1);flex-shrink:0;}
-.modal-head h3{font-family:var(--fd);font-size:16px;font-weight:800;color:var(--t1);}
-.modal-head p{font-size:12px;color:var(--tm);margin-top:3px;font-weight:500;}
-.modal-close{width:32px;height:32px;border-radius:10px;background:var(--grp);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--tm);border:1px solid var(--b1);transition:all .15s;}
-.modal-close:active{transform:scale(.92);background:var(--inp);}
-.modal-body{padding:16px 18px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;flex:1;}
-textarea.compose,input.field{width:100%;resize:none;outline:none;border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.6;color:var(--t1);background:var(--inp);border:1.5px solid var(--bc);font-family:var(--fb);}
-textarea.compose{min-height:110px;}
-textarea.compose:focus,input.field:focus{border-color:var(--p);box-shadow:var(--focus-ring);}
-textarea.compose.over{border-color:var(--err);}
-.field-label{font-size:11px;font-weight:800;color:var(--tm);text-transform:uppercase;letter-spacing:.05em;}
-.compose-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;}
-.compose-foot span{font-size:12px;font-weight:700;color:var(--tm);}
-.compose-foot .warn{color:var(--err);}
-.submit-btn{height:42px;padding:0 20px;border-radius:12px;font-size:13.5px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);box-shadow:0 4px 14px rgba(79,70,229,.3);}
-.submit-btn:disabled{opacity:.4;box-shadow:none;}
-.submit-btn:active{transform:scale(.97);}
-
-/* ── COMMENTS ── */
-.comments-list{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:12px;min-height:60px;}
-.comment-input-area{padding:12px 16px 16px;border-top:1px solid var(--b1);flex-shrink:0;display:flex;flex-direction:column;gap:10px;background:var(--shell);}
-.cmt-card{background:var(--inp);border-radius:14px;padding:12px 14px;border:1px solid var(--b1);}
-.cmt-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px;}
-.cmt-info{cursor:pointer;display:flex;flex-direction:column;}
-.cmt-info strong{font-family:var(--fd);font-size:13px;font-weight:800;color:var(--t1);display:block;}
-.cmt-info small{font-size:11px;color:var(--tm);font-weight:600;margin-top:2px;}
-.cmt-text{font-size:13.5px;line-height:1.6;color:var(--t2);word-break:break-word;}
-.cmt-actions{display:flex;gap:16px;margin-top:10px;}
-.cmt-btn{font-size:12px;font-weight:700;color:var(--t2);background:var(--grp);padding:4px 10px;border-radius:8px;}
-.cmt-btn:active{transform:scale(.95);}
-.view-replies-btn{font-size:12px;font-weight:700;color:var(--p);margin-top:8px;}
-.replies-wrap{margin-top:10px;padding-left:14px;border-left:2px solid var(--b1);display:flex;flex-direction:column;gap:10px;}
-
-/* ── CHATS TAB ── */
-.chat-list{flex:1;overflow-y:scroll;-webkit-overflow-scrolling:touch;padding:10px 12px;}
-.chat-list::-webkit-scrollbar{display:none;}
-.conv-item{
-  display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;
-  background:var(--card-s);border:1px solid var(--bc);margin-bottom:8px;
-  box-shadow:var(--sh);cursor:pointer;transition:background .15s;
-}
-.conv-item:active{background:var(--grp);}
-.conv-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;}
-.conv-name{font-family:var(--fd);font-size:14px;font-weight:800;color:var(--t1);line-height:1.2;}
-.conv-preview{font-size:12.5px;color:var(--t2);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.conv-meta{flex-shrink:0;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
-.conv-time{font-size:11px;color:var(--tm);font-weight:600;}
-
-/* ── DM THREAD ── */
-.dm-screen{position:absolute;inset:0;z-index:1200;background:var(--shell);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .26s var(--ease);}
-.dm-screen.open{transform:translateX(0);}
-.dm-hdr{
-  display:flex;align-items:center;gap:12px;padding:0 14px;height:var(--hdr-h);
-  border-bottom:1px solid var(--b1);background:var(--hdr);flex-shrink:0;
-  backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
-}
-.dm-hdr-info{flex:1;min-width:0;cursor:pointer;padding:4px 0;}
-.dm-hdr-name{font-family:var(--fd);font-size:14.5px;font-weight:800;color:var(--t1);}
-.dm-hdr-status{font-size:11px;color:var(--tm);font-weight:600;margin-top:2px;}
-.dm-messages{flex:1;overflow-y:scroll;-webkit-overflow-scrolling:touch;padding:16px 14px;display:flex;flex-direction:column;gap:8px;}
-.dm-messages::-webkit-scrollbar{display:none;}
-.bubble-wrap{display:flex;align-items:flex-end;gap:8px;}
-.bubble-wrap.me{flex-direction:row-reverse;}
-.bubble{
-  max-width:75%;padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.55;
-  word-break:break-word;background:var(--inp);color:var(--t1);border-bottom-left-radius:4px;
-  border:1px solid var(--bc);
-}
-.bubble-wrap.me .bubble{
-  background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);color:#fff;
-  border-bottom-right-radius:4px;border-bottom-left-radius:18px;border:none;
-}
-.bubble.deleted{color:var(--tm);font-style:italic;background:transparent;border:1px dashed var(--b1);}
-.bubble-wrap.me .bubble.deleted{background:transparent;color:var(--tm);border-color:var(--b1);}
-.bubble-time{font-size:10px;color:var(--tm);flex-shrink:0;margin-bottom:2px;font-weight:600;}
-.bubble-edited{font-size:9.5px;color:var(--tm);font-style:italic;}
-.dm-input-area{
-  display:flex;align-items:flex-end;gap:10px;padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));
-  border-top:1px solid var(--b1);background:var(--hdr);flex-shrink:0;
-  backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
-}
-.dm-edit-banner{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--inp);font-size:12px;color:var(--t2);font-weight:600;border-top:1px solid var(--bc);}
-.dm-edit-banner button{color:var(--p);font-weight:800;}
-.dm-textarea{
-  flex:1;resize:none;outline:none;border-radius:16px;padding:11px 14px;font-size:14px;
-  line-height:1.5;color:var(--t1);background:var(--inp);border:1.5px solid var(--bc);
-  font-family:var(--fb);max-height:120px;min-height:44px;
-}
-.dm-textarea:focus{border-color:var(--p);box-shadow:var(--focus-ring);}
-.dm-send{
-  width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);
-  color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
-  box-shadow:0 4px 12px rgba(79,70,229,.3);
-}
-.dm-send:disabled{opacity:.4;box-shadow:none;}
-.dm-send:active{transform:scale(.95);}
-
-/* ── PROFILE SCREEN (Full Page Overlay) ── */
-.profile-screen{position:absolute;inset:0;z-index:1300;background:var(--shell);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .26s var(--ease);}
-.profile-screen.open{transform:translateX(0);}
-.profile-hdr{
-  display:flex;align-items:center;gap:10px;padding:0 14px;height:var(--hdr-h);
-  border-bottom:1px solid var(--b1);background:var(--hdr);flex-shrink:0;
-  backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
-}
-.profile-body{flex:1;overflow-y:scroll;-webkit-overflow-scrolling:touch;padding-bottom:40px;}
-.profile-body::-webkit-scrollbar{display:none;}
-.profile-hero{
-  display:flex;flex-direction:column;align-items:center;padding:30px 20px 24px;
-  border-bottom:1px solid var(--b1);gap:12px;background:var(--inp);
-  background-image:radial-gradient(circle at 50% 0%, var(--grp) 0%, transparent 70%);
-}
-.profile-hero-name{font-family:var(--fd);font-size:20px;font-weight:900;color:var(--t1);text-align:center;line-height:1.2;}
-.profile-hero-user{font-size:13.5px;color:var(--tm);font-weight:600;margin-top:-6px;}
-.profile-hero-bio{font-size:14px;color:var(--t2);text-align:center;max-width:320px;line-height:1.6;}
-.profile-stats{display:flex;gap:32px;margin-top:6px;}
-.profile-stat{text-align:center;background:none;border:none;cursor:pointer;padding:4px;}
-.profile-stat:active{opacity:.7;}
-.profile-stat b{display:block;font-family:var(--fd);font-size:18px;font-weight:900;color:var(--t1);}
-.profile-stat span{font-size:11px;color:var(--tm);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-top:2px;display:block;}
-.profile-actions{display:flex;gap:12px;margin-top:10px;width:100%;max-width:280px;}
-.profile-msg-btn, .profile-follow-btn, .profile-edit-btn{
-  flex:1;height:44px;border-radius:12px;font-size:14px;font-weight:800;
-  display:flex;align-items:center;justify-content:center;gap:8px;
-}
-.profile-msg-btn{background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);color:#fff;box-shadow:0 4px 14px rgba(79,70,229,.3);}
-.profile-msg-btn:active{transform:scale(.97);}
-.profile-follow-btn{background:transparent;border:1.5px solid var(--p);color:var(--p);}
-.profile-follow-btn.following{background:var(--grp);border-color:var(--bc);color:var(--t1);}
-.profile-follow-btn:active{transform:scale(.97);}
-.profile-edit-btn{background:var(--grp);border:1.5px solid var(--bc);color:var(--t1);width:100%;}
-.profile-edit-btn:active{background:var(--inp);transform:scale(.97);}
-.profile-posts-title{font-family:var(--fd);font-size:15px;font-weight:800;color:var(--t1);padding:20px 16px 10px;}
-.profile-posts-wrap{padding:0 14px 20px;display:flex;flex-direction:column;gap:10px;}
-
-/* ── EDIT PROFILE MODAL ── */
-.emoji-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:4px 0;}
-.emoji-opt{aspect-ratio:1;border-radius:12px;font-size:28px;display:flex;align-items:center;justify-content:center;background:var(--grp);border:2px solid transparent;transition:all .15s;}
-.emoji-opt:active{transform:scale(.92);}
-.emoji-opt.selected{border-color:var(--p);background:var(--p-soft);}
-.username-hint{font-size:11.5px;color:var(--tm);font-weight:600;}
-.username-hint.bad{color:var(--err);}
-.username-hint.good{color:var(--ok);}
-
-/* ── REPORT MODAL ── */
-.report-options{display:flex;flex-direction:column;gap:8px;}
-.report-opt{display:flex;align-items:center;gap:12px;min-height:46px;padding:0 14px;border-radius:12px;font-size:14px;font-weight:600;color:var(--t2);background:var(--inp);text-align:left;border:1.5px solid transparent;}
-.report-opt.selected{background:var(--p-soft);color:var(--p);border-color:var(--p);}
-.report-submit-btn{width:100%;height:46px;border-radius:12px;font-size:14px;font-weight:800;color:#fff;background:var(--err);margin-top:10px;}
-.report-submit-btn:disabled{opacity:.4;}
-
-/* ── ACTION MENU SHEET ── */
-.menu-sheet{width:100%;background:var(--surface);border-radius:24px 24px 0 0;border:1px solid var(--bc);border-bottom:none;display:flex;flex-direction:column;padding-bottom:16px;box-shadow:var(--she);}
-.menu-label{font-size:12px;font-weight:800;color:var(--tm);text-transform:uppercase;letter-spacing:.06em;padding:8px 18px 12px;}
-.menu-sheet button{height:52px;padding:0 18px;text-align:left;font-size:15px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:10px;transition:background .15s;}
-.menu-sheet button:active{background:var(--grp);}
-.menu-sheet button.danger{color:var(--err);}
-.pin-action{color:var(--pin)!important;}
 
 .hidden{display:none!important;}
 
-/* ── UTILITIES ── */
-.username-banner{margin:10px 14px 4px;padding:14px;border-radius:16px;background:var(--warn-soft);border:1.5px solid var(--warn-b);display:flex;align-items:center;gap:12px;}
-.username-banner span.t{flex:1;font-size:13px;color:var(--t1);font-weight:600;}
-.username-banner button{height:34px;padding:0 14px;border-radius:10px;background:var(--pin);color:#fff;font-size:13px;font-weight:800;flex-shrink:0;}
-
+/* Options Sheet */
+.menu-sheet{width:100%;background:var(--shell);border-radius:24px 24px 0 0;border:1px solid var(--b1);border-bottom:none;display:flex;flex-direction:column;padding-bottom:20px;}
+.menu-label{font-size:11.5px;font-weight:800;color:var(--tm);text-transform:uppercase;letter-spacing:.06em;padding:8px 18px 12px;}
+.menu-sheet button{height:52px;padding:0 18px;text-align:left;font-size:15px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:10px;}
+.menu-sheet button:active{background:var(--grp);}
+.menu-sheet button.danger{color:var(--err);}
+.pin-action{color:var(--pin)!important;}
 </style>
 </head>
 <body>
 <div class="af-shell" id="shell">
 
-  <!-- HEADER -->
-  <header class="af-topbar" id="hdr">
-    <div class="af-topbar-flex">
-      <span class="af-topbar-headline">Community</span>
-      <button class="af-hdr-search-btn" id="btnSearch" onclick="openHeaderSearch()" title="Search">🔍</button>
-      <div class="af-hdr-search-wrap" id="searchBar">
-        <span class="af-search-ic">🔍</span>
-        <input type="text" id="searchInp" placeholder="Search by username…" oninput="nxSearchTyping()" autocomplete="off" autocorrect="off" spellcheck="false"/>
-        <button class="af-hdr-search-close" onclick="closeHeaderSearch()">✕</button>
-      </div>
-      <button class="my-avatar-btn hidden" id="btnMyAvatar" onclick="nxOpenMyProfile()"></button>
-    </div>
-    <!-- SEARCH RESULTS DROPDOWN -->
-    <div class="search-results hidden" id="searchResults"></div>
-  </header>
-
-  <!-- LOCKED -->
-  <div class="locked-box" id="lockedBox">
-    <div class="af-empty" role="status">
-      <span>🔒</span>
-      <strong>Community Locked</strong>
-      <p style="margin-top:8px;">Login with your Student ID to join AF Nexus and connect with fellow learners.</p>
-      <button class="login-btn" onclick="goToLogin()">Login to continue</button>
-    </div>
-  </div>
-
-  <!-- TAB BAR -->
-  <div class="view-switch hidden" id="mainTabBar">
-    <button class="view-switch-btn active" id="tabFeed" onclick="nxSwitchTab('feed')">Feed</button>
-    <button class="view-switch-btn" id="tabChats" onclick="nxSwitchTab('chats')">Chats <span class="vs-badge hidden" id="chatBadge">0</span></button>
-  </div>
-
-  <!-- FEED SUBBAR -->
-  <div class="af-tabs hidden" id="filterBar">
-    <button class="af-tab-btn active" id="pillRelevant" onclick="nxSetMode('relevant')">Relevant</button>
-    <button class="af-tab-btn" id="pillRecent" onclick="nxSetMode('recent')">Recent</button>
-  </div>
-
-  <!-- ── FEED TAB ── -->
-  <div class="af-view active" id="feed">
-    <div class="af-page" id="feedPage">
-      <div class="af-body" style="padding-top:4px;">
-        <div class="username-banner hidden" id="usernameBanner">
-          <span class="t">Set a username so others can find your profile.</span>
-          <button onclick="nxOpenEditProfile()">Set up</button>
+  <!-- ── VIEWS ── -->
+  <!-- 1. MAIN FEED/CHATS -->
+  <div class="af-view active" id="mainView">
+    <header class="af-topbar" id="hdr">
+      <div class="af-topbar-flex">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--p),var(--p2));display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;box-shadow:0 2px 8px rgba(79,70,229,.3);">🌐</div>
+          <div>
+            <div class="af-topbar-headline">AF Nexus</div>
+            <div style="font-size:11px;color:var(--tm);font-weight:600;">Student Community</div>
+          </div>
         </div>
-        <div id="postsList">
-          <div class="state-msg"><div class="spinner"></div><span>Loading posts…</span></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button class="af-hdr-search-btn" id="btnSearch" onclick="nxToggleSearch()">🔍</button>
+          <button class="my-avatar-btn" id="btnMyAvatar" onclick="nxOpenMyMenu()"></button>
+        </div>
+
+        <div id="searchBar" class="af-hdr-search-wrap">
+          <span class="af-search-ic">🔍</span>
+          <input type="text" id="searchInp" placeholder="Search users…" oninput="nxSearchTyping()" autocomplete="off"/>
+          <button class="af-hdr-search-close" onclick="nxCloseSearch()">✕</button>
+          <div class="search-results hidden" id="searchResults"></div>
         </div>
       </div>
-    </div>
-  </div>
+    </header>
 
-  <!-- ── CHATS TAB ── -->
-  <div class="af-view" id="chatsTab">
-    <div style="padding:10px 14px 6px;background:var(--shell);border-bottom:1px solid var(--b1);flex-shrink:0;">
-      <div style="display:flex;align-items:center;gap:8px;background:var(--inp);border:1.5px solid var(--bc);border-radius:12px;padding:8px 12px;transition:border-color .2s;" onfocusin="this.style.borderColor='var(--p)'" onfocusout="this.style.borderColor='var(--bc)'">
-        <span style="font-size:14px;color:var(--tm);flex-shrink:0;">🔍</span>
-        <input type="text" id="chatSearchInp" style="flex:1;outline:none;border:none;background:none;font-size:13.5px;color:var(--t1);font-family:var(--fb);" placeholder="Search users to message…" oninput="nxChatSearch()" autocomplete="off"/>
-        <button id="chatSearchClear" style="display:none;font-size:16px;color:var(--tm);" onclick="nxClearChatSearch()">✕</button>
-      </div>
-      <div class="search-results hidden" id="chatSearchResults" style="top:calc(100% - 4px);"></div>
+    <!-- TOP TABS (Feed / Chats) -->
+    <div class="view-switch" id="mainTabBar">
+      <button class="view-switch-btn active" id="tabFeed" onclick="nxSwitchTab('feed')">Feed</button>
+      <button class="view-switch-btn" id="tabChats" onclick="nxSwitchTab('chats')">Chats <span class="vs-badge hidden" id="chatBadge" style="background:var(--rose);color:#fff;padding:2px 6px;">0</span></button>
     </div>
-    <div class="af-page" id="chatPage" style="padding-bottom:calc(var(--nav-h) + 16px);">
+
+    <!-- FEED TAB -->
+    <div class="af-page" id="feed" style="padding-bottom:120px; display:flex; flex-direction:column;">
+      <div class="username-banner hidden" id="usernameBanner">
+        <span class="t">Set a username so others can find your profile.</span>
+        <button class="af-btn-primary" style="height:36px;font-size:13px;" onclick="nxOpenEditProfile()">Set up</button>
+      </div>
+      <div class="af-tabs" id="filterBar">
+        <button class="af-tab-btn active" id="pillRelevant" onclick="nxSetMode('relevant')">Relevant</button>
+        <button class="af-tab-btn" id="pillRecent" onclick="nxSetMode('recent')">Recent</button>
+      </div>
+      <div class="post-list" id="postsList">
+        <div class="state-msg"><div class="spinner"></div><span>Loading posts…</span></div>
+      </div>
+    </div>
+
+    <!-- CHATS TAB -->
+    <div class="af-page hidden" id="chatsTab" style="padding-bottom:120px; display:flex; flex-direction:column; background:var(--bg);">
+      <div style="padding:14px 14px 6px; flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:10px;background:var(--inp);border-radius:12px;padding:10px 14px;border:1.5px solid var(--b1);">
+          <span style="font-size:14px;color:var(--tm);">🔍</span>
+          <input type="text" id="chatSearchInp" style="flex:1;outline:none;border:none;background:none;font-size:14px;color:var(--t1);font-family:var(--fb);font-weight:500;" placeholder="Search users to message…" oninput="nxChatSearch()" autocomplete="off"/>
+          <button id="chatSearchClear" style="display:none;font-size:18px;color:var(--tm);" onclick="nxClearChatSearch()">×</button>
+        </div>
+        <div class="search-results hidden" id="chatSearchResults" style="position:relative;top:4px;left:0;right:0;border-radius:12px;"></div>
+      </div>
       <div class="chat-list" id="chatList">
-        <div class="af-empty"><span style="font-size:32px;">💬</span><strong>No conversations yet.</strong><p style="margin-top:4px;">Search for a user above to start chatting.</p></div>
+        <div class="state-msg"><div class="icon">💬</div><span>No conversations yet.<br>Search for a user to start chatting.</span></div>
       </div>
     </div>
+
+    <button class="fab" id="fab" onclick="nxOpenComposer()" aria-label="Write Post">✍️</button>
   </div>
 
-  <!-- FAB -->
-  <button class="fab hidden" id="fab" onclick="nxOpenComposer()" aria-label="Write Post">✍️</button>
-
-  <!-- BOTTOM NAV -->
-  <nav class="af-bnav" id="bnav" role="navigation">
-    <button class="af-nav-btn" onclick="window.location.href='/index.html'" type="button" aria-label="Home">
-      <span class="af-nav-icon-wrap"><span class="af-nav-icon">🏠</span></span><span class="af-nav-label">Home</span>
-    </button>
-    <button class="af-nav-btn" onclick="window.location.href='/student/index.html'" type="button" aria-label="Explore">
-      <span class="af-nav-icon-wrap"><span class="af-nav-icon">🧭</span></span><span class="af-nav-label">Explore</span>
-    </button>
-    <button class="af-nav-btn" onclick="window.location.href='/batches/index.html'" type="button" aria-label="Batches">
-      <span class="af-nav-icon-wrap"><span class="af-nav-icon">📚</span></span><span class="af-nav-label">Batches</span>
-    </button>
-    <button class="af-nav-btn active" type="button" aria-current="page" aria-label="Community">
-      <span class="af-nav-icon-wrap"><span class="af-nav-icon">💬</span></span><span class="af-nav-label">Community</span>
-    </button>
-    <button class="af-nav-btn" onclick="window.location.href='/setting/index.html'" type="button" aria-label="Settings">
-      <span class="af-nav-icon-wrap"><span class="af-nav-icon">⚙️</span></span><span class="af-nav-label">Settings</span>
-    </button>
-  </nav>
-
-  <div class="af-toast-wrap" id="afToastWrap"></div>
-
-  <!-- ── FULL SCREEN PROFILE ── -->
+  <!-- 2. STUDENT PROFILE SCREEN -->
   <div class="profile-screen" id="profileScreen">
-    <div class="profile-hdr">
+    <div class="af-topbar">
       <button class="af-back" onclick="nxCloseProfile()">←</button>
       <div class="af-topbar-title" id="profileHdrName">Profile</div>
     </div>
-    <div class="profile-body">
-      <div class="profile-hero">
-        <div class="avatar avatar-lg" id="profileAvatar"></div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-          <div class="profile-hero-name" id="profileName"></div>
-          <div class="profile-hero-user" id="profileUsername"></div>
+    <div class="af-page" style="padding:0;">
+      <div style="padding: 24px 20px; background:var(--card-s); border-bottom:1px solid var(--b1);">
+        <div style="display:flex; align-items:center; gap:16px;">
+           <div class="avatar avatar-lg" id="profileAvatar" style="width:72px; height:72px; font-size:32px;"></div>
+           <div style="flex:1; min-width:0;">
+             <h2 id="profileName" style="font-family:var(--fd); font-size:20px; font-weight:800; color:var(--t1); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></h2>
+             <div id="profileUsername" style="font-size:13.5px; color:var(--tm); font-weight:600;"></div>
+           </div>
         </div>
-        <div class="profile-hero-bio hidden" id="profileBio"></div>
-        <div class="profile-stats">
-          <button class="profile-stat" onclick="nxOpenFollowersFor()"><b id="profilePostsCount">0</b><span>Posts</span></button>
-          <button class="profile-stat" onclick="nxOpenFollowersFor()"><b id="profileFollowersCount">0</b><span>Followers</span></button>
-          <button class="profile-stat" onclick="nxOpenFollowingFor()"><b id="profileFollowingCount">0</b><span>Following</span></button>
+        <div id="profileBio" style="margin-top:16px; font-size:14px; color:var(--t2); line-height:1.6;"></div>
+        <div style="display:flex; gap:32px; margin-top:20px;">
+           <div onclick="nxOpenFollowersFor()" style="cursor:pointer; display:flex; flex-direction:column;"><strong id="profileFollowersCount" style="color:var(--t1); font-family:var(--fd); font-size:18px; line-height:1;">0</strong> <span style="font-size:12px; color:var(--tm); font-weight:600; margin-top:4px;">Followers</span></div>
+           <div onclick="nxOpenFollowingFor()" style="cursor:pointer; display:flex; flex-direction:column;"><strong id="profileFollowingCount" style="color:var(--t1); font-family:var(--fd); font-size:18px; line-height:1;">0</strong> <span style="font-size:12px; color:var(--tm); font-weight:600; margin-top:4px;">Following</span></div>
         </div>
-        <div class="profile-actions">
-          <button class="profile-follow-btn" id="profileFollowBtn" onclick="nxToggleFollow()">+ Follow</button>
-          <button class="profile-msg-btn" id="profileMsgBtn" onclick="nxMessageFromProfile()">💬 Message</button>
-          <button class="profile-edit-btn hidden" id="profileEditBtn" onclick="nxEditProfileFromProfile()">✏️ Edit Profile</button>
+        <div style="display:flex; gap:12px; margin-top:24px;">
+          <button id="profileFollowBtn" class="af-btn-primary" style="flex:1;" onclick="nxToggleFollow()">Follow</button>
+          <button class="af-btn-secondary-outline" style="flex:1;" onclick="nxMessageFromProfile()">Message</button>
         </div>
       </div>
-      <div class="profile-posts-title">Posts</div>
-      <div class="profile-posts-wrap" id="profilePostsList">
-        <div class="state-msg"><div class="spinner"></div></div>
+      <div class="af-tabs" style="padding:14px 16px 0; background:var(--bg); border:none;">
+         <div class="af-tab-btn active" style="color:var(--t1);">Posts</div>
+      </div>
+      <div class="post-list" id="profilePostsList" style="background:var(--bg);">
+         <div class="state-msg"><div class="spinner"></div></div>
       </div>
     </div>
   </div>
 
-  <!-- ── DM THREAD SCREEN ── -->
+  <!-- 3. DM THREAD SCREEN -->
   <div class="dm-screen" id="dmScreen">
     <div class="dm-hdr">
-      <button class="af-back" onclick="nxCloseDM()">←</button>
-      <div class="avatar avatar-sm" id="dmPeerAvatar" onclick="nxOpenProfileFromDM()" style="cursor:pointer"></div>
-      <div class="dm-hdr-info" onclick="nxOpenProfileFromDM()">
+      <button class="af-back" onclick="nxCloseDM()" style="background:transparent; border:none; width:auto; font-size:22px; margin-right:4px;">←</button>
+      <div class="avatar avatar-sm" id="dmPeerAvatar" onclick="nxOpenProfile(_dmPeer.key, _dmPeer.name)" style="cursor:pointer;"></div>
+      <div class="dm-hdr-info" onclick="nxOpenProfile(_dmPeer.key, _dmPeer.name)" style="cursor:pointer;">
         <div class="dm-hdr-name" id="dmPeerName"></div>
-        <div class="dm-hdr-status">Long-press a message to edit/delete</div>
+        <div class="dm-hdr-status">Active now</div>
       </div>
     </div>
     <div class="dm-messages" id="dmMessages">
@@ -635,16 +481,36 @@ textarea.compose.over{border-color:var(--err);}
   </div>
 
   <!-- ── MODALS ── -->
+  <!-- MY MENU -->
+  <div class="modal-ov" id="myMenuModal" onclick="nxCloseMyMenu()">
+    <div class="menu-sheet" onclick="event.stopPropagation()">
+      <div class="modal-drag"></div>
+      <div id="myMenuProfile" style="display:flex;align-items:center;gap:14px;padding:16px 20px 14px;border-bottom:1px solid var(--b1); cursor:pointer;" onclick="nxCloseMyMenu(); nxOpenProfile(sKey(), sName())">
+        <div class="avatar" id="myMenuAvatar" style="width:52px;height:52px;border-radius:16px;font-size:26px;"></div>
+        <div>
+          <div style="font-family:var(--fd);font-size:16px;font-weight:800;color:var(--t1);" id="myMenuName"></div>
+          <div style="font-size:13px;color:var(--tm);margin-top:2px;font-weight:600;" id="myMenuUsername"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:24px;padding:16px 20px;border-bottom:1px solid var(--b1);">
+        <button onclick="nxOpenFollowers()" style="flex:1;text-align:center;font-size:12px;font-weight:700;color:var(--t2);display:flex;flex-direction:column;align-items:center;gap:4px;height:auto;padding:0;"><b id="myMenuFollowers" style="font-family:var(--fd);font-size:18px;color:var(--t1);">0</b><span>Followers</span></button>
+        <button onclick="nxOpenFollowing()" style="flex:1;text-align:center;font-size:12px;font-weight:700;color:var(--t2);display:flex;flex-direction:column;align-items:center;gap:4px;height:auto;padding:0;"><b id="myMenuFollowing" style="font-family:var(--fd);font-size:18px;color:var(--t1);">0</b><span>Following</span></button>
+        <button onclick="nxCloseMyMenu(); nxOpenProfile(sKey(), sName());" style="flex:1;text-align:center;font-size:12px;font-weight:700;color:var(--t2);display:flex;flex-direction:column;align-items:center;gap:4px;height:auto;padding:0;"><b id="myMenuPosts" style="font-family:var(--fd);font-size:18px;color:var(--t1);">0</b><span>Posts</span></button>
+      </div>
+      <button onclick="nxEditProfileFromMenu()" style="margin-top:8px;">✏️ Edit Profile</button>
+      <button onclick="nxCloseMyMenu()">✕ Cancel</button>
+    </div>
+  </div>
 
   <!-- FOLLOWERS / FOLLOWING MODAL -->
   <div class="modal-ov" id="followListModal" onclick="nxCloseFollowList()">
-    <div class="modal-card" onclick="event.stopPropagation()" style="max-height:75dvh;">
+    <div class="modal-card" onclick="event.stopPropagation()" style="max-height:80dvh;">
       <div class="modal-drag"></div>
       <div class="modal-head">
         <div><h3 id="followListTitle">Followers</h3></div>
         <button class="modal-close" onclick="nxCloseFollowList()">✕</button>
       </div>
-      <div class="modal-body" id="followListBody" style="padding:8px 0;"></div>
+      <div class="modal-body" id="followListBody" style="padding:0; gap:0;"></div>
     </div>
   </div>
 
@@ -653,44 +519,21 @@ textarea.compose.over{border-color:var(--err);}
     <div class="modal-card" onclick="event.stopPropagation()">
       <div class="modal-drag"></div>
       <div class="modal-head">
-        <div><h3>Edit Profile</h3><p>Update your public info</p></div>
+        <div><h3>Edit Profile</h3><p>Customize your presence</p></div>
         <button class="modal-close" onclick="nxCloseEditProfile()">✕</button>
       </div>
       <div class="modal-body">
         <div class="field-label">Avatar</div>
-        <div class="emoji-grid" id="emojiGrid"></div>
-        <div class="field-label">Username</div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:4px 0;" id="emojiGrid"></div>
+        <div class="field-label" style="margin-top:8px;">Username</div>
         <input type="text" class="field" id="usernameInput" placeholder="e.g. rahul_42" maxlength="24" oninput="nxUsernameTyping()"/>
-        <span class="username-hint" id="usernameHint">3-24 chars: lowercase letters, numbers, underscore.</span>
-        <div class="field-label">Bio</div>
+        <span style="font-size:12px;font-weight:600;color:var(--tm);margin-top:-6px;" id="usernameHint">3-24 chars: lowercase letters, numbers, underscore.</span>
+        <div class="field-label" style="margin-top:8px;">Bio</div>
         <textarea class="compose" id="bioInput" rows="2" style="min-height:70px;" placeholder="Say something about yourself…" maxlength="160"></textarea>
-        <div class="compose-foot">
+        <div class="compose-foot" style="margin-top:8px;">
           <span></span>
-          <button class="submit-btn" id="saveProfileBtn" onclick="nxSaveProfile()">Save Profile</button>
+          <button class="af-btn-primary" id="saveProfileBtn" onclick="nxSaveProfile()">Save Profile</button>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- REPORT MODAL -->
-  <div class="modal-ov" id="reportModal" onclick="nxCloseReport()">
-    <div class="modal-card" onclick="event.stopPropagation()">
-      <div class="modal-drag"></div>
-      <div class="modal-head">
-        <div><h3>Report Post</h3><p>Help keep the community safe</p></div>
-        <button class="modal-close" onclick="nxCloseReport()">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="report-options" id="reportOptions">
-          <button class="report-opt" data-reason="Spam or self-promotion" onclick="nxSelectReport(this)">🚫 Spam or self-promotion</button>
-          <button class="report-opt" data-reason="Harassment or bullying" onclick="nxSelectReport(this)">😠 Harassment or bullying</button>
-          <button class="report-opt" data-reason="Hate speech or discrimination" onclick="nxSelectReport(this)">⚠️ Hate speech or discrimination</button>
-          <button class="report-opt" data-reason="False information" onclick="nxSelectReport(this)">❌ False information</button>
-          <button class="report-opt" data-reason="Inappropriate content" onclick="nxSelectReport(this)">🔞 Inappropriate content</button>
-          <button class="report-opt" data-reason="Other" onclick="nxSelectReport(this)">📝 Other</button>
-        </div>
-        <input type="text" class="field hidden" id="reportOtherInp" placeholder="Describe the issue…" maxlength="200"/>
-        <button class="report-submit-btn" id="reportSubmitBtn" onclick="nxSubmitReport()" disabled>Submit Report</button>
       </div>
     </div>
   </div>
@@ -700,16 +543,14 @@ textarea.compose.over{border-color:var(--err);}
     <div class="modal-card" onclick="event.stopPropagation()">
       <div class="modal-drag"></div>
       <div class="modal-head">
-        <div><h3>Create Post</h3><p>Share with the community</p></div>
+        <div><h3>Create Post</h3><p>Share your thoughts</p></div>
         <button class="modal-close" onclick="nxCloseComposer()">✕</button>
       </div>
       <div class="modal-body">
-        <textarea class="compose" id="postInput" rows="6"
-          placeholder="Write something helpful, thoughtful, or interesting…"
-          oninput="nxPostTyping()"></textarea>
+        <textarea class="compose" id="postInput" rows="6" placeholder="Write something helpful, thoughtful, or interesting…" oninput="nxPostTyping()"></textarea>
         <div class="compose-foot">
           <span id="postCount">0 / 80 words</span>
-          <button class="submit-btn" id="postSubmitBtn" onclick="nxCreatePost()" disabled>Post</button>
+          <button class="af-btn-primary" id="postSubmitBtn" onclick="nxCreatePost()" disabled>Post</button>
         </div>
       </div>
     </div>
@@ -727,12 +568,10 @@ textarea.compose.over{border-color:var(--err);}
         <div class="state-msg"><div class="spinner"></div></div>
       </div>
       <div class="comment-input-area">
-        <textarea class="compose" id="commentInput" rows="2"
-          placeholder="Write a comment…" oninput="nxCommentTyping()"
-          style="min-height:56px;"></textarea>
-        <div class="compose-foot" style="margin-top:-2px;">
+        <textarea class="compose" id="commentInput" rows="2" placeholder="Write a comment…" oninput="nxCommentTyping()" style="min-height:60px;"></textarea>
+        <div class="compose-foot">
           <span id="commentCount">0 / 80 words</span>
-          <button class="submit-btn" id="commentSubmitBtn" onclick="nxCreateComment()" disabled>Comment</button>
+          <button class="af-btn-primary" style="height:38px; font-size:13px;" id="commentSubmitBtn" onclick="nxCreateComment()" disabled>Comment</button>
         </div>
       </div>
     </div>
@@ -747,12 +586,33 @@ textarea.compose.over{border-color:var(--err);}
         <button class="modal-close" onclick="nxCloseReply()">✕</button>
       </div>
       <div class="modal-body">
-        <textarea class="compose" id="replyInput" rows="4"
-          placeholder="Write your reply…" oninput="nxReplyTyping()"></textarea>
+        <textarea class="compose" id="replyInput" rows="4" placeholder="Write your reply…" oninput="nxReplyTyping()"></textarea>
         <div class="compose-foot">
           <span id="replyCount">0 / 80 words</span>
-          <button class="submit-btn" id="replySubmitBtn" onclick="nxCreateReply()" disabled>Reply</button>
+          <button class="af-btn-primary" id="replySubmitBtn" onclick="nxCreateReply()" disabled>Reply</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPORT MODAL -->
+  <div class="modal-ov" id="reportModal" onclick="nxCloseReport()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-drag"></div>
+      <div class="modal-head">
+        <div><h3>Report Post</h3><p>Help keep the community safe</p></div>
+        <button class="modal-close" onclick="nxCloseReport()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:flex;flex-direction:column;gap:8px;" id="reportOptions">
+          <button class="af-btn-secondary-outline" style="justify-content:flex-start; height:48px;" data-reason="Spam or self-promotion" onclick="nxSelectReport(this)">🚫 Spam or self-promotion</button>
+          <button class="af-btn-secondary-outline" style="justify-content:flex-start; height:48px;" data-reason="Harassment or bullying" onclick="nxSelectReport(this)">😠 Harassment or bullying</button>
+          <button class="af-btn-secondary-outline" style="justify-content:flex-start; height:48px;" data-reason="Hate speech or discrimination" onclick="nxSelectReport(this)">⚠️ Hate speech or discrimination</button>
+          <button class="af-btn-secondary-outline" style="justify-content:flex-start; height:48px;" data-reason="False information" onclick="nxSelectReport(this)">❌ False information</button>
+          <button class="af-btn-secondary-outline" style="justify-content:flex-start; height:48px;" data-reason="Other" onclick="nxSelectReport(this)">📝 Other</button>
+        </div>
+        <input type="text" class="field hidden" id="reportOtherInp" placeholder="Describe the issue…" maxlength="200"/>
+        <button class="af-btn-primary" style="background:var(--err); margin-top:10px;" id="reportSubmitBtn" onclick="nxSubmitReport()" disabled>Submit Report</button>
       </div>
     </div>
   </div>
@@ -767,27 +627,54 @@ textarea.compose.over{border-color:var(--err);}
       <button id="menuReportBtn" hidden onclick="nxOpenReport()">🚩 Report</button>
       <button id="menuEditBtn" style="display:none;" onclick="nxEditTarget()">✏️ Edit</button>
       <button id="menuDeleteBtn" class="danger" style="display:none;" onclick="nxDeleteTarget()">🗑 Delete</button>
-      <button onclick="nxCloseMenu()">Cancel</button>
+      <button onclick="nxCloseMenu()">✕ Cancel</button>
     </div>
   </div>
 
-</div>
+  <!-- BOTTOM NAV -->
+  <nav class="af-bnav" id="bnav" role="navigation">
+    <button class="af-nav-btn" onclick="window.location.href='/index.html'" type="button">
+      <span class="af-nav-icon-wrap"><span class="af-nav-icon">🏠</span></span><span class="af-nav-label">Home</span>
+    </button>
+    <button class="af-nav-btn" onclick="window.location.href='/student/index.html'" type="button">
+      <span class="af-nav-icon-wrap"><span class="af-nav-icon">🧭</span></span><span class="af-nav-label">Explore</span>
+    </button>
+    <button class="af-nav-btn" onclick="window.location.href='/batches/index.html'" type="button">
+      <span class="af-nav-icon-wrap"><span class="af-nav-icon">📚</span></span><span class="af-nav-label">Batches</span>
+    </button>
+    <button class="af-nav-btn active" type="button">
+      <span class="af-nav-icon-wrap"><span class="af-nav-icon">💬</span></span><span class="af-nav-label">Community</span>
+    </button>
+    <button class="af-nav-btn" onclick="window.location.href='/setting/index.html'" type="button">
+      <span class="af-nav-icon-wrap"><span class="af-nav-icon">⚙️</span></span><span class="af-nav-label">Settings</span>
+    </button>
+  </nav>
+
+  <div class="af-toast-wrap" id="toastWrap"></div>
+
+  <!-- LOCKED -->
+  <div id="lockedBox" style="display:none;position:absolute;inset:0;z-index:9999;background:var(--bg);flex-direction:column;align-items:center;justify-content:center;padding:24px;">
+    <div style="width:100%;max-width:320px;background:var(--card-s);border:1px solid var(--b1);border-radius:24px;padding:32px 24px;text-align:center;box-shadow:var(--she);">
+      <div style="width:64px;height:64px;margin:0 auto 16px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;background:var(--p-soft);color:var(--p);">🔒</div>
+      <h2 style="font-family:var(--fd);font-size:20px;font-weight:800;color:var(--t1);margin-bottom:10px;">Community Locked</h2>
+      <p style="font-size:14px;color:var(--t2);line-height:1.6;margin-bottom:24px;">Login to join AF Nexus and connect with fellow learners.</p>
+      <button class="af-btn-primary" style="width:100%;" onclick="goToLogin()">Login to continue</button>
+    </div>
+  </div>
+
+</div><!-- /shell -->
 
 <script>
 /* ══════════════════════════════════════════════
-   AF NEXUS v5  — Unified Profile & Chat System
+   AF NEXUS v4 — Modernized Frontend
 ══════════════════════════════════════════════ */
-
-const CACHE_KEY    = 'af_nx_posts_cache_v5';
+const CACHE_KEY    = 'af_nx_posts_cache_v4';
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
-const CACHE_MIN_POSTS = 10;
 const STUDENT_URL  = "https://afooyyydhlwngzssgqih.supabase.co";
 const STUDENT_KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb295eXlkaGx3bmd6c3NncWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDQxMjgsImV4cCI6MjA5NDIyMDEyOH0.KG0XO0oP_2MpewHoIwTtbrKg5FkyOYRUtVzLH1MSJiE";
-
 const ADMIN_KEYS = ['admin@academeforge.in'];
 const EMOJI_PRESETS = ['🎓','🚀','⚡','🦁','🐉','🌟','🦋','🔥','🎯','💎'];
 
-/* ── SUPABASE ── */
 let _sb = null;
 function loadSupabaseSDK(){
   return new Promise((res,rej)=>{
@@ -804,7 +691,6 @@ function getSb(){
   return _sb;
 }
 
-/* ── HELPERS ── */
 const $    = id => document.getElementById(id);
 const show = id => $(id)&&$(id).classList.remove('hidden');
 const hide = id => $(id)&&$(id).classList.add('hidden');
@@ -812,26 +698,28 @@ const isLoggedIn = ()=>!!(localStorage.getItem('af_student_email')||localStorage
 const sKey  = ()=>localStorage.getItem('af_student_email')||localStorage.getItem('af_student_mobile')||'';
 const sName = ()=>localStorage.getItem('af_student_name')||'Student';
 const isAdmin = ()=>ADMIN_KEYS.includes(sKey());
+
 function wordCount(t){const s=String(t||'').trim();return s?s.split(/\s+/).filter(Boolean).length:0;}
 function initials(n){return String(n||'AF').trim().split(/\s+/).slice(0,2).map(v=>v.charAt(0).toUpperCase()).join('');}
-function esc(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,"&#39;");}
+function esc(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function timeAgo(v){
   if(!v) return '';
   try{
     const d=Math.floor((Date.now()-new Date(v).getTime())/1000);
     if(d<60) return 'just now';
-    if(d<3600) return Math.floor(d/60)+'m ago';
-    if(d<86400) return Math.floor(d/3600)+'h ago';
-    if(d<604800) return Math.floor(d/86400)+'d ago';
+    if(d<3600) return Math.floor(d/60)+'m';
+    if(d<86400) return Math.floor(d/3600)+'h';
+    if(d<604800) return Math.floor(d/86400)+'d';
     return new Date(v).toLocaleDateString();
   }catch(e){return '';}
 }
 function getMyEmoji(){return localStorage.getItem('af_avatar_emoji')||'';}
 function getMyUsername(){return localStorage.getItem('af_username')||'';}
-function avatarHTML(name,emoji,extraClass='', onClick=''){
-  const clickAttr = onClick ? ` onclick="event.stopPropagation(); ${onClick}"` : '';
-  if(emoji) return `<div class="avatar${extraClass?(' '+extraClass):''}"${clickAttr}>${emoji}</div>`;
-  return `<div class="avatar initials${extraClass?(' '+extraClass):''}"${clickAttr}>${esc(initials(name))}</div>`;
+
+function avatarHTML(name, emoji, extraClass='', onClick=''){
+  const action = onClick ? ` onclick="${onClick}"` : '';
+  if(emoji) return `<div class="avatar${extraClass?(' '+extraClass):''}"${action}>${emoji}</div>`;
+  return `<div class="avatar initials${extraClass?(' '+extraClass):''}"${action}>${esc(initials(name))}</div>`;
 }
 
 function cacheGet(){
@@ -844,47 +732,38 @@ function cacheGet(){
   }catch(e){return {posts:[],fresh:false};}
 }
 function cacheSet(posts){
-  try{
-    const toStore=Array.isArray(posts)?posts:[];
-    sessionStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),data:toStore}));
-  }catch(e){}
+  try{ sessionStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),data:Array.isArray(posts)?posts:[]})); }catch(e){}
 }
 function cacheClear(){try{sessionStorage.removeItem(CACHE_KEY);}catch(e){}}
 
-function getPeerEmoji(key){try{const m=JSON.parse(localStorage.getItem('af_peer_emojis')||'{}');return m[key]||'';}catch(e){return '';}}
-function setPeerEmoji(key,emoji){try{const m=JSON.parse(localStorage.getItem('af_peer_emojis')||'{}');m[key]=emoji;localStorage.setItem('af_peer_emojis',JSON.stringify(m));}catch(e){}}
-function setPeerUsername(key,username){try{const m=JSON.parse(localStorage.getItem('af_peer_usernames')||'{}');m[key]=username;localStorage.setItem('af_peer_usernames',JSON.stringify(m));}catch(e){}}
-function getPeerUsername(key){try{const m=JSON.parse(localStorage.getItem('af_peer_usernames')||'{}');return m[key]||'';}catch(e){return '';}}
-function setPeerName(key,name){try{if(!key||!name)return;const m=JSON.parse(localStorage.getItem('af_peer_names')||'{}');m[key]=name;localStorage.setItem('af_peer_names',JSON.stringify(m));}catch(e){}}
-function getPeerName(key){try{const m=JSON.parse(localStorage.getItem('af_peer_names')||'{}');return m[key]||'';}catch(e){return '';}}
+function getPeerEmoji(k){try{return JSON.parse(localStorage.getItem('af_peer_emojis')||'{}')[k]||'';}catch(e){return '';}}
+function setPeerEmoji(k,e){try{const m=JSON.parse(localStorage.getItem('af_peer_emojis')||'{}');m[k]=e;localStorage.setItem('af_peer_emojis',JSON.stringify(m));}catch(e){}}
+function getPeerUsername(k){try{return JSON.parse(localStorage.getItem('af_peer_usernames')||'{}')[k]||'';}catch(e){return '';}}
+function setPeerUsername(k,u){try{const m=JSON.parse(localStorage.getItem('af_peer_usernames')||'{}');m[k]=u;localStorage.setItem('af_peer_usernames',JSON.stringify(m));}catch(e){}}
+function getPeerName(k){try{return JSON.parse(localStorage.getItem('af_peer_names')||'{}')[k]||'';}catch(e){return '';}}
+function setPeerName(k,n){try{if(!k||!n)return;const m=JSON.parse(localStorage.getItem('af_peer_names')||'{}');m[k]=n;localStorage.setItem('af_peer_names',JSON.stringify(m));}catch(e){}}
 
 /* ── TOAST ── */
-function afToast(msg, type='info', title=''){
-  const wrap = $('afToastWrap');
-  const existing = wrap.querySelector('.af-toast');
-  if(existing) existing.remove();
-  const t = document.createElement('div');
+let _tTimer=null;
+function showToast(msg, type='ok', title=''){
+  const w=$('toastWrap'); w.innerHTML='';
+  if(_tTimer){clearTimeout(_tTimer);_tTimer=null;}
+  const d=document.createElement('div');
   const isErr = type==='err';
-  t.className = 'af-toast af-toast-' + (isErr ? 'err' : 'ok');
-  t.setAttribute('role','alert');
-  const icon = isErr ? '⚠️' : (type==='info'?'💬':'✓');
-  t.innerHTML = `<span class="af-toast-ic">${icon}</span><div><p class="af-toast-title">${title||(isErr?'Error':'Done')}</p><p class="af-toast-msg">${esc(msg)}</p></div>`;
-  wrap.appendChild(t);
-  requestAnimationFrame(()=> t.classList.add('show'));
-  setTimeout(()=>{
-    t.classList.remove('show');
-    setTimeout(()=>t.remove(), 220);
-  }, 2700);
+  d.className = 'af-toast af-toast-' + (isErr ? 'err' : 'ok');
+  const icon = isErr ? '⚠️' : '✓';
+  d.innerHTML=`<span class="af-toast-ic">${icon}</span><div><p class="af-toast-title">${title||(isErr?'Error':'Done')}</p><p class="af-toast-msg">${esc(msg)}</p></div>`;
+  w.appendChild(d);
+  requestAnimationFrame(()=> d.classList.add('show'));
+  _tTimer=setTimeout(()=>{d.classList.remove('show');setTimeout(()=>d.remove(),220);},2800);
 }
 
-/* ── THEME ── */
 function syncTheme(){document.documentElement.setAttribute('data-theme',localStorage.getItem('af_dark_mode')==='0'?'light':'dark');}
 syncTheme();
 window.addEventListener('storage',e=>{if(e.key==='af_dark_mode') syncTheme();});
 
 function goToLogin(){sessionStorage.setItem('af_last_tab','student');window.location.href='../';}
 
-/* ── EDGE CALL ── */
 async function edgeCall(payload){
   try{
     if(!navigator.onLine) return {ok:false,message:'No internet connection.'};
@@ -907,33 +786,93 @@ let _mode='relevant',_posts=[],_curPostId=null,
     _reportPostId=null,_reportReason=null,
     _emojiSelected=getMyEmoji();
 
-/* ── AVATAR BTN SYNC ── */
 function syncAvatarBtn(){
-  const e=getMyEmoji(), u=getMyUsername(), n=sName();
+  const e=getMyEmoji(), u=getMyUsername();
   const btn=$('btnMyAvatar');
   if(!btn) return;
-  btn.innerHTML = e ? `${e} <span>${u?'@'+esc(u):esc(n.split(' ')[0])}</span>` : `<span>👤</span> <span>${u?'@'+esc(u):'Set up'}</span>`;
-  btn.classList.remove('hidden');
+  btn.innerHTML=e?`${e} <span>${u?'@'+esc(u):'Edit'}</span>`:`<span style="font-size:16px;">👤</span> <span>${u?'@'+esc(u):'Set up'}</span>`;
 }
 
-function nxOpenMyProfile(){
-  nxOpenProfile(sKey(), sName());
+function nxOpenMyMenu(){
+  const e=getMyEmoji(), u=getMyUsername(), n=sName();
+  const av=$('myMenuAvatar');
+  av.className='avatar'+(e?'':' initials');
+  av.style.cssText='width:52px;height:52px;border-radius:16px;font-size:26px;';
+  av.textContent=e||initials(n);
+  $('myMenuName').textContent=n;
+  $('myMenuUsername').textContent=u?'@'+u:'No username set';
+  $('myMenuModal').classList.add('open');
+  nxLoadMyMenuStats();
 }
+function nxCloseMyMenu(){$('myMenuModal').classList.remove('open');}
+async function nxLoadMyMenuStats(){
+  const res=await edgeCall({action:'get_my_profile'});
+  if(res&&res.ok&&res.profile){
+    $('myMenuFollowers').textContent=res.followers_count||0;
+    $('myMenuFollowing').textContent=res.following_count||0;
+  }
+  const res2=await edgeCall({action:'my_posts'});
+  if(res2&&res2.ok&&Array.isArray(res2.posts)) $('myMenuPosts').textContent=res2.posts.length||0;
+}
+function nxEditProfileFromMenu(){nxCloseMyMenu();nxOpenEditProfile();}
 
-/* ══ SEARCH (Header) ══ */
+/* ── FOLLOW LISTS ── */
+async function nxOpenFollowers(){ nxCloseMyMenu(); await loadFollowList('followers', sKey()); }
+async function nxOpenFollowing(){ nxCloseMyMenu(); await loadFollowList('following', sKey()); }
+async function nxOpenFollowersFor(){ if(_profileData) await loadFollowList('followers', _profileData.key); }
+async function nxOpenFollowingFor(){ if(_profileData) await loadFollowList('following', _profileData.key); }
+
+async function loadFollowList(type, targetKey){
+  $('followListTitle').textContent=type==='followers'?'Followers':'Following';
+  $('followListBody').innerHTML='<div class="state-msg" style="margin:20px auto;"><div class="spinner"></div></div>';
+  $('followListModal').classList.add('open');
+  const action = type==='followers' ? 'get_followers' : 'get_following';
+  const res=await edgeCall({action, target_key:targetKey});
+  
+  const box=$('followListBody');
+  const list=res&&res.ok&&Array.isArray(res.users)?res.users:[];
+  if(!list.length){box.innerHTML='<div class="state-msg" style="margin:40px auto;"><span>No users here yet.</span></div>';return;}
+  
+  box.innerHTML=list.map(u=>{
+    const key=u.student_key||u.key||u.follower_key||u.following_key||'';
+    const name=u.student_name||u.name||getPeerName(key)||'Student';
+    const username=u.username||getPeerUsername(key)||'';
+    const emoji=u.emoji||getPeerEmoji(key)||'';
+    if(username) setPeerUsername(key,username);
+    if(emoji) setPeerEmoji(key,emoji);
+    setPeerName(key,name);
+    return `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 18px;cursor:pointer;border-bottom:1px solid var(--b1);transition:background .2s;" onclick="nxCloseFollowList();nxOpenProfile('${esc(key)}','${esc(name).replace(/'/g,"&#39;")}')" onmouseover="this.style.background='var(--grp)'" onmouseout="this.style.background='transparent'">
+      ${avatarHTML(name,emoji,' avatar-sm')}
+      <div style="flex:1;min-width:0;">
+        <div style="font-family:var(--fd);font-size:14px;font-weight:800;color:var(--t1);">
+          ${esc(name)}
+          ${u.is_verified ? '<span class="verified-badge">✔</span>' : ''}
+        </div>
+        ${username?`<div style="font-size:12px;color:var(--tm);font-weight:600;margin-top:2px;">@${esc(username)}</div>`:'<div style="font-size:12px;color:var(--tm);margin-top:2px;">No username set</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+function nxCloseFollowList(){$('followListModal').classList.remove('open');}
+
+/* ── SEARCH (Header) ── */
 let _searchTimer=null;
-function openHeaderSearch(){
-  $('hdr').querySelector('.af-topbar-flex').classList.add('searching');
-  $('searchBar').classList.add('open');
-  setTimeout(()=> $('searchInp')&&$('searchInp').focus(), 80);
+function nxToggleSearch(){
+  const wrap=$('searchBar');
+  const isOpen=wrap.classList.contains('open');
+  if(!isOpen){
+    wrap.classList.add('open');
+    setTimeout(()=>$('searchInp')&&$('searchInp').focus(), 180);
+  } else {
+    nxCloseSearch();
+  }
 }
-function closeHeaderSearch(){
-  const input = $('searchInp');
-  if(input){ input.value = ''; input.blur(); }
-  $('searchResults').classList.add('hidden');
-  $('searchResults').innerHTML = '';
-  $('hdr').querySelector('.af-topbar-flex').classList.remove('searching');
+function nxCloseSearch(){
   $('searchBar').classList.remove('open');
+  if($('searchInp')){$('searchInp').value='';$('searchInp').blur();}
+  $('searchResults').classList.add('hidden');
+  $('searchResults').innerHTML='';
 }
 function nxSearchTyping(){
   const v=($('searchInp').value||'').trim();
@@ -944,57 +883,96 @@ function nxSearchTyping(){
 async function nxDoSearch(q,resultElId){
   const box=$(resultElId); if(!box) return;
   box.classList.remove('hidden');
-  box.innerHTML='<div class="state-msg" style="margin:20px auto;"><div class="spinner"></div></div>';
+  box.innerHTML='<div style="padding:20px;text-align:center;"><div class="spinner" style="margin:0 auto;"></div></div>';
   const res=await edgeCall({action:'search_users',query:q});
   const users=res&&res.ok&&Array.isArray(res.users)?res.users:[];
-  if(!users.length){box.innerHTML='<div class="af-empty" style="padding:20px;"><span>📭</span><strong>No users found.</strong></div>';return;}
+  if(!users.length){box.innerHTML='<div style="padding:16px;text-align:center;font-size:13px;color:var(--t2);">No users found.</div>';return;}
+  
   users.forEach(u=>{if(u.username)setPeerUsername(u.student_key,u.username);if(u.emoji)setPeerEmoji(u.student_key,u.emoji);if(u.student_name)setPeerName(u.student_key,u.student_name);});
+  
   box.innerHTML=users.map(u=>`
-    <div class="user-row" onclick="closeHeaderSearch(); nxOpenProfile('${esc(u.student_key)}','${esc(u.student_name||'Student')}')">
+    <div class="search-result-item" onclick="nxCloseSearch();nxOpenProfile('${esc(u.student_key)}','${esc(u.student_name||'Student').replace(/'/g,"&#39;")}')">
       ${avatarHTML(u.student_name,u.emoji||'',' avatar-sm')}
-      <div class="user-row-info">
-        <div class="user-row-name">${esc(u.student_name||'Student')}${u.is_verified ? '<span class="verified-badge">✔</span>' : ''}</div>
-        ${u.username?`<div class="user-row-user">@${esc(u.username)}</div>`:''}
+      <div>
+       <div class="search-result-name">
+          ${esc(u.student_name||'Student')}
+          ${u.is_verified ? '<span class="verified-badge">✔</span>' : ''}
+       </div>
+       ${u.username?`<div class="search-result-user">@${esc(u.username)}</div>`:''}
       </div>
     </div>`).join('');
 }
 
-/* ══ TAB SWITCHING ══ */
+/* ── CHAT SEARCH ── */
+let _chatSearchTimer=null;
+function nxChatSearch(){
+  const v=($('chatSearchInp').value||'').trim();
+  const clearBtn=$('chatSearchClear');
+  if(clearBtn) clearBtn.style.display=v?'block':'none';
+  clearTimeout(_chatSearchTimer);
+  if(!v){$('chatSearchResults').classList.add('hidden');return;}
+  _chatSearchTimer=setTimeout(()=>nxDoChatSearch(v),300);
+}
+function nxClearChatSearch(){
+  if($('chatSearchInp')) $('chatSearchInp').value='';
+  if($('chatSearchClear')) $('chatSearchClear').style.display='none';
+  $('chatSearchResults').classList.add('hidden');
+  $('chatSearchResults').innerHTML='';
+}
+async function nxDoChatSearch(q){
+  const box=$('chatSearchResults'); if(!box) return;
+  box.classList.remove('hidden');
+  box.innerHTML='<div style="padding:20px;text-align:center;"><div class="spinner" style="margin:0 auto;"></div></div>';
+  const res=await edgeCall({action:'search_users',query:q});
+  const users=res&&res.ok&&Array.isArray(res.users)?res.users:[];
+  if(!users.length){box.innerHTML=`<div style="padding:16px;font-size:13px;color:var(--t2);text-align:center;">No users found for "${esc(q)}".</div>`;return;}
+  
+  users.forEach(u=>{if(u.username)setPeerUsername(u.student_key,u.username);if(u.emoji)setPeerEmoji(u.student_key,u.emoji);if(u.student_name)setPeerName(u.student_key,u.student_name);});
+  
+  box.innerHTML=users.map(u=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--b1);background:var(--card-s);" onclick="nxClearChatSearch();nxOpenProfile('${esc(u.student_key)}','${esc(u.student_name||'Student').replace(/'/g,"&#39;")}')">
+      ${avatarHTML(u.student_name,u.emoji||'',' avatar-sm')}
+      <div style="flex:1;min-width:0;">
+        <div style="font-family:var(--fd);font-size:14px;font-weight:800;color:var(--t1);">${esc(u.student_name||'Student')}</div>
+        ${u.username?`<div style="font-size:12px;color:var(--tm);font-weight:600;">@${esc(u.username)}</div>`:''}
+      </div>
+      <span style="font-size:12.5px;font-weight:700;color:var(--p);background:var(--p-soft);padding:6px 12px;border-radius:99px;">Profile</span>
+    </div>`).join('');
+}
+
+/* ── TAB SWITCHING ── */
 function nxSwitchTab(tab){
   _activeTab=tab;
   $('tabFeed').classList.toggle('active',tab==='feed');
   $('tabChats').classList.toggle('active',tab==='chats');
 
   if(tab==='feed'){
-    show('feed'); hide('chatsTab');
-    show('fab'); show('filterBar');
+    show('feed'); hide('chatsTab'); show('fab');
   } else {
-    hide('feed'); show('chatsTab');
-    hide('fab'); hide('filterBar');
+    hide('feed'); show('chatsTab'); hide('fab');
     nxLoadConvList();
   }
 }
 
-/* ══ INIT ══ */
+/* ── INIT ── */
 async function init(){
+  syncAvatarBtn();
   if(!isLoggedIn()){
-    hide('feed'); hide('filterBar'); hide('fab');
-    hide('mainTabBar'); hide('chatsTab');
-    $('lockedBox').classList.add('visible');
+    hide('mainView');
+    $('lockedBox').style.display='flex';
     return;
   }
-  syncAvatarBtn();
-  show('feed'); show('fab'); show('mainTabBar'); show('filterBar');
-  $('lockedBox').classList.remove('visible');
+  show('mainView');
+  $('lockedBox').style.display='none';
   buildEmojiGrid();
-  nxLoadMyProfileData();
+  nxLoadMyProfile();
 
   const {posts:cached,fresh}=cacheGet();
-  if(cached.length){_posts=cached;renderPosts(_posts);if(fresh) return;}
+  if(cached.length){_posts=cached;renderListToContainer(_posts, 'postsList', true);if(fresh) return;}
   nxLoadPosts(false);
 }
 
-async function nxLoadMyProfileData(){
+async function nxLoadMyProfile(){
   const res=await edgeCall({action:'get_my_profile'});
   if(res&&res.ok&&res.profile){
     if(res.profile.username) localStorage.setItem('af_username',res.profile.username);
@@ -1005,19 +983,68 @@ async function nxLoadMyProfileData(){
   $('usernameBanner').classList.toggle('hidden',hasUsername);
 }
 
-/* ══ LOAD POSTS ══ */
+/* ── POST RENDERING ENGINE ── */
+function renderPostHtml(p, mk, admin, showPinned){
+  const mine=String(p.student_key||'')===String(mk||'');
+  const peerEmoji=p.emoji||getPeerEmoji(p.student_key)||'';
+  const peerUser=p.username||getPeerUsername(p.student_key)||'';
+  const av=avatarHTML(p.student_name,peerEmoji, '', `nxOpenProfile('${esc(p.student_key)}','${esc(p.student_name).replace(/'/g,"&#39;")}')`);
+  const pinBar=(showPinned&&p.is_pinned)?`<div class="pin-badge">📌 Pinned</div>`:'';
+  const prev=esc((p.content||'').replace(/[\n\r]/g,' ').slice(0,55)).replace(/'/g,'&#39;');
+  
+  return `<div class="post-card${p.is_pinned?' pinned':''}">
+    ${pinBar}
+    <div class="post-top">
+      <div class="post-author">
+        ${av}
+        <div class="post-meta">
+          <strong onclick="nxOpenProfile('${esc(p.student_key)}','${esc(p.student_name).replace(/'/g,"&#39;")}')">
+            ${esc(p.student_name||'Student')}
+            ${p.is_verified ? ' <span class="verified-badge">✔</span>' : ''}
+          </strong>
+          <small onclick="nxOpenProfile('${esc(p.student_key)}','${esc(p.student_name).replace(/'/g,"&#39;")}')">${peerUser?'@'+esc(peerUser)+' · ':''}${esc(timeAgo(p.created_at))}</small>
+        </div>
+      </div>
+      <button class="menu-dot" onclick="nxOpenMenu('post',${p.id},${mine},${!!p.is_pinned})">⋯</button>
+    </div>
+    <p class="post-text">${esc(p.content||'')}</p>
+    <div class="post-actions">
+      <button class="action-btn" onclick="nxLikePost(${p.id})">❤ <span class="cnt">${p.likes_count||0}</span></button>
+      <button class="action-btn" onclick="nxOpenComments(${p.id},'${prev}')">💬 <span class="cnt">${p.comments_count||0}</span></button>
+    </div>
+  </div>`;
+}
+
+function renderListToContainer(posts, containerId, checkPinned){
+  const box=$(containerId); if(!box) return;
+  if(!posts||!posts.length){
+    box.innerHTML='<div class="state-msg"><div class="icon">✨</div><span>No posts to show.</span></div>';
+    return;
+  }
+  const mk=sKey(), admin=isAdmin();
+  
+  let ordered = posts;
+  if(checkPinned){
+    const pinned=posts.filter(p=>p.is_pinned);
+    const normal=posts.filter(p=>!p.is_pinned);
+    ordered=[...pinned,...normal];
+  }
+  box.innerHTML=ordered.map(p=>renderPostHtml(p, mk, admin, checkPinned)).join('');
+}
+
+/* ── FEED LOAD ── */
 async function nxLoadPosts(showSpinner=true){
   if(!isLoggedIn()){init();return;}
   const {posts:cached,fresh}=cacheGet();
   if(cached.length){
-    _posts=cached; renderPosts(_posts);
+    _posts=cached; renderListToContainer(_posts, 'postsList', true);
     if(fresh) return;
   } else if(showSpinner){
     $('postsList').innerHTML='<div class="state-msg"><div class="spinner"></div><span>Loading…</span></div>';
   }
   const res=await edgeCall({action:'fetch_posts',mode:_mode});
   if(!res||!res.ok){
-    if(!_posts.length) $('postsList').innerHTML='<div class="af-empty"><span>😕</span><strong>Could not load posts.</strong></div>';
+    if(!_posts.length) $('postsList').innerHTML='<div class="state-msg"><div class="icon">😕</div><span>Could not load posts.</span></div>';
     return;
   }
   _posts=Array.isArray(res.posts)?res.posts:[];
@@ -1026,7 +1053,7 @@ async function nxLoadPosts(showSpinner=true){
     if(p.username) setPeerUsername(p.student_key,p.username);
     if(p.student_name) setPeerName(p.student_key,p.student_name);
   });
-  cacheSet(_posts); renderPosts(_posts);
+  cacheSet(_posts); renderListToContainer(_posts, 'postsList', true);
 }
 
 function nxRefresh(){
@@ -1034,56 +1061,14 @@ function nxRefresh(){
   cacheClear(); nxLoadPosts(false);
 }
 
-/* ══ RENDER POSTS ══ */
-function renderPosts(posts){
-  const box=$('postsList'); if(!box) return;
-  if(!posts||!posts.length){
-    box.innerHTML='<div class="af-empty"><span>✨</span><strong>No posts yet.</strong><p>Be the first to share!</p></div>';
-    return;
-  }
-  const mk=sKey(), admin=isAdmin();
-  const pinned=posts.filter(p=>p.is_pinned);
-  const normal=posts.filter(p=>!p.is_pinned);
-  const ordered=[...pinned,...normal];
-
-  box.innerHTML=ordered.map((p)=>{
-    const mine=String(p.student_key||'')===String(mk||'');
-    const prev=esc((p.content||'').replace(/[\n\r]/g,' ').slice(0,55));
-    const peerEmoji=p.emoji||getPeerEmoji(p.student_key)||'';
-    const peerUser=p.username||getPeerUsername(p.student_key)||'';
-    const profileClick = `nxOpenProfile('${esc(p.student_key)}','${esc(p.student_name)}')`;
-    const av=avatarHTML(p.student_name,peerEmoji, '', profileClick);
-    const pinBar=p.is_pinned?`<div class="pin-badge">📌 Pinned</div>`:'';
-    return `<div class="post-card">
-      ${pinBar}
-      <div class="post-top">
-        <div class="post-author" onclick="${profileClick}">
-          ${av}
-          <div class="post-meta">
-            <strong>${esc(p.student_name||'Student')} ${p.is_verified ? '<span class="verified-badge">✔</span>' : ''}</strong>
-            <small>${peerUser?'@'+esc(peerUser)+' · ':''}${esc(timeAgo(p.created_at))}</small>
-          </div>
-        </div>
-        <button class="menu-dot" onclick="nxOpenMenu('post',${p.id},${mine},${!!p.is_pinned})">⋯</button>
-      </div>
-      <p class="post-text">${esc(p.content||'')}</p>
-      <div class="post-actions">
-        <button class="action-btn" onclick="nxLikePost(${p.id})">❤ <span class="cnt">${p.likes_count||0}</span></button>
-        <button class="action-btn" onclick="nxOpenComments(${p.id},'${prev}')">💬 <span class="cnt">${p.comments_count||0}</span></button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-/* ══ MODE ══ */
 function nxSetMode(m){
   _mode=m==='recent'?'recent':'relevant';
   $('pillRelevant').classList.toggle('active',_mode==='relevant');
   $('pillRecent').classList.toggle('active',_mode==='recent');
-  cacheClear(); nxLoadPosts(false);
+  cacheClear(); nxLoadPosts(true);
 }
 
-/* ══ COMPOSER ══ */
+/* ── COMPOSER ── */
 function nxOpenComposer(){
   if(!isLoggedIn()){goToLogin();return;}
   const inp=$('postInput');
@@ -1103,23 +1088,22 @@ async function nxCreatePost(){
   if(!content||wordCount(content)>80) return;
   $('postSubmitBtn').disabled=true;
   const res=await edgeCall({action:'create_post',content});
-  if(!res||!res.ok){afToast(res?.message||'Could not post.','err');$('postSubmitBtn').disabled=false;return;}
+  if(!res||!res.ok){showToast(res?.message||'Could not post.','err');$('postSubmitBtn').disabled=false;return;}
   inp.value=''; nxCloseComposer();
-  if(res.post){_posts=[res.post,...(_posts||[])];cacheSet(_posts);renderPosts(_posts);}
+  if(res.post){_posts=[res.post,...(_posts||[])];cacheSet(_posts);renderListToContainer(_posts, 'postsList', true);}
   nxLoadPosts(false);
-  afToast('Posted successfully!');
+  showToast('Posted successfully!');
 }
 
-/* ══ LIKE POST ══ */
 async function nxLikePost(pid){
   if(!sKey()) return;
   _posts=_posts.map(p=>String(p.id)!==String(pid)?p:{...p,likes_count:Number(p.likes_count||0)+1});
-  cacheSet(_posts); renderPosts(_posts);
+  cacheSet(_posts); renderListToContainer(_posts, 'postsList', true);
   await edgeCall({action:'toggle_post_like',post_id:pid});
   nxLoadPosts(false);
 }
 
-/* ══ COMMENTS ══ */
+/* ── COMMENTS ── */
 function nxOpenComments(pid,preview){
   _curPostId=pid;
   const inp=$('commentInput');
@@ -1133,27 +1117,23 @@ async function nxLoadComments(pid){
   const box=$('commentsList'); if(!box) return;
   box.innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
   const res=await edgeCall({action:'fetch_comments',post_id:pid});
-  if(!res||!res.ok){box.innerHTML='<div class="af-empty"><span>😕</span><strong>Could not load.</strong></div>';return;}
+  if(!res||!res.ok){box.innerHTML='<div class="state-msg"><span>Could not load.</span></div>';return;}
   renderComments(Array.isArray(res.comments)?res.comments:[]);
 }
 function renderComments(list){
   const box=$('commentsList'); if(!box) return;
-  if(!list||!list.length){box.innerHTML='<div class="af-empty"><span>💬</span><strong>No comments yet.</strong></div>';return;}
+  if(!list||!list.length){box.innerHTML='<div class="state-msg"><div class="icon">💬</div><span>No comments yet.</span></div>';return;}
   const byP={};
   list.forEach(c=>{const k=c.parent_comment_id?String(c.parent_comment_id):'root';if(!byP[k])byP[k]=[];byP[k].push(c);});
   const root=byP.root||[]; const mk=sKey();
   box.innerHTML=root.map(c=>{
     const mine=String(c.student_key||'')===String(mk||'');
     const replies=byP[String(c.id)]||[];
-    const prev=esc((c.content||'').slice(0,45));
-    const profileClick = `nxOpenProfile('${esc(c.student_key)}','${esc(c.student_name)}')`;
+    const prev=esc((c.content||'').slice(0,45)).replace(/'/g,'&#39;');
     return `<div class="cmt-card">
       <div class="cmt-top">
-        <div class="cmt-info" onclick="${profileClick}">
-          <strong>${esc(c.student_name||'Student')}</strong>
-          <small>${esc(timeAgo(c.created_at))}</small>
-        </div>
-        <button class="menu-dot" style="width:28px;height:28px;font-size:14px;" onclick="nxOpenMenu('comment',${c.id},${mine},false)">⋯</button>
+        <div class="cmt-info" onclick="nxOpenProfile('${esc(c.student_key)}','${esc(c.student_name).replace(/'/g,"&#39;")}')"><strong>${esc(c.student_name||'Student')}</strong><small>${esc(timeAgo(c.created_at))}</small></div>
+        <button class="menu-dot" style="width:24px;height:24px;font-size:13px;" onclick="nxOpenMenu('comment',${c.id},${mine},false)">⋯</button>
       </div>
       <p class="cmt-text">${esc(c.content||'')}</p>
       <div class="cmt-actions">
@@ -1165,15 +1145,11 @@ function renderComments(list){
         <div id="rep-${c.id}" class="replies-wrap hidden">
           ${replies.map(r=>{
             const rm=String(r.student_key||'')===String(mk||'');
-            const rp=esc((r.content||'').slice(0,45));
-            const rClick = `nxOpenProfile('${esc(r.student_key)}','${esc(r.student_name)}')`;
-            return `<div class="reply-row">
+            const rp=esc((r.content||'').slice(0,45)).replace(/'/g,'&#39;');
+            return `<div>
               <div class="cmt-top">
-                <div class="cmt-info" onclick="${rClick}">
-                  <strong>${esc(r.student_name||'Student')}</strong>
-                  <small>${esc(timeAgo(r.created_at))}</small>
-                </div>
-                <button class="menu-dot" style="width:28px;height:28px;font-size:14px;" onclick="nxOpenMenu('comment',${r.id},${rm},false)">⋯</button>
+                <div class="cmt-info" onclick="nxOpenProfile('${esc(r.student_key)}','${esc(r.student_name).replace(/'/g,"&#39;")}')"><strong>${esc(r.student_name||'Student')}</strong><small>${esc(timeAgo(r.created_at))}</small></div>
+                <button class="menu-dot" style="width:24px;height:24px;font-size:13px;" onclick="nxOpenMenu('comment',${r.id},${rm},false)">⋯</button>
               </div>
               <p class="cmt-text">${esc(r.content||'')}</p>
               <div class="cmt-actions">
@@ -1203,10 +1179,10 @@ async function nxCreateComment(){
   if(!content||wordCount(content)>80||!_curPostId) return;
   $('commentSubmitBtn').disabled=true;
   const res=await edgeCall({action:'create_comment',post_id:_curPostId,parent_comment_id:null,content});
-  if(!res||!res.ok){afToast(res?.message||'Could not comment.','err');$('commentSubmitBtn').disabled=false;return;}
+  if(!res||!res.ok){showToast(res?.message||'Could not comment.','err');$('commentSubmitBtn').disabled=false;return;}
   inp.value=''; nxCommentTyping();
   _posts=_posts.map(p=>String(p.id)===String(_curPostId)?{...p,comments_count:Number(p.comments_count||0)+1}:p);
-  cacheSet(_posts); renderPosts(_posts);
+  cacheSet(_posts); renderListToContainer(_posts, 'postsList', true);
   nxLoadComments(_curPostId); nxLoadPosts(false);
 }
 async function nxLikeComment(cId){
@@ -1215,7 +1191,7 @@ async function nxLikeComment(cId){
   if(_curPostId) nxLoadComments(_curPostId);
 }
 
-/* ══ REPLY ══ */
+/* ── REPLY ── */
 function nxOpenReply(pid,preview){
   _replyParentId=pid;
   $('replyTarget').textContent=preview?'Replying to: '+preview:'Reply to comment';
@@ -1234,14 +1210,14 @@ async function nxCreateReply(){
   if(!content||wordCount(content)>80||!_curPostId||!_replyParentId) return;
   $('replySubmitBtn').disabled=true;
   const res=await edgeCall({action:'create_comment',post_id:_curPostId,parent_comment_id:_replyParentId,content});
-  if(!res||!res.ok){afToast(res?.message||'Could not reply.','err');$('replySubmitBtn').disabled=false;return;}
+  if(!res||!res.ok){showToast(res?.message||'Could not reply.','err');$('replySubmitBtn').disabled=false;return;}
   nxCloseReply();
   _posts=_posts.map(p=>String(p.id)===String(_curPostId)?{...p,comments_count:Number(p.comments_count||0)+1}:p);
-  cacheSet(_posts); renderPosts(_posts);
+  cacheSet(_posts); renderListToContainer(_posts, 'postsList', true);
   nxLoadComments(_curPostId); nxLoadPosts(false);
 }
 
-/* ══ ACTION MENU ══ */
+/* ── ACTION MENU (posts/comments/dm) ── */
 function nxOpenMenu(type,id,mine,isPinned){
   _menuTarget={type,id,isMine:!!mine,isPinned:!!isPinned};
   $('menuDeleteBtn').style.display=mine?'flex':'none';
@@ -1265,10 +1241,10 @@ async function nxTogglePin(){
   if(!_menuTarget||_menuTarget.type!=='post'||!isAdmin()){nxCloseMenu();return;}
   const pin=!_menuTarget.isPinned;
   const res=await edgeCall({action:'pin_post',post_id:_menuTarget.id,pin});
-  if(!res||!res.ok){afToast(res?.message||'Could not update pin.','err');nxCloseMenu();return;}
+  if(!res||!res.ok){showToast(res?.message||'Could not update pin.','err');nxCloseMenu();return;}
   nxCloseMenu();
   cacheClear(); nxLoadPosts(false);
-  afToast(pin?'Post pinned to feed':'Post unpinned','info','📌');
+  showToast(pin?'Post pinned':'Post unpinned');
 }
 
 async function nxDeleteTarget(){
@@ -1277,13 +1253,13 @@ async function nxDeleteTarget(){
   if(t.type==='post')    res=await edgeCall({action:'delete_post',post_id:t.id});
   if(t.type==='comment') res=await edgeCall({action:'delete_comment',comment_id:t.id});
   if(t.type==='dm')      res=await edgeCall({action:'delete_dm',message_id:t.id});
-  if(!res||!res.ok){afToast(res?.message||'Could not delete.','err');return;}
+  if(!res||!res.ok){showToast(res?.message||'Could not delete.','err');return;}
   nxCloseMenu();
-  if(t.type==='post'){_posts=_posts.filter(p=>String(p.id)!==String(t.id));cacheSet(_posts);renderPosts(_posts);}
+  if(t.type==='post'){_posts=_posts.filter(p=>String(p.id)!==String(t.id));cacheSet(_posts);renderListToContainer(_posts, 'postsList', true);}
   if(t.type==='comment'&&_curPostId) nxLoadComments(_curPostId);
   if(t.type==='dm'&&_dmPeer) nxPollDMs(true);
   if(t.type!=='dm'){ nxLoadPosts(false); }
-  afToast('Deleted successfully!');
+  showToast('Deleted successfully.');
 }
 
 function nxEditTarget(){
@@ -1292,10 +1268,10 @@ function nxEditTarget(){
   nxStartEditDM(t.id);
 }
 
-/* ══ REPORT ══ */
+/* ── REPORT ── */
 function nxOpenReportForPost(pid){
   _reportPostId=pid; _reportReason=null;
-  document.querySelectorAll('.report-opt').forEach(b=>b.classList.remove('selected'));
+  document.querySelectorAll('.af-btn-secondary-outline').forEach(b=>b.style.borderColor='var(--bc)');
   hide('reportOtherInp'); $('reportSubmitBtn').disabled=true;
   if($('reportOtherInp')) $('reportOtherInp').value='';
   $('reportModal').classList.add('open');
@@ -1306,8 +1282,8 @@ function nxOpenReport(){
 }
 function nxCloseReport(){$('reportModal').classList.remove('open');_reportPostId=null;_reportReason=null;}
 function nxSelectReport(btn){
-  document.querySelectorAll('.report-opt').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected');
+  document.querySelectorAll('#reportOptions button').forEach(b=>{b.style.borderColor='var(--bc)';b.style.background='transparent';});
+  btn.style.borderColor='var(--p)'; btn.style.background='var(--p-soft)';
   _reportReason=btn.getAttribute('data-reason');
   if(_reportReason==='Other'){show('reportOtherInp');setTimeout(()=>$('reportOtherInp')&&$('reportOtherInp').focus(),80);}
   else hide('reportOtherInp');
@@ -1320,43 +1296,42 @@ async function nxSubmitReport(){
   $('reportSubmitBtn').disabled=true;
   const res=await edgeCall({action:'report_post',post_id:_reportPostId,reason});
   nxCloseReport();
-  if(!res||!res.ok){afToast(res?.message||'Could not submit report.','err');return;}
-  afToast('Report submitted. Thank you.','ok','🚩');
+  if(!res||!res.ok){showToast(res?.message||'Could not submit report.','err');return;}
+  showToast('Report submitted. Thank you.');
 }
 
-/* ══ FULL SCREEN PROFILE ══ */
+/* ── STUDENT PROFILE ── */
+let _profileHistory = []; // to manage back navigation gracefully
+
 async function nxOpenProfile(key,name){
   if(!key) return;
   _profileData={key,name};
   $('profileHdrName').textContent=name;
-  $('profileName').innerHTML = esc(name);
+  $('profileName').textContent=name;
   
-  const isMe = key === sKey();
-  $('profileFollowBtn').style.display = isMe ? 'none' : 'flex';
-  $('profileMsgBtn').style.display = isMe ? 'none' : 'flex';
-  $('profileEditBtn').style.display = isMe ? 'flex' : 'none';
-
-  const emoji=getPeerEmoji(key) || (isMe ? getMyEmoji() : '');
+  const emoji=getPeerEmoji(key);
   $('profileAvatar').className='avatar avatar-lg'+(emoji?'':' initials');
   $('profileAvatar').textContent=emoji||initials(name);
   
-  const username = getPeerUsername(key) || (isMe ? getMyUsername() : '');
-  $('profileUsername').textContent=username ? '@'+username : 'No username set';
+  $('profileUsername').textContent='';
+  $('profileBio').textContent='';
+  $('profileFollowersCount').textContent='0';
+  $('profileFollowingCount').textContent='0';
+  $('profileFollowBtn').textContent='Follow';
+  $('profileFollowBtn').className='af-btn-primary';
+  $('profileFollowBtn').style.display=key===sKey()?'none':'flex';
   
-  $('profileBio').classList.add('hidden');
-  $('profilePostsCount').textContent='—';
-  $('profileFollowersCount').textContent='—';
-  $('profileFollowingCount').textContent='—';
-  $('profileFollowBtn').textContent='+ Follow';
-  $('profileFollowBtn').classList.remove('following');
   $('profilePostsList').innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
+  
   $('profileScreen').classList.add('open');
   
-  nxLoadProfilePosts(key);
   nxLoadProfileMeta(key);
+  nxLoadProfilePosts(key);
 }
-function nxCloseProfile(){$('profileScreen').classList.remove('open');_profileData=null;}
-
+function nxCloseProfile(){
+  $('profileScreen').classList.remove('open');
+  _profileData=null;
+}
 async function nxLoadProfileMeta(key){
   const res=await edgeCall({action:'get_profile',target_key:key});
   if(!res||!res.ok) return;
@@ -1372,106 +1347,50 @@ async function nxLoadProfileMeta(key){
     }
     if(res.profile.bio){
       $('profileBio').textContent=res.profile.bio;
-      $('profileBio').classList.remove('hidden');
     }
-    $('profileName').innerHTML = esc(res.profile.full_name || _profileData.name) + (res.profile.is_verified ? ' <span class="verified-badge">✔</span>' : '');
+    if(res.profile.is_verified){
+      $('profileName').innerHTML = esc(res.profile.student_name) + ' <span class="verified-badge">✔</span>';
+    }
   }
-  $('profilePostsCount').textContent=res.posts_count||0;
   $('profileFollowersCount').textContent=res.followers_count||0;
   $('profileFollowingCount').textContent=res.following_count||0;
   _profileIsFollowing=!!res.is_following;
-  $('profileFollowBtn').textContent=_profileIsFollowing?'Following':'+ Follow';
-  $('profileFollowBtn').classList.toggle('following',_profileIsFollowing);
+  
+  if(key!==sKey()){
+    $('profileFollowBtn').textContent=_profileIsFollowing?'Following':'Follow';
+    $('profileFollowBtn').className=_profileIsFollowing?'af-btn-secondary-outline':'af-btn-primary';
+  }
 }
-
 async function nxToggleFollow(){
   if(!_profileData) return;
   const res=await edgeCall({action:'toggle_follow',target_key:_profileData.key});
-  if(!res||!res.ok){afToast(res?.message||'Could not update follow.','err');return;}
+  if(!res||!res.ok){showToast(res?.message||'Could not update follow.','err');return;}
   _profileIsFollowing=!!res.following;
-  $('profileFollowBtn').textContent=_profileIsFollowing?'Following':'+ Follow';
-  $('profileFollowBtn').classList.toggle('following',_profileIsFollowing);
+  
+  $('profileFollowBtn').textContent=_profileIsFollowing?'Following':'Follow';
+  $('profileFollowBtn').className=_profileIsFollowing?'af-btn-secondary-outline':'af-btn-primary';
+  
   const c=$('profileFollowersCount');
   c.textContent=Math.max(0,Number(c.textContent||0)+(_profileIsFollowing?1:-1));
 }
-
 async function nxLoadProfilePosts(key){
   const res=await edgeCall({action:'student_posts',target_key:key});
   const box=$('profilePostsList'); if(!box) return;
-  if(!res||!res.ok){box.innerHTML='<div class="af-empty"><span>😕</span><strong>Could not load.</strong></div>';return;}
-  const posts=Array.isArray(res.posts)?res.posts:[];
-  if(!posts.length){box.innerHTML='<div class="af-empty"><span>✨</span><strong>No posts yet.</strong></div>';return;}
-  box.innerHTML=posts.map(p=>`
-    <div class="post-card" style="margin-bottom:0;box-shadow:none;">
-      <p class="post-text" style="margin-bottom:8px;">${esc(p.content||'')}</p>
-      <div style="font-size:12px;color:var(--tm);display:flex;gap:14px;font-weight:600;">
-        <span>❤ ${p.likes_count||0}</span>
-        <span>💬 ${p.comments_count||0}</span>
-        <span style="margin-left:auto;">${esc(timeAgo(p.created_at))}</span>
-      </div>
-    </div>`).join('');
+  if(!res||!res.ok){box.innerHTML='<div class="state-msg"><span>Could not load.</span></div>';return;}
+  renderListToContainer(res.posts, 'profilePostsList', false);
 }
-
 function nxMessageFromProfile(){
   if(!_profileData) return;
   const key=_profileData.key, name=_profileData.name;
-  nxCloseProfile(); // Un-overlay
-  nxSwitchTab('chats'); // Switch to chat mode under the hood
-  nxOpenDM(key,name); // Open specific chat overlay
+  // keep profile open underneath, just open dm screen over it.
+  nxOpenDM(key,name);
 }
 
-/* ══ FOLLOWERS / FOLLOWING MODAL ══ */
-let _followListType='followers';
-async function nxOpenFollowersFor(){
-  if(!_profileData) return;
-  _followListType='followers';
-  $('followListTitle').textContent='Followers';
-  $('followListBody').innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
-  $('followListModal').classList.add('open');
-  const res=await edgeCall({action:'get_followers',target_key:_profileData.key});
-  renderFollowList(res);
-}
-async function nxOpenFollowingFor(){
-  if(!_profileData) return;
-  _followListType='following';
-  $('followListTitle').textContent='Following';
-  $('followListBody').innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
-  $('followListModal').classList.add('open');
-  const res=await edgeCall({action:'get_following',target_key:_profileData.key});
-  renderFollowList(res);
-}
-function renderFollowList(res){
-  const box=$('followListBody');
-  const list=res&&res.ok&&Array.isArray(res.users)?res.users:[];
-  if(!list.length){box.innerHTML='<div class="af-empty" style="padding:20px;"><span>📭</span><strong>No users found.</strong></div>';return;}
-  box.innerHTML=list.map(u=>{
-    const key=u.student_key||u.key||u.follower_key||u.following_key||'';
-    const name=u.student_name||u.name||getPeerName(key)||'Student';
-    const username=u.username||getPeerUsername(key)||'';
-    const emoji=u.emoji||getPeerEmoji(key)||'';
-    if(username) setPeerUsername(key,username);
-    if(emoji) setPeerEmoji(key,emoji);
-    setPeerName(key,name);
-    return `
-    <div class="user-row" onclick="nxCloseFollowList(); nxOpenProfile('${esc(key)}','${esc(name)}')">
-      ${avatarHTML(name,emoji,' avatar-sm')}
-      <div class="user-row-info">
-        <div class="user-row-name">${esc(name)}${u.is_verified ? '<span class="verified-badge">✔</span>' : ''}</div>
-        ${username?`<div class="user-row-user">@${esc(username)}</div>`:'<div class="user-row-user">No username set</div>'}
-      </div>
-    </div>`;
-  }).join('');
-}
-function nxCloseFollowList(){$('followListModal').classList.remove('open');}
-
-/* ══ EDIT PROFILE ══ */
+/* ── EDIT PROFILE ── */
 function buildEmojiGrid(){
   const g=$('emojiGrid'); if(!g) return;
   const cur=getMyEmoji();
-  g.innerHTML=EMOJI_PRESETS.map(e=>`<button class="emoji-opt${e===cur?' selected':''}" onclick="nxPickEmoji('${e}')">${e}</button>`).join('');
-}
-function nxEditProfileFromProfile(){
-  nxOpenEditProfile();
+  g.innerHTML=EMOJI_PRESETS.map(e=>`<button style="aspect-ratio:1;border-radius:12px;font-size:26px;background:var(--inp);border:2px solid ${e===cur?'var(--p)':'transparent'};display:flex;align-items:center;justify-content:center;" onclick="nxPickEmoji(this, '${e}')">${e}</button>`).join('');
 }
 function nxOpenEditProfile(){
   _emojiSelected=getMyEmoji();
@@ -1479,26 +1398,28 @@ function nxOpenEditProfile(){
   $('usernameInput').value=getMyUsername();
   $('bioInput').value=localStorage.getItem('af_bio')||'';
   $('usernameHint').textContent='3-24 chars: lowercase letters, numbers, underscore.';
-  $('usernameHint').className='username-hint';
+  $('usernameHint').style.color='var(--tm)';
   $('editProfileModal').classList.add('open');
 }
 function nxCloseEditProfile(){$('editProfileModal').classList.remove('open');}
-function nxPickEmoji(e){
+function nxPickEmoji(btn, e){
   _emojiSelected=e;
-  document.querySelectorAll('.emoji-opt').forEach(b=>{b.classList.toggle('selected',b.textContent===e);});
+  document.querySelectorAll('#emojiGrid button').forEach(b=>b.style.borderColor='transparent');
+  btn.style.borderColor='var(--p)';
 }
 let _usernameCheckTimer=null;
 function nxUsernameTyping(){
   const v=($('usernameInput').value||'').toLowerCase().replace(/[^a-z0-9_]/g,'');
   $('usernameInput').value=v;
   clearTimeout(_usernameCheckTimer);
-  if(!v){ $('usernameHint').textContent='3-24 chars: lowercase letters, numbers, underscore.'; $('usernameHint').className='username-hint'; return; }
-  if(v.length<3){ $('usernameHint').textContent='Too short.'; $('usernameHint').className='username-hint bad'; return; }
+  const hint = $('usernameHint');
+  if(!v){ hint.textContent='3-24 chars: lowercase letters, numbers, underscore.'; hint.style.color='var(--tm)'; return; }
+  if(v.length<3){ hint.textContent='Too short.'; hint.style.color='var(--err)'; return; }
   _usernameCheckTimer=setTimeout(async()=>{
     const res=await edgeCall({action:'check_username',username:v});
     if(res&&res.ok){
-      $('usernameHint').textContent=res.available?'Available ✓':'Already taken.';
-      $('usernameHint').className='username-hint '+(res.available?'good':'bad');
+      hint.textContent=res.available?'Available ✓':'Already taken.';
+      hint.style.color=res.available?'var(--ok)':'var(--err)';
     }
   },350);
 }
@@ -1506,27 +1427,23 @@ async function nxSaveProfile(){
   const username=($('usernameInput').value||'').toLowerCase().trim();
   const bio=($('bioInput').value||'').trim();
   if(username && !/^[a-z0-9_]{3,24}$/.test(username)){
-    afToast('Username must be 3-24 chars: lowercase, numbers, underscore.','err');return;
+    showToast('Username must be 3-24 chars.','err');return;
   }
   $('saveProfileBtn').disabled=true;
   const res=await edgeCall({action:'save_username',username:username||getMyUsername()||('student'+Math.floor(Math.random()*99999)),emoji:_emojiSelected||getMyEmoji(),bio});
   $('saveProfileBtn').disabled=false;
-  if(!res||!res.ok){afToast(res?.message||'Could not save profile.','err');return;}
+  if(!res||!res.ok){showToast(res?.message||'Could not save profile.','err');return;}
   if(_emojiSelected) localStorage.setItem('af_avatar_emoji',_emojiSelected);
   if(res.profile&&res.profile.username) localStorage.setItem('af_username',res.profile.username);
   localStorage.setItem('af_bio',bio);
   setPeerEmoji(sKey(),_emojiSelected||getMyEmoji());
   syncAvatarBtn(); nxCloseEditProfile();
   $('usernameBanner').classList.add('hidden');
-  afToast('Profile updated!');
-  
-  if($('profileScreen').classList.contains('open')){
-    nxLoadProfileMeta(sKey()); // Refresh profile screen if open
-  }
+  showToast('Profile updated!');
   cacheClear(); nxLoadPosts(false);
 }
 
-/* ══ CHATS / DM ══ */
+/* ── CHATS / DM ── */
 const CONV_STORE = 'af_nx_convs_v1';
 function getConvs(){try{return JSON.parse(localStorage.getItem(CONV_STORE)||'[]');}catch(e){return [];}}
 function saveConv(peer_key,peer_name,lastMsg,ts){
@@ -1541,53 +1458,20 @@ function nxLoadConvList(){
   const box=$('chatList'); if(!box) return;
   const convs=getConvs();
   if(!convs.length){
-    box.innerHTML='<div class="af-empty"><span style="font-size:32px;">💬</span><strong>No conversations yet.</strong><p style="margin-top:4px;">Search for a user above to start chatting.</p></div>';
+    box.innerHTML='<div class="state-msg"><div class="icon">💬</div><span>No conversations yet.<br>Search a student to message them.</span></div>';
     return;
   }
-  box.innerHTML=convs.map(c=>{
-    const pClick = `nxOpenProfile('${esc(c.key)}','${esc(c.peer_name)}')`;
-    return `
-    <div class="conv-item" onclick="nxOpenDM('${esc(c.key)}','${esc(c.peer_name)}')">
-      ${avatarHTML(c.peer_name,getPeerEmoji(c.key),' avatar-sm', pClick)}
+  box.innerHTML=convs.map(c=>`
+    <div class="conv-item" onclick="nxOpenDM('${esc(c.key)}','${esc(c.peer_name).replace(/'/g,"&#39;")}')">
+      ${avatarHTML(c.peer_name,getPeerEmoji(c.key),' avatar-sm')}
       <div class="conv-info">
-       <div class="conv-name">${esc(c.peer_name)}</div>
+       <div class="conv-name">
+          ${esc(c.peer_name)}
+          ${c.is_verified ? '<span class="verified-badge">✔</span>' : ''}
+       </div>
        <div class="conv-preview">${esc(c.lastMsg||'')}</div>
       </div>
       <div class="conv-meta"><div class="conv-time">${esc(timeAgo(c.ts))}</div></div>
-    </div>`;
-  }).join('');
-}
-
-let _chatSearchTimer=null;
-function nxChatSearch(){
-  const v=($('chatSearchInp').value||'').trim();
-  const clearBtn=$('chatSearchClear');
-  if(clearBtn) clearBtn.style.display=v?'block':'none';
-  clearTimeout(_chatSearchTimer);
-  if(!v){$('chatSearchResults').classList.add('hidden');return;}
-  _chatSearchTimer=setTimeout(()=>nxDoChatSearch(v),300);
-}
-function nxClearChatSearch(){
-  if($('chatSearchInp')) $('chatSearchInp').value='';
-  if($('chatSearchClear')) $('chatSearchClear').style.display='none';
-  $('chatSearchResults').classList.add('hidden');
-  $('chatSearchResults').innerHTML='';
-}
-async function nxDoChatSearch(q){
-  const box=$('chatSearchResults'); if(!box) return;
-  box.classList.remove('hidden');
-  box.innerHTML='<div class="state-msg" style="margin:20px auto;"><div class="spinner"></div></div>';
-  const res=await edgeCall({action:'search_users',query:q});
-  const users=res&&res.ok&&Array.isArray(res.users)?res.users:[];
-  if(!users.length){box.innerHTML='<div class="af-empty" style="padding:20px;"><span>📭</span><strong>No users found.</strong></div>';return;}
-  users.forEach(u=>{if(u.username)setPeerUsername(u.student_key,u.username);if(u.emoji)setPeerEmoji(u.student_key,u.emoji);if(u.student_name)setPeerName(u.student_key,u.student_name);});
-  box.innerHTML=users.map(u=>`
-    <div class="user-row" onclick="nxClearChatSearch();nxOpenDM('${esc(u.student_key)}','${esc(u.student_name||'Student')}')">
-      ${avatarHTML(u.student_name,u.emoji||'',' avatar-sm')}
-      <div class="user-row-info">
-        <div class="user-row-name">${esc(u.student_name||'Student')}</div>
-        ${u.username?`<div class="user-row-user">@${esc(u.username)}</div>`:''}
-      </div>
     </div>`).join('');
 }
 
@@ -1598,14 +1482,17 @@ function setDMMessages(peerKey,msgs){try{localStorage.setItem(dmKey(sKey(),peerK
 function nxOpenDM(peerKey,peerName){
   _dmPeer={key:peerKey,name:peerName};
   _dmEditingId=null; hide('dmEditBanner');
+  
   const emoji=getPeerEmoji(peerKey);
   const av=$('dmPeerAvatar');
   av.className='avatar avatar-sm'+(emoji?'':' initials');
   av.textContent=emoji||initials(peerName);
   $('dmPeerName').textContent=peerName;
+  
   $('dmInput').value=''; nxDMTyping();
   $('dmScreen').classList.add('open');
   $('bnav').classList.add('kb-hidden');
+  
   nxRenderDMMessages();
   nxPollDMs(true);
   clearInterval(_dmPollTimer);
@@ -1617,26 +1504,30 @@ function nxCloseDM(){
   _dmPeer=null; _dmEditingId=null;
   clearInterval(_dmPollTimer); _dmPollTimer=null;
 }
-function nxOpenProfileFromDM(){
-  if(_dmPeer) nxOpenProfile(_dmPeer.key, _dmPeer.name);
-}
 
 function nxRenderDMMessages(){
   const box=$('dmMessages'); if(!box) return;
   const msgs=getDMMessages(_dmPeer.key);
   if(!msgs.length){
-    box.innerHTML='<div class="af-empty"><span style="font-size:32px;">💬</span><strong>Start the conversation!</strong></div>';
+    box.innerHTML='<div class="state-msg"><div class="icon">💬</div><span>Say hello!</span></div>';
     return;
   }
-  const pClick = `nxOpenProfile('${esc(_dmPeer.key)}','${esc(_dmPeer.name)}')`;
-  box.innerHTML=msgs.map(m=>{
+  
+  box.innerHTML=msgs.map((m, i)=>{
     const me=m.sender===sKey();
     const deleted=!!m.is_deleted;
-    return `<div class="bubble-wrap${me?' me':''}" ${me&&!deleted&&m.id?`onclick="nxOpenMenu('dm',${m.id},true,false)"`:''}>
-      ${!me?avatarHTML(_dmPeer.name,getPeerEmoji(_dmPeer.key),' avatar-sm', pClick):''}
-      <div>
+    
+    // Grouping consecutive messages
+    const isConsecutive = (i > 0 && msgs[i-1].sender === m.sender && !msgs[i-1].is_deleted);
+    
+    const clickAction = (me && !deleted && m.id) ? ` onclick="nxOpenMenu('dm',${m.id},true,false)"` : '';
+    
+    return `
+    <div class="bubble-wrap${me?' me':''}${isConsecutive?' consecutive':''}"${clickAction}>
+      ${!me ? (isConsecutive ? '<div class="bubble-avatar-slot"></div>' : avatarHTML(_dmPeer.name,getPeerEmoji(_dmPeer.key),' bubble-avatar-slot', `nxOpenProfile('${esc(_dmPeer.key)}','${esc(_dmPeer.name).replace(/'/g,"&#39;")}')`)) : ''}
+      <div style="display:flex; align-items:flex-end; gap:8px; max-width:100%; ${me?'flex-direction:row-reverse':''}">
         <div class="bubble${deleted?' deleted':''}">${deleted?'Message deleted':esc(m.text)}</div>
-        <div class="bubble-time" style="text-align:${me?'right':'left'}">${esc(timeAgo(m.ts))}${m.is_edited&&!deleted?' · <span class="bubble-edited">edited</span>':''}</div>
+        <div class="bubble-time">${esc(timeAgo(m.ts))}</div>
       </div>
     </div>`;
   }).join('');
@@ -1655,7 +1546,7 @@ async function nxSendDM(){
   if(_dmEditingId){
     $('dmSendBtn').disabled=true;
     const res=await edgeCall({action:'edit_dm',message_id:_dmEditingId,text});
-    if(!res||!res.ok){afToast(res?.message||'Could not edit.','err');$('dmSendBtn').disabled=false;return;}
+    if(!res||!res.ok){showToast(res?.message||'Could not edit.','err');$('dmSendBtn').disabled=false;return;}
     nxCancelEditDM();
     inp.value=''; nxDMTyping();
     nxPollDMs(true);
@@ -1704,7 +1595,7 @@ async function nxPollDMs(force){
   if(last) saveConv(_dmPeer.key,_dmPeer.name,last.is_deleted?'Message deleted':last.text,last.ts);
 }
 
-/* ══ KEYBOARD HIDE NAV ══ */
+/* ── KEYBOARD ESC & HIDE NAV ── */
 (function(){
   let vis=true;
   function check(){
@@ -1716,9 +1607,9 @@ async function nxPollDMs(force){
   window.visualViewport&&window.visualViewport.addEventListener('resize',check,{passive:true});
 })();
 
-/* ══ KEYBOARD ESC ══ */
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape') return;
+  if($('myMenuModal').classList.contains('open')){nxCloseMyMenu();return;}
   if($('followListModal').classList.contains('open')){nxCloseFollowList();return;}
   if($('editProfileModal').classList.contains('open')){nxCloseEditProfile();return;}
   if($('reportModal').classList.contains('open')){nxCloseReport();return;}
@@ -1728,27 +1619,26 @@ document.addEventListener('keydown',e=>{
   if($('composerModal').classList.contains('open')){nxCloseComposer();return;}
   if($('dmScreen').classList.contains('open')){nxCloseDM();return;}
   if($('profileScreen').classList.contains('open')){nxCloseProfile();return;}
-  if($('searchBar').classList.contains('open')){closeHeaderSearch();return;}
+  if($('searchBar').classList.contains('open')){nxCloseSearch();return;}
 });
 
-/* ══ BOOT ══ */
+/* ── BOOT ── */
 document.addEventListener('DOMContentLoaded',init);
 window.addEventListener('storage',e=>{
   if(['af_student_email','af_student_mobile','af_student_name'].includes(e.key)) init();
 });
 
-/* ══ PULL TO REFRESH ══ */
+/* ── PULL TO REFRESH ── */
 (function(){
-  const feed=document.getElementById('feedPage')||document.body;
+  const feed=document.getElementById('feed')||document.body;
   const loader=document.createElement('div');
   loader.id='afPullRefresh';
   loader.innerHTML='<div class="afSpinner"></div>';
   document.body.appendChild(loader);
   const style=document.createElement('style');
   style.textContent=`
-    #afPullRefresh{position:fixed;top:-70px;left:50%;transform:translateX(-50%);width:46px;height:46px;z-index:999999;display:flex;align-items:center;justify-content:center;transition:top .25s ease;pointer-events:none;}
-    .afSpinner{width:32px;height:32px;border-radius:50%;border:4px solid rgba(79,70,229,.18);border-top-color:#4f46e5;animation:afSpin .8s linear infinite;}
-    @keyframes afSpin{to{transform:rotate(360deg);}}
+    #afPullRefresh{position:fixed;top:-70px;left:50%;transform:translateX(-50%);width:46px;height:46px;z-index:999999;display:flex;align-items:center;justify-content:center;transition:top .25s var(--ease);pointer-events:none;}
+    .afSpinner{width:32px;height:32px;border-radius:50%;border:4px solid rgba(79,70,229,.18);border-top-color:var(--p);animation:spin .8s linear infinite;}
   `;
   document.head.appendChild(style);
   let pulling=false,pullStartY=0,distance=0;
@@ -1762,7 +1652,7 @@ window.addEventListener('storage',e=>{
   });
 })();
 
-/* ══ SWIPE NAV ══ */
+/* ── SWIPE NAV ── */
 (function(){
   let startX=0,startY=0;
   document.addEventListener('touchstart',e=>{startX=e.touches[0].clientX;startY=e.touches[0].clientY;},{passive:true});
