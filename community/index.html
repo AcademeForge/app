@@ -205,7 +205,6 @@ textarea,input{-webkit-user-select:text;user-select:text;}
 .post-text{font-size:14px;line-height:1.65;color:var(--t2);white-space:pre-wrap;word-wrap:break-word;overflow-wrap:break-word;margin-bottom:14px;}
 .post-actions{display:flex;align-items:center;gap:16px;padding-top:12px;border-top:1px solid var(--b1);}
 .action-btn{font-size:12.5px;font-weight:700;color:var(--t2);display:flex;align-items:center;gap:5px;}
-.action-btn.liked{color:var(--rose);}
 
 /* ── USERNAME BANNER ── */
 .username-banner{margin:12px 12px 0;padding:14px;border-radius:14px;background:var(--grp);border:1px solid var(--bc);display:flex;align-items:center;gap:10px;}
@@ -626,7 +625,7 @@ textarea.compose.over{border-color:var(--err);}
       <div class="menu-label">Options</div>
       <button id="menuPinBtn" class="pin-action hidden" onclick="nxTogglePin()">📌 Pin Post</button>
       <button id="menuUnpinBtn" class="pin-action hidden" onclick="nxTogglePin()">📌 Unpin Post</button>
-      <button id="menuReportBtn" onclick="nxOpenReport()"> Report</button>
+      <button id="menuReportBtn" onclick="nxOpenReport()">🚩 Report</button>
       <button id="menuEditBtn" style="display:none;" onclick="nxEditTarget()">✏️ Edit</button>
       <button id="menuDeleteBtn" class="danger" style="display:none;" onclick="nxDeleteTarget()">🗑 Delete</button>
       <button onclick="nxCloseMenu()">✕ Cancel</button>
@@ -1028,7 +1027,6 @@ function renderPostHtml(p, mk, admin, showPinned){
   const pinBar=(showPinned&&p.is_pinned)?`<div class="pin-badge">📌 Pinned</div>`:'';
   const prev=esc((p.content||'').replace(/[\n\r]/g,' ').slice(0,55)).replace(/'/g,'&#39;');
   
-  const isLiked = !!p.is_liked;
   const verCardClass = isVer ? ' verified-post-card' : '';
 
   return `<div class="post-card${p.is_pinned?' pinned':''}${verCardClass}">
@@ -1048,8 +1046,8 @@ function renderPostHtml(p, mk, admin, showPinned){
     </div>
     <p class="post-text">${esc(p.content||'')}</p>
     <div class="post-actions">
-      <button class="action-btn ${isLiked?'liked':''}" style="${isLiked?'color:var(--rose)':''}" onclick="nxLikePost(${p.id})">
-        ${isLiked?'❤️':'🤍'} <span class="cnt">${p.likes_count||0}</span>
+      <button class="action-btn" onclick="nxLikePost(${p.id})">
+        ❤️ <span class="cnt">${p.likes_count||0}</span>
       </button>
       <button class="action-btn" onclick="nxOpenComments(${p.id},'${prev}')">💬 <span class="cnt">${p.comments_count||0}</span></button>
     </div>
@@ -1131,21 +1129,8 @@ async function nxCreatePost(){
 
 async function nxLikePost(pid){
   if(!sKey()) return;
-  
-  const res = await edgeCall({action:'toggle_post_like',post_id:pid});
-  if(res && res.ok){
-      _posts = _posts.map(p => {
-          if(String(p.id) === String(pid)) {
-              let newCount = Number(p.likes_count || 0);
-              const wasLiked = !!p.is_liked;
-              if(res.liked && !wasLiked) newCount++;
-              else if(!res.liked && wasLiked) newCount = Math.max(0, newCount - 1);
-              return {...p, likes_count: newCount, is_liked: res.liked};
-          }
-          return p;
-      });
-      renderListToContainer(_posts, 'postsList', true);
-  }
+  await edgeCall({action:'toggle_post_like',post_id:pid});
+  await nxLoadPosts();
 }
 
 function nxOpenComments(pid,preview){
@@ -1175,7 +1160,6 @@ function renderComments(list){
     const replies=byP[String(c.id)]||[];
     const prev=esc((c.content||'').slice(0,45)).replace(/'/g,'&#39;');
     const isVer=!!c.is_verified;
-    const isLiked=!!c.is_liked;
     return `<div class="cmt-card">
       <div class="cmt-top">
         <div class="cmt-info" onclick="nxOpenProfile('${esc(c.student_key)}','${esc(c.student_name).replace(/'/g,"&#39;")}')"><strong>${esc(c.student_name||'Student')}${isVer?' <span class="verified-badge">✔</span>':''}</strong><small>${esc(timeAgo(c.created_at))}</small></div>
@@ -1183,7 +1167,7 @@ function renderComments(list){
       </div>
       <p class="cmt-text">${esc(c.content||'')}</p>
       <div class="cmt-actions">
-        <button class="cmt-btn ${isLiked?'liked':''}" style="${isLiked?'color:var(--rose)':''}" onclick="nxLikeComment(${c.id})">${isLiked?'❤️':'🤍'} ${c.likes_count||0}</button>
+        <button class="cmt-btn" onclick="nxLikeComment(${c.id})">❤️ ${c.likes_count||0}</button>
         <button class="cmt-btn" onclick="nxOpenReply(${c.id},'${prev}')">Reply</button>
       </div>
       ${replies.length?`
@@ -1193,7 +1177,6 @@ function renderComments(list){
             const rm=String(r.student_key||'')===String(mk||'');
             const rp=esc((r.content||'').slice(0,45)).replace(/'/g,'&#39;');
             const rVer=!!r.is_verified;
-            const rLiked=!!r.is_liked;
             return `<div>
               <div class="cmt-top">
                 <div class="cmt-info" onclick="nxOpenProfile('${esc(r.student_key)}','${esc(r.student_name).replace(/'/g,"&#39;")}')"><strong>${esc(r.student_name||'Student')}${rVer?' <span class="verified-badge">✔</span>':''}</strong><small>${esc(timeAgo(r.created_at))}</small></div>
@@ -1201,7 +1184,7 @@ function renderComments(list){
               </div>
               <p class="cmt-text">${esc(r.content||'')}</p>
               <div class="cmt-actions">
-                <button class="cmt-btn ${rLiked?'liked':''}" style="${rLiked?'color:var(--rose)':''}" onclick="nxLikeComment(${r.id})">${rLiked?'❤️':'🤍'} ${r.likes_count||0}</button>
+                <button class="cmt-btn" onclick="nxLikeComment(${r.id})">❤️ ${r.likes_count||0}</button>
                 <button class="cmt-btn" onclick="nxOpenReply(${r.id},'${rp}')">Reply</button>
               </div>
             </div>`;
@@ -1229,36 +1212,14 @@ async function nxCreateComment(){
   const res=await edgeCall({action:'create_comment',post_id:_curPostId,parent_comment_id:null,content});
   if(!res||!res.ok){showToast(res?.message||'Could not comment.','err');$('commentSubmitBtn').disabled=false;return;}
   inp.value=''; nxCommentTyping();
-  
-  _posts=_posts.map(p=>String(p.id)===String(_curPostId)?{...p,comments_count:Number(p.comments_count||0)+1}:p);
-  renderListToContainer(_posts, 'postsList', true);
-  await nxLoadComments(_curPostId); 
+  await nxLoadPosts();
+  await nxLoadComments(_curPostId);
 }
 
 async function nxLikeComment(cId){
   if(!sKey()) return;
-  const res = await edgeCall({action:'toggle_comment_like',comment_id:cId});
-  if(res && res.ok) {
-      const btns = document.querySelectorAll(`button[onclick="nxLikeComment(${cId})"]`);
-      btns.forEach(btn => {
-          const text = btn.textContent;
-          let currentCount = parseInt(text.replace(/[^0-9]/g, ''), 10) || 0;
-          const wasLiked = text.includes('❤️');
-          const isLikedNow = res.liked;
-          
-          if(isLikedNow && !wasLiked) currentCount++;
-          else if(!isLikedNow && wasLiked) currentCount = Math.max(0, currentCount - 1);
-          
-          btn.innerHTML = `${isLikedNow ? '❤️' : '🤍'} ${currentCount}`;
-          if(isLikedNow) {
-              btn.classList.add('liked');
-              btn.style.color = 'var(--rose)';
-          } else {
-              btn.classList.remove('liked');
-              btn.style.color = '';
-          }
-      });
-  }
+  await edgeCall({action:'toggle_comment_like',comment_id:cId});
+  if(_curPostId) await nxLoadComments(_curPostId);
 }
 
 function nxOpenReply(pid,preview){
@@ -1281,9 +1242,7 @@ async function nxCreateReply(){
   const res=await edgeCall({action:'create_comment',post_id:_curPostId,parent_comment_id:_replyParentId,content});
   if(!res||!res.ok){showToast(res?.message||'Could not reply.','err');$('replySubmitBtn').disabled=false;return;}
   nxCloseReply();
-  
-  _posts=_posts.map(p=>String(p.id)===String(_curPostId)?{...p,comments_count:Number(p.comments_count||0)+1}:p);
-  renderListToContainer(_posts, 'postsList', true);
+  await nxLoadPosts();
   await nxLoadComments(_curPostId);
 }
 
