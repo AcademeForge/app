@@ -265,6 +265,20 @@ textarea.compose.over{border-color:var(--err);}
 .pin-action{color:var(--pin)!important;}
 
 .hidden{display:none!important;}
+
+/* SEARCH BAR */
+.search-bar{position:relative;padding:8px 12px;background:var(--nav);border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:8px;animation:slideDown .2s var(--ease);}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+.search-inp{flex:1;outline:none;border:1.5px solid var(--b1);border-radius:var(--r1);padding:8px 12px;font-size:13.5px;background:var(--inp);color:var(--t1);font-family:var(--font-body);}
+.search-inp:focus{border-color:var(--p);}
+.search-close{width:30px;height:30px;border-radius:var(--r1);background:var(--inp);display:grid;place-items:center;font-size:18px;color:var(--tm);flex-shrink:0;}
+.search-results{position:absolute;top:calc(100% - 2px);left:12px;right:12px;background:var(--surface);border:1px solid var(--b1);border-top:none;border-radius:0 0 var(--r2) var(--r2);z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.15);max-height:220px;overflow-y:auto;}
+.search-result-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--b1);}
+.search-result-item:last-child{border-bottom:none;}
+.search-result-item:active{background:var(--inp);}
+.search-result-name{font-size:13px;font-weight:700;color:var(--t1);}
+.search-result-user{font-size:11.5px;color:var(--tm);}
+
 </style>
 </head>
 <body>
@@ -280,10 +294,51 @@ textarea.compose.over{border-color:var(--err);}
       </div>
     </div>
     <div class="hdr-right hidden" id="hdrActions">
-      <button class="my-avatar-btn" id="btnMyAvatar" onclick="nxOpenEditProfile()"></button>
-      <button class="hdr-icon-btn" id="btnRefresh" onclick="nxRefresh()" title="Refresh">↻</button>
+      <button class="hdr-icon-btn" id="btnSearch" onclick="nxToggleSearch()" title="Search">🔍</button>
+      <button class="my-avatar-btn" id="btnMyAvatar" onclick="nxOpenMyMenu()"></button>
     </div>
   </header>
+
+  <!-- SEARCH BAR (slides in below header, 30% of header area) -->
+  <div id="searchBar" class="search-bar hidden">
+    <input type="text" class="search-inp" id="searchInp" placeholder="Search by username…" oninput="nxSearchTyping()" autocomplete="off" autocorrect="off" spellcheck="false"/>
+    <button class="search-close" onclick="nxCloseSearch()">×</button>
+    <div class="search-results hidden" id="searchResults"></div>
+  </div>
+
+  <!-- MY MENU SHEET (Profile / My Posts / Edit Profile / Edit Description) -->
+  <div class="modal-ov" id="myMenuModal" onclick="nxCloseMyMenu()">
+    <div class="menu-sheet" onclick="event.stopPropagation()">
+      <div class="modal-drag"></div>
+      <div id="myMenuProfile" style="display:flex;align-items:center;gap:12px;padding:14px 16px 12px;border-bottom:1px solid var(--b1);">
+        <div class="avatar" id="myMenuAvatar" style="width:44px;height:44px;border-radius:14px;font-size:22px;"></div>
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--t1);" id="myMenuName"></div>
+          <div style="font-size:11.5px;color:var(--tm);margin-top:2px;" id="myMenuUsername"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:24px;padding:12px 16px;border-bottom:1px solid var(--b1);">
+        <button onclick="nxOpenFollowers()" style="flex:1;text-align:center;font-size:12px;font-weight:700;color:var(--t2);display:flex;flex-direction:column;align-items:center;gap:2px;"><b id="myMenuFollowers" style="font-size:15px;color:var(--t1);">—</b><span>Followers</span></button>
+        <button onclick="nxOpenFollowing()" style="flex:1;text-align:center;font-size:12px;font-weight:700;color:var(--t2);display:flex;flex-direction:column;align-items:center;gap:2px;"><b id="myMenuFollowing" style="font-size:15px;color:var(--t1);">—</b><span>Following</span></button>
+        <button onclick="nxOpenMyPostsFromMenu()" style="flex:1;text-align:center;font-size:12px;font-weight:700;color:var(--t2);display:flex;flex-direction:column;align-items:center;gap:2px;"><b id="myMenuPosts" style="font-size:15px;color:var(--t1);">—</b><span>Posts</span></button>
+      </div>
+      <button onclick="nxEditProfileFromMenu()">✏️ Edit Profile</button>
+      <button onclick="nxEditDescriptionFromMenu()">📝 Edit Description</button>
+      <button onclick="nxCloseMyMenu()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- FOLLOWERS / FOLLOWING MODAL -->
+  <div class="modal-ov" id="followListModal" onclick="nxCloseFollowList()">
+    <div class="modal-card" onclick="event.stopPropagation()" style="max-height:70dvh;">
+      <div class="modal-drag"></div>
+      <div class="modal-head">
+        <div><h3 id="followListTitle">Followers</h3></div>
+        <button class="modal-close" onclick="nxCloseFollowList()">×</button>
+      </div>
+      <div class="modal-body" id="followListBody" style="padding:8px 0;"></div>
+    </div>
+  </div>
 
   <!-- FEED / CHATS TAB BAR -->
   <div class="tab-bar hidden" id="mainTabBar">
@@ -328,8 +383,16 @@ textarea.compose.over{border-color:var(--err);}
 
   <!-- ── CHATS TAB ── -->
   <div class="chat-screen hidden" id="chatsTab">
+    <div style="padding:10px 12px 6px;background:var(--surface);border-bottom:1px solid var(--b1);flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:8px;background:var(--inp);border-radius:var(--r1);padding:8px 12px;">
+        <span style="font-size:14px;flex-shrink:0;">🔍</span>
+        <input type="text" id="chatSearchInp" style="flex:1;outline:none;border:none;background:none;font-size:13px;color:var(--t1);font-family:var(--font-body);" placeholder="Search users by username to message…" oninput="nxChatSearch()" autocomplete="off"/>
+        <button id="chatSearchClear" style="display:none;font-size:16px;color:var(--tm);" onclick="nxClearChatSearch()">×</button>
+      </div>
+      <div class="hidden" id="chatSearchResults" style="background:var(--surface);border:1px solid var(--b1);border-radius:var(--r1);margin-top:6px;max-height:160px;overflow-y:auto;"></div>
+    </div>
     <div class="chat-list" id="chatList">
-      <div class="state-msg"><div class="icon">💬</div><span>No conversations yet.<br>Message a student from their profile.</span></div>
+      <div class="state-msg"><div class="icon">💬</div><span>No conversations yet.<br>Search for a user above to start chatting.</span></div>
     </div>
   </div>
 
@@ -542,8 +605,9 @@ textarea.compose.over{border-color:var(--err);}
    AF NEXUS v4  — Feed + Chats + Profiles + Username + Follow + DM edit/delete
 ══════════════════════════════════════════════ */
 
-const CACHE_KEY    = 'af_nx_posts_cache_v2';
-const CACHE_TTL_MS = 5 * 60 * 1000;
+const CACHE_KEY    = 'af_nx_posts_cache_v3';
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; /* 24 hours */
+const CACHE_MIN_POSTS = 10;
 const STUDENT_URL  = "https://afooyyydhlwngzssgqih.supabase.co";
 const STUDENT_KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb295eXlkaGx3bmd6c3NncWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDQxMjgsImV4cCI6MjA5NDIyMDEyOH0.KG0XO0oP_2MpewHoIwTtbrKg5FkyOYRUtVzLH1MSJiE";
 
@@ -596,17 +660,24 @@ function avatarHTML(name,emoji,extraClass=''){
   return `<div class="avatar initials${extraClass?(' '+extraClass):''}">${esc(initials(name))}</div>`;
 }
 
-/* ── CACHE ── */
 function cacheGet(){
   try{
-    const raw=localStorage.getItem(CACHE_KEY);
+    const raw=sessionStorage.getItem(CACHE_KEY);
     if(!raw) return {posts:[],fresh:false};
     const obj=JSON.parse(raw);
-    return {posts:Array.isArray(obj.data)?obj.data:[],fresh:(Date.now()-obj.ts)<CACHE_TTL_MS};
+    const fresh=(Date.now()-obj.ts)<CACHE_TTL_MS;
+    return {posts:Array.isArray(obj.data)?obj.data:[],fresh};
   }catch(e){return {posts:[],fresh:false};}
 }
-function cacheSet(posts){try{localStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),data:posts||[]}));}catch(e){}}
-function cacheClear(){try{localStorage.removeItem(CACHE_KEY);}catch(e){}}
+function cacheSet(posts){
+  try{
+    const toStore=Array.isArray(posts)?posts:[];
+    /* always store at least CACHE_MIN_POSTS if available */
+    sessionStorage.setItem(CACHE_KEY,JSON.stringify({ts:Date.now(),data:toStore}));
+  }catch(e){}
+}
+function cacheClear(){try{sessionStorage.removeItem(CACHE_KEY);}catch(e){}}
+
 
 function getPeerEmoji(key){
   try{const m=JSON.parse(localStorage.getItem('af_peer_emojis')||'{}');return m[key]||'';}catch(e){return '';}
@@ -673,6 +744,142 @@ function syncAvatarBtn(){
   btn.innerHTML=e?`${e} <span>${u?'@'+esc(u):'Edit'}</span>`:`<span>👤</span> <span>${u?'@'+esc(u):'Set up'}</span>`;
 }
 
+/* ══ MY MENU ══ */
+let _myMenuStats={followers:0,following:0,posts:0};
+function nxOpenMyMenu(){
+  const e=getMyEmoji(), u=getMyUsername(), n=sName();
+  const av=$('myMenuAvatar');
+  av.className='avatar'+(e?'':' initials');
+  av.style.cssText='width:44px;height:44px;border-radius:14px;font-size:22px;';
+  av.textContent=e||initials(n);
+  $('myMenuName').textContent=n;
+  $('myMenuUsername').textContent=u?'@'+u:'No username set';
+  $('myMenuModal').classList.add('open');
+  nxLoadMyMenuStats();
+}
+function nxCloseMyMenu(){$('myMenuModal').classList.remove('open');}
+async function nxLoadMyMenuStats(){
+  const res=await edgeCall({action:'get_my_profile'});
+  if(res&&res.ok&&res.profile){
+    $('myMenuFollowers').textContent=res.followers_count||0;
+    $('myMenuFollowing').textContent=res.following_count||0;
+    _myMenuStats={followers:res.followers_count||0,following:res.following_count||0,posts:res.posts_count||0};
+  }
+  const res2=await edgeCall({action:'my_posts'});
+  if(res2&&res2.ok&&Array.isArray(res2.posts)) $('myMenuPosts').textContent=res2.posts.length||0;
+}
+function nxEditProfileFromMenu(){nxCloseMyMenu();nxOpenEditProfile();}
+function nxEditDescriptionFromMenu(){nxCloseMyMenu();nxOpenEditProfile();}
+function nxOpenMyPostsFromMenu(){nxCloseMyMenu();nxSwitchTab('feed');nxOpenMyPosts();}
+
+/* ══ FOLLOWERS / FOLLOWING MODAL ══ */
+let _followListType='followers';
+async function nxOpenFollowers(){
+  _followListType='followers';
+  nxCloseMyMenu();
+  $('followListTitle').textContent='Followers';
+  $('followListBody').innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
+  $('followListModal').classList.add('open');
+  const res=await edgeCall({action:'get_follow_list',list_type:'followers'});
+  renderFollowList(res);
+}
+async function nxOpenFollowing(){
+  _followListType='following';
+  nxCloseMyMenu();
+  $('followListTitle').textContent='Following';
+  $('followListBody').innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
+  $('followListModal').classList.add('open');
+  const res=await edgeCall({action:'get_follow_list',list_type:'following'});
+  renderFollowList(res);
+}
+function renderFollowList(res){
+  const box=$('followListBody');
+  const list=res&&res.ok&&Array.isArray(res.users)?res.users:[];
+  if(!list.length){box.innerHTML='<div class="state-msg" style="padding:20px;"><span>No users here yet.</span></div>';return;}
+  box.innerHTML=list.map(u=>`
+    <div style="display:flex;align-items:center;gap:11px;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--b1);" onclick="nxCloseFollowList();nxOpenProfile('${esc(u.key)}','${esc(u.name).replace(/'/g,"&#39;")}')">
+      ${avatarHTML(u.name,u.emoji||'',' avatar-sm')}
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:700;color:var(--t1);">${esc(u.name)}</div>
+        ${u.username?`<div style="font-size:11px;color:var(--tm);">@${esc(u.username)}</div>`:''}
+      </div>
+    </div>`).join('');
+}
+function nxCloseFollowList(){$('followListModal').classList.remove('open');}
+
+/* ══ SEARCH (header) ══ */
+let _searchTimer=null;
+function nxToggleSearch(){
+  const bar=$('searchBar');
+  const isHidden=bar.classList.contains('hidden');
+  if(isHidden){bar.classList.remove('hidden');setTimeout(()=>$('searchInp')&&$('searchInp').focus(),80);}
+  else{nxCloseSearch();}
+}
+function nxCloseSearch(){
+  $('searchBar').classList.add('hidden');
+  if($('searchInp')) $('searchInp').value='';
+  $('searchResults').classList.add('hidden');
+  $('searchResults').innerHTML='';
+}
+function nxSearchTyping(){
+  const v=($('searchInp').value||'').trim();
+  clearTimeout(_searchTimer);
+  if(!v){$('searchResults').classList.add('hidden');return;}
+  _searchTimer=setTimeout(()=>nxDoSearch(v,'searchResults'),300);
+}
+async function nxDoSearch(q,resultElId){
+  const box=$(resultElId); if(!box) return;
+  box.classList.remove('hidden');
+  box.innerHTML='<div class="state-msg" style="padding:12px;"><div class="spinner"></div></div>';
+  const res=await edgeCall({action:'search_users',query:q});
+  const users=res&&res.ok&&Array.isArray(res.users)?res.users:[];
+  if(!users.length){box.innerHTML='<div class="state-msg" style="padding:12px;font-size:12px;"><span>No users found.</span></div>';return;}
+  box.innerHTML=users.map(u=>`
+    <div class="search-result-item" onclick="nxCloseSearch();nxCloseSearch2();nxOpenProfile('${esc(u.key)}','${esc(u.name).replace(/'/g,"&#39;")}')">
+      ${avatarHTML(u.name,u.emoji||'',' avatar-sm')}
+      <div>
+        <div class="search-result-name">${esc(u.name)}</div>
+        ${u.username?`<div class="search-result-user">@${esc(u.username)}</div>`:''}
+      </div>
+    </div>`).join('');
+}
+
+/* ══ CHAT SEARCH ══ */
+let _chatSearchTimer=null;
+function nxChatSearch(){
+  const v=($('chatSearchInp').value||'').trim();
+  const clearBtn=$('chatSearchClear');
+  if(clearBtn) clearBtn.style.display=v?'block':'none';
+  clearTimeout(_chatSearchTimer);
+  if(!v){$('chatSearchResults').classList.add('hidden');return;}
+  _chatSearchTimer=setTimeout(()=>nxDoChatSearch(v),300);
+}
+function nxClearChatSearch(){
+  if($('chatSearchInp')) $('chatSearchInp').value='';
+  if($('chatSearchClear')) $('chatSearchClear').style.display='none';
+  $('chatSearchResults').classList.add('hidden');
+  $('chatSearchResults').innerHTML='';
+}
+async function nxDoChatSearch(q){
+  const box=$('chatSearchResults'); if(!box) return;
+  box.classList.remove('hidden');
+  box.innerHTML='<div class="state-msg" style="padding:12px;"><div class="spinner"></div></div>';
+  const res=await edgeCall({action:'search_users',query:q});
+  const users=res&&res.ok&&Array.isArray(res.users)?res.users:[];
+  if(!users.length){box.innerHTML='<div class="state-msg" style="padding:10px;font-size:12px;"><span>No users found for "'+esc(q)+'".</span></div>';return;}
+  box.innerHTML=users.map(u=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;border-bottom:1px solid var(--b1);" onclick="nxClearChatSearch();nxOpenDM('${esc(u.key)}','${esc(u.name).replace(/'/g,"&#39;")}')">
+      ${avatarHTML(u.name,u.emoji||'',' avatar-sm')}
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:700;color:var(--t1);">${esc(u.name)}</div>
+        ${u.username?`<div style="font-size:11px;color:var(--tm);">@${esc(u.username)}</div>`:''}
+      </div>
+      <span style="font-size:12px;font-weight:700;color:var(--p);">Message</span>
+    </div>`).join('');
+}
+function nxCloseSearch2(){/* stub for consistency */}
+
+
 /* ══ TAB SWITCHING ══ */
 function nxSwitchTab(tab){
   _activeTab=tab;
@@ -732,8 +939,13 @@ async function nxLoadMyProfile(){
 /* ══ LOAD POSTS ══ */
 async function nxLoadPosts(showSpinner=true){
   if(!isLoggedIn()){init();return;}
-  if(showSpinner&&!_posts.length)
+  const {posts:cached,fresh}=cacheGet();
+  if(cached.length){
+    _posts=cached; renderPosts(_posts);
+    if(fresh) return; /* still fresh, no need to fetch */
+  } else if(showSpinner){
     $('postsList').innerHTML='<div class="state-msg"><div class="spinner"></div><span>Loading…</span></div>';
+  }
   const res=await edgeCall({action:'fetch_posts',mode:_mode});
   if(!res||!res.ok){
     if(!_posts.length) $('postsList').innerHTML='<div class="state-msg"><div class="icon">😕</div><span>Could not load posts.</span></div>';
@@ -749,12 +961,12 @@ async function nxLoadPosts(showSpinner=true){
 
 /* ══ REFRESH ══ */
 function nxRefresh(){
-  if(_activeTab==='chats'){nxLoadConvList();showToast('Chats refreshed','info','↻');return;}
+  if(_activeTab==='chats'){nxLoadConvList();return;}
   if(_myMode){
     $('postsList').innerHTML='<div class="state-msg"><div class="spinner"></div><span>Loading…</span></div>';
-    nxLoadMyPosts(); showToast('My Posts refreshed','info','↻');
+    nxLoadMyPosts();
   } else {
-    cacheClear(); nxLoadPosts(false); showToast('Feed refreshed','info','↻');
+    cacheClear(); nxLoadPosts(false);
   }
 }
 
@@ -793,7 +1005,6 @@ function renderPosts(posts){
       <div class="post-actions">
         <button class="action-btn" onclick="nxLikePost(${p.id})">❤ <span class="cnt">${p.likes_count||0}</span></button>
         <button class="action-btn" onclick="nxOpenComments(${p.id},'${prev}')">💬 <span class="cnt">${p.comments_count||0}</span></button>
-        ${!mine?`<button class="action-btn report-btn" onclick="nxOpenReportForPost(${p.id})" title="Report">🚩</button>`:''}
       </div>
     </div>`;
   }).join('');
@@ -1126,9 +1337,10 @@ async function nxLoadProfilePosts(key){
 }
 function nxMessageFromProfile(){
   if(!_profileData) return;
+  const key=_profileData.key, name=_profileData.name;
   nxCloseProfile();
-  nxSwitchTab('chats');
-  nxOpenDM(_profileData.key,_profileData.name);
+  /* Open DM directly without switching tab first to avoid flicker */
+  nxOpenDM(key,name);
 }
 
 /* ══ EDIT PROFILE (avatar + username + bio) ══ */
@@ -1343,6 +1555,8 @@ async function nxPollDMs(force){
 /* ══ KEYBOARD ESC ══ */
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape') return;
+  if($('myMenuModal').classList.contains('open')){nxCloseMyMenu();return;}
+  if($('followListModal').classList.contains('open')){nxCloseFollowList();return;}
   if($('editProfileModal').classList.contains('open')){nxCloseEditProfile();return;}
   if($('reportModal').classList.contains('open')){nxCloseReport();return;}
   if($('menuModal').classList.contains('open')){nxCloseMenu();return;}
@@ -1351,6 +1565,7 @@ document.addEventListener('keydown',e=>{
   if($('composerModal').classList.contains('open')){nxCloseComposer();return;}
   if($('dmScreen').classList.contains('open')){nxCloseDM();return;}
   if($('profileScreen').classList.contains('open')){nxCloseProfile();return;}
+  if(!$('searchBar').classList.contains('hidden')){nxCloseSearch();return;}
 });
 
 /* ══ BOOT ══ */
