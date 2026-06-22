@@ -197,8 +197,9 @@ a{text-decoration:none;color:inherit;}
 .error-text{padding:12px;border-radius:var(--r2);font-size:12.5px;font-weight:800;background:rgba(239,68,68,.08);color:var(--err);}
 
 /* ── BOTTOM NAV (single Batches entry — Student folded in) ── */
-.bnav{position:absolute;bottom:0;left:0;right:0;z-index:999;height:var(--nav-h);background:var(--nav);border-top:1px solid var(--b1);display:flex;align-items:center;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px);transition:transform .2s ease,opacity .2s ease;}
-.bnav.kb-hidden{transform:translateY(100%);opacity:0;pointer-events:none;}
+.bnav{position:absolute;bottom:0;left:0;right:0;z-index:999;height:var(--nav-h);background:var(--nav);border-top:1px solid var(--b1);display:flex;align-items:center;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px);transition:transform .18s ease,opacity .18s ease;}
+.bnav.kb-hidden{transform:translateY(110%);opacity:0;pointer-events:none;}
+.page.kb-open{padding-bottom:20px!important;}
 .bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:100%;border-radius:var(--r2);padding:6px 4px;position:relative;}
 .bnav-btn::before{content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--p);border-radius:99px;transition:width .15s ease;}
 .bnav-btn.active::before{width:24px;}
@@ -397,11 +398,37 @@ const COURSES_KEY    = 'af_student_courses_v1';
 const CHAPTERS_PFX   = 'af_chapters_v1_';
 const LECTURES_PFX   = 'af_lectures_v1_';
 const NOTES_PFX      = 'af_notes_v1_';
-const NOTES_KEY_PFX  = 'af_notes_v1_';
 const STUDENT_TTL    = 12 * 60 * 60 * 1000; // 12 hours
 
-/* session state — survives refresh, cleared on tab/browser close */
-const SS_KEY = 'af_ui_state_v1';
+/* ─── UI STATE PERSISTENCE (localStorage, survives refresh) ─── */
+const UI_STATE_KEY = 'af_batches_ui_state_v1';
+function saveUIState() {
+  try {
+    // figure out which student panel is visible
+    let visiblePanel = 'courses';
+    for (const p of STUDENT_PANELS) {
+      const el = document.getElementById('panel' + p.charAt(0).toUpperCase() + p.slice(1));
+      if (el && !el.classList.contains('hidden')) { visiblePanel = p; break; }
+    }
+    // batch view
+    const batchDetailActive = document.getElementById('bDetailView') &&
+      document.getElementById('bDetailView').classList.contains('active');
+    localStorage.setItem(UI_STATE_KEY, JSON.stringify({
+      activeTab,
+      studentPanel: visiblePanel,
+      selectedCourseId: selectedCourse ? selectedCourse.id : null,
+      learningMode,
+      selectedChapterTitle,
+      selectedChapterNumber,
+      selectedChapterId,
+      selectedBatchId: selectedBatch ? selectedBatch.id : null,
+      batchDetailActive: !!batchDetailActive
+    }));
+  } catch(_) {}
+}
+function loadUIState() {
+  try { return JSON.parse(localStorage.getItem(UI_STATE_KEY) || 'null'); } catch(_) { return null; }
+}
 
 const COURSE_IDS = {
   "video-editing":         "4cdd5351-b370-4d07-8841-b4024a0bcb27",
@@ -430,6 +457,7 @@ let learningMode     = 'lectures';
 let currentChapters       = [];
 let selectedChapterTitle  = '';
 let selectedChapterNumber = '';
+let selectedChapterId     = '';
 
 /* ─── HELPERS ────────────────────────────────────────────── */
 const $id = id => document.getElementById(id);
@@ -492,38 +520,6 @@ function cacheClear(keyOrPrefix) {
   } catch(_){}
 }
 
-/* ─── SESSION STATE (survive page refresh) ───────────────── */
-function saveUIState() {
-  try {
-    const state = {
-      activeTab,
-      bView: $id('bDetailView') && $id('bDetailView').classList.contains('active') ? 'detail' : 'list',
-      selectedBatchId: selectedBatch ? selectedBatch.id : null,
-      studentPanel: (function() {
-        const panels = ['noAuth','courses','noCourse','courseDetail','learning','chapters','content'];
-        for (const p of panels) {
-          const el = $id('panel' + p.charAt(0).toUpperCase() + p.slice(1));
-          if (el && !el.classList.contains('hidden')) return p;
-        }
-        return 'courses';
-      })(),
-      selectedCourseId: selectedCourse ? selectedCourse.id : null,
-      learningMode,
-      selectedChapterTitle,
-      selectedChapterNumber,
-    };
-    sessionStorage.setItem(SS_KEY, JSON.stringify(state));
-  } catch(_) {}
-}
-
-function loadUIState() {
-  try {
-    const raw = sessionStorage.getItem(SS_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch(_) { return null; }
-}
-
 /* ─── SUPABASE (lazy — only imported when a network call is needed) ─── */
 let _sb = null;
 function loadScript(src) {
@@ -572,8 +568,33 @@ function switchTab(tab) {
 }
 
 function handleRefresh() {
-  if (activeTab === 'batches') forceRefreshBatches();
-  else forceRefreshCourses();
+  if (activeTab === 'batches') { forceRefreshBatches(); return; }
+  // Student tab — refresh only the data for the current panel, don't navigate away
+  const state = loadUIState();
+  const panel = state ? (state.studentPanel || 'courses') : 'courses';
+  if (panel === 'chapters' || panel === 'content') {
+    // Refresh chapters for current course without moving to courses list
+    if (selectedCourse) {
+      cacheClear(CHAPTERS_PFX + selectedCourse.id);
+      if (panel === 'content' && selectedChapterId) {
+        cacheClear(LECTURES_PFX + selectedChapterId);
+        cacheClear(NOTES_PFX + selectedChapterId);
+      }
+      showToast('Refreshing…','info','↻');
+      loadChapters().then(() => {
+        if (panel === 'content' && selectedChapterId) {
+          const chObj = currentChapters.find(c => String(c.id)===String(selectedChapterId));
+          const isLocked = chObj ? chObj.is_locked===true : false;
+          if (!isLocked) {
+            if (learningMode==='notes') loadNotes(selectedChapterId);
+            else loadLectures(selectedChapterId);
+          }
+        }
+      });
+      return;
+    }
+  }
+  forceRefreshCourses();
 }
 
 /* ════════════════════════════════════════════════════════
@@ -950,6 +971,8 @@ async function openChapterContent(chapterId, isLocked) {
   const chObj = currentChapters.find(c => String(c.id)===String(chapterId));
   selectedChapterTitle  = chObj ? safe(chObj.title,'') : '';
   selectedChapterNumber = chObj ? safe(chObj.chapter_number,'') : '';
+  selectedChapterId     = String(chapterId);
+  saveUIState();
   if (isLocked===true) {
     $id('sContentTitle').textContent='🔒 Chapter Locked';
     $id('sContentSubtitle').textContent='This chapter will unlock after content upload.';
@@ -1037,131 +1060,120 @@ function openVideo(btn) {
     sessionStorage.setItem('af_lecture_chapter',     chapterLabel);
     sessionStorage.setItem('af_lecture_course',      selectedCourse ? (selectedCourse.title||'') : '');
   } catch(_){}
+  saveUIState();
   window.location.href = '/batches/lecture-player.html';
 }
 function openPdf(url)   { if(!url){showToast('PDF not available yet.','warn','Locked');return;} window.open(url,'_blank'); }
 
 /* ════════════════════════════════════════════════════════
-   KEYBOARD — hide bottom nav when virtual keyboard appears
-   ════════════════════════════════════════════════════════ */
-(function() {
-  const nav = document.querySelector('.bnav') || document.querySelector('nav.bnav');
-  if (!nav) return;
-
-  function applyKbState() {
-    // visualViewport height shrinks when keyboard opens
-    const vv = window.visualViewport;
-    if (!vv) return;
-    const keyboardOpen = (window.innerHeight - vv.height) > 80;
-    nav.classList.toggle('kb-hidden', keyboardOpen);
-  }
-
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', applyKbState, { passive: true });
-    window.visualViewport.addEventListener('scroll', applyKbState, { passive: true });
-  }
-
-  // fallback: focus/blur on any input/select
-  document.addEventListener('focusin', function(e) {
-    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')) {
-      nav.classList.add('kb-hidden');
-    }
-  }, { passive: true });
-  document.addEventListener('focusout', function() {
-    setTimeout(applyKbState, 150); // brief delay so vv has updated
-  }, { passive: true });
-})();
-
-/* ════════════════════════════════════════════════════════
-   INIT
+   INIT — restores UI state across refresh and back-navigation
    ════════════════════════════════════════════════════════ */
 async function init() {
   const state = loadUIState();
 
-  if (state && state.activeTab) {
-    // Restore tab header + visibility without triggering full loadStudentData yet
-    activeTab = state.activeTab;
-    $id('mainTabBatches').classList.toggle('active', activeTab === 'batches');
-    $id('mainTabStudent').classList.toggle('active', activeTab === 'student');
-    $id('viewBatches').classList.toggle('hidden', activeTab !== 'batches');
-    $id('viewStudent').classList.toggle('hidden', activeTab !== 'student');
-    $id('hdrCount').classList.toggle('hidden', activeTab !== 'batches');
-    $id('hdrTitle').textContent = activeTab === 'batches' ? 'Batches 📚' : 'Student 🎓';
+  // Always init batches first (fast, static)
+  await initBatches(false);
 
-    // Always init batches (fast, static)
-    await initBatches(false);
+  if (!state) {
+    switchTab('batches');
+    return;
+  }
 
-    if (activeTab === 'batches') {
-      // Restore batch detail if user was on it
-      if (state.bView === 'detail' && state.selectedBatchId) {
-        openDetail(state.selectedBatchId);
+  // Restore active tab without triggering loadStudentData yet
+  activeTab = state.activeTab || 'batches';
+  $id('mainTabBatches').classList.toggle('active', activeTab==='batches');
+  $id('mainTabStudent').classList.toggle('active', activeTab==='student');
+  $id('viewBatches').classList.toggle('hidden', activeTab!=='batches');
+  $id('viewStudent').classList.toggle('hidden', activeTab!=='student');
+  $id('hdrCount').classList.toggle('hidden', activeTab!=='batches');
+  $id('hdrTitle').textContent = activeTab==='batches' ? 'Batches 📚' : 'Student 🎓';
+
+  if (activeTab === 'batches') {
+    // Restore batch detail view if it was open
+    if (state.batchDetailActive && state.selectedBatchId) {
+      openDetail(state.selectedBatchId);
+    }
+    return;
+  }
+
+  // Restore student tab
+  const uuid = localStorage.getItem('af_student_uuid');
+  if (!uuid) { showStudentPanel('noAuth'); return; }
+
+  // Load courses from cache (don't force network)
+  const cachedCourses = cacheGet(COURSES_KEY, STUDENT_TTL);
+  if (cachedCourses && Array.isArray(cachedCourses) && cachedCourses.length) {
+    enrolledCourses = cachedCourses;
+    $id('welcomeText').textContent = 'Welcome ' + (localStorage.getItem('af_student_name') || 'Student');
+    renderCourseCards();
+  } else {
+    // No cache — fetch then restore
+    await loadCourses(false);
+  }
+
+  // Restore selected course
+  if (state.selectedCourseId && enrolledCourses.length) {
+    selectedCourse = enrolledCourses.find(c => String(c.id)===String(state.selectedCourseId)) || null;
+  }
+
+  const panel = state.studentPanel || 'courses';
+
+  if (panel === 'courses' || !selectedCourse) {
+    showStudentPanel(enrolledCourses.length ? 'courses' : 'noCourse');
+    return;
+  }
+
+  // Restore learningMode + chapter state
+  learningMode          = state.learningMode || 'lectures';
+  selectedChapterTitle  = state.selectedChapterTitle  || '';
+  selectedChapterNumber = state.selectedChapterNumber || '';
+  selectedChapterId     = state.selectedChapterId     || '';
+
+  if (panel === 'courseDetail') {
+    openCourseDetail(selectedCourse.id);
+    return;
+  }
+
+  if (panel === 'learning') {
+    openCourseDetail(selectedCourse.id);
+    startLearning();
+    return;
+  }
+
+  if (panel === 'chapters' || panel === 'content') {
+    // Restore chapter mode title
+    $id('sChapterModeTitle').textContent = learningMode==='lectures' ? '🎥 Lectures' : '📝 Notes';
+
+    // Load chapters from cache
+    const cKey = CHAPTERS_PFX + selectedCourse.id;
+    const cachedChapters = cacheGet(cKey, STUDENT_TTL);
+    if (cachedChapters && Array.isArray(cachedChapters)) {
+      renderChapters(cachedChapters);
+    } else {
+      await loadChapters();
+    }
+
+    if (panel === 'content' && selectedChapterId) {
+      // Find locked status from cached chapters
+      const chObj = currentChapters.find(c => String(c.id)===String(selectedChapterId));
+      const isLocked = chObj ? chObj.is_locked===true : false;
+      if (isLocked) {
+        $id('sContentTitle').textContent='🔒 Chapter Locked';
+        $id('sContentSubtitle').textContent='This chapter will unlock after content upload.';
+        $id('sContentList').innerHTML='<p class="error-text">This chapter is currently locked.</p>';
+        showStudentPanel('content');
+      } else {
+        if (learningMode==='notes') await loadNotes(selectedChapterId);
+        else await loadLectures(selectedChapterId);
+        showStudentPanel('content');
       }
     } else {
-      // Restore student tab
-      const uuid = localStorage.getItem('af_student_uuid');
-      if (!uuid) { showStudentPanel('noAuth'); return; }
-
-      $id('welcomeText').textContent = 'Welcome ' + (localStorage.getItem('af_student_name') || 'Student');
-
-      // Load courses from cache (12h TTL) — no network unless forced
-      const cachedCourses = cacheGet(COURSES_KEY, STUDENT_TTL);
-      if (cachedCourses && Array.isArray(cachedCourses) && cachedCourses.length) {
-        enrolledCourses = cachedCourses;
-        renderCourseCards();
-      }
-
-      // Restore selected course
-      if (state.selectedCourseId && enrolledCourses.length) {
-        selectedCourse = enrolledCourses.find(c => String(c.id) === String(state.selectedCourseId)) || null;
-      }
-
-      // Restore learning state
-      if (selectedCourse && (state.studentPanel === 'chapters' || state.studentPanel === 'content')) {
-        learningMode          = state.learningMode || 'lectures';
-        selectedChapterTitle  = state.selectedChapterTitle  || '';
-        selectedChapterNumber = state.selectedChapterNumber || '';
-
-        // Restore chapter mode title
-        $id('sChapterModeTitle').textContent = learningMode === 'lectures' ? '🎥 Lectures' : '📝 Notes';
-
-        // Load chapters from cache
-        const cKey = CHAPTERS_PFX + selectedCourse.id;
-        const cachedChapters = cacheGet(cKey, STUDENT_TTL);
-        if (cachedChapters) {
-          renderChapters(cachedChapters);
-        } else {
-          await loadChapters();
-        }
-
-        if (state.studentPanel === 'content') {
-          // Restore content (lecture/notes list) — find which chapter was open from content title
-          // We can't restore the exact chapter id from state easily, so show chapters panel instead
-          // unless we also saved chapterId — let's restore to content panel with a re-load
-          showStudentPanel('chapters');
-        } else {
-          showStudentPanel('chapters');
-        }
-      } else if (selectedCourse && state.studentPanel === 'courseDetail') {
-        openCourseDetail(selectedCourse.id);
-      } else if (selectedCourse && state.studentPanel === 'learning') {
-        openCourseDetail(selectedCourse.id); // rebuild detail first
-        $id('sLearningTitle').textContent = (selectedCourse.icon||'📘') + ' ' + (selectedCourse.title||'Course');
-        showStudentPanel('learning');
-      } else {
-        // Default: show courses panel
-        if (enrolledCourses.length) {
-          showStudentPanel('courses');
-        } else {
-          // Need to fetch
-          loadStudentData(false);
-        }
-      }
+      showStudentPanel('chapters');
     }
-  } else {
-    // Fresh load — default to batches
-    switchTab('batches');
-    initBatches(false);
+    return;
   }
+
+  showStudentPanel('courses');
 }
 document.addEventListener('DOMContentLoaded', init);
 
@@ -1176,6 +1188,18 @@ document.addEventListener('DOMContentLoaded', init);
   }, { passive: true });
 
   document.addEventListener("touchend", function (e) {
+    // Block swipe when inside deep student panels (chapters, content, courseDetail, learning)
+    if (activeTab === 'student') {
+      const deepPanels = ['panelChapters','panelContent','panelCourseDetail','panelLearning'];
+      for (const pid of deepPanels) {
+        const el = document.getElementById(pid);
+        if (el && !el.classList.contains('hidden')) return;
+      }
+    }
+    // Also block when batch detail is open
+    const bDetail = document.getElementById('bDetailView');
+    if (bDetail && bDetail.classList.contains('active')) return;
+
     const endX = e.changedTouches[0].clientX;
     const endY = e.changedTouches[0].clientY;
     const diffX = endX - startX;
@@ -1238,6 +1262,50 @@ document.addEventListener('DOMContentLoaded', init);
     pulling = false;
     distance = 0;
   });
+})();
+
+/* ── KEYBOARD: hide bottom nav in browser, PWA and APK/WebView ── */
+(function () {
+  const bnav = document.querySelector('.bnav');
+  const page = document.getElementById('page');
+  if (!bnav) return;
+  let _kb = false;
+  const windowH = window.innerHeight;
+
+  function setKb(open) {
+    if (_kb === open) return;
+    _kb = open;
+    bnav.classList.toggle('kb-hidden', open);
+    if (page) page.classList.toggle('kb-open', open);
+  }
+
+  // Strategy 1: visualViewport (Chrome, Android WebView, most reliable)
+  if (window.visualViewport) {
+    const vv = window.visualViewport;
+    function onVV() { setKb((window.innerHeight - vv.height) > 100); }
+    vv.addEventListener('resize', onVV, { passive: true });
+    vv.addEventListener('scroll', onVV, { passive: true });
+  }
+
+  // Strategy 2: window resize fallback (older WebViews, iOS quirks)
+  window.addEventListener('resize', function () {
+    const vvH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    setKb((windowH - vvH) > 150);
+  }, { passive: true });
+
+  // Strategy 3: focus/blur on any input — covers Capacitor/APK builds
+  document.addEventListener('focusin', function (e) {
+    const tag = e.target && e.target.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') setKb(true);
+  }, { passive: true });
+
+  document.addEventListener('focusout', function () {
+    setTimeout(function () {
+      const vv = window.visualViewport;
+      if (vv) setKb((window.innerHeight - vv.height) > 100);
+      else setKb(false);
+    }, 200);
+  }, { passive: true });
 })();
 </script>
 </body>
