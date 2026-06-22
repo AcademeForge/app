@@ -197,7 +197,8 @@ a{text-decoration:none;color:inherit;}
 .error-text{padding:12px;border-radius:var(--r2);font-size:12.5px;font-weight:800;background:rgba(239,68,68,.08);color:var(--err);}
 
 /* ── BOTTOM NAV (single Batches entry — Student folded in) ── */
-.bnav{position:absolute;bottom:0;left:0;right:0;z-index:999;height:var(--nav-h);background:var(--nav);border-top:1px solid var(--b1);display:flex;align-items:center;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px);}
+.bnav{position:absolute;bottom:0;left:0;right:0;z-index:999;height:var(--nav-h);background:var(--nav);border-top:1px solid var(--b1);display:flex;align-items:center;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px);transition:transform .2s ease,opacity .2s ease;}
+.bnav.kb-hidden{transform:translateY(100%);opacity:0;pointer-events:none;}
 .bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:100%;border-radius:var(--r2);padding:6px 4px;position:relative;}
 .bnav-btn::before{content:'';position:absolute;top:6px;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--p);border-radius:99px;transition:width .15s ease;}
 .bnav-btn.active::before{width:24px;}
@@ -390,13 +391,17 @@ const BATCH_OLD      = 99;
 const DISCOUNT       = Math.round(((BATCH_OLD - BATCH_PRICE) / BATCH_OLD) * 100);
 
 const ENROLLED_KEY   = 'af_enrolled_cache_v1';
-const ENROLLED_TTL   = 30 * 60 * 1000; // 30 min
+const ENROLLED_TTL   = 12 * 60 * 60 * 1000; // 12 hours
 
 const COURSES_KEY    = 'af_student_courses_v1';
 const CHAPTERS_PFX   = 'af_chapters_v1_';
 const LECTURES_PFX   = 'af_lectures_v1_';
 const NOTES_PFX      = 'af_notes_v1_';
-const STUDENT_TTL    = 20 * 60 * 1000; // 20 min
+const NOTES_KEY_PFX  = 'af_notes_v1_';
+const STUDENT_TTL    = 12 * 60 * 60 * 1000; // 12 hours
+
+/* session state — survives refresh, cleared on tab/browser close */
+const SS_KEY = 'af_ui_state_v1';
 
 const COURSE_IDS = {
   "video-editing":         "4cdd5351-b370-4d07-8841-b4024a0bcb27",
@@ -487,6 +492,38 @@ function cacheClear(keyOrPrefix) {
   } catch(_){}
 }
 
+/* ─── SESSION STATE (survive page refresh) ───────────────── */
+function saveUIState() {
+  try {
+    const state = {
+      activeTab,
+      bView: $id('bDetailView') && $id('bDetailView').classList.contains('active') ? 'detail' : 'list',
+      selectedBatchId: selectedBatch ? selectedBatch.id : null,
+      studentPanel: (function() {
+        const panels = ['noAuth','courses','noCourse','courseDetail','learning','chapters','content'];
+        for (const p of panels) {
+          const el = $id('panel' + p.charAt(0).toUpperCase() + p.slice(1));
+          if (el && !el.classList.contains('hidden')) return p;
+        }
+        return 'courses';
+      })(),
+      selectedCourseId: selectedCourse ? selectedCourse.id : null,
+      learningMode,
+      selectedChapterTitle,
+      selectedChapterNumber,
+    };
+    sessionStorage.setItem(SS_KEY, JSON.stringify(state));
+  } catch(_) {}
+}
+
+function loadUIState() {
+  try {
+    const raw = sessionStorage.getItem(SS_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch(_) { return null; }
+}
+
 /* ─── SUPABASE (lazy — only imported when a network call is needed) ─── */
 let _sb = null;
 function loadScript(src) {
@@ -531,6 +568,7 @@ function switchTab(tab) {
     loadStudentData(false);
   }
   $id('page').scrollTop = 0;
+  saveUIState();
 }
 
 function handleRefresh() {
@@ -618,6 +656,7 @@ function showBatchList() {
   $id('bListView').style.display = 'block';
   $id('bDetailView').classList.remove('active');
   $id('page').scrollTop = 0;
+  saveUIState();
 }
 
 function openDetail(id) {
@@ -648,6 +687,7 @@ function openDetail(id) {
   $id('bListView').style.display = 'none';
   $id('bDetailView').classList.add('active');
   $id('page').scrollTop = 0;
+  saveUIState();
 }
 
 function loadRazorpay() {
@@ -782,6 +822,7 @@ function showStudentPanel(name) {
   const el = $id('panel' + name.charAt(0).toUpperCase() + name.slice(1));
   if (el) el.classList.remove('hidden');
   $id('page').scrollTop = 0;
+  saveUIState();
 }
 
 let _studentLoadedOnce = false;
@@ -1001,11 +1042,126 @@ function openVideo(btn) {
 function openPdf(url)   { if(!url){showToast('PDF not available yet.','warn','Locked');return;} window.open(url,'_blank'); }
 
 /* ════════════════════════════════════════════════════════
+   KEYBOARD — hide bottom nav when virtual keyboard appears
+   ════════════════════════════════════════════════════════ */
+(function() {
+  const nav = document.querySelector('.bnav') || document.querySelector('nav.bnav');
+  if (!nav) return;
+
+  function applyKbState() {
+    // visualViewport height shrinks when keyboard opens
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const keyboardOpen = (window.innerHeight - vv.height) > 80;
+    nav.classList.toggle('kb-hidden', keyboardOpen);
+  }
+
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', applyKbState, { passive: true });
+    window.visualViewport.addEventListener('scroll', applyKbState, { passive: true });
+  }
+
+  // fallback: focus/blur on any input/select
+  document.addEventListener('focusin', function(e) {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')) {
+      nav.classList.add('kb-hidden');
+    }
+  }, { passive: true });
+  document.addEventListener('focusout', function() {
+    setTimeout(applyKbState, 150); // brief delay so vv has updated
+  }, { passive: true });
+})();
+
+/* ════════════════════════════════════════════════════════
    INIT
    ════════════════════════════════════════════════════════ */
-function init() {
-  switchTab('batches');
-  initBatches(false);
+async function init() {
+  const state = loadUIState();
+
+  if (state && state.activeTab) {
+    // Restore tab header + visibility without triggering full loadStudentData yet
+    activeTab = state.activeTab;
+    $id('mainTabBatches').classList.toggle('active', activeTab === 'batches');
+    $id('mainTabStudent').classList.toggle('active', activeTab === 'student');
+    $id('viewBatches').classList.toggle('hidden', activeTab !== 'batches');
+    $id('viewStudent').classList.toggle('hidden', activeTab !== 'student');
+    $id('hdrCount').classList.toggle('hidden', activeTab !== 'batches');
+    $id('hdrTitle').textContent = activeTab === 'batches' ? 'Batches 📚' : 'Student 🎓';
+
+    // Always init batches (fast, static)
+    await initBatches(false);
+
+    if (activeTab === 'batches') {
+      // Restore batch detail if user was on it
+      if (state.bView === 'detail' && state.selectedBatchId) {
+        openDetail(state.selectedBatchId);
+      }
+    } else {
+      // Restore student tab
+      const uuid = localStorage.getItem('af_student_uuid');
+      if (!uuid) { showStudentPanel('noAuth'); return; }
+
+      $id('welcomeText').textContent = 'Welcome ' + (localStorage.getItem('af_student_name') || 'Student');
+
+      // Load courses from cache (12h TTL) — no network unless forced
+      const cachedCourses = cacheGet(COURSES_KEY, STUDENT_TTL);
+      if (cachedCourses && Array.isArray(cachedCourses) && cachedCourses.length) {
+        enrolledCourses = cachedCourses;
+        renderCourseCards();
+      }
+
+      // Restore selected course
+      if (state.selectedCourseId && enrolledCourses.length) {
+        selectedCourse = enrolledCourses.find(c => String(c.id) === String(state.selectedCourseId)) || null;
+      }
+
+      // Restore learning state
+      if (selectedCourse && (state.studentPanel === 'chapters' || state.studentPanel === 'content')) {
+        learningMode          = state.learningMode || 'lectures';
+        selectedChapterTitle  = state.selectedChapterTitle  || '';
+        selectedChapterNumber = state.selectedChapterNumber || '';
+
+        // Restore chapter mode title
+        $id('sChapterModeTitle').textContent = learningMode === 'lectures' ? '🎥 Lectures' : '📝 Notes';
+
+        // Load chapters from cache
+        const cKey = CHAPTERS_PFX + selectedCourse.id;
+        const cachedChapters = cacheGet(cKey, STUDENT_TTL);
+        if (cachedChapters) {
+          renderChapters(cachedChapters);
+        } else {
+          await loadChapters();
+        }
+
+        if (state.studentPanel === 'content') {
+          // Restore content (lecture/notes list) — find which chapter was open from content title
+          // We can't restore the exact chapter id from state easily, so show chapters panel instead
+          // unless we also saved chapterId — let's restore to content panel with a re-load
+          showStudentPanel('chapters');
+        } else {
+          showStudentPanel('chapters');
+        }
+      } else if (selectedCourse && state.studentPanel === 'courseDetail') {
+        openCourseDetail(selectedCourse.id);
+      } else if (selectedCourse && state.studentPanel === 'learning') {
+        openCourseDetail(selectedCourse.id); // rebuild detail first
+        $id('sLearningTitle').textContent = (selectedCourse.icon||'📘') + ' ' + (selectedCourse.title||'Course');
+        showStudentPanel('learning');
+      } else {
+        // Default: show courses panel
+        if (enrolledCourses.length) {
+          showStudentPanel('courses');
+        } else {
+          // Need to fetch
+          loadStudentData(false);
+        }
+      }
+    }
+  } else {
+    // Fresh load — default to batches
+    switchTab('batches');
+    initBatches(false);
+  }
 }
 document.addEventListener('DOMContentLoaded', init);
 
