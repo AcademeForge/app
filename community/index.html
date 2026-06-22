@@ -233,7 +233,7 @@ textarea.compose.over{border-color:var(--err);}
 .profile-hero-user{font-size:12px;color:var(--tm);font-weight:600;}
 .profile-hero-bio{font-size:12.5px;color:var(--t2);text-align:center;max-width:280px;line-height:1.5;}
 .profile-stats{display:flex;gap:22px;margin-top:2px;}
-.profile-stat{text-align:center;}
+.profile-stat{text-align:center;background:none;border:none;}
 .profile-stat b{display:block;font-size:15px;font-weight:800;color:var(--t1);}
 .profile-stat span{font-size:10.5px;color:var(--tm);font-weight:600;}
 .profile-actions{display:flex;gap:8px;margin-top:4px;}
@@ -266,13 +266,13 @@ textarea.compose.over{border-color:var(--err);}
 
 .hidden{display:none!important;}
 
-/* SEARCH BAR */
-.search-bar{position:relative;padding:8px 12px;background:var(--nav);border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:8px;animation:slideDown .2s var(--ease);}
-@keyframes slideDown{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
-.search-inp{flex:1;outline:none;border:1.5px solid var(--b1);border-radius:var(--r1);padding:8px 12px;font-size:13.5px;background:var(--inp);color:var(--t1);font-family:var(--font-body);}
+/* SEARCH BAR — compact inline dropdown, ~30% of header height, smooth expand */
+.search-bar{position:relative;height:0;padding:0 12px;background:var(--nav);border-bottom:1px solid transparent;display:flex;align-items:center;gap:8px;overflow:hidden;transition:height .22s var(--ease),padding .22s var(--ease),border-color .22s var(--ease);}
+.search-bar.expanded{height:calc(var(--hdr-h) * 0.62);padding:8px 12px;border-bottom:1px solid var(--b1);}
+.search-inp{flex:1;outline:none;border:1.5px solid var(--b1);border-radius:var(--r1);padding:7px 12px;font-size:13px;background:var(--inp);color:var(--t1);font-family:var(--font-body);min-width:0;}
 .search-inp:focus{border-color:var(--p);}
-.search-close{width:30px;height:30px;border-radius:var(--r1);background:var(--inp);display:grid;place-items:center;font-size:18px;color:var(--tm);flex-shrink:0;}
-.search-results{position:absolute;top:calc(100% - 2px);left:12px;right:12px;background:var(--surface);border:1px solid var(--b1);border-top:none;border-radius:0 0 var(--r2) var(--r2);z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.15);max-height:220px;overflow-y:auto;}
+.search-close{width:26px;height:26px;border-radius:var(--r1);background:var(--inp);display:grid;place-items:center;font-size:16px;color:var(--tm);flex-shrink:0;}
+.search-results{position:absolute;top:100%;left:12px;right:12px;background:var(--surface);border:1px solid var(--b1);border-top:none;border-radius:0 0 var(--r2) var(--r2);z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.15);max-height:220px;overflow-y:auto;}
 .search-result-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--b1);}
 .search-result-item:last-child{border-bottom:none;}
 .search-result-item:active{background:var(--inp);}
@@ -437,8 +437,8 @@ textarea.compose.over{border-color:var(--err);}
         </div>
         <div class="profile-hero-bio hidden" id="profileBio"></div>
         <div class="profile-stats">
-          <div class="profile-stat"><b id="profileFollowersCount">0</b><span>Followers</span></div>
-          <div class="profile-stat"><b id="profileFollowingCount">0</b><span>Following</span></div>
+          <button class="profile-stat" onclick="nxOpenFollowersFor()"><b id="profileFollowersCount">0</b><span>Followers</span></button>
+          <button class="profile-stat" onclick="nxOpenFollowingFor()"><b id="profileFollowingCount">0</b><span>Following</span></button>
         </div>
         <div class="profile-actions">
           <button class="profile-follow-btn" id="profileFollowBtn" onclick="nxToggleFollow()">+ Follow</button>
@@ -780,7 +780,7 @@ async function nxOpenFollowers(){
   $('followListTitle').textContent='Followers';
   $('followListBody').innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
   $('followListModal').classList.add('open');
-  const res=await edgeCall({action:'get_follow_list',list_type:'followers'});
+  const res=await edgeCall({action:'get_followers',target_key:sKey()});
   renderFollowList(res);
 }
 async function nxOpenFollowing(){
@@ -789,7 +789,23 @@ async function nxOpenFollowing(){
   $('followListTitle').textContent='Following';
   $('followListBody').innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
   $('followListModal').classList.add('open');
-  const res=await edgeCall({action:'get_follow_list',list_type:'following'});
+  const res=await edgeCall({action:'get_following',target_key:sKey()});
+  renderFollowList(res);
+}
+async function nxOpenFollowersFor(){
+  if(!_profileData) return;
+  $('followListTitle').textContent='Followers';
+  $('followListBody').innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
+  $('followListModal').classList.add('open');
+  const res=await edgeCall({action:'get_followers',target_key:_profileData.key});
+  renderFollowList(res);
+}
+async function nxOpenFollowingFor(){
+  if(!_profileData) return;
+  $('followListTitle').textContent='Following';
+  $('followListBody').innerHTML='<div class="state-msg"><div class="spinner"></div></div>';
+  $('followListModal').classList.add('open');
+  const res=await edgeCall({action:'get_following',target_key:_profileData.key});
   renderFollowList(res);
 }
 function renderFollowList(res){
@@ -797,10 +813,10 @@ function renderFollowList(res){
   const list=res&&res.ok&&Array.isArray(res.users)?res.users:[];
   if(!list.length){box.innerHTML='<div class="state-msg" style="padding:20px;"><span>No users here yet.</span></div>';return;}
   box.innerHTML=list.map(u=>`
-    <div style="display:flex;align-items:center;gap:11px;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--b1);" onclick="nxCloseFollowList();nxOpenProfile('${esc(u.key)}','${esc(u.name).replace(/'/g,"&#39;")}')">
-      ${avatarHTML(u.name,u.emoji||'',' avatar-sm')}
+    <div style="display:flex;align-items:center;gap:11px;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--b1);" onclick="nxCloseFollowList();nxOpenProfile('${esc(u.student_key)}','${esc(u.student_name).replace(/'/g,"&#39;")}')">
+      ${avatarHTML(u.student_name,u.emoji||'',' avatar-sm')}
       <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;font-weight:700;color:var(--t1);">${esc(u.name)}</div>
+        <div style="font-size:13px;font-weight:700;color:var(--t1);">${esc(u.student_name)}</div>
         ${u.username?`<div style="font-size:11px;color:var(--tm);">@${esc(u.username)}</div>`:''}
       </div>
     </div>`).join('');
@@ -811,15 +827,17 @@ function nxCloseFollowList(){$('followListModal').classList.remove('open');}
 let _searchTimer=null;
 function nxToggleSearch(){
   const bar=$('searchBar');
-  const isHidden=bar.classList.contains('hidden');
-  if(isHidden){bar.classList.remove('hidden');setTimeout(()=>$('searchInp')&&$('searchInp').focus(),80);}
+  const isOpen=bar.classList.contains('expanded');
+  if(!isOpen){bar.classList.remove('hidden');requestAnimationFrame(()=>bar.classList.add('expanded'));setTimeout(()=>$('searchInp')&&$('searchInp').focus(),180);}
   else{nxCloseSearch();}
 }
 function nxCloseSearch(){
-  $('searchBar').classList.add('hidden');
-  if($('searchInp')) $('searchInp').value='';
+  const bar=$('searchBar');
+  bar.classList.remove('expanded');
+  if($('searchInp')){$('searchInp').value='';$('searchInp').blur();}
   $('searchResults').classList.add('hidden');
   $('searchResults').innerHTML='';
+  setTimeout(()=>bar.classList.add('hidden'),220);
 }
 function nxSearchTyping(){
   const v=($('searchInp').value||'').trim();
