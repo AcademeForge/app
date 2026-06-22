@@ -279,6 +279,20 @@ textarea.compose.over{border-color:var(--err);}
 .search-result-name{font-size:13px;font-weight:700;color:var(--t1);}
 .search-result-user{font-size:11.5px;color:var(--tm);}
 
+  .verified-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:14px;
+  height:14px;
+  margin-left:4px;
+  border-radius:50%;
+  background:#1d9bf0;
+  color:#fff;
+  font-size:9px;
+  font-weight:700;
+  vertical-align:middle;
+}
 </style>
 </head>
 <body>
@@ -830,7 +844,10 @@ function renderFollowList(res){
     <div style="display:flex;align-items:center;gap:11px;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--b1);" onclick="nxCloseFollowList();nxOpenProfile('${esc(key)}','${esc(name).replace(/'/g,"&#39;")}')">
       ${avatarHTML(name,emoji,' avatar-sm')}
       <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;font-weight:700;color:var(--t1);">${esc(name)}</div>
+      <div style="font-size:13px;font-weight:700;color:var(--t1);">
+  ${esc(name)}
+  ${u.is_verified ? '<span class="verified-badge">✔</span>' : ''}
+</div>
         ${username?`<div style="font-size:11px;color:var(--tm);">@${esc(username)}</div>`:'<div style="font-size:11px;color:var(--tm);">No username set</div>'}
       </div>
     </div>`;
@@ -872,7 +889,10 @@ async function nxDoSearch(q,resultElId){
     <div class="search-result-item" onclick="nxCloseSearch();nxCloseSearch2();nxOpenProfile('${esc(u.student_key)}','${esc(u.student_name||'Student').replace(/'/g,"&#39;")}')">
       ${avatarHTML(u.student_name,u.emoji||'',' avatar-sm')}
       <div>
-        <div class="search-result-name">${esc(u.student_name||'Student')}</div>
+       <div class="search-result-name">
+  ${esc(u.student_name||'Student')}
+  ${u.is_verified ? '<span class="verified-badge">✔</span>' : ''}
+</div>
         ${u.username?`<div class="search-result-user">@${esc(u.username)}</div>`:''}
       </div>
     </div>`).join('');
@@ -1031,7 +1051,10 @@ function renderPosts(posts){
         <div class="post-author" onclick="nxOpenProfile('${esc(p.student_key)}','${esc(p.student_name).replace(/'/g,"&#39;")}')">
           ${av}
           <div class="post-meta">
-            <strong>${esc(p.student_name||'Student')}</strong>
+          <strong>
+  ${esc(p.student_name||'Student')}
+  ${p.is_verified ? ' <span class="verified-badge">✔</span>' : ''}
+</strong>
             <small>${peerUser?'@'+esc(peerUser)+' · ':''}${esc(timeAgo(p.created_at))}</small>
           </div>
         </div>
@@ -1305,7 +1328,9 @@ async function nxOpenProfile(key,name){
   if(!key||key===sKey()) return;
   _profileData={key,name};
   $('profileHdrName').textContent=name;
-  $('profileName').textContent=name;
+$('profileName').innerHTML =
+  esc(_profileData.name) +
+  (res.profile.is_verified ? ' <span class="verified-badge">✔</span>' : '');
   const emoji=getPeerEmoji(key);
   $('profileAvatar').className='avatar avatar-lg'+(emoji?'':' initials');
   $('profileAvatar').textContent=emoji||initials(name);
@@ -1456,7 +1481,10 @@ function nxLoadConvList(){
     <div class="conv-item" onclick="nxOpenDM('${esc(c.key)}','${esc(c.peer_name).replace(/'/g,"&#39;")}')">
       ${avatarHTML(c.peer_name,getPeerEmoji(c.key),' avatar-sm')}
       <div class="conv-info">
-        <div class="conv-name">${esc(c.peer_name)}</div>
+       <div class="conv-name">
+  ${esc(c.peer_name)}
+  ${c.is_verified ? '<span class="verified-badge">✔</span>' : ''}
+</div>
         <div class="conv-preview">${esc(c.lastMsg||'')}</div>
       </div>
       <div class="conv-meta"><div class="conv-time">${esc(timeAgo(c.ts))}</div></div>
