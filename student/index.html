@@ -141,7 +141,9 @@ button:focus-visible,a:focus-visible,input:focus-visible{box-shadow:var(--focus-
   flex:1;overflow-y:scroll;overflow-x:hidden;-webkit-overflow-scrolling:touch;
   overscroll-behavior-y:contain; min-height:0;
   padding-bottom:calc(var(--nav-h) + 20px + env(safe-area-inset-bottom,0px));
+  transition:padding-bottom .18s ease;
 }
+.af-page.kb-open{ padding-bottom:20px; }
 .af-page.no-nav-pad{ padding-bottom:24px; }
 .af-page::-webkit-scrollbar{width:2px}
 .af-page::-webkit-scrollbar-thumb{background:var(--bc);border-radius:99px}
@@ -470,6 +472,12 @@ button:focus-visible,a:focus-visible,input:focus-visible{box-shadow:var(--focus-
   background:var(--nav);border-top:1px solid var(--b1);
   display:flex;align-items:center;padding:0 6px;padding-bottom:env(safe-area-inset-bottom,0px);
   backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  transition:transform .18s ease,opacity .18s ease;
+}
+.af-bnav.kb-hidden{
+  transform:translateY(110%);
+  opacity:0;
+  pointer-events:none;
 }
 .af-nav-btn{
   flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
@@ -650,6 +658,30 @@ const DASH_EDGE    = STUDENT_URL + "/functions/v1/student-dashboard-af";
 const HDRS = {'Content-Type':'application/json','apikey':STUDENT_KEY,'Authorization':'Bearer '+STUDENT_KEY};
 const VERIFY_BASE = "https://cert.academeforge.in/verify?id=";
 
+/* ── 12-HOUR CACHE HELPERS (localStorage) ── */
+const CACHE_TTL = 12 * 60 * 60 * 1000; // 12 hours in ms
+
+function cacheSet(key, data){
+  try{ localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); }catch(_){}
+}
+function cacheGet(key, ttl){
+  try{
+    const raw = localStorage.getItem(key);
+    if(!raw) return null;
+    const obj = JSON.parse(raw);
+    if(Date.now() - obj.ts > (ttl||CACHE_TTL)) return null;
+    return obj.data;
+  }catch(_){ return null; }
+}
+function cacheDel(key){
+  try{ localStorage.removeItem(key); }catch(_){}
+}
+
+const CK_CATALOG  = 'af_explore_catalog_v1';      // full catalog response per category
+const CK_DASH     = 'af_explore_dash_v1';         // dashboard response
+const CK_COURSE   = 'af_explore_course_v1_';      // + courseId
+const CK_MODULE   = 'af_explore_module_v1_';      // + moduleId
+
 const $ = id => document.getElementById(id);
 
 /* getStudentId — checks the same keys the rest of the app (e.g. Community)
@@ -779,11 +811,7 @@ function afToast(msg, type){
   }, 2700);
 }
 
-/* ── DARK MODE — preserved exactly: localStorage + storage event sync ── */
-window.addEventListener('storage', e=>{
-  if(e.key==='af_dark_mode')
-    document.documentElement.setAttribute('data-theme', e.newValue==='1'?'dark':'light');
-});
+/* ── DARK MODE — handled in storage listener at bottom of script ── */
 
 /* ── VIEW SWITCHING (full-screen panels) ── */
 function showView(id){
@@ -906,14 +934,28 @@ window.setSort = setSort;
 
 async function loadCourses(){
   $('courseList').innerHTML = '<div class="af-skel af-skel-card"></div><div class="af-skel af-skel-card"></div>';
+
+  // Try cache first (keyed by category + studentId)
+  const sid = getStudentId();
+  const cacheKey = CK_CATALOG + '|' + (_selectedCategory||'All Courses') + '|' + (sid||'');
+  const cached = cacheGet(cacheKey);
+  if(cached && cached.ok){
+    _categories = ['All Courses', ...(cached.categories||[])];
+    renderFilterMenu();
+    _allCourses = cached.courses || [];
+    renderCourseList();
+    return;
+  }
+
   const data = await callCatalog('list_courses', {
     category: _selectedCategory,
-    student_id: getStudentId()
+    student_id: sid
   });
   if(!data.ok){
     $('courseList').innerHTML = `<div class="af-empty" role="status"><span>⚠️</span>${escapeHtml(data.message||'Could not load courses.')}</div>`;
     return;
   }
+  cacheSet(cacheKey, data);
   _categories = ['All Courses', ...(data.categories||[])];
   renderFilterMenu();
   _allCourses = data.courses || [];
@@ -973,9 +1015,17 @@ async function openCourse(courseId){
   showView('viewDetail');
   $('detailPage').innerHTML = `<div style="padding:14px"><div class="af-skel" style="aspect-ratio:16/9;margin-bottom:16px"></div><div class="af-skel" style="height:18px;width:60%;margin-bottom:10px"></div><div class="af-skel" style="height:28px;width:90%;margin-bottom:16px"></div></div>`;
 
-  const data = await callCatalog('get_course', { course_id: courseId, student_id: getStudentId() });
-  if(!data.ok){
-    $('detailPage').innerHTML = `<div class="af-empty" role="status"><span>⚠️</span>${escapeHtml(data.message||'Could not load this course.')}</div>`;
+  // Try cache first
+  const cacheKey = CK_COURSE + courseId + '|' + (getStudentId()||'');
+  const cached = cacheGet(cacheKey);
+  let data = cached;
+  if(!data || !data.ok){
+    data = await callCatalog('get_course', { course_id: courseId, student_id: getStudentId() });
+    if(data && data.ok) cacheSet(cacheKey, data);
+  }
+
+  if(!data || !data.ok){
+    $('detailPage').innerHTML = `<div class="af-empty" role="status"><span>⚠️</span>${escapeHtml((data&&data.message)||'Could not load this course.')}</div>`;
     return;
   }
   _currentCourse = data.course;
@@ -1088,7 +1138,15 @@ async function openModule(moduleId){
   $('lessonPage').innerHTML = `<div style="padding:20px"><div class="af-skel" style="aspect-ratio:16/8;margin-bottom:16px"></div><div class="af-skel" style="height:24px;width:70%;margin-bottom:10px"></div><div class="af-skel" style="height:80px"></div></div>`;
   setLessonProgress(0);
 
-  const data = await callCatalog('get_module', { module_id: moduleId, student_id: getStudentId() });
+  // Try cache — but only use cached lesson if is_done hasn't changed (safe: we invalidate on complete)
+  const sid = getStudentId();
+  const cacheKey = CK_MODULE + moduleId + '|' + (sid||'');
+  const cached = cacheGet(cacheKey);
+  let data = cached;
+  if(!data || !data.ok){
+    data = await callCatalog('get_module', { module_id: moduleId, student_id: sid });
+    if(data && data.ok) cacheSet(cacheKey, data);
+  }
   if(!data.ok){
     $('lessonPage').innerHTML = `<div class="af-empty" role="status"><span>⚠️</span>${escapeHtml(data.message||'Could not load this lesson.')}</div>`;
     return;
@@ -1312,6 +1370,10 @@ async function handleContinue(){
       await callCatalog('complete_module', { student_id: sid, module_id: _currentModule.id, course_id: _currentCourse.id });
       const idx = _currentModules.findIndex(m=>m.id===_currentModule.id);
       if(idx>=0) _currentModules[idx].is_done = true;
+      // Invalidate caches so next open reflects updated progress
+      cacheDel(CK_MODULE + _currentModule.id + '|' + sid);
+      cacheDel(CK_COURSE + _currentCourse.id + '|' + sid);
+      _dashLoaded = false; cacheDel(CK_DASH);
     } else {
       afToast('Log in to save your progress permanently.', 'err');
     }
@@ -1339,10 +1401,8 @@ function showCompletionScreen(){
 
 function finishToDetail(){
   openCourse(_currentCourse.id);
-  // The course they just finished may now have a fresh certificate —
-  // invalidate the cached dashboard data so it refetches next time
-  // the Dashboard tab is opened.
   _dashLoaded = false;
+  cacheDel(CK_DASH);
 }
 window.finishToDetail = finishToDetail;
 
@@ -1380,6 +1440,15 @@ async function loadDashboard(){
     return;
   }
 
+  // Try cache first
+  const cachedDash = cacheGet(CK_DASH);
+  if(cachedDash && cachedDash.ok){
+    _dashData = cachedDash;
+    _dashLoaded = true;
+    renderDashboard(_dashData, _searchQuery);
+    return;
+  }
+
   $('dashboardPane').innerHTML = `
     <div class="af-skel" style="height:96px;border-radius:18px"></div>
     <div class="af-skel" style="height:80px;border-radius:16px"></div>
@@ -1391,6 +1460,7 @@ async function loadDashboard(){
     return;
   }
 
+  cacheSet(CK_DASH, data);
   _dashData = data;
   _dashLoaded = true;
   renderDashboard(_dashData, _searchQuery);
@@ -1637,6 +1707,7 @@ async function issueCert(courseId, btn){
 
   afToast('Certificate ready! 🎉','ok');
   _dashLoaded = false;
+  cacheDel(CK_DASH);
   await loadDashboard();
 }
 window.issueCert = issueCert;
@@ -2091,12 +2162,125 @@ body{width:1122px;height:794px;overflow:hidden;background:#fff;font-family:'Popp
    ════════════════════════════════════════════════════════ */
 loadCourses();
 
+/* ════════════════════════════════════════════════════════
+   FIX 1 — KEYBOARD HIDES BOTTOM NAV
+   Works in browser, PWA, AND Android APK/WebView.
+   Uses three independent strategies for maximum coverage:
+   1. visualViewport resize (Chrome/Android WebView)
+   2. window.innerHeight shrink (older WebViews)
+   3. focus/blur events (fallback for any environment)
+   ════════════════════════════════════════════════════════ */
+(function(){
+  const bnav  = document.querySelector('.af-bnav');
+  const pages = document.querySelectorAll('.af-page');
+  if(!bnav) return;
+
+  let kbOpen = false;
+  const windowH = window.innerHeight;
+
+  function setKb(open){
+    if(kbOpen === open) return;
+    kbOpen = open;
+    bnav.classList.toggle('kb-hidden', open);
+    pages.forEach(p => p.classList.toggle('kb-open', open));
+  }
+
+  // Strategy 1: visualViewport (most reliable on Android)
+  if(window.visualViewport){
+    const vv = window.visualViewport;
+    function onVV(){
+      // Keyboard is open when viewport height shrinks by >100px
+      setKb((window.innerHeight - vv.height) > 100);
+    }
+    vv.addEventListener('resize', onVV, { passive: true });
+    vv.addEventListener('scroll', onVV, { passive: true });
+  }
+
+  // Strategy 2: window resize fallback
+  window.addEventListener('resize', function(){
+    setKb((window.innerHeight - window.visualViewport?.height || 0) > 100
+       || (windowH - window.innerHeight) > 150);
+  }, { passive: true });
+
+  // Strategy 3: focus/blur on inputs (covers all WebViews incl. Capacitor/APK)
+  document.addEventListener('focusin', function(e){
+    const tag = e.target && e.target.tagName;
+    if(tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'){
+      setKb(true);
+    }
+  }, { passive: true });
+
+  document.addEventListener('focusout', function(){
+    // Delay to let visualViewport settle before we check
+    setTimeout(function(){
+      const vv = window.visualViewport;
+      if(vv){
+        setKb((window.innerHeight - vv.height) > 100);
+      } else {
+        setKb(false);
+      }
+    }, 200);
+  }, { passive: true });
+})();
+
+/* ════════════════════════════════════════════════════════
+   FIX 3 — SWIPE TO CHANGE NAV / INNER TAB
+   Swipe rules (only triggers on main catalog view):
+   • In Courses pane: swipe RIGHT → /index.html (Home)
+   • In Courses pane: swipe LEFT  → Dashboard pane
+   • In Dashboard pane: swipe RIGHT → Courses pane
+   • In Dashboard pane: swipe LEFT  → /community/index.html
+   Deep views (detail, modules, lesson, cert) are excluded.
+   ════════════════════════════════════════════════════════ */
+(function(){
+  let _sx = 0, _sy = 0;
+  const THRESH = 72;  // minimum horizontal px to count as swipe
+  const MAX_VER = 55; // max vertical drift allowed (prevents accidental triggers on scroll)
+
+  document.addEventListener('touchstart', function(e){
+    _sx = e.touches[0].clientX;
+    _sy = e.touches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', function(e){
+    // Only act if the main catalog view is active
+    const catalogView = document.getElementById('viewCatalog');
+    if(!catalogView || !catalogView.classList.contains('active')) return;
+
+    const dx = e.changedTouches[0].clientX - _sx;
+    const dy = e.changedTouches[0].clientY - _sy;
+
+    // Must be more horizontal than vertical
+    if(Math.abs(dy) > MAX_VER) return;
+    if(Math.abs(dx) < THRESH) return;
+
+    if(dx > 0){
+      // Swipe RIGHT
+      if(_activeView === 'courses'){
+        window.location.href = '/index.html';          // Courses → Home
+      } else {
+        setActiveView('courses');                       // Dashboard → Courses
+      }
+    } else {
+      // Swipe LEFT
+      if(_activeView === 'courses'){
+        setActiveView('dashboard');                     // Courses → Dashboard
+      } else {
+        window.location.href = '/community/index.html'; // Dashboard → Community
+      }
+    }
+  }, { passive: true });
+})();
+
 window.addEventListener('storage', e=>{
   if(['af_student_email','af_student_mobile','af_student_name'].includes(e.key)){
     _dashLoaded = false;
+    cacheDel(CK_DASH);
     if(_activeView==='dashboard') loadDashboard();
     if(_activeView==='courses') loadCourses();
   }
+  if(e.key==='af_dark_mode')
+    document.documentElement.setAttribute('data-theme', e.newValue==='1'?'dark':'light');
 });
 </script>
 </body>
