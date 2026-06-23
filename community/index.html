@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -303,6 +302,15 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
 .post-meta small{display:block;margin-top:2px;font-size:11.5px;color:var(--tm);font-weight:600;cursor:pointer;}
 .menu-dot{width:28px;height:28px;min-width:28px;border-radius:var(--r1);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--tm);}
 .post-text{font-size:14px;line-height:1.65;color:var(--t2);white-space:pre-wrap;word-wrap:break-word;overflow-wrap:break-word;margin-bottom:14px;}
+.post-text.clamped{
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;
+  overflow:hidden;margin-bottom:6px;
+}
+.read-more-btn{
+  display:inline-block;font-size:13px;font-weight:800;color:var(--p);
+  margin-bottom:14px;cursor:pointer;background:none;border:none;padding:0;
+}
+.read-more-btn:active{opacity:.7;}
 .post-actions{display:flex;align-items:center;gap:16px;padding-top:12px;border-top:1px solid var(--b1);}
 .action-btn{font-size:12.5px;font-weight:700;color:var(--t2);display:flex;align-items:center;gap:5px;transition:color .15s;}
 .action-btn.liked{color:var(--rose);}
@@ -356,6 +364,8 @@ textarea.compose.over{border-color:var(--err);}
 .comments-list{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px;min-height:60px;background:var(--bg);}
 .comment-input-area{padding:14px;border-top:1px solid var(--b1);flex-shrink:0;display:flex;flex-direction:column;gap:10px;background:var(--shell);}
 .cmt-card{background:var(--card-s);border:1px solid var(--b1);border-radius:14px;padding:12px;box-shadow:var(--sh);}
+.cmt-card.gold-post-card{overflow:visible;height:auto;max-height:none;}
+.cmt-card .cmt-text{overflow:visible;max-height:none;white-space:pre-wrap;display:block;}
 .cmt-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;}
 .cmt-info strong{font-family:var(--fd);font-size:13px;font-weight:800;color:var(--t1);display:block;cursor:pointer;}
 .cmt-info small{font-size:11px;color:var(--tm);font-weight:600;}
@@ -667,8 +677,9 @@ textarea.compose.over{border-color:var(--err);}
           </div>
           <input type="file" id="avatarFileInput" accept="image/*" style="display:none;" onchange="nxHandleAvatarUpload(this)"/>
         </div>
-        <div class="field-label" style="margin-top:8px;">Avatar Emoji</div>
-        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:4px 0;" id="emojiGrid"></div>
+        <div class="field-label" style="margin-top:8px;">Display Name</div>
+        <input type="text" class="field" id="displayNameInput" placeholder="e.g. Rahul Kumar" maxlength="40" oninput="nxDisplayNameTyping()"/>
+        <span style="font-size:12px;font-weight:600;color:var(--tm);margin-top:-6px;" id="displayNameHint">2-40 characters. This is shown on your posts, comments and messages.</span>
         <div class="field-label" style="margin-top:8px;">Username</div>
         <input type="text" class="field" id="usernameInput" placeholder="e.g. rahul_42" maxlength="24" oninput="nxUsernameTyping()"/>
         <span style="font-size:12px;font-weight:600;color:var(--tm);margin-top:-6px;" id="usernameHint">3-24 chars: lowercase letters, numbers, underscore.</span>
@@ -808,17 +819,6 @@ textarea.compose.over{border-color:var(--err);}
 const STUDENT_URL   = "https://afooyyydhlwngzssgqih.supabase.co";
 const STUDENT_KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb295eXlkaGx3bmd6c3NncWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDQxMjgsImV4cCI6MjA5NDIyMDEyOH0.KG0XO0oP_2MpewHoIwTtbrKg5FkyOYRUtVzLH1MSJiE";
 const ADMIN_KEYS = ['admin@academeforge.in'];
-const EMOJI_PRESETS = [
-  "🧠","🎓","🏆","👑","⚡","🎯","🚀","🔥","💎","🌟",
-  "🤖","🧩","🎮","🕹️","🥇","🥈","🥉","🏅","📚","🔮",
-  "🦁","🐯","🦅","🦊","🐺","🐼","🐨","🐱","🐵","🐸",
-  "😎","🗿","💀","😈","👹","🐉","🦖","🦈","🦍","🐲",
-  "⚔️","🛡️","🏹","🔱","🪓","⚜️","☠️","👁️","🌪️","🌋",
-  "💰","💸","💼","🎩","🕶️","⌚","📈","🏛️","🏰","🛸",
-  "🌌","🌠","☄️","🪐","🌙","☀️","⭐","🌍","🛰️","🚁",
-  "💻","⌨️","🖥️","📱","🎧","🎤","📡","🔋","⚙️","🧪",
-  "👽","🐅","🦄","👻","🇮🇳","🚩","🕉️","☸️","🪔","🦚"
-];
 
 /* ═══════════════════════════════════════════════════
    IN-MEMORY CACHE  (no localStorage for runtime data)
@@ -877,6 +877,25 @@ function getSb(){
 const $    = id => document.getElementById(id);
 const show = id => $(id)&&$(id).classList.remove('hidden');
 const hide = id => $(id)&&$(id).classList.add('hidden');
+
+/* ═══════════════════════════════════════════════════
+   STACKING MANAGER
+   Every full-screen view (profile, my-profile, DM, search)
+   and every modal overlay (comments, follow list, etc.)
+   gets bumped to the top of the visual stack the moment
+   it opens, regardless of which other screen/modal it was
+   opened from. This guarantees that clicking a name inside
+   a DM, inside the comments modal, or inside a follow list
+   always opens the profile screen IN FRONT of whatever is
+   currently open — never behind it.
+═══════════════════════════════════════════════════ */
+const STACK_BASE_Z = 1100;
+let _stackCounter = 0;
+function nxBringToFront(id){
+  const el=$(id); if(!el) return;
+  _stackCounter+=1;
+  el.style.zIndex = String(STACK_BASE_Z + _stackCounter);
+}
 const isLoggedIn = ()=>!!(localStorage.getItem('af_student_email')||localStorage.getItem('af_student_mobile'));
 const sKey  = ()=>localStorage.getItem('af_student_email')||localStorage.getItem('af_student_mobile')||'';
 const sName = ()=>localStorage.getItem('af_student_name')||'Student';
@@ -1192,7 +1211,6 @@ let _curPostId=null, _replyParentId=null, _menuTarget=null;
 let _profileData=null, _profileIsFollowing=false;
 let _dmPeer=null, _dmEditingId=null;
 let _reportPostId=null, _reportReason=null;
-let _emojiSelected=getMyEmoji();
 let _pendingAvatarDataUrl=null;
 
 function renderPostHtml(p, mk, admin, showPinned){
@@ -1214,6 +1232,18 @@ function renderPostHtml(p, mk, admin, showPinned){
     ? `<span class="gold-name">${esc(p.student_name||'Student')}</span>${verBadgeHTML(true)}`
     : esc(p.student_name||'Student');
 
+  // Posts longer than ~4 lines get clamped with a "Read More" toggle.
+  // We treat a post as "long" if it has more than 4 explicit line breaks
+  // OR its raw character length is long enough to wrap past 4 lines at
+  // the card's text size (~46 chars/line on the mobile shell width).
+  const rawContent = p.content||'';
+  const lineBreakCount = (rawContent.match(/\n/g)||[]).length;
+  const isLong = lineBreakCount >= 4 || rawContent.length > 220;
+  const postTextHtml = isLong
+    ? `<p class="post-text clamped" id="post-text-${p.id}">${esc(rawContent)}</p>
+       <button class="read-more-btn" id="read-more-${p.id}" onclick="event.stopPropagation();nxToggleReadMore(${p.id})">Read More</button>`
+    : `<p class="post-text" onclick="nxOpenComments(${p.id},'${prev}')" style="cursor:pointer;">${esc(rawContent)}</p>`;
+
   return `<div class="post-card${cardClass}${seenClass}" data-post-id="${p.id}">
     ${pinBar}
     <div class="post-top">
@@ -1228,7 +1258,7 @@ function renderPostHtml(p, mk, admin, showPinned){
       </div>
       <button class="menu-dot" onclick="nxOpenMenu('post',${p.id},${mine},${!!p.is_pinned})">⋯</button>
     </div>
-    <p class="post-text" onclick="nxOpenComments(${p.id},'${prev}')" style="cursor:pointer;">${esc(p.content||'')}</p>
+    ${postTextHtml}
     <div class="post-actions">
       <button class="action-btn${likedClass}" id="like-btn-${p.id}" onclick="nxLikePost(${p.id},this)">
         ❤️ <span class="cnt" id="like-cnt-${p.id}">${p.likes_count||0}</span>
@@ -1237,6 +1267,29 @@ function renderPostHtml(p, mk, admin, showPinned){
     </div>
   </div>`;
 }
+
+/**
+ * Toggles a long post between its 4-line clamped preview and full text.
+ * Expanding does NOT open the comments modal — it only reveals the rest
+ * of the post in place, matching standard feed UX (Instagram/Facebook
+ * style "Read More").
+ */
+function nxToggleReadMore(pid){
+  const textEl=$('post-text-'+pid);
+  const btnEl=$('read-more-'+pid);
+  if(!textEl||!btnEl) return;
+  const isClamped=textEl.classList.contains('clamped');
+  if(isClamped){
+    textEl.classList.remove('clamped');
+    textEl.style.marginBottom='6px';
+    btnEl.textContent='Read Less';
+  } else {
+    textEl.classList.add('clamped');
+    textEl.style.marginBottom='';
+    btnEl.textContent='Read More';
+  }
+}
+window.nxToggleReadMore=nxToggleReadMore;
 
 function renderListToContainer(posts, containerId, checkPinned){
   const box=$(containerId); if(!box) return;
@@ -1292,7 +1345,6 @@ async function init(){
   }
   show('mainView');
   $('lockedBox').style.display='none';
-  buildEmojiGrid();
   nxLoadMyProfile();
   await Promise.all([nxLoadPosts(), nxPreloadConnections()]);
   setupRealtime();
@@ -1479,9 +1531,13 @@ function nxOpenComposer(){
   if(!isLoggedIn()){goToLogin();return;}
   const inp=$('postInput');
   if(inp){inp.value='';nxPostTyping();setTimeout(()=>inp.focus(),10);}
+  nxBringToFront('composerModal');
   $('composerModal').style.display='flex';
 }
-function nxCloseComposer(){$('composerModal').style.display='none';}
+function nxCloseComposer(){
+  $('composerModal').style.display='none';
+  nxForceRepaint();
+}
 function nxPostTyping(){
   const v=$('postInput').value,w=wordCount(v),ex=w>80;
   $('postCount').textContent=w+' / 80 words';
@@ -1544,10 +1600,15 @@ function nxOpenComments(pid,preview){
   const inp=$('commentInput');
   if(inp){inp.value='';nxCommentTyping();}
   $('commentsPreview').textContent=preview?preview+'…':'Join the discussion';
+  nxBringToFront('commentsModal');
   $('commentsModal').style.display='flex';
   nxLoadComments(pid);
 }
-function nxCloseComments(){$('commentsModal').style.display='none';_curPostId=null;}
+function nxCloseComments(){
+  $('commentsModal').style.display='none';
+  _curPostId=null;
+  nxForceRepaint();
+}
 async function nxLoadComments(pid){
   const box=$('commentsList'); if(!box) return;
   box.innerHTML='<div class="state-msg">Loading…</div>';
@@ -1667,9 +1728,14 @@ function nxOpenReply(pid,preview){
   _replyParentId=pid;
   $('replyTarget').textContent=preview?'Replying to: '+preview:'Reply to comment';
   const inp=$('replyInput'); if(inp){inp.value='';nxReplyTyping();setTimeout(()=>inp.focus(),10);}
+  nxBringToFront('replyModal');
   $('replyModal').style.display='flex';
 }
-function nxCloseReply(){$('replyModal').style.display='none';_replyParentId=null;}
+function nxCloseReply(){
+  $('replyModal').style.display='none';
+  _replyParentId=null;
+  nxForceRepaint();
+}
 function nxReplyTyping(){
   const v=$('replyInput').value,w=wordCount(v),ex=w>80;
   $('replyCount').textContent=w+' / 80 words';
@@ -1703,9 +1769,14 @@ function nxOpenMenu(type,id,mine,isPinned){
   } else {
     pinBtn.classList.add('hidden'); unpinBtn.classList.add('hidden');
   }
+  nxBringToFront('menuModal');
   $('menuModal').style.display='flex';
 }
-function nxCloseMenu(){$('menuModal').style.display='none';_menuTarget=null;}
+function nxCloseMenu(){
+  $('menuModal').style.display='none';
+  _menuTarget=null;
+  nxForceRepaint();
+}
 
 async function nxTogglePin(){
   if(!_menuTarget||_menuTarget.type!=='post'||!isAdmin()){nxCloseMenu();return;}
@@ -1744,13 +1815,19 @@ function nxOpenReportForPost(pid){
   document.querySelectorAll('.af-btn-secondary-outline').forEach(b=>b.style.borderColor='var(--bc)');
   hide('reportOtherInp'); $('reportSubmitBtn').disabled=true;
   if($('reportOtherInp')) $('reportOtherInp').value='';
+  nxBringToFront('reportModal');
   $('reportModal').style.display='flex';
 }
 function nxOpenReport(){
   const t=_menuTarget; nxCloseMenu();
   if(t&&!t.isMine) nxOpenReportForPost(t.id);
 }
-function nxCloseReport(){$('reportModal').style.display='none';_reportPostId=null;_reportReason=null;}
+function nxCloseReport(){
+  $('reportModal').style.display='none';
+  _reportPostId=null;
+  _reportReason=null;
+  nxForceRepaint();
+}
 function nxSelectReport(btn){
   document.querySelectorAll('#reportOptions button').forEach(b=>{b.style.borderColor='var(--bc)';b.style.background='transparent';});
   btn.style.borderColor='var(--p)'; btn.style.background='var(--p-soft)';
@@ -1799,11 +1876,16 @@ async function nxOpenProfile(key,name){
     _applyProfileUI(cached, false);
   }
 
+  nxBringToFront('profileScreen');
   $('profileScreen').style.display='flex';
   nxLoadProfileMeta(key);
   nxLoadProfilePosts(key);
 }
-function nxCloseProfile(){$('profileScreen').style.display='none';_profileData=null;}
+function nxCloseProfile(){
+  $('profileScreen').style.display='none';
+  _profileData=null;
+  nxForceRepaint();
+}
 
 function _applyProfileUI(p, isFull){
   const isVer=!!p.is_verified;
@@ -1895,10 +1977,14 @@ function nxOpenMyProfile(){
     avatarInner.style.cssText='width:72px;height:72px;border-radius:18px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--p);color:#fff;';
   }
   $('myProfilePageScroll').scrollTop=0;
+  nxBringToFront('myProfileScreen');
   $('myProfileScreen').style.display='flex';
   nxLoadMyProfileData();
 }
-function nxCloseMyProfile(){$('myProfileScreen').style.display='none';}
+function nxCloseMyProfile(){
+  $('myProfileScreen').style.display='none';
+  nxForceRepaint();
+}
 async function nxLoadMyProfileData(){
   const res=await edgeCall({action:'get_my_profile'});
   if(res&&res.ok){
@@ -1926,6 +2012,7 @@ async function nxOpenFollowingFor(){if(_profileData) await loadFollowList('follo
 async function loadFollowList(type,targetKey){
   $('followListTitle').textContent=type==='followers'?'Followers':'Following';
   $('followListBody').innerHTML='<div class="state-msg">Loading…</div>';
+  nxBringToFront('followListModal');
   $('followListModal').style.display='flex';
   const action=type==='followers'?'get_followers':'get_following';
   const res=await edgeCall({action,target_key:targetKey});
@@ -1953,19 +2040,24 @@ async function loadFollowList(type,targetKey){
     </div>`;
   }).join('');
 }
-function nxCloseFollowList(){$('followListModal').style.display='none';}
+function nxCloseFollowList(){
+  $('followListModal').style.display='none';
+  nxForceRepaint();
+}
 
 /* ═══════════════════════════════════════════════════
    SEARCH
 ═══════════════════════════════════════════════════ */
 let _searchTimer=null;
 function nxOpenSearchScreen(){
+  nxBringToFront('searchScreen');
   $('searchScreen').style.display='flex';
   setTimeout(()=>$('fullSearchInp')&&$('fullSearchInp').focus(),10);
 }
 function nxCloseSearchScreen(){
   $('searchScreen').style.display='none';
   nxClearFullSearch();
+  nxForceRepaint();
 }
 function nxClearFullSearch(){
   if($('fullSearchInp')) $('fullSearchInp').value='';
@@ -2007,7 +2099,7 @@ async function nxDoSearch(q){
 }
 
 /* ═══════════════════════════════════════════════════
-   AVATAR UPLOAD
+   AVATAR UPLOAD (photo only — no emoji avatar)
 ═══════════════════════════════════════════════════ */
 function nxHandleAvatarUpload(input){
   const file=input.files&&input.files[0];
@@ -2016,10 +2108,8 @@ function nxHandleAvatarUpload(input){
   const reader=new FileReader();
   reader.onload=e=>{
     _pendingAvatarDataUrl=e.target.result;
-    _emojiSelected='';
     nxRenderEditAvatarPreview();
     $('removeAvatarBtn').style.display='block';
-    document.querySelectorAll('#emojiGrid button').forEach(b=>b.style.borderColor='transparent');
   };
   reader.readAsDataURL(file);
 }
@@ -2033,45 +2123,59 @@ function nxRenderEditAvatarPreview(){
   const el=$('editProfileAvatarPreview');
   if(!el) return;
   const avatarUrl=_pendingAvatarDataUrl||getMyAvatarUrl();
-  const emoji=_emojiSelected||getMyEmoji();
   const name=sName();
   if(avatarUrl){
     el.className='avatar avatar-lg';
     el.innerHTML=`<img src="${esc(avatarUrl)}" style="width:64px;height:64px;object-fit:cover;border-radius:16px;" onerror="this.parentElement.innerHTML='${esc(initials(name))}'"/>`;
-  } else if(emoji){
-    el.className='avatar avatar-lg';
-    el.textContent=emoji;
   } else {
     el.className='avatar avatar-lg initials';
     el.textContent=initials(name);
   }
 }
 
-function buildEmojiGrid(){
-  const g=$('emojiGrid'); if(!g) return;
-  const cur=getMyEmoji();
-  g.innerHTML=EMOJI_PRESETS.map(e=>`<button style="aspect-ratio:1;border-radius:12px;font-size:26px;background:var(--inp);border:2px solid ${e===cur?'var(--p)':'transparent'};display:flex;align-items:center;justify-content:center;" onclick="nxPickEmoji(this,'${e}')">${e}</button>`).join('');
+/* ═══════════════════════════════════════════════════
+   FORCE REPAINT — fixes the leftover hazy/faded look
+   that WebKit/Blink can leave behind after a modal's
+   backdrop-filter:blur() overlay is set to display:none.
+   Toggling a layout property on the next frame forces
+   the renderer to repaint the shell cleanly.
+═══════════════════════════════════════════════════ */
+function nxForceRepaint(){
+  const shell=$('shell');
+  if(!shell) return;
+  requestAnimationFrame(()=>{
+    shell.style.transform='translateZ(0)';
+    requestAnimationFrame(()=>{ shell.style.transform=''; });
+  });
 }
+
 function nxOpenEditProfile(){
-  _emojiSelected=getMyEmoji();
   _pendingAvatarDataUrl=null;
-  buildEmojiGrid();
   nxRenderEditAvatarPreview();
+  $('displayNameInput').value=sName();
+  $('displayNameHint').textContent='2-40 characters. This is shown on your posts, comments and messages.';
+  $('displayNameHint').style.color='var(--tm)';
   $('usernameInput').value=getMyUsername();
   $('bioInput').value=localStorage.getItem('af_bio')||'';
   $('usernameHint').textContent='3-24 chars: lowercase letters, numbers, underscore.';
   $('usernameHint').style.color='var(--tm)';
   const existingUrl=getMyAvatarUrl();
   $('removeAvatarBtn').style.display=existingUrl?'block':'none';
+  nxBringToFront('editProfileModal');
   $('editProfileModal').style.display='flex';
 }
-function nxCloseEditProfile(){$('editProfileModal').style.display='none';}
-function nxPickEmoji(btn,e){
-  _emojiSelected=e;
-  _pendingAvatarDataUrl=null;
-  document.querySelectorAll('#emojiGrid button').forEach(b=>b.style.borderColor='transparent');
-  btn.style.borderColor='var(--p)';
-  nxRenderEditAvatarPreview();
+function nxCloseEditProfile(){
+  $('editProfileModal').style.display='none';
+  nxForceRepaint();
+}
+function nxDisplayNameTyping(){
+  const hint=$('displayNameHint');
+  const v=($('displayNameInput').value||'').trim();
+  if(!v){hint.textContent='Display name cannot be empty.';hint.style.color='var(--err)';return;}
+  if(v.length<2){hint.textContent='Too short.';hint.style.color='var(--err)';return;}
+  if(v.length>40){hint.textContent='Too long.';hint.style.color='var(--err)';return;}
+  hint.textContent='2-40 characters. This is shown on your posts, comments and messages.';
+  hint.style.color='var(--tm)';
 }
 
 let _usernameCheckTimer=null;
@@ -2091,9 +2195,35 @@ function nxUsernameTyping(){
   },350);
 }
 
+/**
+ * Saves the profile: display name, username, bio and avatar photo.
+ *
+ * IMPORTANT — BACKEND REQUIREMENT:
+ * This calls the existing 'save_username' Supabase Edge Function action
+ * with an added `name` field. For the name change to propagate correctly,
+ * the Edge Function (and underlying SQL) MUST be updated to:
+ *   1. UPDATE the canonical `student_name` column on the profile/student
+ *      row for this student_key.
+ *   2. Either (a) read student_name by JOIN at query time for posts,
+ *      comments, replies, DMs and follow lists (no denormalized copy),
+ *      OR (b) if student_name is denormalized onto posts/comments/dms
+ *      tables, UPDATE those existing rows too in the same transaction,
+ *      e.g.:
+ *        UPDATE posts    SET student_name = :new_name WHERE student_key = :key;
+ *        UPDATE comments SET student_name = :new_name WHERE student_key = :key;
+ *        UPDATE dms      SET sender_name   = :new_name WHERE sender_key  = :key;
+ *      Option (a) is strongly preferred — it guarantees every surface
+ *      (old posts, old comments, old DMs) shows the new name with zero
+ *      extra writes and no risk of missed tables.
+ * Without this backend change, old posts/comments/DMs created before
+ * the rename will keep showing the old name even though this frontend
+ * is fully wired to send and refresh the new one.
+ */
 async function nxSaveProfile(){
+  const displayName=($('displayNameInput').value||'').trim();
   const username=($('usernameInput').value||'').toLowerCase().trim();
   const bio=($('bioInput').value||'').trim();
+  if(!displayName||displayName.length<2||displayName.length>40){showToast('Display name must be 2-40 characters.','err');return;}
   if(username&&!/^[a-z0-9_]{3,24}$/.test(username)){showToast('Username must be 3-24 chars.','err');return;}
   $('saveProfileBtn').disabled=true;
   let finalAvatarUrl = getMyAvatarUrl();
@@ -2107,21 +2237,36 @@ async function nxSaveProfile(){
   } else if(!_pendingAvatarDataUrl && !getMyAvatarUrl() && $('removeAvatarBtn').style.display==='none'){
     finalAvatarUrl='';
   }
-  const res=await edgeCall({action:'save_username',username:username||getMyUsername()||('student'+Math.floor(Math.random()*99999)),emoji:_emojiSelected||'',bio,avatar_url:finalAvatarUrl});
+  const res=await edgeCall({
+    action:'save_username',
+    name:displayName,
+    username:username||getMyUsername()||('student'+Math.floor(Math.random()*99999)),
+    bio,
+    avatar_url:finalAvatarUrl
+  });
   $('saveProfileBtn').disabled=false;
   if(!res||!res.ok){showToast(res?.message||'Could not save profile.','err');return;}
-  if(_emojiSelected) localStorage.setItem('af_avatar_emoji',_emojiSelected);
-  else if(!_emojiSelected) localStorage.removeItem('af_avatar_emoji');
+  const nameChanged = displayName !== sName();
   if(finalAvatarUrl) localStorage.setItem('af_avatar_url',finalAvatarUrl);
   else localStorage.removeItem('af_avatar_url');
+  localStorage.setItem('af_student_name', displayName);
   if(res.profile&&res.profile.username) localStorage.setItem('af_username',res.profile.username);
+  else if(username) localStorage.setItem('af_username',username);
   localStorage.setItem('af_bio',bio);
   _pendingAvatarDataUrl=null;
   syncAvatarBtn();
   nxCloseEditProfile();
   $('usernameBanner').classList.add('hidden');
-  showToast('Profile updated!');
-  await nxLoadPosts(true);
+  showToast(nameChanged?'Profile updated! Your new name is now live.':'Profile updated!');
+  // Refresh everything that can display the name/avatar so the change
+  // is reflected immediately across feed, profile and chats.
+  _cache.profiles.delete(sKey());
+  await Promise.all([
+    nxLoadPosts(true),
+    nxPreloadConnections()
+  ]);
+  if($('myProfileScreen').style.display==='flex') nxOpenMyProfile();
+  if($('chatsTab') && !$('chatsTab').classList.contains('hidden')) nxRenderChatList();
 }
 
 /* ═══════════════════════════════════════════════════
@@ -2163,8 +2308,7 @@ async function nxOpenDM(peerKey,peerName){
   _dmEditingId=null; hide('dmEditBanner');
   $('dmPeerName').textContent=peerName;
   $('dmInput').value=''; nxDMTyping();
-  const fromProfile=$('profileScreen').style.display==='flex'||$('myProfileScreen').style.display==='flex';
-  $('dmScreen').style.zIndex=fromProfile?'2500':'1200';
+  nxBringToFront('dmScreen');
   $('dmScreen').style.display='flex';
   $('bnav').classList.add('kb-hidden');
   $('dmMessages').innerHTML='<div class="state-msg">Loading…</div>';
@@ -2233,6 +2377,7 @@ function nxCloseDM(){
   $('dmScreen').style.display='none';
   $('bnav').classList.remove('kb-hidden');
   _dmPeer=null; _dmEditingId=null;
+  nxForceRepaint();
 }
 
 function nxRenderDMMessages(msgs){
@@ -2422,7 +2567,7 @@ window.nxSendDM=nxSendDM;
 window.nxDMTyping=nxDMTyping;
 window.nxCancelEditDM=nxCancelEditDM;
 window.nxSaveProfile=nxSaveProfile;
-window.nxPickEmoji=nxPickEmoji;
+window.nxDisplayNameTyping=nxDisplayNameTyping;
 window.nxUsernameTyping=nxUsernameTyping;
 window.nxCommentTyping=nxCommentTyping;
 window.nxPostTyping=nxPostTyping;
