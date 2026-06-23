@@ -488,6 +488,25 @@ textarea.compose.over{border-color:var(--err);}
 #imgLightbox.open .lb-img-wrap{opacity:1;transform:scale(1);}
 #imgLightbox .lb-img-wrap:active{cursor:grabbing;}
 #imgLightbox .lb-img-wrap img{display:block;border-radius:10px;max-width:min(90vw,440px);max-height:80dvh;object-fit:contain;pointer-events:none;box-shadow:0 20px 60px rgba(0,0,0,.55);}
+
+/* ── TAB SLIDE TRANSITION ── */
+.tab-slide-container{
+  flex:1;min-height:0;overflow:hidden;position:relative;display:flex;
+}
+.tab-slide-track{
+  display:flex;flex-direction:row;width:200%;height:100%;
+  transition:transform .32s cubic-bezier(.4,0,.2,1);
+  will-change:transform;
+}
+.tab-slide-track.no-anim{transition:none;}
+.tab-slide-pane{
+  width:50%;height:100%;flex-shrink:0;overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;
+  contain:layout style;
+  padding-bottom:calc(var(--nav-h) + 20px + env(safe-area-inset-bottom,0px));
+}
+/* When showing chats (index 1), shift track left by 50% */
+.tab-slide-track.show-chats{transform:translateX(-50%);}
 </style>
 </head>
 <body>
@@ -512,13 +531,7 @@ textarea.compose.over{border-color:var(--err);}
   <div class="af-view active" id="mainView">
     <header class="af-topbar" id="hdr">
       <div class="af-topbar-flex">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--p),var(--p2));display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;box-shadow:0 2px 8px rgba(79,70,229,.3);">🌐</div>
-          <div>
-            <div class="af-topbar-headline">AF Nexus</div>
-            <div style="font-size:11px;color:var(--tm);font-weight:600;">Student Community</div>
-          </div>
-        </div>
+        <div class="af-topbar-headline">Community</div>
         <div style="display:flex;align-items:center;gap:8px;">
           <button class="af-hdr-icon-btn" onclick="nxOpenSearchScreen()" aria-label="Search">🔍</button>
           <button class="my-avatar-btn" id="btnMyAvatar" onclick="nxOpenMyProfile()" aria-label="My profile"></button>
@@ -532,28 +545,34 @@ textarea.compose.over{border-color:var(--err);}
       <button class="view-switch-btn" id="tabChats" onclick="nxSwitchTab('chats')">Chats <span class="vs-badge hidden" id="chatBadge" style="background:var(--rose);color:#fff;padding:2px 6px;border-radius:99px;font-size:10px;">0 new</span></button>
     </div>
 
-    <!-- FEED TAB -->
-    <div class="af-page" id="feed" style="padding-bottom:120px;display:flex;flex-direction:column;">
-      <div class="username-banner hidden" id="usernameBanner">
-        <span class="t">Set a username so others can find your profile.</span>
-        <button class="af-btn-primary" style="height:36px;font-size:13px;" onclick="nxOpenEditProfile()">Set up</button>
-      </div>
-      <div class="af-tabs" id="filterBar">
-        <button class="af-tab-btn active" id="pillRelevant" onclick="nxSetMode('relevant')">Relevant</button>
-        <button class="af-tab-btn" id="pillRecent" onclick="nxSetMode('recent')">Recent</button>
-      </div>
-      <div class="post-list" id="postsList">
-        <!-- Skeleton placeholder rendered by JS -->
-        <div class="post-card af-skel" style="height:120px;"></div>
-        <div class="post-card af-skel" style="height:100px;"></div>
-        <div class="post-card af-skel" style="height:140px;"></div>
-      </div>
-    </div>
+    <!-- SLIDING TAB VIEWPORT -->
+    <div class="tab-slide-container">
+      <div class="tab-slide-track no-anim" id="tabSlideTrack">
 
-    <!-- CHATS TAB -->
-    <div class="af-page hidden" id="chatsTab" style="padding-bottom:120px;display:flex;flex-direction:column;background:var(--bg);">
-      <div class="chat-list" id="chatList">
-        <div class="state-msg">Loading…</div>
+        <!-- PANE 0: FEED -->
+        <div class="tab-slide-pane" id="feed" style="display:flex;flex-direction:column;">
+          <div class="username-banner hidden" id="usernameBanner">
+            <span class="t">Set a username so others can find your profile.</span>
+            <button class="af-btn-primary" style="height:36px;font-size:13px;" onclick="nxOpenEditProfile()">Set up</button>
+          </div>
+          <div class="af-tabs" id="filterBar">
+            <button class="af-tab-btn active" id="pillRelevant" onclick="nxSetMode('relevant')">Relevant</button>
+            <button class="af-tab-btn" id="pillRecent" onclick="nxSetMode('recent')">Recent</button>
+          </div>
+          <div class="post-list" id="postsList">
+            <div class="post-card af-skel" style="height:120px;"></div>
+            <div class="post-card af-skel" style="height:100px;"></div>
+            <div class="post-card af-skel" style="height:140px;"></div>
+          </div>
+        </div>
+
+        <!-- PANE 1: CHATS -->
+        <div class="tab-slide-pane" id="chatsTab" style="background:var(--bg);">
+          <div class="chat-list" id="chatList">
+            <div class="state-msg">Loading…</div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -1123,6 +1142,10 @@ function nxClearAllCaches(){
   _pendingAvatarDataUrl=null;
   _dmPendingImage=null;
   _stackCounter=0;
+  // Reset slide track to feed pane without animation
+  const _resetTrack = $('tabSlideTrack');
+  if(_resetTrack){ _resetTrack.classList.add('no-anim'); _resetTrack.classList.remove('show-chats'); }
+  show('fab');
 
   // 5. Tear down realtime subscription bound to this account
   teardownRealtime();
@@ -1456,21 +1479,31 @@ function renderListToContainer(posts, containerId, checkPinned){
 }
 
 /* ═══════════════════════════════════════════════════
-   TAB SWITCH
+   TAB SWITCH — slide animation
 ═══════════════════════════════════════════════════ */
-function nxSwitchTab(tab){
+function nxSwitchTab(tab, animate){
   // Save scroll position before switching
   if(_activeTab==='feed') _cache.feedScrollTop = $('feed').scrollTop;
 
-  _activeTab=tab;
-  $('tabFeed').classList.toggle('active',tab==='feed');
-  $('tabChats').classList.toggle('active',tab==='chats');
-  if(tab==='feed'){
-    show('feed'); hide('chatsTab'); show('fab');
-    // Restore scroll position
+  _activeTab = tab;
+  $('tabFeed').classList.toggle('active', tab==='feed');
+  $('tabChats').classList.toggle('active', tab==='chats');
+
+  const track = $('tabSlideTrack');
+  if(animate === false){
+    track.classList.add('no-anim');
+  } else {
+    track.classList.remove('no-anim');
+  }
+
+  if(tab === 'feed'){
+    track.classList.remove('show-chats');
+    show('fab');
+    // Restore scroll position after transition
     requestAnimationFrame(()=>{ $('feed').scrollTop = _cache.feedScrollTop; });
   } else {
-    hide('feed'); show('chatsTab'); hide('fab');
+    track.classList.add('show-chats');
+    hide('fab');
   }
 }
 
@@ -1488,6 +1521,12 @@ async function init(){
   show('mainView');
   $('lockedBox').style.display='none';
   _cache.chatReadTs = loadChatReadTs();
+  // Ensure slide track starts at feed with no animation, then arm animation
+  const track = $('tabSlideTrack');
+  if(track){ track.classList.add('no-anim'); track.classList.remove('show-chats'); }
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{ if(track) track.classList.remove('no-anim'); });
+  });
   nxLoadMyProfile();
   await Promise.all([nxLoadPosts(), nxPreloadConnections(), nxLoadBlockedUsers()]);
   setupRealtime();
@@ -2927,21 +2966,86 @@ document.addEventListener('keydown',e=>{
 
 /* ═══════════════════════════════════════════════════
    SWIPE NAV
+   • On Community page (this file):
+       swipe-right  = feed  (if currently on chats)
+       swipe-left   = chats (if currently on feed)
+   • At page boundaries:
+       swipe-right on feed  → /batches/index.html
+       swipe-left  on chats → /setting/index.html
+   • Reverse swipes mirror the same logic.
+   • All full-screen overlays (DM, profile, search,
+     modals) suppress inter-pane swiping so they can
+     capture their own horizontal gestures.
 ═══════════════════════════════════════════════════ */
 (function(){
-  let startX=0,startY=0;
-  document.addEventListener('touchstart',e=>{startX=e.touches[0].clientX;startY=e.touches[0].clientY;},{passive:true});
-  document.addEventListener('touchend',e=>{
-    if($('dmScreen').style.display==='flex') return;
-    if($('profileScreen').style.display==='flex') return;
-    if($('myProfileScreen').style.display==='flex') return;
-    const diffX=e.changedTouches[0].clientX-startX;
-    const diffY=e.changedTouches[0].clientY-startY;
-    if(Math.abs(diffY)>Math.abs(diffX)) return;
-    const threshold=80;
-    if(diffX>threshold) window.location.href='/batches/index.html';
-    if(diffX<-threshold) window.location.href='/setting/index.html';
-  },{passive:true});
+  const THRESHOLD   = 72;   // px horizontal movement to trigger
+  const ANGLE_LIMIT = 0.65; // max |diffY/diffX| ratio — keeps vertical scrolls from triggering
+
+  let startX = 0, startY = 0;
+  let swiping = false;
+
+  function anyOverlayOpen(){
+    return (
+      $('dmScreen').style.display      === 'flex' ||
+      $('profileScreen').style.display === 'flex' ||
+      $('myProfileScreen').style.display === 'flex' ||
+      $('searchScreen').style.display  === 'flex' ||
+      $('commentsModal').style.display === 'flex' ||
+      $('replyModal').style.display    === 'flex' ||
+      $('composerModal').style.display === 'flex' ||
+      $('menuModal').style.display     === 'flex' ||
+      $('dmOptionsModal').style.display === 'flex' ||
+      $('reportModal').style.display   === 'flex' ||
+      $('followListModal').style.display === 'flex' ||
+      $('editProfileModal').style.display === 'flex' ||
+      $('clearChatModal').style.display === 'flex' ||
+      $('mainMenuModal').style.display === 'flex' ||
+      $('blockListModal').style.display === 'flex'
+    );
+  }
+
+  document.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    swiping = true;
+  }, { passive: true });
+
+  document.addEventListener('touchend', e => {
+    if(!swiping) return;
+    swiping = false;
+
+    if(anyOverlayOpen()) return;
+
+    const diffX = e.changedTouches[0].clientX - startX;
+    const diffY = e.changedTouches[0].clientY - startY;
+
+    // Reject if too vertical
+    if(Math.abs(diffX) < THRESHOLD) return;
+    if(Math.abs(diffY) / Math.abs(diffX) > ANGLE_LIMIT) return;
+
+    const goingLeft  = diffX < 0;  // user finger moved left  → content slides left → advance
+    const goingRight = diffX > 0;  // user finger moved right → content slides right → go back
+
+    if(goingLeft){
+      // Currently on Feed → slide to Chats
+      if(_activeTab === 'feed'){
+        nxSwitchTab('chats');
+      }
+      // Currently on Chats → leave page to Settings
+      else if(_activeTab === 'chats'){
+        window.location.href = '/setting/index.html';
+      }
+    } else if(goingRight){
+      // Currently on Chats → slide back to Feed
+      if(_activeTab === 'chats'){
+        nxSwitchTab('feed');
+      }
+      // Currently on Feed → leave page to Batches/Programs
+      else if(_activeTab === 'feed'){
+        window.location.href = '/batches/index.html';
+      }
+    }
+  }, { passive: true });
 })();
 
 /* ═══════════════════════════════════════════════════
