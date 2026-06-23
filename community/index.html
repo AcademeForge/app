@@ -190,6 +190,18 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
   animation:gold-shine 3s ease-in-out infinite;
   pointer-events:none;z-index:2;
 }
+/* Gold avatar frame — Feed-only variant: gold ring without the inner white gap */
+.gold-avatar-frame-feed{
+  border-color:transparent!important;
+  box-shadow:0 0 0 2.5px var(--gold),0 0 0 4px rgba(245,158,11,.22)!important;
+  position:relative;
+}
+.gold-avatar-frame-feed::after{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:var(--gold-shine);
+  animation:gold-shine 3s ease-in-out infinite;
+  pointer-events:none;z-index:2;
+}
 @keyframes gold-shine{
   0%,100%{opacity:0;background-position:-150% 0;}
   40%{opacity:1;}
@@ -301,7 +313,12 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
 .post-meta strong{display:block;font-family:var(--fd);font-size:14.5px;font-weight:800;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;cursor:pointer;}
 .post-meta small{display:block;margin-top:2px;font-size:11.5px;color:var(--tm);font-weight:600;cursor:pointer;}
 .menu-dot{width:28px;height:28px;min-width:28px;border-radius:var(--r1);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--tm);}
-.post-text{font-size:14px;line-height:1.65;color:var(--t2);white-space:pre-wrap;word-wrap:break-word;overflow-wrap:break-word;margin-bottom:14px;}
+.post-text{font-size:14px;line-height:1.65;color:var(--t2);white-space:pre-wrap;word-wrap:break-word;overflow-wrap:break-word;margin-bottom:0;}
+.post-text-wrap{margin-bottom:14px;}
+.clamp-3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.read-more-btn{font-size:12.5px;font-weight:800;color:var(--p);margin-top:4px;display:inline-block;}
+.read-more-btn.hidden{display:none;}
 .post-actions{display:flex;align-items:center;gap:16px;padding-top:12px;border-top:1px solid var(--b1);}
 .action-btn{font-size:12.5px;font-weight:700;color:var(--t2);display:flex;align-items:center;gap:5px;transition:color .15s;}
 .action-btn.liked{color:var(--rose);}
@@ -359,6 +376,7 @@ textarea.compose.over{border-color:var(--err);}
 .cmt-info strong{font-family:var(--fd);font-size:13px;font-weight:800;color:var(--t1);display:block;cursor:pointer;}
 .cmt-info small{font-size:11px;color:var(--tm);font-weight:600;}
 .cmt-text{font-size:13.5px;line-height:1.6;color:var(--t2);word-wrap:break-word;overflow-wrap:break-word;}
+.cmt-text-wrap{margin-bottom:2px;}
 .cmt-actions{display:flex;gap:16px;margin-top:10px;}
 .cmt-btn{font-size:12px;font-weight:700;color:var(--tm);}
 .cmt-btn.liked{color:var(--rose);}
@@ -380,7 +398,7 @@ textarea.compose.over{border-color:var(--err);}
 
 /* ── FULL SCREENS ── */
 .full-screen-view{position:absolute;inset:0;z-index:1150;background:var(--bg);display:none;flex-direction:column;}
-.profile-screen{position:absolute;inset:0;z-index:1500;background:var(--bg);display:none;flex-direction:column;}
+.profile-screen{position:absolute;inset:0;z-index:9500;background:var(--bg);display:none;flex-direction:column;}
 .dm-screen{position:absolute;inset:0;z-index:1200;background:var(--bg);display:none;flex-direction:column;}
 
 /* ── DM THREAD ── */
@@ -442,7 +460,7 @@ textarea.compose.over{border-color:var(--err);}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* Profile screens */
-.my-profile-screen{position:absolute;inset:0;z-index:2000;background:var(--bg);display:none;flex-direction:column;}
+.my-profile-screen{position:absolute;inset:0;z-index:9600;background:var(--bg);display:none;flex-direction:column;}
 
 /* Pull indicator */
 .pull-indicator{
@@ -667,7 +685,10 @@ textarea.compose.over{border-color:var(--err);}
           <input type="file" id="avatarFileInput" accept="image/*" style="display:none;" onchange="nxHandleAvatarUpload(this)"/>
         </div>
         <div class="field-label" style="margin-top:8px;">Avatar Emoji</div>
-        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:4px 0;" id="emojiGrid"></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:4px 0;">
+          <input type="text" class="field" id="emojiInput" placeholder="Tap here & pick an emoji from your keyboard" maxlength="8" oninput="nxEmojiInputTyping()" style="flex:1;font-size:18px;"/>
+          <button id="clearEmojiBtn" onclick="nxClearEmoji()" style="font-size:11.5px;font-weight:700;color:var(--err);white-space:nowrap;display:none;flex-shrink:0;">Clear</button>
+        </div>
         <div class="field-label" style="margin-top:8px;">Username</div>
         <input type="text" class="field" id="usernameInput" placeholder="e.g. rahul_42" maxlength="24" oninput="nxUsernameTyping()"/>
         <span style="font-size:12px;font-weight:600;color:var(--tm);margin-top:-6px;" id="usernameHint">3-24 chars: lowercase letters, numbers, underscore.</span>
@@ -807,17 +828,6 @@ textarea.compose.over{border-color:var(--err);}
 const STUDENT_URL   = "https://afooyyydhlwngzssgqih.supabase.co";
 const STUDENT_KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb295eXlkaGx3bmd6c3NncWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDQxMjgsImV4cCI6MjA5NDIyMDEyOH0.KG0XO0oP_2MpewHoIwTtbrKg5FkyOYRUtVzLH1MSJiE";
 const ADMIN_KEYS = ['admin@academeforge.in'];
-const EMOJI_PRESETS = [
-  "🧠","🎓","🏆","👑","⚡","🎯","🚀","🔥","💎","🌟",
-  "🤖","🧩","🎮","🕹️","🥇","🥈","🥉","🏅","📚","🔮",
-  "🦁","🐯","🦅","🦊","🐺","🐼","🐨","🐱","🐵","🐸",
-  "😎","🗿","💀","😈","👹","🐉","🦖","🦈","🦍","🐲",
-  "⚔️","🛡️","🏹","🔱","🪓","⚜️","☠️","👁️","🌪️","🌋",
-  "💰","💸","💼","🎩","🕶️","⌚","📈","🏛️","🏰","🛸",
-  "🌌","🌠","☄️","🪐","🌙","☀️","⭐","🌍","🛰️","🚁",
-  "💻","⌨️","🖥️","📱","🎧","🎤","📡","🔋","⚙️","🧪",
-  "👽","🐅","🦄","👻","🇮🇳","🚩","🕉️","☸️","🪔","🦚"
-];
 
 /* ═══════════════════════════════════════════════════
    IN-MEMORY CACHE  (no localStorage for runtime data)
@@ -938,10 +948,10 @@ async function edgeCall(payload){
 /* ═══════════════════════════════════════════════════
    AVATAR HTML — gold vs standard verified
 ═══════════════════════════════════════════════════ */
-function avatarHTML(name, emoji, avatarUrl, extraClass='', onClick='', isVer=false){
+function avatarHTML(name, emoji, avatarUrl, extraClass='', onClick='', isVer=false, feedGold=false){
   const action = onClick ? ` onclick="${onClick}"` : '';
-  // Gold frame for verified users (premium identity)
-  const verClass = isVer ? ' gold-avatar-frame' : '';
+  // Gold frame for verified users (premium identity) — feed uses a lighter variant w/o inner white ring
+  const verClass = isVer ? (feedGold ? ' gold-avatar-frame-feed' : ' gold-avatar-frame') : '';
   if(avatarUrl){
     return `<div class="avatar${extraClass}${verClass}"${action}><img src="${esc(avatarUrl)}" alt="${esc(name)}" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='${esc(initials(name))}'"/></div>`;
   }
@@ -1194,24 +1204,26 @@ let _reportPostId=null, _reportReason=null;
 let _emojiSelected=getMyEmoji();
 let _pendingAvatarDataUrl=null;
 
-function renderPostHtml(p, mk, admin, showPinned){
+function renderPostHtml(p, mk, admin, showPinned, isFeed){
   const mine=String(p.student_key||'')===String(mk||'');
   const peerEmoji=p.emoji||'';
   const peerAvatarUrl=p.avatar_url||'';
   const isVer=!!p.is_verified;
-  const av=avatarHTML(p.student_name,peerEmoji,peerAvatarUrl,'',`nxOpenProfile('${esc(p.student_key)}','${esc(p.student_name).replace(/'/g,"&#39;")}')`,isVer);
+  const av=avatarHTML(p.student_name,peerEmoji,peerAvatarUrl,'',`nxOpenProfile('${esc(p.student_key)}','${esc(p.student_name).replace(/'/g,"&#39;")}')`,isVer,isFeed);
   const pinBar=(showPinned&&p.is_pinned)?`<div class="pin-badge">📌 Pinned</div>`:'';
   const prev=esc((p.content||'').replace(/[\n\r]/g,' ').slice(0,55)).replace(/'/g,'&#39;');
 
-  // Gold card for verified, standard card otherwise
-  const cardClass = isVer ? ' gold-post-card' : (p.is_pinned?' pinned':'');
+  // Gold card only outside Feed (Profile / etc). In Feed, premium posts look like normal posts.
+  const cardClass = (isVer && !isFeed) ? ' gold-post-card' : (p.is_pinned?' pinned':'');
   const likedClass=_cache.likedPostIds.has(p.id)?' liked':'';
   const seenClass = (getSeenPenalty(p.id) < 1.0) ? ' seen-post' : '';
 
-  // Name display: gold gradient text for verified
+  // Name display: gold gradient text for verified — kept everywhere, including Feed
   const nameHtml = isVer
     ? `<span class="gold-name">${esc(p.student_name||'Student')}</span>${verBadgeHTML(true)}`
     : esc(p.student_name||'Student');
+
+  const postTextId = `postText${p.id}`;
 
   return `<div class="post-card${cardClass}${seenClass}" data-post-id="${p.id}">
     ${pinBar}
@@ -1227,7 +1239,10 @@ function renderPostHtml(p, mk, admin, showPinned){
       </div>
       <button class="menu-dot" onclick="nxOpenMenu('post',${p.id},${mine},${!!p.is_pinned})">⋯</button>
     </div>
-    <p class="post-text" onclick="nxOpenComments(${p.id},'${prev}')" style="cursor:pointer;">${esc(p.content||'')}</p>
+    <div class="post-text-wrap">
+      <p class="post-text clamp-3" id="${postTextId}" onclick="nxOpenComments(${p.id},'${prev}')" style="cursor:pointer;">${esc(p.content||'')}</p>
+      <button class="read-more-btn hidden" onclick="nxExpandText(event,'${postTextId}')">Read More</button>
+    </div>
     <div class="post-actions">
       <button class="action-btn${likedClass}" id="like-btn-${p.id}" onclick="nxLikePost(${p.id},this)">
         ❤️ <span class="cnt" id="like-cnt-${p.id}">${p.likes_count||0}</span>
@@ -1237,6 +1252,31 @@ function renderPostHtml(p, mk, admin, showPinned){
   </div>`;
 }
 
+/* ═══════════════════════════════════════════════════
+   READ MORE — generic line-clamp overflow detector
+═══════════════════════════════════════════════════ */
+function nxSetupReadMore(selector){
+  requestAnimationFrame(()=>{
+    document.querySelectorAll(selector).forEach(textEl=>{
+      const wrap=textEl.parentElement;
+      const btn=wrap?wrap.querySelector('.read-more-btn'):null;
+      if(!btn) return;
+      if(textEl.scrollHeight - textEl.clientHeight > 2){
+        btn.classList.remove('hidden');
+      } else {
+        btn.remove();
+      }
+    });
+  });
+}
+function nxExpandText(event, textId){
+  if(event) event.stopPropagation();
+  const el=document.getElementById(textId);
+  if(el) el.classList.remove('clamp-3','clamp-2');
+  const btn=event?event.currentTarget:null;
+  if(btn) btn.remove();
+}
+
 function renderListToContainer(posts, containerId, checkPinned){
   const box=$(containerId); if(!box) return;
   if(!posts||!posts.length){
@@ -1244,19 +1284,21 @@ function renderListToContainer(posts, containerId, checkPinned){
     return;
   }
   const mk=sKey(), admin=isAdmin();
+  const isFeed = containerId==='postsList';
   let ordered=posts;
   if(checkPinned){
     const pinned=posts.filter(p=>p.is_pinned);
     const normal=posts.filter(p=>!p.is_pinned);
     ordered=[...pinned,...normal];
   }
-  box.innerHTML=ordered.map(p=>renderPostHtml(p,mk,admin,checkPinned)).join('');
+  box.innerHTML=ordered.map(p=>renderPostHtml(p,mk,admin,checkPinned,isFeed)).join('');
   // Append feed-end marker if this is the main feed
   if(containerId==='postsList' && posts.length > 0){
     box.innerHTML += '<div class="feed-end-msg">🎉 Take a break. You\'re all caught up.</div>';
   }
-  // Start observing for seen tracking
+  // Start observing for seen tracking + detect overflowing posts for Read More
   requestAnimationFrame(observePostCards);
+  nxSetupReadMore('#'+containerId+' .post-text.clamp-3');
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1291,7 +1333,6 @@ async function init(){
   }
   show('mainView');
   $('lockedBox').style.display='none';
-  buildEmojiGrid();
   nxLoadMyProfile();
   await Promise.all([nxLoadPosts(), nxPreloadConnections()]);
   setupRealtime();
@@ -1585,7 +1626,10 @@ function renderComments(list){
         </div>
         <button class="menu-dot" style="width:24px;height:24px;font-size:13px;" onclick="nxOpenMenu('comment',${c.id},${mine},false)">⋯</button>
       </div>
-      <p class="cmt-text">${esc(c.content||'')}</p>
+      <div class="cmt-text-wrap">
+        <p class="cmt-text clamp-2" id="cmtText${c.id}">${esc(c.content||'')}</p>
+        <button class="read-more-btn hidden" onclick="nxExpandText(event,'cmtText${c.id}')">Read More</button>
+      </div>
       <div class="cmt-actions">
         <button class="cmt-btn" onclick="nxLikeComment(${c.id},this)">❤️ ${c.likes_count||0}</button>
         <button class="cmt-btn" onclick="nxOpenReply(${c.id},'${prev}')">Reply</button>
@@ -1609,7 +1653,10 @@ function renderComments(list){
                 </div>
                 <button class="menu-dot" style="width:24px;height:24px;font-size:13px;" onclick="nxOpenMenu('comment',${r.id},${rm},false)">⋯</button>
               </div>
-              <p class="cmt-text">${esc(r.content||'')}</p>
+              <div class="cmt-text-wrap">
+                <p class="cmt-text clamp-2" id="cmtText${r.id}">${esc(r.content||'')}</p>
+                <button class="read-more-btn hidden" onclick="nxExpandText(event,'cmtText${r.id}')">Read More</button>
+              </div>
               <div class="cmt-actions">
                 <button class="cmt-btn" onclick="nxLikeComment(${r.id},this)">❤️ ${r.likes_count||0}</button>
                 <button class="cmt-btn" onclick="nxOpenReply(${r.id},'${rp}')">Reply</button>
@@ -1620,12 +1667,16 @@ function renderComments(list){
       }
     </div>`;
   }).join('');
+  // Detect overflowing root-comment text (replies are still hidden/collapsed at this point)
+  nxSetupReadMore('#commentsList .cmt-text.clamp-2');
 }
 function nxToggleReplies(cId){
   const b=$('rep-'+cId); if(!b) return;
+  const wasHidden=b.classList.contains('hidden');
   b.classList.toggle('hidden');
   const btn=b.previousElementSibling;
   if(btn){const h=b.classList.contains('hidden'),m=btn.textContent.match(/\d+/),n=m?m[0]:'';btn.textContent=(h?'▸ ':'▾ ')+n+' repl'+(Number(n)===1?'y':'ies');}
+  if(wasHidden) nxSetupReadMore('#rep-'+cId+' .cmt-text.clamp-2');
 }
 function nxCommentTyping(){
   const v=$('commentInput').value,w=wordCount(v),ex=w>80;
@@ -2018,7 +2069,8 @@ function nxHandleAvatarUpload(input){
     _emojiSelected='';
     nxRenderEditAvatarPreview();
     $('removeAvatarBtn').style.display='block';
-    document.querySelectorAll('#emojiGrid button').forEach(b=>b.style.borderColor='transparent');
+    $('emojiInput').value='';
+    $('clearEmojiBtn').style.display='none';
   };
   reader.readAsDataURL(file);
 }
@@ -2046,15 +2098,11 @@ function nxRenderEditAvatarPreview(){
   }
 }
 
-function buildEmojiGrid(){
-  const g=$('emojiGrid'); if(!g) return;
-  const cur=getMyEmoji();
-  g.innerHTML=EMOJI_PRESETS.map(e=>`<button style="aspect-ratio:1;border-radius:12px;font-size:26px;background:var(--inp);border:2px solid ${e===cur?'var(--p)':'transparent'};display:flex;align-items:center;justify-content:center;" onclick="nxPickEmoji(this,'${e}')">${e}</button>`).join('');
-}
 function nxOpenEditProfile(){
   _emojiSelected=getMyEmoji();
   _pendingAvatarDataUrl=null;
-  buildEmojiGrid();
+  $('emojiInput').value=_emojiSelected||'';
+  $('clearEmojiBtn').style.display=_emojiSelected?'inline-block':'none';
   nxRenderEditAvatarPreview();
   $('usernameInput').value=getMyUsername();
   $('bioInput').value=localStorage.getItem('af_bio')||'';
@@ -2065,11 +2113,17 @@ function nxOpenEditProfile(){
   $('editProfileModal').style.display='flex';
 }
 function nxCloseEditProfile(){$('editProfileModal').style.display='none';}
-function nxPickEmoji(btn,e){
-  _emojiSelected=e;
+function nxEmojiInputTyping(){
+  const v=($('emojiInput').value||'').trim();
+  _emojiSelected=v;
   _pendingAvatarDataUrl=null;
-  document.querySelectorAll('#emojiGrid button').forEach(b=>b.style.borderColor='transparent');
-  btn.style.borderColor='var(--p)';
+  $('clearEmojiBtn').style.display=v?'inline-block':'none';
+  nxRenderEditAvatarPreview();
+}
+function nxClearEmoji(){
+  $('emojiInput').value='';
+  _emojiSelected='';
+  $('clearEmojiBtn').style.display='none';
   nxRenderEditAvatarPreview();
 }
 
@@ -2421,7 +2475,8 @@ window.nxSendDM=nxSendDM;
 window.nxDMTyping=nxDMTyping;
 window.nxCancelEditDM=nxCancelEditDM;
 window.nxSaveProfile=nxSaveProfile;
-window.nxPickEmoji=nxPickEmoji;
+window.nxEmojiInputTyping=nxEmojiInputTyping;
+window.nxClearEmoji=nxClearEmoji;
 window.nxUsernameTyping=nxUsernameTyping;
 window.nxCommentTyping=nxCommentTyping;
 window.nxPostTyping=nxPostTyping;
