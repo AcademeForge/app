@@ -409,6 +409,7 @@ textarea.compose.over{border-color:var(--err);}
   border:1px solid var(--b1);box-shadow:var(--sh);
   word-break:break-word;overflow-wrap:break-word;white-space:pre-wrap;hyphens:none;
   text-align:left;display:inline-block;max-width:100%;
+  width:fit-content; /* Ensure it stays snug to text width */
 }
 .bubble-wrap.me .bubble{background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);color:#fff;border:none;border-radius:18px 18px 4px 18px;box-shadow:0 4px 12px rgba(79,70,229,.2);}
 .bubble.deleted{font-style:italic;opacity:.6;background:transparent!important;color:var(--tm)!important;border:1px dashed var(--tm);box-shadow:none!important;}
@@ -1634,7 +1635,7 @@ async function nxLoadPosts(isRefresh=false){
 
   const freshPosts=Array.isArray(res.posts)?res.posts:[];
 
-  // Sync liked state directly from backend (No more optimistic override issues)
+  // Sync liked state from server
   if(Array.isArray(res.liked_post_ids)){
     _cache.likedPostIds = new Set(res.liked_post_ids);
   } else {
@@ -1706,37 +1707,34 @@ async function nxCreatePost(){
 }
 
 /* ═══════════════════════════════════════════════════
-   LIKE (Strict Backend Fetch - No Optimistic UI Cache)
+   LIKE (optimistic, prevents double count)
 ═══════════════════════════════════════════════════ */
 async function nxLikePost(pid, btnEl){
   if(!sKey()) return;
-  if(btnEl) btnEl.style.pointerEvents = 'none';
+  const wasLiked = _cache.likedPostIds.has(pid);
+  const cntEl = $('like-cnt-'+pid);
   
-  const res = await edgeCall({action:'toggle_post_like',post_id:pid});
-  
-  if(btnEl) btnEl.style.pointerEvents = 'auto';
-
-  if(res && res.ok){
-    // Sync liked state from authoritative backend response
-    if(res.liked) _cache.likedPostIds.add(pid);
-    else _cache.likedPostIds.delete(pid);
-
-    // Force a clean full fetch — bypass mergeFeedOnRefresh entirely so no
-    // stale cached counts can bleed into the re-render. Clearing _cache.posts
-    // before calling nxLoadPosts(false) routes through rankFeed(freshPosts)
-    // directly, guaranteeing the DOM reflects only what the DB returned.
-    const scrollEl = $('feed');
-    const st = scrollEl ? scrollEl.scrollTop : 0;
-    _cache.posts = [];
-    await nxLoadPosts(false);
-    if(scrollEl) requestAnimationFrame(() => { scrollEl.scrollTop = st; });
+  // 1. Optimistic Update (UI)
+  if(wasLiked){
+    _cache.likedPostIds.delete(pid);
+    if(cntEl) cntEl.textContent = Math.max(0, parseInt(cntEl.textContent||0) - 1);
+    if(btnEl) btnEl.classList.remove('liked');
+    const pIdx = _cache.posts.findIndex(p=>p.id===pid);
+    if(pIdx>=0) _cache.posts[pIdx].likes_count = Math.max(0, (_cache.posts[pIdx].likes_count||0) - 1);
   } else {
-    showToast(res?.message||'Could not like post.','err');
+    _cache.likedPostIds.add(pid);
+    if(cntEl) cntEl.textContent = parseInt(cntEl.textContent||0) + 1;
+    if(btnEl) btnEl.classList.add('liked');
+    const pIdx = _cache.posts.findIndex(p=>p.id===pid);
+    if(pIdx>=0) _cache.posts[pIdx].likes_count = (_cache.posts[pIdx].likes_count||0) + 1;
   }
+  
+  // 2. Fire and forget backend call (NO await nxLoadPosts after)
+  edgeCall({action:'toggle_post_like',post_id:pid}).catch(()=>{/* silent fail */});
 }
 
 /* ═══════════════════════════════════════════════════
-   COMMENTS (Strict Backend Fetch - No Optimistic UI Cache)
+   COMMENTS (optimistic, prevents double count)
 ═══════════════════════════════════════════════════ */
 function nxOpenComments(pid,preview){
   _curPostId=pid;
@@ -1848,33 +1846,34 @@ async function nxCreateComment(){
   
   inp.value=''; nxCommentTyping();
 
-  // Clean full fetch — bypass mergeFeedOnRefresh to avoid stale comment counts
-  const scrollEl = $('feed');
-  const st = scrollEl ? scrollEl.scrollTop : 0;
-  _cache.posts = [];
-  await nxLoadPosts(false);
+  // Optimistic Update UI directly
+  const pIdx = _cache.posts.findIndex(p=>p.id===_curPostId);
+  if(pIdx>=0) _cache.posts[pIdx].comments_count = (_cache.posts[pIdx].comments_count||0) + 1;
+  const pc = document.querySelector(`.post-card[data-post-id="${_curPostId}"]`);
+  if(pc){
+    const btns = pc.querySelectorAll('.action-btn');
+    if(btns && btns.length > 1){
+      const cc = btns[1].querySelector('.cnt');
+      if(cc) cc.textContent = parseInt(cc.textContent||0) + 1;
+    }
+  }
+
+  // Refetch ONLY the comments array dynamically without fetching the entire feed
   await nxLoadComments(_curPostId);
-  if(scrollEl) requestAnimationFrame(() => { scrollEl.scrollTop = st; });
 }
 
 async function nxLikeComment(cId, btnEl){
   if(!sKey()) return;
-  if(btnEl) btnEl.style.pointerEvents = 'none';
-
-  const res=await edgeCall({action:'toggle_comment_like',comment_id:cId});
-  
-  if(btnEl) btnEl.style.pointerEvents = 'auto';
-  
-  if(res&&res.ok){
-    if(_curPostId){
-      const scrollEl = $('commentsList');
-      const st = scrollEl ? scrollEl.scrollTop : 0;
-      await nxLoadComments(_curPostId);
-      if(scrollEl) requestAnimationFrame(() => { scrollEl.scrollTop = st; });
-    }
-  } else {
-    showToast(res?.message||'Could not like comment.','err');
+  // Optimistic update locally immediately
+  if(btnEl){
+    const m=btnEl.textContent.match(/(\d+)/);
+    const cur=m?parseInt(m[1]):0;
+    btnEl.classList.toggle('liked');
+    const liked=btnEl.classList.contains('liked');
+    btnEl.innerHTML=`❤️ ${liked?cur+1:Math.max(0,cur-1)}`;
   }
+  // Fire and forget
+  edgeCall({action:'toggle_comment_like',comment_id:cId}).catch(()=>{});
 }
 
 function nxOpenReply(pid,preview){
@@ -1899,18 +1898,24 @@ async function nxCreateReply(){
   const inp=$('replyInput'),content=inp.value.trim();
   if(!content||wordCount(content)>80||!_curPostId||!_replyParentId) return;
   $('replySubmitBtn').disabled=true;
-  
   const res=await edgeCall({action:'create_comment',post_id:_curPostId,parent_comment_id:_replyParentId,content});
   if(!res||!res.ok){showToast(res?.message||'Could not reply.','err');$('replySubmitBtn').disabled=false;return;}
   nxCloseReply();
+  
+  // Optimistic UI directly 
+  const pIdx = _cache.posts.findIndex(p=>p.id===_curPostId);
+  if(pIdx>=0) _cache.posts[pIdx].comments_count = (_cache.posts[pIdx].comments_count||0) + 1;
+  const pc = document.querySelector(`.post-card[data-post-id="${_curPostId}"]`);
+  if(pc){
+    const btns = pc.querySelectorAll('.action-btn');
+    if(btns && btns.length > 1){
+      const cc = btns[1].querySelector('.cnt');
+      if(cc) cc.textContent = parseInt(cc.textContent||0) + 1;
+    }
+  }
 
-  // Clean full fetch — bypass mergeFeedOnRefresh to avoid stale comment counts
-  const scrollEl = $('feed');
-  const st = scrollEl ? scrollEl.scrollTop : 0;
-  _cache.posts = [];
-  await nxLoadPosts(false);
+  // Reload only comments for this post
   await nxLoadComments(_curPostId);
-  if(scrollEl) requestAnimationFrame(() => { scrollEl.scrollTop = st; });
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1959,10 +1964,21 @@ async function nxDeleteTarget(){
   nxCloseMenu();
   
   if(t.type==='post'){
-    await nxLoadPosts(true);
+    _cache.posts = _cache.posts.filter(p => p.id !== t.id);
+    const el = document.querySelector(`.post-card[data-post-id="${t.id}"]`);
+    if(el) el.remove();
   }
   if(t.type==='comment'&&_curPostId){
-    await nxLoadPosts(true);
+    const pIdx = _cache.posts.findIndex(p=>p.id===_curPostId);
+    if(pIdx>=0 && _cache.posts[pIdx].comments_count > 0) _cache.posts[pIdx].comments_count--;
+    const pc = document.querySelector(`.post-card[data-post-id="${_curPostId}"]`);
+    if(pc){
+      const btns = pc.querySelectorAll('.action-btn');
+      if(btns && btns.length > 1){
+        const cc = btns[1].querySelector('.cnt');
+        if(cc) cc.textContent = Math.max(0, parseInt(cc.textContent||0) - 1);
+      }
+    }
     await nxLoadComments(_curPostId);
   }
   showToast('Deleted successfully.');
@@ -2725,19 +2741,19 @@ function nxRenderDMMessages(msgs){
     const bubbleExtraClass=(!me&&peerVer)?' gold-bubble':'';
 
     // Assemble the image preview if image URL is present and completely valid
-    const isValidImg = m.image_url && typeof m.image_url === 'string' && m.image_url.startsWith('http');
+    const isValidImg = m.image_url && m.image_url !== 'null' && m.image_url !== 'undefined';
     const imgHtml = (!deleted && isValidImg) 
       ? `<img src="${esc(m.image_url)}" onclick="nxOpenLightbox(this.src)" style="max-width:220px; border-radius:${m.text?'10px 10px 4px 4px':'10px'}; margin-bottom:${m.text?'6px':'0'}; display:block; max-height:220px; object-fit:cover; cursor:zoom-in;"/>` 
       : '';
       
     // The text content or deletion notice
-    const textHtml = deleted ? 'Message deleted' : esc((m.text || '').trim());
+    const textHtml = deleted ? 'Message deleted' : esc(m.text || '');
 
     // NOTE: This literal absolutely MUST NOT contain interior white space or newlines between <div class="bubble..."> and </div>
     // Otherwise `white-space: pre-wrap;` injects those hidden characters and stretches out the bubble.
     return `<div class="bubble-wrap${me?' me':''}${isConsecutive?' consecutive':''}"${clickAction}>
       ${!me?(isConsecutive?'<div class="bubble-avatar-slot"></div>':avatarHTML(_dmPeer.name,peerEmoji,peerAvatarUrl,' bubble-avatar-slot',`nxOpenProfile('${esc(_dmPeer.key)}','${esc(_dmPeer.name).replace(/'/g,"&#39;")}')`,peerVer)):''}
-      <div style="display:flex;flex-direction:column;align-items:${me?'flex-end':'flex-start'};max-width:72%;">
+      <div style="display:flex;flex-direction:column;align-items:${me?'flex-end':'flex-start'};max-width:72%;min-width:0;">
         <div class="bubble${deleted?' deleted':''}${bubbleExtraClass}" style="${(!deleted && !m.text && isValidImg) ? 'padding:4px;' : ''}">${imgHtml}${textHtml}</div>
         <div class="bubble-time">${esc(timeAgo(m.ts))}</div>
       </div>
