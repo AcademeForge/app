@@ -397,9 +397,9 @@ textarea.compose.over{border-color:var(--err);}
 .unread-dot{width:10px;height:10px;background:var(--rose);border-radius:50%;display:inline-block;margin-left:6px;}
 
 /* ── FULL SCREENS ── */
-.full-screen-view{position:absolute;inset:0;z-index:1150;background:var(--bg);display:none;flex-direction:column;}
-.profile-screen{position:absolute;inset:0;z-index:9500;background:var(--bg);display:none;flex-direction:column;}
-.dm-screen{position:absolute;inset:0;z-index:1200;background:var(--bg);display:none;flex-direction:column;}
+.full-screen-view{position:absolute;inset:0;z-index:9000;background:var(--bg);display:none;flex-direction:column;}
+.profile-screen{position:absolute;inset:0;z-index:9000;background:var(--bg);display:none;flex-direction:column;}
+.dm-screen{position:absolute;inset:0;z-index:9000;background:var(--bg);display:none;flex-direction:column;}
 
 /* ── DM THREAD ── */
 .dm-hdr{display:flex;align-items:center;gap:10px;padding:0 14px;height:64px;border-bottom:1px solid var(--b1);background:var(--hdr);backdrop-filter:blur(16px);flex-shrink:0;z-index:10;}
@@ -460,7 +460,7 @@ textarea.compose.over{border-color:var(--err);}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* Profile screens */
-.my-profile-screen{position:absolute;inset:0;z-index:9600;background:var(--bg);display:none;flex-direction:column;}
+.my-profile-screen{position:absolute;inset:0;z-index:9000;background:var(--bg);display:none;flex-direction:column;}
 
 /* Pull indicator */
 .pull-indicator{
@@ -683,11 +683,6 @@ textarea.compose.over{border-color:var(--err);}
             <button id="removeAvatarBtn" onclick="nxRemoveAvatar()" style="font-size:11.5px;color:var(--err);font-weight:700;margin-top:6px;display:none;">Remove photo</button>
           </div>
           <input type="file" id="avatarFileInput" accept="image/*" style="display:none;" onchange="nxHandleAvatarUpload(this)"/>
-        </div>
-        <div class="field-label" style="margin-top:8px;">Avatar Emoji</div>
-        <div style="display:flex;align-items:center;gap:10px;padding:4px 0;">
-          <input type="text" class="field" id="emojiInput" placeholder="Tap here & pick an emoji from your keyboard" maxlength="8" oninput="nxEmojiInputTyping()" style="flex:1;font-size:18px;"/>
-          <button id="clearEmojiBtn" onclick="nxClearEmoji()" style="font-size:11.5px;font-weight:700;color:var(--err);white-space:nowrap;display:none;flex-shrink:0;">Clear</button>
         </div>
         <div class="field-label" style="margin-top:8px;">Username</div>
         <input type="text" class="field" id="usernameInput" placeholder="e.g. rahul_42" maxlength="24" oninput="nxUsernameTyping()"/>
@@ -1204,6 +1199,18 @@ let _reportPostId=null, _reportReason=null;
 let _emojiSelected=getMyEmoji();
 let _pendingAvatarDataUrl=null;
 
+/* ═══════════════════════════════════════════════════
+   OVERLAY STACKING — always bring the most-recently
+   opened screen/modal to the very front, regardless
+   of which other overlay(s) are already open beneath it
+═══════════════════════════════════════════════════ */
+let _topZ=9000;
+function nxBringToFront(el){
+  if(!el) return;
+  _topZ+=10;
+  el.style.zIndex=String(_topZ);
+}
+
 function renderPostHtml(p, mk, admin, showPinned, isFeed){
   const mine=String(p.student_key||'')===String(mk||'');
   const peerEmoji=p.emoji||'';
@@ -1519,6 +1526,7 @@ function nxOpenComposer(){
   if(!isLoggedIn()){goToLogin();return;}
   const inp=$('postInput');
   if(inp){inp.value='';nxPostTyping();setTimeout(()=>inp.focus(),10);}
+  nxBringToFront($('composerModal'));
   $('composerModal').style.display='flex';
 }
 function nxCloseComposer(){$('composerModal').style.display='none';}
@@ -1584,6 +1592,7 @@ function nxOpenComments(pid,preview){
   const inp=$('commentInput');
   if(inp){inp.value='';nxCommentTyping();}
   $('commentsPreview').textContent=preview?preview+'…':'Join the discussion';
+  nxBringToFront($('commentsModal'));
   $('commentsModal').style.display='flex';
   nxLoadComments(pid);
 }
@@ -1717,6 +1726,7 @@ function nxOpenReply(pid,preview){
   _replyParentId=pid;
   $('replyTarget').textContent=preview?'Replying to: '+preview:'Reply to comment';
   const inp=$('replyInput'); if(inp){inp.value='';nxReplyTyping();setTimeout(()=>inp.focus(),10);}
+  nxBringToFront($('replyModal'));
   $('replyModal').style.display='flex';
 }
 function nxCloseReply(){$('replyModal').style.display='none';_replyParentId=null;}
@@ -1753,6 +1763,7 @@ function nxOpenMenu(type,id,mine,isPinned){
   } else {
     pinBtn.classList.add('hidden'); unpinBtn.classList.add('hidden');
   }
+  nxBringToFront($('menuModal'));
   $('menuModal').style.display='flex';
 }
 function nxCloseMenu(){$('menuModal').style.display='none';_menuTarget=null;}
@@ -1794,6 +1805,7 @@ function nxOpenReportForPost(pid){
   document.querySelectorAll('.af-btn-secondary-outline').forEach(b=>b.style.borderColor='var(--bc)');
   hide('reportOtherInp'); $('reportSubmitBtn').disabled=true;
   if($('reportOtherInp')) $('reportOtherInp').value='';
+  nxBringToFront($('reportModal'));
   $('reportModal').style.display='flex';
 }
 function nxOpenReport(){
@@ -1850,6 +1862,7 @@ async function nxOpenProfile(key,name){
   }
 
   $('profileScreen').style.display='flex';
+  nxBringToFront($('profileScreen'));
   nxLoadProfileMeta(key);
   nxLoadProfilePosts(key);
 }
@@ -1945,6 +1958,7 @@ function nxOpenMyProfile(){
     avatarInner.style.cssText='width:72px;height:72px;border-radius:18px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--p);color:#fff;';
   }
   $('myProfilePageScroll').scrollTop=0;
+  nxBringToFront($('myProfileScreen'));
   $('myProfileScreen').style.display='flex';
   nxLoadMyProfileData();
 }
@@ -1976,6 +1990,7 @@ async function nxOpenFollowingFor(){if(_profileData) await loadFollowList('follo
 async function loadFollowList(type,targetKey){
   $('followListTitle').textContent=type==='followers'?'Followers':'Following';
   $('followListBody').innerHTML='<div class="state-msg">Loading…</div>';
+  nxBringToFront($('followListModal'));
   $('followListModal').style.display='flex';
   const action=type==='followers'?'get_followers':'get_following';
   const res=await edgeCall({action,target_key:targetKey});
@@ -2010,6 +2025,7 @@ function nxCloseFollowList(){$('followListModal').style.display='none';}
 ═══════════════════════════════════════════════════ */
 let _searchTimer=null;
 function nxOpenSearchScreen(){
+  nxBringToFront($('searchScreen'));
   $('searchScreen').style.display='flex';
   setTimeout(()=>$('fullSearchInp')&&$('fullSearchInp').focus(),10);
 }
@@ -2069,8 +2085,6 @@ function nxHandleAvatarUpload(input){
     _emojiSelected='';
     nxRenderEditAvatarPreview();
     $('removeAvatarBtn').style.display='block';
-    $('emojiInput').value='';
-    $('clearEmojiBtn').style.display='none';
   };
   reader.readAsDataURL(file);
 }
@@ -2101,8 +2115,6 @@ function nxRenderEditAvatarPreview(){
 function nxOpenEditProfile(){
   _emojiSelected=getMyEmoji();
   _pendingAvatarDataUrl=null;
-  $('emojiInput').value=_emojiSelected||'';
-  $('clearEmojiBtn').style.display=_emojiSelected?'inline-block':'none';
   nxRenderEditAvatarPreview();
   $('usernameInput').value=getMyUsername();
   $('bioInput').value=localStorage.getItem('af_bio')||'';
@@ -2110,22 +2122,10 @@ function nxOpenEditProfile(){
   $('usernameHint').style.color='var(--tm)';
   const existingUrl=getMyAvatarUrl();
   $('removeAvatarBtn').style.display=existingUrl?'block':'none';
+  nxBringToFront($('editProfileModal'));
   $('editProfileModal').style.display='flex';
 }
 function nxCloseEditProfile(){$('editProfileModal').style.display='none';}
-function nxEmojiInputTyping(){
-  const v=($('emojiInput').value||'').trim();
-  _emojiSelected=v;
-  _pendingAvatarDataUrl=null;
-  $('clearEmojiBtn').style.display=v?'inline-block':'none';
-  nxRenderEditAvatarPreview();
-}
-function nxClearEmoji(){
-  $('emojiInput').value='';
-  _emojiSelected='';
-  $('clearEmojiBtn').style.display='none';
-  nxRenderEditAvatarPreview();
-}
 
 let _usernameCheckTimer=null;
 function nxUsernameTyping(){
@@ -2216,8 +2216,7 @@ async function nxOpenDM(peerKey,peerName){
   _dmEditingId=null; hide('dmEditBanner');
   $('dmPeerName').textContent=peerName;
   $('dmInput').value=''; nxDMTyping();
-  const fromProfile=$('profileScreen').style.display==='flex'||$('myProfileScreen').style.display==='flex';
-  $('dmScreen').style.zIndex=fromProfile?'2500':'1200';
+  nxBringToFront($('dmScreen'));
   $('dmScreen').style.display='flex';
   $('bnav').classList.add('kb-hidden');
   $('dmMessages').innerHTML='<div class="state-msg">Loading…</div>';
