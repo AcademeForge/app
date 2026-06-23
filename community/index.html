@@ -632,24 +632,43 @@ textarea.compose.over{border-color:var(--err);}
     </div>
   </div>
 
-  <!-- BOTTOM NAV -->
-  <nav class="af-bnav" id="bnav" role="navigation">
-    <button class="af-nav-btn" onclick="window.location.href='/index.html'" type="button">
-      <span class="af-nav-icon-wrap"><span class="af-nav-icon">🏠</span></span><span class="af-nav-label">Home</span>
-    </button>
-    <button class="af-nav-btn" onclick="window.location.href='/student/index.html'" type="button">
-      <span class="af-nav-icon-wrap"><span class="af-nav-icon">🧭</span></span><span class="af-nav-label">Explore</span>
-    </button>
-    <button class="af-nav-btn" onclick="window.location.href='/batches/index.html'" type="button">
-      <span class="af-nav-icon-wrap"><span class="af-nav-icon">📚</span></span><span class="af-nav-label">Batches</span>
-    </button>
-    <button class="af-nav-btn active" type="button">
-      <span class="af-nav-icon-wrap"><span class="af-nav-icon">💬</span></span><span class="af-nav-label">Community</span>
-    </button>
-    <button class="af-nav-btn" onclick="window.location.href='/setting/index.html'" type="button">
-      <span class="af-nav-icon-wrap"><span class="af-nav-icon">⚙️</span></span><span class="af-nav-label">Settings</span>
-    </button>
-  </nav>
+<!-- BOTTOM NAV -->
+<nav class="af-bnav" id="bnav" role="navigation">
+  <button class="af-nav-btn" onclick="window.location.href='/index.html'" type="button">
+    <span class="af-nav-icon-wrap">
+      <span class="af-nav-icon">🏠</span>
+    </span>
+    <span class="af-nav-label">Home</span>
+  </button>
+
+  <button class="af-nav-btn" onclick="window.location.href='/student/index.html'" type="button">
+    <span class="af-nav-icon-wrap">
+      <span class="af-nav-icon">🧭</span>
+    </span>
+    <span class="af-nav-label">Explore</span>
+  </button>
+
+  <button class="af-nav-btn" onclick="window.location.href='/batches/index.html'" type="button">
+    <span class="af-nav-icon-wrap">
+      <span class="af-nav-icon">💡</span>
+    </span>
+    <span class="af-nav-label">Programs</span>
+  </button>
+
+  <button class="af-nav-btn active" type="button">
+    <span class="af-nav-icon-wrap">
+      <span class="af-nav-icon">🌐</span>
+    </span>
+    <span class="af-nav-label">Community</span>
+  </button>
+
+  <button class="af-nav-btn" onclick="window.location.href='/setting/index.html'" type="button">
+    <span class="af-nav-icon-wrap">
+      <span class="af-nav-icon">⚙️</span>
+    </span>
+    <span class="af-nav-label">Settings</span>
+  </button>
+</nav>
 
   <div class="af-toast-wrap" id="toastWrap"></div>
 
@@ -669,7 +688,17 @@ textarea.compose.over{border-color:var(--err);}
 const STUDENT_URL  = "https://afooyyydhlwngzssgqih.supabase.co";
 const STUDENT_KEY_SB = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb295eXlkaGx3bmd6c3NncWloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2NDQxMjgsImV4cCI6MjA5NDIyMDEyOH0.KG0XO0oP_2MpewHoIwTtbrKg5FkyOYRUtVzLH1MSJiE";
 const ADMIN_KEYS = ['admin@academeforge.in'];
-const EMOJI_PRESETS = ['🎓','🚀','⚡','🦁','🐉','🌟','🦋','🔥','🎯','💎'];
+const EMOJI_PRESETS = [
+  "🧠","🎓","🏆","👑","⚡","🎯","🚀","🔥","💎","🌟",
+  "🤖","🧩","🎮","🕹️","🥇","🥈","🥉","🏅","📚","🔮",
+  "🦁","🐯","🦅","🦊","🐺","🐼","🐨","🐱","🐵","🐸",
+  "😎","🗿","💀","😈","👹","🐉","🦖","🦈","🦍","🐲",
+  "⚔️","🛡️","🏹","🔱","🪓","⚜️","☠️","👁️","🌪️","🌋",
+  "💰","💸","💼","🎩","🕶️","⌚","📈","🏛️","🏰","🛸",
+  "🌌","🌠","☄️","🪐","🌙","☀️","⭐","🌍","🛰️","🚁",
+  "💻","⌨️","🖥️","📱","🎧","🎤","📡","🔋","⚙️","🧪",
+  "👽","🐅","🦄","👻","🇮🇳","🚩","🕉️","☸️","🪔","🦚"
+];
 
 let _sb = null;
 function loadSupabaseSDK(){
