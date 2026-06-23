@@ -405,10 +405,8 @@ textarea.compose.over{border-color:var(--err);}
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <!-- FIX 1: Dark mode toggle -->
-          <button class="dark-toggle" id="darkToggleBtn" onclick="nxToggleDarkMode()" aria-label="Toggle dark mode">🌙</button>
           <button class="af-hdr-icon-btn" onclick="nxOpenSearchScreen()" aria-label="Search">🔍</button>
-          <!-- FIX 5: Avatar-only circle button -->
+          <!-- Avatar-only circle button -->
           <button class="my-avatar-btn" id="btnMyAvatar" onclick="nxOpenMyProfile()" aria-label="My profile"></button>
         </div>
       </div>
@@ -536,7 +534,10 @@ textarea.compose.over{border-color:var(--err);}
       <button class="af-back" onclick="nxCloseDM()" style="background:transparent;border:none;width:auto;font-size:22px;margin-right:4px;">←</button>
       <div class="avatar avatar-sm" id="dmPeerAvatar" onclick="nxOpenProfileFromDM()" style="cursor:pointer;"></div>
       <div class="dm-hdr-info" onclick="nxOpenProfileFromDM()">
-        <div class="dm-hdr-name" id="dmPeerName"></div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <div class="dm-hdr-name" id="dmPeerName"></div>
+          <span class="verified-badge" id="dmPeerVerifiedBadge" style="display:none;">✔</span>
+        </div>
         <div class="dm-hdr-status" id="dmHdrStatus"></div>
       </div>
     </div>
@@ -1746,8 +1747,10 @@ async function nxOpenDM(peerKey,peerName){
       av.className='avatar avatar-sm'+(p.emoji?'':' initials')+(p.is_verified?' verified-avatar':'');
       av.textContent=p.emoji||initials(p.student_name);
     }
+    const badge=$('dmPeerVerifiedBadge');
+    if(badge) badge.style.display=p.is_verified?'inline-flex':'none';
     let roleStr='Community Member';
-    if(p.is_verified) roleStr='✔ Verified Member';
+    if(p.is_verified) roleStr='Verified Member';
     else if(p.username) roleStr='@'+p.username;
     $('dmHdrStatus').textContent=roleStr;
     $('dmHdrStatus').style.color=p.is_verified?'var(--p)':'var(--tm)';
