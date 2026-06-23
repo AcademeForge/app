@@ -409,6 +409,7 @@ textarea.compose.over{border-color:var(--err);}
   border:1px solid var(--b1);box-shadow:var(--sh);
   word-break:break-word;overflow-wrap:break-word;white-space:pre-wrap;hyphens:none;
   text-align:left;display:inline-block;max-width:100%;
+  width:fit-content; /* FIXED: Prevent bubbles from stretching full width */
 }
 .bubble-wrap.me .bubble{background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);color:#fff;border:none;border-radius:18px 18px 4px 18px;box-shadow:0 4px 12px rgba(79,70,229,.2);}
 .bubble.deleted{font-style:italic;opacity:.6;background:transparent!important;color:var(--tm)!important;border:1px dashed var(--tm);box-shadow:none!important;}
@@ -1068,17 +1069,17 @@ function goToLogin(){sessionStorage.setItem('af_last_tab','student');window.loca
 /**
  * Fully logs the student out of AF Nexus and wipes every trace of their
  * session from this page before redirecting:
- *   1. Removes every af_* identity/profile key from localStorage
- *      (email, mobile, name, username, bio, avatar, dark mode is kept
- *      since theme is a device preference, not account data — change
- *      AF_KEEP_ON_LOGOUT below if you want theme reset too).
- *   2. Clears sessionStorage entries set by this page.
- *   3. Empties the entire in-memory _cache object (feed, profiles,
- *      chats, likes, follow graph) so nothing the next person who
- *      opens this device could see leftover data from this account.
- *   4. Resets all module-level UI state variables.
- *   5. Unsubscribes the realtime DM channel tied to this account.
- *   6. Closes every open screen/modal so the next init() starts clean.
+ * 1. Removes every af_* identity/profile key from localStorage
+ * (email, mobile, name, username, bio, avatar, dark mode is kept
+ * since theme is a device preference, not account data — change
+ * AF_KEEP_ON_LOGOUT below if you want theme reset too).
+ * 2. Clears sessionStorage entries set by this page.
+ * 3. Empties the entire in-memory _cache object (feed, profiles,
+ * chats, likes, follow graph) so nothing the next person who
+ * opens this device could see leftover data from this account.
+ * 4. Resets all module-level UI state variables.
+ * 5. Unsubscribes the realtime DM channel tied to this account.
+ * 6. Closes every open screen/modal so the next init() starts clean.
  */
 const AF_KEEP_ON_LOGOUT = new Set(['af_dark_mode']);
 function nxClearAllCaches(){
@@ -1706,7 +1707,7 @@ async function nxCreatePost(){
 }
 
 /* ═══════════════════════════════════════════════════
-   LIKE (optimistic, server reconcile)
+   LIKE (optimistic, prevents double-count glitch)
 ═══════════════════════════════════════════════════ */
 async function nxLikePost(pid, btnEl){
   if(!sKey()) return;
@@ -1716,33 +1717,21 @@ async function nxLikePost(pid, btnEl){
     _cache.likedPostIds.delete(pid);
     if(cntEl) cntEl.textContent = Math.max(0, parseInt(cntEl.textContent||0) - 1);
     if(btnEl) btnEl.classList.remove('liked');
+    const pIdx = _cache.posts.findIndex(p=>p.id===pid);
+    if(pIdx>=0) _cache.posts[pIdx].likes_count = Math.max(0, (_cache.posts[pIdx].likes_count||0) - 1);
   } else {
     _cache.likedPostIds.add(pid);
     if(cntEl) cntEl.textContent = parseInt(cntEl.textContent||0) + 1;
     if(btnEl) btnEl.classList.add('liked');
+    const pIdx = _cache.posts.findIndex(p=>p.id===pid);
+    if(pIdx>=0) _cache.posts[pIdx].likes_count = (_cache.posts[pIdx].likes_count||0) + 1;
   }
-  const res = await edgeCall({action:'toggle_post_like',post_id:pid});
-  if(res && res.ok && typeof res.likes_count === 'number'){
-    if(cntEl) cntEl.textContent = res.likes_count;
-    if(res.liked){ _cache.likedPostIds.add(pid); if(btnEl) btnEl.classList.add('liked'); }
-    else { _cache.likedPostIds.delete(pid); if(btnEl) btnEl.classList.remove('liked'); }
-    const postIdx = _cache.posts.findIndex(p=>p.id===pid);
-    if(postIdx>=0) _cache.posts[postIdx].likes_count = res.likes_count;
-  } else if(!res || !res.ok){
-    if(wasLiked){
-      _cache.likedPostIds.add(pid);
-      if(cntEl) cntEl.textContent = parseInt(cntEl.textContent||0) + 1;
-      if(btnEl) btnEl.classList.add('liked');
-    } else {
-      _cache.likedPostIds.delete(pid);
-      if(cntEl) cntEl.textContent = Math.max(0, parseInt(cntEl.textContent||0) - 1);
-      if(btnEl) btnEl.classList.remove('liked');
-    }
-  }
+  // Trust Optimistic UI. Only trigger backend side-effect.
+  edgeCall({action:'toggle_post_like',post_id:pid}).catch(()=>{/* silent fail */});
 }
 
 /* ═══════════════════════════════════════════════════
-   COMMENTS
+   COMMENTS (optimistic, prevents double-count glitch)
 ═══════════════════════════════════════════════════ */
 function nxOpenComments(pid,preview){
   _curPostId=pid;
@@ -1851,8 +1840,17 @@ async function nxCreateComment(){
   const res=await edgeCall({action:'create_comment',post_id:_curPostId,parent_comment_id:null,content});
   if(!res||!res.ok){showToast(res?.message||'Could not comment.','err');$('commentSubmitBtn').disabled=false;return;}
   inp.value=''; nxCommentTyping();
-  await nxLoadPosts(true);
-  await nxLoadComments(_curPostId);
+
+  // Optimistic UI update to prevent backend race condition double-count
+  const pIdx = _cache.posts.findIndex(p=>p.id===_curPostId);
+  if(pIdx>=0) _cache.posts[pIdx].comments_count = (_cache.posts[pIdx].comments_count||0) + 1;
+  const pc = document.querySelector(`.post-card[data-post-id="${_curPostId}"]`);
+  if(pc){
+    const cc = pc.querySelector('.action-btn:nth-child(2) .cnt');
+    if(cc) cc.textContent = parseInt(cc.textContent||0) + 1;
+  }
+  
+  await nxLoadComments(_curPostId); // Only reload the specific comments, not the whole feed
 }
 
 async function nxLikeComment(cId, btnEl){
@@ -1864,13 +1862,8 @@ async function nxLikeComment(cId, btnEl){
     const liked=btnEl.classList.contains('liked');
     btnEl.innerHTML=`❤️ ${liked?cur+1:Math.max(0,cur-1)}`;
   }
-  const res=await edgeCall({action:'toggle_comment_like',comment_id:cId});
-  if(res&&res.ok&&typeof res.likes_count==='number'&&btnEl){
-    btnEl.innerHTML=`❤️ ${res.likes_count}`;
-    if(res.liked) btnEl.classList.add('liked'); else btnEl.classList.remove('liked');
-  } else if(!res||!res.ok){
-    if(_curPostId) await nxLoadComments(_curPostId);
-  }
+  // Trust Optimistic UI
+  edgeCall({action:'toggle_comment_like',comment_id:cId}).catch(()=>{});
 }
 
 function nxOpenReply(pid,preview){
@@ -1898,7 +1891,16 @@ async function nxCreateReply(){
   const res=await edgeCall({action:'create_comment',post_id:_curPostId,parent_comment_id:_replyParentId,content});
   if(!res||!res.ok){showToast(res?.message||'Could not reply.','err');$('replySubmitBtn').disabled=false;return;}
   nxCloseReply();
-  await nxLoadPosts(true);
+
+  // Optimistic UI update
+  const pIdx = _cache.posts.findIndex(p=>p.id===_curPostId);
+  if(pIdx>=0) _cache.posts[pIdx].comments_count = (_cache.posts[pIdx].comments_count||0) + 1;
+  const pc = document.querySelector(`.post-card[data-post-id="${_curPostId}"]`);
+  if(pc){
+    const cc = pc.querySelector('.action-btn:nth-child(2) .cnt');
+    if(cc) cc.textContent = parseInt(cc.textContent||0) + 1;
+  }
+  
   await nxLoadComments(_curPostId);
 }
 
@@ -1946,7 +1948,17 @@ async function nxDeleteTarget(){
   if(!res||!res.ok){showToast(res?.message||'Could not delete.','err');return;}
   nxCloseMenu();
   if(t.type==='post'){await nxLoadPosts(true);}
-  if(t.type==='comment'&&_curPostId) await nxLoadComments(_curPostId);
+  if(t.type==='comment'&&_curPostId){
+    // Optimistic delete count
+    const pIdx = _cache.posts.findIndex(p=>p.id===_curPostId);
+    if(pIdx>=0 && _cache.posts[pIdx].comments_count > 0) _cache.posts[pIdx].comments_count--;
+    const pc = document.querySelector(`.post-card[data-post-id="${_curPostId}"]`);
+    if(pc){
+      const cc = pc.querySelector('.action-btn:nth-child(2) .cnt');
+      if(cc) cc.textContent = Math.max(0, parseInt(cc.textContent||0) - 1);
+    }
+    await nxLoadComments(_curPostId);
+  }
   showToast('Deleted successfully.');
 }
 
@@ -2706,9 +2718,10 @@ function nxRenderDMMessages(msgs){
     // Gold bubble for verified peer messages
     const bubbleExtraClass=(!me&&peerVer)?' gold-bubble':'';
 
-    // Assemble the image preview if image URL is present
-    const imgHtml = (!deleted && m.image_url) 
-      ? `<img src="${esc(m.image_url)}" onclick="nxOpenLightbox(this.src)" style="max-width:220px;width:100%; border-radius:${m.text?'10px 10px 4px 4px':'10px'}; margin-bottom:${m.text?'6px':'0'}; display:block; max-height:220px; object-fit:cover; cursor:zoom-in;"/>` 
+    // Assemble the image preview if image URL is present and perfectly valid
+    const isValidImg = m.image_url && m.image_url !== 'null' && m.image_url !== 'undefined';
+    const imgHtml = (!deleted && isValidImg) 
+      ? `<img src="${esc(m.image_url)}" onclick="nxOpenLightbox(this.src)" style="max-width:220px; border-radius:${m.text?'10px 10px 4px 4px':'10px'}; margin-bottom:${m.text?'6px':'0'}; display:block; max-height:220px; object-fit:cover; cursor:zoom-in;"/>` 
       : '';
       
     // The text content or deletion notice
@@ -2920,7 +2933,7 @@ document.addEventListener('keydown',e=>{
 })();
 
 /* ═══════════════════════════════════════════════════
-   SWIPE NAV
+   SWIPE NAV (Slide features implemented)
 ═══════════════════════════════════════════════════ */
 (function(){
   let startX=0,startY=0;
@@ -2929,12 +2942,30 @@ document.addEventListener('keydown',e=>{
     if($('dmScreen').style.display==='flex') return;
     if($('profileScreen').style.display==='flex') return;
     if($('myProfileScreen').style.display==='flex') return;
+    if($('searchScreen').style.display==='flex') return;
+    
     const diffX=e.changedTouches[0].clientX-startX;
     const diffY=e.changedTouches[0].clientY-startY;
+    
     if(Math.abs(diffY)>Math.abs(diffX)) return;
+    
     const threshold=80;
-    if(diffX>threshold) window.location.href='/batches/index.html';
-    if(diffX<-threshold) window.location.href='/setting/index.html';
+    
+    if(diffX < -threshold) { 
+      // Swiped Left (Navigate right across the tabs/pages)
+      if(_activeTab === 'feed') {
+        nxSwitchTab('chats');
+      } else if (_activeTab === 'chats') {
+        window.location.href='/setting/index.html';
+      }
+    } else if(diffX > threshold) { 
+      // Swiped Right (Navigate left across the tabs/pages)
+      if(_activeTab === 'chats') {
+        nxSwitchTab('feed');
+      } else if (_activeTab === 'feed') {
+        window.location.href='/batches/index.html';
+      }
+    }
   },{passive:true});
 })();
 
