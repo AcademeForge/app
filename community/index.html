@@ -825,6 +825,38 @@ const ADMIN_KEYS = ['admin@academeforge.in'];
    Only identity keys (email/name/emoji/avatar/dark)
    come from localStorage — everything else lives here.
 ═══════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════
+   CHAT READ-STATE PERSISTENCE
+   chatReadTs lives in-memory for fast lookups during the
+   session, but is mirrored to localStorage (scoped to the
+   current account) so a chat that was already seen stays
+   marked as read after a page reload — the red unread dot
+   should never reappear for a message the user has opened.
+═══════════════════════════════════════════════════ */
+function chatReadTsStorageKey(){
+  const key=sKey();
+  return key ? 'af_chat_read_ts:'+key : null;
+}
+function loadChatReadTs(){
+  const storageKey=chatReadTsStorageKey();
+  if(!storageKey) return new Map();
+  try{
+    const raw=localStorage.getItem(storageKey);
+    if(!raw) return new Map();
+    const obj=JSON.parse(raw);
+    return new Map(Object.entries(obj).map(([k,v])=>[k,Number(v)||0]));
+  }catch(e){ return new Map(); }
+}
+function saveChatReadTs(){
+  const storageKey=chatReadTsStorageKey();
+  if(!storageKey) return;
+  try{
+    const obj={};
+    _cache.chatReadTs.forEach((v,k)=>{ obj[k]=v; });
+    localStorage.setItem(storageKey, JSON.stringify(obj));
+  }catch(e){ /* storage full or unavailable — read-state just won't persist this time */ }
+}
+
 const _cache = {
   /* Feed */
   posts: [],               // current ranked feed
@@ -840,7 +872,7 @@ const _cache = {
 
   /* Chats */
   chatList: [],            // [{peer, messages, latest}]
-  chatReadTs: new Map(),   // peerKey -> lastReadTimestamp
+  chatReadTs: new Map(),   // peerKey -> lastReadTimestamp (persisted, see above)
 
   /* Profile thumbnails keyed by student_key */
   profiles: new Map(),     // student_key -> {name, emoji, avatar_url, is_verified, username, bio}
@@ -929,7 +961,15 @@ function syncTheme(){
 syncTheme();
 window.addEventListener('storage',e=>{
   if(e.key==='af_dark_mode') syncTheme();
-  if(['af_student_email','af_student_mobile','af_student_name'].includes(e.key)) init();
+  if(['af_student_email','af_student_mobile','af_student_name'].includes(e.key)){
+    const stillLoggedIn = !!(localStorage.getItem('af_student_email')||localStorage.getItem('af_student_mobile'));
+    if(!stillLoggedIn){
+      // Logout happened in another tab/page (e.g. the Settings page) —
+      // purge every cache so nothing from the previous session lingers.
+      nxClearAllCaches();
+    }
+    init();
+  }
 });
 function nxToggleDarkMode(){
   const isDark = localStorage.getItem('af_dark_mode')==='1';
@@ -938,6 +978,74 @@ function nxToggleDarkMode(){
 }
 window.nxToggleDarkMode = nxToggleDarkMode;
 function goToLogin(){sessionStorage.setItem('af_last_tab','student');window.location.href='../';}
+
+/**
+ * Fully logs the student out of AF Nexus and wipes every trace of their
+ * session from this page before redirecting:
+ *   1. Removes every af_* identity/profile key from localStorage
+ *      (email, mobile, name, username, bio, avatar, dark mode is kept
+ *      since theme is a device preference, not account data — change
+ *      AF_KEEP_ON_LOGOUT below if you want theme reset too).
+ *   2. Clears sessionStorage entries set by this page.
+ *   3. Empties the entire in-memory _cache object (feed, profiles,
+ *      chats, likes, follow graph) so nothing the next person who
+ *      opens this device could see leftover data from this account.
+ *   4. Resets all module-level UI state variables.
+ *   5. Unsubscribes the realtime DM channel tied to this account.
+ *   6. Closes every open screen/modal so the next init() starts clean.
+ */
+const AF_KEEP_ON_LOGOUT = new Set(['af_dark_mode']);
+function nxClearAllCaches(){
+  // 1. Wipe every af_* key in localStorage except explicitly kept ones
+  Object.keys(localStorage)
+    .filter(k=>k.startsWith('af_') && !AF_KEEP_ON_LOGOUT.has(k))
+    .forEach(k=>localStorage.removeItem(k));
+
+  // 2. Wipe session-scoped data
+  sessionStorage.removeItem('af_last_tab');
+
+  // 3. Empty the in-memory cache completely (new objects, not just .clear())
+  //    to guarantee no stale references survive in closures.
+  _cache.posts = [];
+  _cache.seenPostIds = new Map();
+  _cache.feedScrollTop = 0;
+  _cache.feedLastRefresh = 0;
+  _cache.feedMode = 'relevant';
+  _cache.myFollowers = [];
+  _cache.myFollowing = [];
+  _cache.followingKeys = new Set();
+  _cache.chatList = [];
+  _cache.chatReadTs = new Map();
+  _cache.profiles = new Map();
+  _cache.likedPostIds = new Set();
+  _cache.myVerified = false;
+
+  // 4. Reset module-level state
+  _activeTab='feed';
+  _mode='relevant';
+  _curPostId=null; _replyParentId=null; _menuTarget=null;
+  _profileData=null; _profileIsFollowing=false;
+  _dmPeer=null; _dmEditingId=null;
+  _reportPostId=null; _reportReason=null;
+  _pendingAvatarDataUrl=null;
+  _stackCounter=0;
+
+  // 5. Tear down realtime subscription bound to this account
+  teardownRealtime();
+
+  // 6. Close every screen/modal so nothing from this session lingers visibly
+  ['profileScreen','myProfileScreen','dmScreen','searchScreen',
+   'followListModal','editProfileModal','composerModal','commentsModal',
+   'replyModal','reportModal','menuModal'].forEach(id=>{
+    const el=$(id); if(el) el.style.display='none';
+  });
+}
+function nxLogout(){
+  nxClearAllCaches();
+  goToLogin();
+}
+window.nxLogout = nxLogout;
+window.nxClearAllCaches = nxClearAllCaches;
 
 /* ═══════════════════════════════════════════════════
    EDGE CALL
@@ -1345,6 +1453,7 @@ async function init(){
   }
   show('mainView');
   $('lockedBox').style.display='none';
+  _cache.chatReadTs = loadChatReadTs();
   nxLoadMyProfile();
   await Promise.all([nxLoadPosts(), nxPreloadConnections()]);
   setupRealtime();
@@ -1395,6 +1504,7 @@ function getChatUnreadCount(messages){
 }
 function markChatRead(peerKey){
   _cache.chatReadTs.set(peerKey, Date.now());
+  saveChatReadTs();
   nxUpdateUnreadBadge();
   nxRenderChatList();
 }
@@ -1408,10 +1518,11 @@ function nxUpdateUnreadBadge(){
 /* ═══════════════════════════════════════════════════
    REALTIME
 ═══════════════════════════════════════════════════ */
+let _realtimeChannel=null;
 function setupRealtime(){
   const sb=getSb();
   if(!sb) return;
-  sb.channel('realtime_dms')
+  _realtimeChannel=sb.channel('realtime_dms')
     .on('postgres_changes',{event:'*',schema:'public',table:'af_nexus_dms_v2'},payload=>{
       const msg=payload.new;
       if(msg&&(msg.receiver_key===sKey()||msg.sender_key===sKey())){
@@ -1419,6 +1530,13 @@ function setupRealtime(){
         nxRefreshPeerChat(peerKey);
       }
     }).subscribe();
+}
+function teardownRealtime(){
+  const sb=getSb();
+  if(sb&&_realtimeChannel){
+    try{ sb.removeChannel(_realtimeChannel); }catch(e){/* channel already gone */}
+  }
+  _realtimeChannel=null;
 }
 
 async function nxRefreshPeerChat(peerKey){
