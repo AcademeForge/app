@@ -1689,6 +1689,10 @@ async function nxLoadChatsFromConnections(){
   chats.sort((a,b)=>new Date(b.latest.ts)-new Date(a.latest.ts));
   _cache.chatList=chats;
   nxRenderChatList();
+  // Persist so the NEXT app open can paint this chat list instantly
+  // from cache before the network round-trip resolves (same pattern
+  // as the feed/connections snapshots above).
+  saveSnapshot('chats', _cache.chatList);
 }
 
 /* ═══════════════════════════════════════════════════
@@ -2507,15 +2511,8 @@ async function nxOpenFollowing(){await loadFollowList('following',sKey());}
 async function nxOpenFollowersFor(){if(_profileData) await loadFollowList('followers',_profileData.key);}
 async function nxOpenFollowingFor(){if(_profileData) await loadFollowList('following',_profileData.key);}
 
-async function loadFollowList(type,targetKey){
-  $('followListTitle').textContent=type==='followers'?'Followers':'Following';
-  $('followListBody').innerHTML='<div class="state-msg">Loading…</div>';
-  nxBringToFront('followListModal');
-  $('followListModal').style.display='flex';
-  const action=type==='followers'?'get_followers':'get_following';
-  const res=await edgeCall({action,target_key:targetKey});
+function _renderFollowListBox(list){
   const box=$('followListBody');
-  const list=res&&res.ok&&Array.isArray(res.users)?res.users:[];
   if(!list.length){box.innerHTML='<div class="state-msg"><span>No users here yet.</span></div>';return;}
   box.innerHTML=list.map(u=>{
     const key=u.student_key||u.key||u.follower_key||u.following_key||'';
@@ -2537,6 +2534,51 @@ async function loadFollowList(type,targetKey){
       </div>
     </div>`;
   }).join('');
+}
+
+async function loadFollowList(type,targetKey){
+  $('followListTitle').textContent=type==='followers'?'Followers':'Following';
+  nxBringToFront('followListModal');
+  $('followListModal').style.display='flex';
+
+  // INSTANT PAINT: my own followers/following are already sitting in
+  // memory (fetched in parallel at app start by nxPreloadConnections),
+  // so opening this modal for myself should feel instant — no spinner —
+  // exactly like Instagram opening your own followers list. We still
+  // quietly refresh from the network after, in case it changed since
+  // app start. Other people's lists aren't cached, so those still show
+  // a brief loading state.
+  const isOwnList = targetKey===sKey();
+  const cachedList = isOwnList ? (type==='followers'?_cache.myFollowers:_cache.myFollowing) : null;
+  if(Array.isArray(cachedList) && cachedList.length){
+    _renderFollowListBox(cachedList);
+  } else {
+    $('followListBody').innerHTML='<div class="state-msg">Loading…</div>';
+  }
+
+  const action=type==='followers'?'get_followers':'get_following';
+  const res=await edgeCall({action,target_key:targetKey});
+  // Guard against the modal having been closed/reopened for a different
+  // list while this request was in flight.
+  if($('followListModal').style.display!=='flex' || $('followListTitle').textContent!==(type==='followers'?'Followers':'Following')) return;
+  const list=res&&res.ok&&Array.isArray(res.users)?res.users:null;
+  if(list===null){
+    // Network/server failure: keep whatever we already painted (cached
+    // or otherwise) rather than wiping it out with an empty state.
+    if(!cachedList || !cachedList.length){
+      $('followListBody').innerHTML='<div class="state-msg"><span>No users here yet.</span></div>';
+    }
+    return;
+  }
+  if(isOwnList){
+    if(type==='followers') _cache.myFollowers=list;
+    else {
+      _cache.myFollowing=list;
+      _cache.followingKeys=new Set(list.map(u=>String(u.student_key||'')));
+    }
+    saveSnapshot(type==='followers'?'followers_me':'following_me', list);
+  }
+  _renderFollowListBox(list);
 }
 function nxCloseFollowList(){
   $('followListModal').style.display='none';
@@ -2783,7 +2825,6 @@ async function nxOpenDM(peerKey,peerName){
   nxBringToFront('dmScreen');
   $('dmScreen').style.display='flex';
   $('bnav').classList.add('kb-hidden');
-  $('dmMessages').innerHTML='<div class="state-msg">Loading…</div>';
 
   // Hide both badges initially
   const verBadgeEl=$('dmPeerVerifiedBadge');
@@ -2791,7 +2832,29 @@ async function nxOpenDM(peerKey,peerName){
   if(verBadgeEl) verBadgeEl.style.display='none';
   if(goldBadgeEl) goldBadgeEl.style.display='none';
 
-  const res=await edgeCall({action:'fetch_dms',peer_key:peerKey});
+  // INSTANT PAINT: if we already have this thread's messages in memory
+  // (preloaded at app start, or from a previous open this session), render
+  // them immediately — no spinner, no blank screen — exactly like opening
+  // a thread you've already opened before in Instagram. Only fall back to
+  // a loading state when there is truly nothing to show yet.
+  const cachedChat=_cache.chatList.find(c=>c.peer.student_key===peerKey);
+  if(cachedChat && cachedChat.messages && cachedChat.messages.length){
+    nxRenderDMMessages(cachedChat.messages);
+  } else {
+    $('dmMessages').innerHTML='<div class="state-msg">Loading…</div>';
+  }
+
+  // Paint the header instantly from any cached profile thumbnail too.
+  const cachedProf = _cache.profiles.get(peerKey);
+  if(cachedProf) _applyDMHeaderProfile(cachedProf);
+
+  // fetch_dms and get_profile are independent reads — run them in
+  // parallel instead of one after another so the round-trip cost is
+  // max(a,b) instead of a+b.
+  const [res, profRes] = await Promise.all([
+    edgeCall({action:'fetch_dms',peer_key:peerKey}),
+    edgeCall({action:'get_profile',target_key:peerKey}),
+  ]);
   const msgs=res&&res.ok&&res.messages?res.messages:[];
 
   // Check block status (Requires edge function to return am_i_blocked in fetch_dms)
@@ -2816,18 +2879,19 @@ async function nxOpenDM(peerKey,peerName){
     $('dmImageInput').disabled = false;
   }
 
-  // Try cache first for instant header render
-  const cachedProf = _cache.profiles.get(peerKey);
-  if(cachedProf) _applyDMHeaderProfile(cachedProf);
-
-  const profRes=await edgeCall({action:'get_profile',target_key:peerKey});
   if(profRes&&profRes.ok&&profRes.profile){
     const p=profRes.profile;
     _cache.profiles.set(peerKey, p);
     _applyDMHeaderProfile(p);
   }
 
-  nxRenderDMMessages(msgs);
+  // Only re-render if the thread is still open on this peer (guards
+  // against a race if the user backed out before the network resolved)
+  // and only if we got a real response — never blow away the instantly
+  // painted cached messages with an empty array from a failed/blocked call.
+  if(_dmPeer && _dmPeer.key===peerKey && res && res.ok){
+    nxRenderDMMessages(msgs);
+  }
   markChatRead(peerKey);
 }
 
