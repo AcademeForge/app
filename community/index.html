@@ -1717,14 +1717,18 @@ async function nxLikePost(pid, btnEl){
   if(btnEl) btnEl.style.pointerEvents = 'auto';
 
   if(res && res.ok){
-    // Keep local list synced to actual database response immediately
+    // Sync liked state from authoritative backend response
     if(res.liked) _cache.likedPostIds.add(pid);
     else _cache.likedPostIds.delete(pid);
-    
-    // Completely re-fetch from database to guarantee no double-count
+
+    // Force a clean full fetch — bypass mergeFeedOnRefresh entirely so no
+    // stale cached counts can bleed into the re-render. Clearing _cache.posts
+    // before calling nxLoadPosts(false) routes through rankFeed(freshPosts)
+    // directly, guaranteeing the DOM reflects only what the DB returned.
     const scrollEl = $('feed');
     const st = scrollEl ? scrollEl.scrollTop : 0;
-    await nxLoadPosts(true); 
+    _cache.posts = [];
+    await nxLoadPosts(false);
     if(scrollEl) requestAnimationFrame(() => { scrollEl.scrollTop = st; });
   } else {
     showToast(res?.message||'Could not like post.','err');
@@ -1844,10 +1848,11 @@ async function nxCreateComment(){
   
   inp.value=''; nxCommentTyping();
 
-  // Entirely rely on database fetch
+  // Clean full fetch — bypass mergeFeedOnRefresh to avoid stale comment counts
   const scrollEl = $('feed');
   const st = scrollEl ? scrollEl.scrollTop : 0;
-  await nxLoadPosts(true); 
+  _cache.posts = [];
+  await nxLoadPosts(false);
   await nxLoadComments(_curPostId);
   if(scrollEl) requestAnimationFrame(() => { scrollEl.scrollTop = st; });
 }
@@ -1898,10 +1903,12 @@ async function nxCreateReply(){
   const res=await edgeCall({action:'create_comment',post_id:_curPostId,parent_comment_id:_replyParentId,content});
   if(!res||!res.ok){showToast(res?.message||'Could not reply.','err');$('replySubmitBtn').disabled=false;return;}
   nxCloseReply();
-  
+
+  // Clean full fetch — bypass mergeFeedOnRefresh to avoid stale comment counts
   const scrollEl = $('feed');
   const st = scrollEl ? scrollEl.scrollTop : 0;
-  await nxLoadPosts(true);
+  _cache.posts = [];
+  await nxLoadPosts(false);
   await nxLoadComments(_curPostId);
   if(scrollEl) requestAnimationFrame(() => { scrollEl.scrollTop = st; });
 }
