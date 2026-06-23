@@ -409,7 +409,7 @@ textarea.compose.over{border-color:var(--err);}
   border:1px solid var(--b1);box-shadow:var(--sh);
   word-break:break-word;overflow-wrap:break-word;white-space:pre-wrap;hyphens:none;
   text-align:left;display:inline-block;max-width:100%;
-  width:fit-content; /* FIXED: Prevent bubbles from stretching full width */
+  width:fit-content; /* Ensure it stays snug to text width */
 }
 .bubble-wrap.me .bubble{background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);color:#fff;border:none;border-radius:18px 18px 4px 18px;box-shadow:0 4px 12px rgba(79,70,229,.2);}
 .bubble.deleted{font-style:italic;opacity:.6;background:transparent!important;color:var(--tm)!important;border:1px dashed var(--tm);box-shadow:none!important;}
@@ -1707,12 +1707,14 @@ async function nxCreatePost(){
 }
 
 /* ═══════════════════════════════════════════════════
-   LIKE (optimistic, prevents double-count glitch)
+   LIKE (optimistic, prevents double count)
 ═══════════════════════════════════════════════════ */
 async function nxLikePost(pid, btnEl){
   if(!sKey()) return;
   const wasLiked = _cache.likedPostIds.has(pid);
   const cntEl = $('like-cnt-'+pid);
+  
+  // 1. Optimistic Update (UI)
   if(wasLiked){
     _cache.likedPostIds.delete(pid);
     if(cntEl) cntEl.textContent = Math.max(0, parseInt(cntEl.textContent||0) - 1);
@@ -1726,12 +1728,13 @@ async function nxLikePost(pid, btnEl){
     const pIdx = _cache.posts.findIndex(p=>p.id===pid);
     if(pIdx>=0) _cache.posts[pIdx].likes_count = (_cache.posts[pIdx].likes_count||0) + 1;
   }
-  // Trust Optimistic UI. Only trigger backend side-effect.
+  
+  // 2. Fire and forget backend call (NO await nxLoadPosts after)
   edgeCall({action:'toggle_post_like',post_id:pid}).catch(()=>{/* silent fail */});
 }
 
 /* ═══════════════════════════════════════════════════
-   COMMENTS (optimistic, prevents double-count glitch)
+   COMMENTS (optimistic, prevents double count)
 ═══════════════════════════════════════════════════ */
 function nxOpenComments(pid,preview){
   _curPostId=pid;
@@ -1837,24 +1840,31 @@ async function nxCreateComment(){
   const inp=$('commentInput'),content=inp.value.trim();
   if(!content||wordCount(content)>80||!_curPostId) return;
   $('commentSubmitBtn').disabled=true;
+  
   const res=await edgeCall({action:'create_comment',post_id:_curPostId,parent_comment_id:null,content});
   if(!res||!res.ok){showToast(res?.message||'Could not comment.','err');$('commentSubmitBtn').disabled=false;return;}
+  
   inp.value=''; nxCommentTyping();
 
-  // Optimistic UI update to prevent backend race condition double-count
+  // Optimistic Update UI directly
   const pIdx = _cache.posts.findIndex(p=>p.id===_curPostId);
   if(pIdx>=0) _cache.posts[pIdx].comments_count = (_cache.posts[pIdx].comments_count||0) + 1;
   const pc = document.querySelector(`.post-card[data-post-id="${_curPostId}"]`);
   if(pc){
-    const cc = pc.querySelector('.action-btn:nth-child(2) .cnt');
-    if(cc) cc.textContent = parseInt(cc.textContent||0) + 1;
+    const btns = pc.querySelectorAll('.action-btn');
+    if(btns && btns.length > 1){
+      const cc = btns[1].querySelector('.cnt');
+      if(cc) cc.textContent = parseInt(cc.textContent||0) + 1;
+    }
   }
-  
-  await nxLoadComments(_curPostId); // Only reload the specific comments, not the whole feed
+
+  // Refetch ONLY the comments array dynamically without fetching the entire feed
+  await nxLoadComments(_curPostId);
 }
 
 async function nxLikeComment(cId, btnEl){
   if(!sKey()) return;
+  // Optimistic update locally immediately
   if(btnEl){
     const m=btnEl.textContent.match(/(\d+)/);
     const cur=m?parseInt(m[1]):0;
@@ -1862,7 +1872,7 @@ async function nxLikeComment(cId, btnEl){
     const liked=btnEl.classList.contains('liked');
     btnEl.innerHTML=`❤️ ${liked?cur+1:Math.max(0,cur-1)}`;
   }
-  // Trust Optimistic UI
+  // Fire and forget
   edgeCall({action:'toggle_comment_like',comment_id:cId}).catch(()=>{});
 }
 
@@ -1891,16 +1901,20 @@ async function nxCreateReply(){
   const res=await edgeCall({action:'create_comment',post_id:_curPostId,parent_comment_id:_replyParentId,content});
   if(!res||!res.ok){showToast(res?.message||'Could not reply.','err');$('replySubmitBtn').disabled=false;return;}
   nxCloseReply();
-
-  // Optimistic UI update
+  
+  // Optimistic UI directly 
   const pIdx = _cache.posts.findIndex(p=>p.id===_curPostId);
   if(pIdx>=0) _cache.posts[pIdx].comments_count = (_cache.posts[pIdx].comments_count||0) + 1;
   const pc = document.querySelector(`.post-card[data-post-id="${_curPostId}"]`);
   if(pc){
-    const cc = pc.querySelector('.action-btn:nth-child(2) .cnt');
-    if(cc) cc.textContent = parseInt(cc.textContent||0) + 1;
+    const btns = pc.querySelectorAll('.action-btn');
+    if(btns && btns.length > 1){
+      const cc = btns[1].querySelector('.cnt');
+      if(cc) cc.textContent = parseInt(cc.textContent||0) + 1;
+    }
   }
-  
+
+  // Reload only comments for this post
   await nxLoadComments(_curPostId);
 }
 
@@ -1945,17 +1959,25 @@ async function nxDeleteTarget(){
   if(t.type==='post')    res=await edgeCall({action:'delete_post',post_id:t.id});
   if(t.type==='comment') res=await edgeCall({action:'delete_comment',comment_id:t.id});
   if(t.type==='dm')      res=await edgeCall({action:'delete_dm',message_id:t.id});
+  
   if(!res||!res.ok){showToast(res?.message||'Could not delete.','err');return;}
   nxCloseMenu();
-  if(t.type==='post'){await nxLoadPosts(true);}
+  
+  if(t.type==='post'){
+    _cache.posts = _cache.posts.filter(p => p.id !== t.id);
+    const el = document.querySelector(`.post-card[data-post-id="${t.id}"]`);
+    if(el) el.remove();
+  }
   if(t.type==='comment'&&_curPostId){
-    // Optimistic delete count
     const pIdx = _cache.posts.findIndex(p=>p.id===_curPostId);
     if(pIdx>=0 && _cache.posts[pIdx].comments_count > 0) _cache.posts[pIdx].comments_count--;
     const pc = document.querySelector(`.post-card[data-post-id="${_curPostId}"]`);
     if(pc){
-      const cc = pc.querySelector('.action-btn:nth-child(2) .cnt');
-      if(cc) cc.textContent = Math.max(0, parseInt(cc.textContent||0) - 1);
+      const btns = pc.querySelectorAll('.action-btn');
+      if(btns && btns.length > 1){
+        const cc = btns[1].querySelector('.cnt');
+        if(cc) cc.textContent = Math.max(0, parseInt(cc.textContent||0) - 1);
+      }
     }
     await nxLoadComments(_curPostId);
   }
@@ -2718,7 +2740,7 @@ function nxRenderDMMessages(msgs){
     // Gold bubble for verified peer messages
     const bubbleExtraClass=(!me&&peerVer)?' gold-bubble':'';
 
-    // Assemble the image preview if image URL is present and perfectly valid
+    // Assemble the image preview if image URL is present and completely valid
     const isValidImg = m.image_url && m.image_url !== 'null' && m.image_url !== 'undefined';
     const imgHtml = (!deleted && isValidImg) 
       ? `<img src="${esc(m.image_url)}" onclick="nxOpenLightbox(this.src)" style="max-width:220px; border-radius:${m.text?'10px 10px 4px 4px':'10px'}; margin-bottom:${m.text?'6px':'0'}; display:block; max-height:220px; object-fit:cover; cursor:zoom-in;"/>` 
@@ -2727,13 +2749,12 @@ function nxRenderDMMessages(msgs){
     // The text content or deletion notice
     const textHtml = deleted ? 'Message deleted' : esc(m.text || '');
 
+    // NOTE: This literal absolutely MUST NOT contain interior white space or newlines between <div class="bubble..."> and </div>
+    // Otherwise `white-space: pre-wrap;` injects those hidden characters and stretches out the bubble.
     return `<div class="bubble-wrap${me?' me':''}${isConsecutive?' consecutive':''}"${clickAction}>
       ${!me?(isConsecutive?'<div class="bubble-avatar-slot"></div>':avatarHTML(_dmPeer.name,peerEmoji,peerAvatarUrl,' bubble-avatar-slot',`nxOpenProfile('${esc(_dmPeer.key)}','${esc(_dmPeer.name).replace(/'/g,"&#39;")}')`,peerVer)):''}
       <div style="display:flex;flex-direction:column;align-items:${me?'flex-end':'flex-start'};max-width:72%;min-width:0;">
-        <div class="bubble${deleted?' deleted':''}${bubbleExtraClass}" style="${(!deleted && !m.text && m.image_url) ? 'padding:4px;' : ''}">
-          ${imgHtml}
-          ${textHtml}
-        </div>
+        <div class="bubble${deleted?' deleted':''}${bubbleExtraClass}" style="${(!deleted && !m.text && isValidImg) ? 'padding:4px;' : ''}">${imgHtml}${textHtml}</div>
         <div class="bubble-time">${esc(timeAgo(m.ts))}</div>
       </div>
     </div>`;
@@ -2942,7 +2963,7 @@ document.addEventListener('keydown',e=>{
     if($('dmScreen').style.display==='flex') return;
     if($('profileScreen').style.display==='flex') return;
     if($('myProfileScreen').style.display==='flex') return;
-    if($('searchScreen').style.display==='flex') return;
+    if($('searchScreen') && $('searchScreen').style.display==='flex') return;
     
     const diffX=e.changedTouches[0].clientX-startX;
     const diffY=e.changedTouches[0].clientY-startY;
