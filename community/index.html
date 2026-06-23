@@ -316,6 +316,7 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
 .action-btn.liked{color:var(--rose);}
 .action-btn:active{opacity:.7;}
 .heart-ic{display:inline-flex;width:21px;height:21px;flex:none;}
+.heart-ic.heart-ic-sm{width:16px;height:16px;}
 .heart-ic svg{width:100%;height:100%;display:block;}
 .heart-ic path{
   fill:none;
@@ -325,7 +326,8 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
   stroke-linejoin:round;
   transition:fill .15s ease, stroke .15s ease;
 }
-.action-btn.liked .heart-ic path{
+.action-btn.liked .heart-ic path,
+.cmt-btn.liked .heart-ic path{
   fill:var(--rose);
   stroke:var(--rose);
 }
@@ -392,7 +394,7 @@ textarea.compose.over{border-color:var(--err);}
 .cmt-info small{font-size:11px;color:var(--tm);font-weight:600;}
 .cmt-text{font-size:13.5px;line-height:1.6;color:var(--t2);word-wrap:break-word;overflow-wrap:break-word;}
 .cmt-actions{display:flex;gap:16px;margin-top:10px;}
-.cmt-btn{font-size:12px;font-weight:700;color:var(--tm);}
+.cmt-btn{font-size:12px;font-weight:700;color:var(--tm);display:inline-flex;align-items:center;gap:4px;transition:color .15s;}
 .cmt-btn.liked{color:var(--rose);}
 .view-replies-btn{font-size:12px;font-weight:700;color:var(--p);margin-top:10px;display:inline-block;}
 .replies-wrap{margin-top:10px;padding-left:14px;border-left:2px solid var(--b1);display:flex;flex-direction:column;gap:10px;}
@@ -1860,7 +1862,10 @@ function renderComments(list){
       </div>
       <p class="cmt-text">${esc(c.content||'')}</p>
       <div class="cmt-actions">
-        <button class="cmt-btn" onclick="nxLikeComment(${c.id},this)">❤️ ${c.likes_count||0}</button>
+        <button class="cmt-btn${c.is_liked?' liked':''}" id="cmt-like-btn-${c.id}" onclick="nxLikeComment(${c.id},this)">
+          <span class="heart-ic heart-ic-sm" id="cmt-like-icon-${c.id}"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.8-10.2-9.6C.2 8.4 1.4 4.8 4.8 3.6c2.1-.7 4.3 0 5.6 1.7l1.6 2 1.6-2c1.3-1.7 3.5-2.4 5.6-1.7 3.4 1.2 4.6 4.8 3 7.8C19.5 16.2 12 21 12 21z"/></svg></span>
+          <span class="cnt" id="cmt-like-cnt-${c.id}">${c.likes_count>0?c.likes_count:''}</span>
+        </button>
         <button class="cmt-btn" onclick="nxOpenReply(${c.id},'${prev}')">Reply</button>
       </div>
       ${replies.length?`
@@ -1884,7 +1889,10 @@ function renderComments(list){
               </div>
               <p class="cmt-text">${esc(r.content||'')}</p>
               <div class="cmt-actions">
-                <button class="cmt-btn" onclick="nxLikeComment(${r.id},this)">❤️ ${r.likes_count||0}</button>
+                <button class="cmt-btn${r.is_liked?' liked':''}" id="cmt-like-btn-${r.id}" onclick="nxLikeComment(${r.id},this)">
+                  <span class="heart-ic heart-ic-sm" id="cmt-like-icon-${r.id}"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.8-10.2-9.6C.2 8.4 1.4 4.8 4.8 3.6c2.1-.7 4.3 0 5.6 1.7l1.6 2 1.6-2c1.3-1.7 3.5-2.4 5.6-1.7 3.4 1.2 4.6 4.8 3 7.8C19.5 16.2 12 21 12 21z"/></svg></span>
+                  <span class="cnt" id="cmt-like-cnt-${r.id}">${r.likes_count>0?r.likes_count:''}</span>
+                </button>
                 <button class="cmt-btn" onclick="nxOpenReply(${r.id},'${rp}')">Reply</button>
               </div>
             </div>`;
@@ -1934,15 +1942,28 @@ async function nxCreateComment(){
 
 async function nxLikeComment(cId, btnEl){
   if(!sKey()) return;
+  const cntEl = $('cmt-like-cnt-'+cId);
+  const iconEl = $('cmt-like-icon-'+cId);
+  const wasLiked = btnEl && btnEl.classList.contains('liked');
+
   // Optimistic update locally immediately
-  if(btnEl){
-    const m=btnEl.textContent.match(/(\d+)/);
-    const cur=m?parseInt(m[1]):0;
-    btnEl.classList.toggle('liked');
-    const liked=btnEl.classList.contains('liked');
-    btnEl.innerHTML=`❤️ ${liked?cur+1:Math.max(0,cur-1)}`;
+  if(wasLiked){
+    const newCount = Math.max(0, (parseInt(cntEl?.textContent,10)||0) - 1);
+    if(cntEl) cntEl.textContent = newCount>0 ? newCount : '';
+    if(btnEl) btnEl.classList.remove('liked');
+  } else {
+    const newCount = (parseInt(cntEl?.textContent,10)||0) + 1;
+    if(cntEl) cntEl.textContent = newCount;
+    if(btnEl) btnEl.classList.add('liked');
+    if(iconEl){
+      iconEl.classList.remove('pop');
+      void iconEl.offsetWidth; // restart animation
+      iconEl.classList.add('pop');
+    }
   }
-  // Fire and forget
+
+  // Fire and forget — the server is the source of truth; reopening
+  // comments re-fetches is_liked fresh, so no local persistence needed here.
   edgeCall({action:'toggle_comment_like',comment_id:cId}).catch(()=>{});
 }
 
