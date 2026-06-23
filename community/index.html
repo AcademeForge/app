@@ -467,9 +467,6 @@ textarea.compose.over{border-color:var(--err);}
 .avatar-upload-ring .upload-overlay{position:absolute;inset:0;border-radius:inherit;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:18px;opacity:0;transition:opacity .15s;}
 .avatar-upload-ring:hover .upload-overlay{opacity:1;}
 
-/* Seen post fade — visually deprioritized */
-.post-card.seen-post{opacity:0.72;}
-
 /* Feed end message */
 .feed-end-msg{text-align:center;padding:24px 20px;font-size:13px;font-weight:700;color:var(--tm);}
 
@@ -800,11 +797,10 @@ textarea.compose.over{border-color:var(--err);}
       </div>
       <div class="modal-body">
         <p style="font-size:14px;color:var(--t2);line-height:1.6;">
-          This will permanently delete every message in your conversation with
-          <strong id="clearChatPeerName" style="color:var(--t1);"></strong> for both of you.
-          You won't be able to recover these messages.
+          This will clear the chat history for you. 
+          <strong id="clearChatPeerName" style="color:var(--t1);"></strong> will still be able to see these messages.
         </p>
-        <button class="af-btn-primary" style="background:var(--err);margin-top:4px;" id="clearChatConfirmBtn" onclick="nxConfirmClearChat()">Yes, delete everything</button>
+        <button class="af-btn-primary" style="background:var(--err);margin-top:4px;" id="clearChatConfirmBtn" onclick="nxConfirmClearChat()">Clear for me</button>
         <button class="af-btn-secondary-outline" onclick="nxCloseClearChatConfirm()">Cancel</button>
       </div>
     </div>
@@ -1362,7 +1358,7 @@ function renderPostHtml(p, mk, admin, showPinned){
   // Gold card for verified, standard card otherwise
   const cardClass = isVer ? ' gold-post-card' : (p.is_pinned?' pinned':'');
   const likedClass=_cache.likedPostIds.has(p.id)?' liked':'';
-  const seenClass = (getSeenPenalty(p.id) < 1.0) ? ' seen-post' : '';
+  const seenClass = ''; // Removed seen fade effect
 
   // Name display: gold gradient text for verified
   const nameHtml = isVer
@@ -2547,7 +2543,7 @@ function nxOpenClearChatConfirm(){
   nxCloseDMOptions();
   $('clearChatPeerName').textContent=_dmPeer.name||'this user';
   $('clearChatConfirmBtn').disabled=false;
-  $('clearChatConfirmBtn').textContent='Yes, delete everything';
+  $('clearChatConfirmBtn').textContent='Clear for me';
   nxBringToFront('clearChatModal');
   $('clearChatModal').style.display='flex';
 }
@@ -2557,46 +2553,18 @@ function nxCloseClearChatConfirm(){
 }
 
 /**
- * Permanently deletes the entire conversation with the current DM peer.
- *
- * IMPORTANT — BACKEND REQUIREMENT:
- * This calls a new 'clear_chat_history' action on the Supabase Edge
- * Function ('af-nexus-community-v2'), which does not exist yet and
- * MUST be added server-side:
- *
- *   action: 'clear_chat_history'
- *   payload: { peer_key }   (student_key/student_name are already
- *                            attached to every edgeCall payload)
- *
- * Required server-side behavior:
- *   1. Verify the caller (student_key from the authenticated session,
- *      NOT a value trusted from the request body) is either the
- *      sender_key or receiver_key on every row being deleted.
- *   2. DELETE FROM af_nexus_dms_v2
- *      WHERE (sender_key = :caller AND receiver_key = :peer_key)
- *         OR (sender_key = :peer_key AND receiver_key = :caller);
- *      This deletes the conversation for BOTH participants (matches
- *      the "for both of you" copy in the confirmation dialog below).
- *      If you instead want a one-sided "clear for me only" experience,
- *      add a per-user `deleted_for` array/jsonb column and filter reads
- *      by it instead of hard-deleting rows — that is a bigger schema
- *      change and is NOT what this frontend call currently assumes.
- *   3. Return { ok: true } on success, or { ok: false, message } on
- *      failure (e.g. peer_key missing, not authenticated, etc).
- *
- * Until that Edge Function action exists, this will fail gracefully
- * with a toast — it will NOT silently pretend to succeed, and it will
- * NOT clear local UI state unless the server confirms ok:true.
+ * Clears the conversation history for the current user.
+ * The other participant will still be able to see the messages.
  */
 async function nxConfirmClearChat(){
   if(!_dmPeer) return;
   const peerKey=_dmPeer.key;
   $('clearChatConfirmBtn').disabled=true;
-  $('clearChatConfirmBtn').textContent='Deleting…';
+  $('clearChatConfirmBtn').textContent='Clearing…';
   const res=await edgeCall({action:'clear_chat_history',peer_key:peerKey});
   if(!res||!res.ok){
     $('clearChatConfirmBtn').disabled=false;
-    $('clearChatConfirmBtn').textContent='Yes, delete everything';
+    $('clearChatConfirmBtn').textContent='Clear for me';
     showToast(res?.message||'Could not clear chat history. The server may not support this yet.','err');
     return;
   }
