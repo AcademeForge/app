@@ -494,6 +494,7 @@ textarea.compose.over{border-color:var(--err);}
         <div style="display:flex;align-items:center;gap:8px;">
           <button class="af-hdr-icon-btn" onclick="nxOpenSearchScreen()" aria-label="Search">🔍</button>
           <button class="my-avatar-btn" id="btnMyAvatar" onclick="nxOpenMyProfile()" aria-label="My profile"></button>
+          <button class="af-hdr-icon-btn" onclick="nxOpenMainMenu()" aria-label="Menu" style="font-size:18px;">⋮</button>
         </div>
       </div>
     </header>
@@ -636,7 +637,8 @@ textarea.compose.over{border-color:var(--err);}
       <span>Editing message…</span>
       <button onclick="nxCancelEditDM()">Cancel</button>
     </div>
-    <div class="dm-input-area">
+    <div class="dm-input-area" style="position:relative;">
+      <div id="dmBlockedBanner" class="hidden" style="position:absolute;inset:0;background:var(--hdr);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--tm);z-index:5;backdrop-filter:blur(16px);border-top:1px solid var(--b1);">You have blocked this user.</div>
       <textarea class="dm-textarea" id="dmInput" rows="1" placeholder="Type a message…" oninput="nxDMTyping()"></textarea>
       <button class="dm-send" id="dmSendBtn" onclick="nxSendDM()" disabled>➤</button>
     </div>
@@ -783,6 +785,8 @@ textarea.compose.over{border-color:var(--err);}
     <div class="menu-sheet" onclick="event.stopPropagation()">
       <div class="modal-drag"></div>
       <div class="menu-label">Chat Options</div>
+      <button id="dmBlockBtn" class="danger" onclick="nxBlockCurrentPeer()">🚫 Block User</button>
+      <button id="dmUnblockBtn" class="danger hidden" onclick="nxUnblockCurrentPeer()" style="color:var(--ok);">✅ Unblock User</button>
       <button class="danger" onclick="nxOpenClearChatConfirm()">🗑 Clear Chat History</button>
       <button onclick="nxCloseDMOptions()">✕ Cancel</button>
     </div>
@@ -803,6 +807,26 @@ textarea.compose.over{border-color:var(--err);}
         <button class="af-btn-primary" style="background:var(--err);margin-top:4px;" id="clearChatConfirmBtn" onclick="nxConfirmClearChat()">Clear for me</button>
         <button class="af-btn-secondary-outline" onclick="nxCloseClearChatConfirm()">Cancel</button>
       </div>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="mainMenuModal" onclick="nxCloseMainMenu()">
+    <div class="menu-sheet" onclick="event.stopPropagation()">
+      <div class="modal-drag"></div>
+      <div class="menu-label">Settings</div>
+      <button onclick="nxOpenBlockedUsers()">🚫 Blocked Users</button>
+      <button onclick="nxCloseMainMenu()">✕ Cancel</button>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="blockListModal" onclick="nxCloseBlockedUsers()">
+    <div class="modal-card" onclick="event.stopPropagation()" style="max-height:80dvh;">
+      <div class="modal-drag"></div>
+      <div class="modal-head">
+        <div><h3>Blocked Users</h3><p>Manage your blocklist</p></div>
+        <button class="modal-close" onclick="nxCloseBlockedUsers()">✕</button>
+      </div>
+      <div class="modal-body" id="blockListBody" style="padding:0;gap:0;"></div>
     </div>
   </div>
 
@@ -904,6 +928,7 @@ const _cache = {
 
   /* Liked post IDs this session */
   likedPostIds: new Set(),
+  blockedKeys: new Set(),
 
   /* Misc */
   myVerified: false,
@@ -1043,6 +1068,7 @@ function nxClearAllCaches(){
   _cache.chatReadTs = new Map();
   _cache.profiles = new Map();
   _cache.likedPostIds = new Set();
+  _cache.blockedKeys = new Set();
   _cache.myVerified = false;
 
   // 4. Reset module-level state
@@ -1061,7 +1087,8 @@ function nxClearAllCaches(){
   // 6. Close every screen/modal so nothing from this session lingers visibly
   ['profileScreen','myProfileScreen','dmScreen','searchScreen',
    'followListModal','editProfileModal','composerModal','commentsModal',
-   'replyModal','reportModal','menuModal','dmOptionsModal','clearChatModal'].forEach(id=>{
+   'replyModal','reportModal','menuModal','dmOptionsModal','clearChatModal',
+   'mainMenuModal','blockListModal'].forEach(id=>{
     const el=$(id); if(el) el.style.display='none';
   });
 }
@@ -1480,7 +1507,7 @@ async function init(){
   $('lockedBox').style.display='none';
   _cache.chatReadTs = loadChatReadTs();
   nxLoadMyProfile();
-  await Promise.all([nxLoadPosts(), nxPreloadConnections()]);
+  await Promise.all([nxLoadPosts(), nxPreloadConnections(), nxLoadBlockedUsers()]);
   setupRealtime();
 }
 
@@ -1994,6 +2021,105 @@ async function nxSubmitReport(){
 }
 
 /* ═══════════════════════════════════════════════════
+   BLOCK / UNBLOCK SYSTEM
+═══════════════════════════════════════════════════ */
+async function nxLoadBlockedUsers(){
+  const res = await edgeCall({action:'get_blocked'});
+  if(res && res.ok && res.users){
+    _cache.blockedKeys = new Set(res.users.map(u => u.student_key));
+  }
+}
+
+function nxOpenMainMenu(){
+  nxBringToFront('mainMenuModal');
+  $('mainMenuModal').style.display='flex';
+}
+function nxCloseMainMenu(){
+  $('mainMenuModal').style.display='none';
+  nxForceRepaint();
+}
+
+async function nxOpenBlockedUsers(){
+  nxCloseMainMenu();
+  $('blockListBody').innerHTML='<div class="state-msg">Loading…</div>';
+  nxBringToFront('blockListModal');
+  $('blockListModal').style.display='flex';
+  
+  const res = await edgeCall({action:'get_blocked'});
+  const box = $('blockListBody');
+  if(!res || !res.ok || !res.users || !res.users.length){
+    box.innerHTML='<div class="state-msg"><span>No blocked users.</span></div>';
+    return;
+  }
+  
+  box.innerHTML = res.users.map(u => {
+    return `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 18px;border-bottom:1px solid var(--b1);">
+      <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;">
+        ${avatarHTML(u.student_name, u.emoji||'', u.avatar_url||'', ' avatar-sm', '', !!u.is_verified)}
+        <div style="font-family:var(--fd);font-size:14px;font-weight:800;color:var(--t1);">${esc(u.student_name)}</div>
+      </div>
+      <button class="af-btn-secondary-outline" style="height:32px;font-size:12px;padding:0 12px;flex-shrink:0;color:var(--t1);" onclick="nxUnblockFromList('${esc(u.student_key)}')">Unblock</button>
+    </div>`;
+  }).join('');
+}
+
+function nxCloseBlockedUsers(){
+  $('blockListModal').style.display='none';
+  nxForceRepaint();
+}
+
+async function nxBlockCurrentPeer(){
+  if(!_dmPeer) return;
+  const key = _dmPeer.key;
+  nxCloseDMOptions();
+  const res = await edgeCall({action:'block_user', target_key:key});
+  if(res && res.ok){
+    _cache.blockedKeys.add(key);
+    showToast('User blocked.');
+    if($('dmScreen').style.display==='flex' && _dmPeer.key === key){
+      show('dmBlockedBanner');
+      $('dmInput').disabled = true;
+      $('dmSendBtn').disabled = true;
+    }
+  } else {
+    showToast(res?.message||'Could not block user.','err');
+  }
+}
+
+async function nxUnblockCurrentPeer(){
+  if(!_dmPeer) return;
+  const key = _dmPeer.key;
+  nxCloseDMOptions();
+  const res = await edgeCall({action:'unblock_user', target_key:key});
+  if(res && res.ok){
+    _cache.blockedKeys.delete(key);
+    showToast('User unblocked.');
+    if($('dmScreen').style.display==='flex' && _dmPeer.key === key){
+      hide('dmBlockedBanner');
+      $('dmInput').disabled = false;
+      nxDMTyping(); 
+    }
+  } else {
+    showToast(res?.message||'Could not unblock user.','err');
+  }
+}
+
+async function nxUnblockFromList(key){
+  const res = await edgeCall({action:'unblock_user', target_key:key});
+  if(res && res.ok){
+    _cache.blockedKeys.delete(key);
+    showToast('User unblocked.');
+    nxOpenBlockedUsers();
+    if(_dmPeer && _dmPeer.key === key){
+      hide('dmBlockedBanner');
+      $('dmInput').disabled = false;
+    }
+  } else {
+    showToast(res?.message||'Could not unblock user.','err');
+  }
+}
+
+/* ═══════════════════════════════════════════════════
    PROFILE (with in-memory cache for thumbnails)
 ═══════════════════════════════════════════════════ */
 async function nxOpenProfile(key,name){
@@ -2459,6 +2585,16 @@ async function nxOpenDM(peerKey,peerName){
   $('bnav').classList.add('kb-hidden');
   $('dmMessages').innerHTML='<div class="state-msg">Loading…</div>';
 
+  const isBlocked = _cache.blockedKeys.has(peerKey);
+  if(isBlocked){
+    show('dmBlockedBanner');
+    $('dmInput').disabled = true;
+    $('dmSendBtn').disabled = true;
+  } else {
+    hide('dmBlockedBanner');
+    $('dmInput').disabled = false;
+  }
+
   // Hide both badges initially
   const verBadgeEl=$('dmPeerVerifiedBadge');
   const goldBadgeEl=$('dmPeerGoldBadge');
@@ -2531,6 +2667,9 @@ function nxCloseDM(){
 ═══════════════════════════════════════════════════ */
 function nxOpenDMOptions(){
   if(!_dmPeer) return;
+  const isBlocked = _cache.blockedKeys.has(_dmPeer.key);
+  $('dmBlockBtn').style.display = isBlocked ? 'none' : 'flex';
+  $('dmUnblockBtn').style.display = isBlocked ? 'flex' : 'none';
   nxBringToFront('dmOptionsModal');
   $('dmOptionsModal').style.display='flex';
 }
@@ -2697,6 +2836,8 @@ function nxCancelEditDM(){
 ═══════════════════════════════════════════════════ */
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape') return;
+  if($('mainMenuModal').style.display==='flex'){nxCloseMainMenu();return;}
+  if($('blockListModal').style.display==='flex'){nxCloseBlockedUsers();return;}
   if($('myProfileScreen').style.display==='flex'){nxCloseMyProfile();return;}
   if($('followListModal').style.display==='flex'){nxCloseFollowList();return;}
   if($('editProfileModal').style.display==='flex'){nxCloseEditProfile();return;}
@@ -2820,6 +2961,13 @@ window.nxCloseDMOptions=nxCloseDMOptions;
 window.nxOpenClearChatConfirm=nxOpenClearChatConfirm;
 window.nxCloseClearChatConfirm=nxCloseClearChatConfirm;
 window.nxConfirmClearChat=nxConfirmClearChat;
+window.nxOpenMainMenu=nxOpenMainMenu;
+window.nxCloseMainMenu=nxCloseMainMenu;
+window.nxOpenBlockedUsers=nxOpenBlockedUsers;
+window.nxCloseBlockedUsers=nxCloseBlockedUsers;
+window.nxBlockCurrentPeer=nxBlockCurrentPeer;
+window.nxUnblockCurrentPeer=nxUnblockCurrentPeer;
+window.nxUnblockFromList=nxUnblockFromList;
 window.goToLogin=goToLogin;
 
 document.addEventListener('DOMContentLoaded',init);
