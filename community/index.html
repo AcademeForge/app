@@ -996,6 +996,38 @@ function saveLikedPostIds(){
   }catch(e){ /* storage full or unavailable — liked-state just won't persist this time */ }
 }
 
+/* ═══════════════════════════════════════════════════
+   GENERIC "STALE-WHILE-REVALIDATE" SNAPSHOT CACHE
+   This is the same fetch pattern big apps (Instagram,
+   Facebook, etc.) use: the last successful response for
+   feed / chats / followers / following is mirrored to
+   localStorage (scoped to the current account). On the
+   next app open we paint that snapshot INSTANTLY — no
+   spinner, no blank screen — while the real network
+   request runs quietly in the background and silently
+   replaces it once it resolves. Nothing here changes what
+   is rendered or how — only when data first appears.
+═══════════════════════════════════════════════════ */
+function snapshotStorageKey(name){
+  const key=sKey();
+  return key ? 'af_snap_'+name+':'+key : null;
+}
+function loadSnapshot(name){
+  const storageKey=snapshotStorageKey(name);
+  if(!storageKey) return null;
+  try{
+    const raw=localStorage.getItem(storageKey);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+function saveSnapshot(name, data){
+  const storageKey=snapshotStorageKey(name);
+  if(!storageKey) return;
+  try{
+    localStorage.setItem(storageKey, JSON.stringify(data));
+  }catch(e){ /* storage full or unavailable — just skip caching this time */ }
+}
+
 const _cache = {
   /* Feed */
   posts: [],               // current ranked feed
@@ -1547,12 +1579,39 @@ async function init(){
    CONNECTIONS & CHAT CACHE
 ═══════════════════════════════════════════════════ */
 async function nxPreloadConnections(){
-  const folRes = await edgeCall({action:'get_followers',target_key:sKey()});
-  if(folRes&&folRes.ok) _cache.myFollowers = folRes.users||[];
-  const figRes = await edgeCall({action:'get_following',target_key:sKey()});
+  // Paint instantly from cached connections (if any) before the network
+  // round-trip resolves, then quietly refresh in the background.
+  const cachedFollowers=loadSnapshot('followers_me');
+  const cachedFollowing=loadSnapshot('following_me');
+  if(Array.isArray(cachedFollowers)) _cache.myFollowers=cachedFollowers;
+  if(Array.isArray(cachedFollowing)){
+    _cache.myFollowing=cachedFollowing;
+    _cache.followingKeys=new Set(_cache.myFollowing.map(u=>String(u.student_key||'')));
+  }
+  // Paint the cached chat list immediately (no network call) — the real
+  // fetch below will quietly replace it once it resolves.
+  if(!_cache.chatList.length){
+    const cachedChats=loadSnapshot('chats');
+    if(Array.isArray(cachedChats) && cachedChats.length){
+      _cache.chatList=cachedChats;
+      nxRenderChatList();
+    }
+  }
+
+  // get_followers and get_following are independent — fetch them in
+  // parallel instead of one after another.
+  const [folRes, figRes] = await Promise.all([
+    edgeCall({action:'get_followers',target_key:sKey()}),
+    edgeCall({action:'get_following',target_key:sKey()}),
+  ]);
+  if(folRes&&folRes.ok){
+    _cache.myFollowers = folRes.users||[];
+    saveSnapshot('followers_me', _cache.myFollowers);
+  }
   if(figRes&&figRes.ok){
     _cache.myFollowing = figRes.users||[];
     _cache.followingKeys = new Set(_cache.myFollowing.map(u=>String(u.student_key||'')));
+    saveSnapshot('following_me', _cache.myFollowing);
   }
   await nxLoadChatsFromConnections();
 }
@@ -1672,12 +1731,20 @@ async function nxLoadMyProfile(){
 async function nxLoadPosts(isRefresh=false){
   if(!isLoggedIn()){init();return;}
 
-  // Only show skeleton on first load, not refresh
+  // Instant paint from the last cached feed snapshot (stale-while-revalidate,
+  // same pattern Instagram/Facebook use) — show something real immediately
+  // instead of a skeleton whenever we have a previous snapshot to show.
   if(!isRefresh && !_cache.posts.length){
-    $('postsList').innerHTML=`
-      <div class="post-card af-skel" style="height:120px;"></div>
-      <div class="post-card af-skel" style="height:100px;"></div>
-      <div class="post-card af-skel" style="height:130px;"></div>`;
+    const cachedFeed=loadSnapshot('feed_'+_mode);
+    if(Array.isArray(cachedFeed) && cachedFeed.length){
+      _cache.posts=cachedFeed;
+      renderListToContainer(_cache.posts, 'postsList', true);
+    } else {
+      $('postsList').innerHTML=`
+        <div class="post-card af-skel" style="height:120px;"></div>
+        <div class="post-card af-skel" style="height:100px;"></div>
+        <div class="post-card af-skel" style="height:130px;"></div>`;
+    }
   }
 
   const res=await edgeCall({action:'fetch_posts',mode:_mode});
@@ -1710,6 +1777,7 @@ async function nxLoadPosts(isRefresh=false){
   }
 
   _cache.feedLastRefresh = Date.now();
+  saveSnapshot('feed_'+_mode, _cache.posts);
   renderListToContainer(_cache.posts, 'postsList', true);
 }
 
