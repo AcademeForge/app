@@ -1224,18 +1224,74 @@ window.nxClearAllCaches = nxClearAllCaches;
 
 /* ═══════════════════════════════════════════════════
    EDGE CALL
+   NOTE: User-facing messages are intentionally generic.
+   Raw SDK / transport / edge-function error text (e.g. "Edge
+   Function returned a non-2xx status code", "FunctionsHttpError",
+   HTTP 5xx status text, etc.) must NEVER reach the UI — it is
+   internal plumbing detail that means nothing to the end user
+   and looks broken/unprofessional. We classify the failure into
+   one of three buckets (offline / network / server) and return
+   a calm, professional message for each. Genuine application-level
+   messages returned by our own backend in `data.message` (when
+   `data.ok` is false) are still passed through as-is, since those
+   are intentional, human-written responses from our own API
+   (e.g. validation errors), not provider plumbing.
 ═══════════════════════════════════════════════════ */
+const EDGE_ERR_OFFLINE = "You're offline right now. Please check your internet connection and try again.";
+const EDGE_ERR_NETWORK = "We couldn't reach the server. Please check your connection and try again.";
+const EDGE_ERR_SERVER  = "Something went wrong on our end. It's not you — we're already looking into it. Please try again shortly.";
+
+function _isLikelyNetworkError(e){
+  if(!e) return false;
+  const name = e.name || '';
+  const msg = (e.message || '').toLowerCase();
+  if(name === 'TypeError' && msg.includes('fetch')) return true; // "Failed to fetch" (Chrome/Safari)
+  if(msg.includes('networkerror')) return true; // Firefox: "NetworkError when attempting to fetch resource"
+  if(msg.includes('load failed')) return true; // Safari
+  if(msg.includes('network request failed')) return true; // React Native / some WebViews
+  if(name === 'AbortError' || msg.includes('aborted') || msg.includes('timeout')) return true;
+  return false;
+}
+
 async function edgeCall(payload){
   try{
-    if(!navigator.onLine) return {ok:false,message:'No internet connection.'};
+    if(!navigator.onLine) return {ok:false,message:EDGE_ERR_OFFLINE};
     await loadSupabaseSDK();
     const sb=getSb();
-    if(!sb) return {ok:false,message:'SDK not ready.'};
+    if(!sb) return {ok:false,message:EDGE_ERR_SERVER};
     const fp={...payload,student_key:sKey(),student_name:sName(),student_emoji:getMyEmoji(),student_avatar_url:getMyAvatarUrl()};
-    const {data,error}=await sb.functions.invoke('af-nexus-community-v2',{body:fp});
-    if(error) return {ok:false,message:error.message||'Request failed.'};
-    return data||{ok:false,message:'Empty response.'};
-  }catch(e){return {ok:false,message:e.message||'Request failed.'};}
+    let data, error;
+    try{
+      const res = await sb.functions.invoke('af-nexus-community-v2',{body:fp});
+      data = res.data; error = res.error;
+    }catch(invokeErr){
+      // Transport-level throw (e.g. fetch itself rejected) rather than a
+      // structured {error} response from the SDK.
+      if(!navigator.onLine) return {ok:false,message:EDGE_ERR_OFFLINE};
+      if(_isLikelyNetworkError(invokeErr)) return {ok:false,message:EDGE_ERR_NETWORK};
+      return {ok:false,message:EDGE_ERR_SERVER};
+    }
+    if(error){
+      // `error` here is the Supabase Functions client's error object. Its
+      // `.message` is implementation detail (status codes, "non-2xx",
+      // FunctionsHttpError/FunctionsFetchError class names, etc.) and is
+      // never shown to the user — only our own classified copy is.
+      if(_isLikelyNetworkError(error)) return {ok:false,message:EDGE_ERR_NETWORK};
+      return {ok:false,message:EDGE_ERR_SERVER};
+    }
+    if(!data) return {ok:false,message:EDGE_ERR_SERVER};
+    // `data` is our own backend's JSON payload. If it reports failure, its
+    // `message` field is content we wrote ourselves (e.g. validation
+    // errors), so it's safe and appropriate to surface directly.
+    if(data.ok === false && !data.message){
+      return {ok:false,message:EDGE_ERR_SERVER};
+    }
+    return data;
+  }catch(e){
+    if(!navigator.onLine) return {ok:false,message:EDGE_ERR_OFFLINE};
+    if(_isLikelyNetworkError(e)) return {ok:false,message:EDGE_ERR_NETWORK};
+    return {ok:false,message:EDGE_ERR_SERVER};
+  }
 }
 
 /* ═══════════════════════════════════════════════════
@@ -2546,7 +2602,7 @@ async function nxDoSearch(q){
 function nxHandleAvatarUpload(input){
   const file=input.files&&input.files[0];
   if(!file) return;
-  if(file.size>2*1024*1024){showToast('Image must be under 2MB.','err');return;}
+  if(file.size>2*1024*1024){showToast('Please reduce the image size to less than 2 MB and try again.','err');return;}
   const reader=new FileReader();
   reader.onload=e=>{
     _pendingAvatarDataUrl=e.target.result;
@@ -2927,7 +2983,7 @@ function nxRenderDMMessages(msgs){
 function nxHandleDMImage(input) {
   const file = input.files && input.files[0];
   if (!file) return;
-  if (file.size > 2*1024*1024) { showToast('Image must be under 2MB.','err'); return; }
+  if (file.size > 2*1024*1024) { showToast('Please reduce the image size to less than 2 MB and try again.','err'); return; }
   const reader = new FileReader();
   reader.onload = e => {
     _dmPendingImage = e.target.result;
@@ -2957,6 +3013,11 @@ function nxDMTyping(){
 async function nxSendDM(){
   const inp=$('dmInput'),text=inp.value.trim();
   if(!text && !_dmPendingImage) return;
+
+  if(_dmPendingImage && !_dmEditingId && !text){
+    showToast('Please add a message to send with your photo.','err');
+    return;
+  }
 
   if(_dmEditingId){
     if(_dmPendingImage) {
