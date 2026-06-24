@@ -728,16 +728,17 @@ textarea.compose.over{border-color:var(--err);}
       <!-- STORIES BAR -->
       <div class="stories-bar" id="storiesBar">
         <div class="stories-scroll" id="storiesScroll">
-          <!-- Add My Story -->
-          <div class="story-item story-add" onclick="nxOpenStoryComposer()">
-            <div class="story-ring story-ring-add">
+          <!-- Add My Story / View My Story -->
+          <div class="story-item story-add" id="yourStoryItem" onclick="nxYourStoryClick()">
+            <div class="story-ring story-ring-add" id="yourStoryRing">
               <div class="story-avatar-wrap" id="myStoryAvatar">
-                <div class="story-add-plus">+</div>
+                <span id="myStoryAvatarInner"></span>
+                <div class="story-add-plus" id="yourStoryPlus" onclick="event.stopPropagation();nxOpenStoryComposer()">+</div>
               </div>
             </div>
             <span class="story-label">Your Story</span>
           </div>
-          <!-- Story items rendered by JS -->
+          <!-- Other users' story items are rendered here by JS (class="story-other") -->
         </div>
       </div>
       <div class="username-banner hidden" id="usernameBanner">
@@ -1761,6 +1762,310 @@ let _svTimer=null;            // auto-advance timer
 let _svProgressInterval=null; // progress bar interval
 let _storyPendingMedia=null;  // {dataUrl, mediaType}
 
+/* ═══════════════════════════════════════════════════
+   STORIES
+═══════════════════════════════════════════════════ */
+const STORY_IMG_DURATION = 5000;             // ms each image story stays on screen
+const STORY_VIDEO_FALLBACK_DURATION = 8000;  // ms, used until a video's real duration loads
+const STORY_MAX_BYTES = 50 * 1024 * 1024;    // 50MB, matches the edge function limit
+
+async function nxLoadStories(){
+  const res=await edgeCall({action:'fetch_stories'});
+  if(!res||!res.ok) return;
+  _storyGroups = Array.isArray(res.groups)?res.groups:[];
+  nxRenderStoriesBar();
+}
+
+function syncMyStoryAvatar(){
+  nxRenderStoriesBar();
+}
+
+function nxRenderStoriesBar(){
+  const scroll=$('storiesScroll');
+  if(!scroll) return;
+
+  // "Your Story" avatar + ring — the "+" button itself is left untouched
+  const inner=$('myStoryAvatarInner');
+  if(inner){
+    const avatarUrl=getMyAvatarUrl(), emoji=getMyEmoji(), name=sName();
+    if(avatarUrl){
+      inner.innerHTML=`<img src="${esc(avatarUrl)}" alt="${esc(name)}" loading="lazy" decoding="async" onerror="this.style.display='none'"/>`;
+    } else if(emoji){
+      inner.textContent=emoji;
+    } else {
+      inner.textContent=initials(name);
+    }
+  }
+  const mine = _storyGroups.find(g=>g.is_mine);
+  const ring=$('yourStoryRing');
+  if(ring){
+    const hasMine = !!(mine && mine.stories && mine.stories.length);
+    ring.classList.toggle('mine-ring', hasMine);
+    ring.classList.toggle('story-ring-add', !hasMine);
+  }
+
+  // Other users' story rings, appended after the static "Your Story" item
+  scroll.querySelectorAll('.story-item.story-other').forEach(el=>el.remove());
+  const others = _storyGroups.filter(g=>!g.is_mine);
+  const html = others.map(g=>renderStoryItemHtml(g, _storyGroups.indexOf(g))).join('');
+  if(html) scroll.insertAdjacentHTML('beforeend', html);
+}
+
+function renderStoryItemHtml(g, idx){
+  const seenClass = g.has_unviewed ? '' : ' seen';
+  const avatarInner = g.avatar_url
+    ? `<img src="${esc(g.avatar_url)}" alt="${esc(g.student_name||'')}" loading="lazy" decoding="async" onerror="this.style.display='none'"/>`
+    : esc(g.emoji || initials(g.student_name));
+  const label = g.username ? ('@'+esc(g.username)) : esc((g.student_name||'Student').split(/\s+/)[0]);
+  return `<div class="story-item story-other" onclick="nxOpenStoryViewer(${idx})">
+    <div class="story-ring${seenClass}">
+      <div class="story-avatar-wrap">${avatarInner}</div>
+    </div>
+    <span class="story-label">${label}</span>
+  </div>`;
+}
+
+function nxYourStoryClick(){
+  const idx=_storyGroups.findIndex(g=>g.is_mine);
+  if(idx>=0 && _storyGroups[idx].stories && _storyGroups[idx].stories.length){
+    nxOpenStoryViewer(idx);
+  } else {
+    nxOpenStoryComposer();
+  }
+}
+
+/* ── STORY VIEWER ──────────────────────────────────── */
+function nxOpenStoryViewer(groupIdx){
+  if(!_storyGroups.length || groupIdx<0 || groupIdx>=_storyGroups.length) return;
+  _svGroupIdx=groupIdx;
+  const grp=_storyGroups[groupIdx];
+  const firstUnviewed = grp.stories.findIndex(s=>!s.is_viewed);
+  _svStoryIdx = firstUnviewed>=0 ? firstUnviewed : 0;
+  nxBringToFront('storyViewer');
+  $('storyViewer').classList.add('open');
+  nxRenderStoryProgressBars();
+  nxShowCurrentStory();
+}
+
+function nxCloseStoryViewer(){
+  clearTimeout(_svTimer); clearInterval(_svProgressInterval);
+  _svTimer=null; _svProgressInterval=null;
+  const el=$('storyViewer');
+  if(el) el.classList.remove('open');
+  const media=$('svMedia');
+  if(media){
+    const v=media.querySelector('video');
+    if(v){ try{ v.pause(); }catch(e){} }
+    media.querySelectorAll('img,video').forEach(n=>n.remove());
+  }
+  nxRenderStoriesBar();
+  nxForceRepaint();
+}
+
+function nxRenderStoryProgressBars(){
+  const grp=_storyGroups[_svGroupIdx];
+  const wrap=$('svProgress');
+  if(!wrap||!grp) return;
+  wrap.innerHTML = grp.stories.map((_,i)=>`<div class="sv-prog-seg"><div class="sv-prog-seg-fill" id="svSeg-${i}"></div></div>`).join('');
+}
+
+function nxGoToGroup(newGroupIdx, enterFrom){
+  if(newGroupIdx<0 || newGroupIdx>=_storyGroups.length){ nxCloseStoryViewer(); return; }
+  _svGroupIdx=newGroupIdx;
+  const grp=_storyGroups[newGroupIdx];
+  _svStoryIdx = enterFrom==='end' ? grp.stories.length-1 : 0;
+  nxRenderStoryProgressBars();
+  nxShowCurrentStory();
+}
+
+function nxShowCurrentStory(){
+  clearTimeout(_svTimer); clearInterval(_svProgressInterval);
+  const grp=_storyGroups[_svGroupIdx];
+  if(!grp){ nxCloseStoryViewer(); return; }
+  if(_svStoryIdx<0){ nxGoToGroup(_svGroupIdx-1, 'end'); return; }
+  if(_svStoryIdx>=grp.stories.length){ nxGoToGroup(_svGroupIdx+1, 'start'); return; }
+
+  const story=grp.stories[_svStoryIdx];
+
+  // Header
+  const av=$('svHdrAv');
+  if(av){
+    av.innerHTML = grp.avatar_url
+      ? `<img src="${esc(grp.avatar_url)}" alt="${esc(grp.student_name||'')}" onerror="this.style.display='none'"/>`
+      : esc(grp.emoji || initials(grp.student_name));
+  }
+  $('svHdrName').textContent = grp.is_mine ? 'Your Story' : (grp.student_name||'Student');
+  $('svHdrTime').textContent = timeAgo(story.created_at);
+  $('svCaption').textContent = story.caption||'';
+  $('svDeleteBtn').style.display = grp.is_mine ? 'flex' : 'none';
+
+  // Reset progress segments: before = full, current = empty, after = empty
+  grp.stories.forEach((_,i)=>{
+    const seg=$('svSeg-'+i);
+    if(!seg) return;
+    if(i<_svStoryIdx){ seg.classList.add('done'); seg.style.transition='none'; seg.style.width='100%'; }
+    else if(i>_svStoryIdx){ seg.classList.remove('done'); seg.style.transition='none'; seg.style.width='0%'; }
+  });
+  const curSeg=$('svSeg-'+_svStoryIdx);
+  if(curSeg){ curSeg.classList.remove('done'); curSeg.style.transition='none'; curSeg.style.width='0%'; }
+
+  // Media
+  const mediaWrap=$('svMedia');
+  mediaWrap.querySelectorAll('img,video').forEach(n=>n.remove());
+  let mediaEl;
+  if(story.media_type==='video'){
+    mediaEl=document.createElement('video');
+    mediaEl.src=story.media_url;
+    mediaEl.playsInline=true;
+    mediaEl.autoplay=true;
+    mediaEl.onended=()=>nxStoryNext();
+    mediaEl.onloadedmetadata=()=>{ nxRunStoryProgress((mediaEl.duration||8)*1000); };
+    mediaEl.play().catch(()=>{});
+    nxRunStoryProgress(STORY_VIDEO_FALLBACK_DURATION);
+  } else {
+    mediaEl=document.createElement('img');
+    mediaEl.src=story.media_url;
+    mediaEl.alt='Story';
+    nxRunStoryProgress(STORY_IMG_DURATION);
+  }
+  mediaWrap.appendChild(mediaEl);
+
+  // Mark viewed (once per story)
+  if(!story.is_viewed){
+    story.is_viewed=true;
+    grp.has_unviewed = grp.stories.some(s=>!s.is_viewed);
+    edgeCall({action:'view_story',story_id:story.id}).catch(()=>{});
+  }
+}
+
+let _svProgressStart=0;
+function nxRunStoryProgress(durationMs){
+  clearInterval(_svProgressInterval); clearTimeout(_svTimer);
+  const seg=$('svSeg-'+_svStoryIdx);
+  if(seg){ seg.style.transition='none'; seg.style.width='0%'; }
+  _svProgressStart=Date.now();
+  _svProgressInterval=setInterval(()=>{
+    const pct=Math.min(100, ((Date.now()-_svProgressStart)/durationMs)*100);
+    if(seg) seg.style.width=pct+'%';
+    if(pct>=100){
+      clearInterval(_svProgressInterval);
+      if(seg) seg.classList.add('done');
+      nxStoryNext();
+    }
+  },50);
+  // Safety-net timer in case the interval is ever throttled/dropped
+  _svTimer=setTimeout(()=>nxStoryNext(), durationMs+150);
+}
+
+function nxStoryNext(){
+  clearTimeout(_svTimer); clearInterval(_svProgressInterval);
+  _svStoryIdx++;
+  nxShowCurrentStory();
+}
+function nxStoryPrev(){
+  clearTimeout(_svTimer); clearInterval(_svProgressInterval);
+  _svStoryIdx--;
+  nxShowCurrentStory();
+}
+
+async function nxDeleteCurrentStory(){
+  const grp=_storyGroups[_svGroupIdx];
+  if(!grp||!grp.is_mine) return;
+  const story=grp.stories[_svStoryIdx];
+  if(!story) return;
+  const res=await edgeCall({action:'delete_story',story_id:story.id});
+  if(!res||!res.ok){ showToast(res?.message||'Could not delete story.','err'); return; }
+  grp.stories.splice(_svStoryIdx,1);
+  showToast('Story deleted.');
+  if(!grp.stories.length){
+    _storyGroups.splice(_svGroupIdx,1);
+    nxCloseStoryViewer();
+  } else {
+    if(_svStoryIdx>=grp.stories.length) _svStoryIdx=grp.stories.length-1;
+    nxRenderStoryProgressBars();
+    nxShowCurrentStory();
+  }
+  nxRenderStoriesBar();
+}
+
+/* ── STORY COMPOSER ────────────────────────────────── */
+function nxOpenStoryComposer(){
+  if(!isLoggedIn()){ goToLogin(); return; }
+  _storyPendingMedia=null;
+  if($('scImageInput')) $('scImageInput').value='';
+  if($('scVideoInput')) $('scVideoInput').value='';
+  if($('scCaption')) $('scCaption').value='';
+  $('scPostBtn').disabled=true;
+  nxRenderStoryComposerPreview();
+  nxBringToFront('storyComposer');
+  $('storyComposer').classList.add('open');
+}
+function nxCloseStoryComposer(){
+  const el=$('storyComposer');
+  if(el) el.classList.remove('open');
+  _storyPendingMedia=null;
+  nxForceRepaint();
+}
+
+function nxRenderStoryComposerPreview(){
+  const preview=$('scPreview');
+  if(!preview) return;
+  if(!_storyPendingMedia){
+    preview.innerHTML='<div class="sc-empty" id="scEmpty"><div class="sc-empty-icon">📷</div><p>Pick a photo or video below</p></div>';
+    return;
+  }
+  if(_storyPendingMedia.mediaType==='video'){
+    preview.innerHTML=`<video src="${_storyPendingMedia.dataUrl}" controls autoplay muted playsinline style="max-width:100%;max-height:100%;"></video>`;
+  } else {
+    preview.innerHTML=`<img src="${_storyPendingMedia.dataUrl}" alt="Story preview"/>`;
+  }
+}
+
+function nxHandleStoryMedia(input, type){
+  const file=input.files&&input.files[0];
+  if(!file) return;
+  if(file.size>STORY_MAX_BYTES){ showToast('File too large (max 50MB).','err'); input.value=''; return; }
+  const reader=new FileReader();
+  reader.onload=e=>{
+    _storyPendingMedia={dataUrl:e.target.result, mediaType:type};
+    nxRenderStoryComposerPreview();
+    $('scPostBtn').disabled=false;
+  };
+  reader.onerror=()=>{ showToast('Could not read file.','err'); };
+  reader.readAsDataURL(file);
+}
+
+async function nxPostStory(){
+  if(!_storyPendingMedia) return;
+  $('scPostBtn').disabled=true;
+  const uploadRes=await edgeCall({action:'upload_story_media',media_data_url:_storyPendingMedia.dataUrl});
+  if(!uploadRes||!uploadRes.ok){
+    showToast(uploadRes?.message||'Upload failed.','err');
+    $('scPostBtn').disabled=false;
+    return;
+  }
+  const caption=(($('scCaption')&&$('scCaption').value)||'').trim();
+  const res=await edgeCall({action:'create_story',media_url:uploadRes.media_url,media_type:uploadRes.media_type,caption});
+  if(!res||!res.ok){
+    showToast(res?.message||'Could not post story.','err');
+    $('scPostBtn').disabled=false;
+    return;
+  }
+  nxCloseStoryComposer();
+  showToast('Story shared!');
+  await nxLoadStories();
+}
+
+window.nxYourStoryClick=nxYourStoryClick;
+window.nxOpenStoryViewer=nxOpenStoryViewer;
+window.nxCloseStoryViewer=nxCloseStoryViewer;
+window.nxStoryNext=nxStoryNext;
+window.nxStoryPrev=nxStoryPrev;
+window.nxDeleteCurrentStory=nxDeleteCurrentStory;
+window.nxOpenStoryComposer=nxOpenStoryComposer;
+window.nxCloseStoryComposer=nxCloseStoryComposer;
+window.nxHandleStoryMedia=nxHandleStoryMedia;
+window.nxPostStory=nxPostStory;
 
 function renderPostHtml(p, mk, admin, showPinned){
   const mine=String(p.student_key||'')===String(mk||'');
