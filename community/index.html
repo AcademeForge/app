@@ -725,6 +725,57 @@ textarea.compose.over{border-color:var(--err);}
 }
 .status-row{display:flex;align-items:center;gap:5px;}
 
+/* ── PRESENCE LABELS (chat list + DM header) ── */
+.presence-online{color:#22c55e;font-weight:700;font-size:11.5px;display:flex;align-items:center;gap:4px;}
+.presence-online::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 2px rgba(34,197,94,.25);}
+.presence-offline{color:var(--tm);font-size:11.5px;}
+
+/* ── STORY REPLY BAR ── */
+.sv-reply-bar{position:absolute;bottom:0;left:0;right:0;padding:12px 16px 28px;background:linear-gradient(transparent,rgba(0,0,0,.68));display:none;flex-direction:column;gap:10px;z-index:4;}
+.sv-reply-bar.visible{display:flex;}
+.sv-emoji-strip{display:flex;gap:6px;justify-content:center;}
+.sv-emoji-strip button{font-size:26px;background:rgba(255,255,255,.13);border:1.5px solid rgba(255,255,255,.22);border-radius:50%;width:46px;height:46px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .14s,background .14s;touch-action:manipulation;}
+.sv-emoji-strip button:active{transform:scale(1.28);background:rgba(255,255,255,.28);}
+.sv-reply-row{display:flex;align-items:center;gap:8px;}
+.sv-reply-row input{flex:1;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);border-radius:22px;padding:9px 16px;color:#fff;font-family:var(--fb);font-size:14px;outline:none;min-width:0;}
+.sv-reply-row input::placeholder{color:rgba(255,255,255,.55);}
+.sv-reply-row input:focus{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.5);}
+.sv-reply-send{width:40px;height:40px;border-radius:50%;background:var(--ac);color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .15s,transform .12s;}
+.sv-reply-send:disabled{opacity:.38;}
+.sv-reply-send:not(:disabled):active{transform:scale(.9);}
+
+/* ── STORY 3-DOT OPTIONS BUTTON ── */
+.sv-opts-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(255,255,255,.18);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;
+  letter-spacing:2px;
+}
+/* ── STORY OPTIONS DROPDOWN ── */
+.sv-opts-menu{
+  position:absolute;top:60px;right:10px;z-index:20;
+  background:rgba(20,18,40,.93);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.18);border-radius:12px;
+  padding:6px;min-width:160px;display:none;flex-direction:column;
+  box-shadow:0 8px 24px rgba(0,0,0,.5);
+}
+.sv-opts-menu.open{display:flex;}
+.sv-opts-menu button{
+  display:flex;align-items:center;gap:8px;padding:10px 14px;
+  border-radius:9px;color:#fff;font-size:13.5px;font-weight:600;
+  transition:background .15s;
+}
+.sv-opts-menu button:hover,.sv-opts-menu button:active{background:rgba(255,255,255,.12);}
+.sv-opts-menu .sv-opts-delete{color:#ff6b6b;}
+/* Swipe-up hint for own story */
+.sv-swipe-hint{
+  position:absolute;bottom:56px;left:50%;transform:translateX(-50%);
+  display:none;flex-direction:column;align-items:center;gap:2px;
+  color:rgba(255,255,255,.55);font-size:10px;font-weight:600;pointer-events:none;z-index:3;
+}
+.sv-swipe-hint.visible{display:flex;}
+.sv-swipe-hint::before{content:'∧';font-size:16px;color:rgba(255,255,255,.4);}
+
 #imgLightbox{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;pointer-events:none;touch-action:none;}
 #imgLightbox.open{background:rgba(0,0,0,.92);pointer-events:all;}
 #imgLightbox .lb-close{position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;opacity:0;transform:scale(.8);transition:opacity .22s ease,transform .22s ease,background .15s;}
@@ -1001,7 +1052,11 @@ textarea.compose.over{border-color:var(--err);}
   </div>
 
   <!-- ── STORY VIEWER ── -->
-  <div class="story-viewer" id="storyViewer">
+  <div class="story-viewer" id="storyViewer"
+    ontouchstart="nxSvTouchStart(event)"
+    ontouchend="nxSvTouchEnd(event)"
+    ontouchcancel="nxSvTouchEnd(event)"
+    ontouchmove="nxSvTouchMove(event)">
     <div class="sv-progress" id="svProgress"></div>
     <div class="sv-hdr">
       <div class="sv-hdr-av" id="svHdrAv"></div>
@@ -1009,21 +1064,44 @@ textarea.compose.over{border-color:var(--err);}
         <div class="sv-hdr-name" id="svHdrName"></div>
         <div class="sv-hdr-time" id="svHdrTime"></div>
       </div>
+      <button class="sv-opts-btn" id="svOptsBtn" onclick="nxOpenStoryOpts()" style="display:none;" aria-label="Story options">⋯</button>
       <button class="sv-close" onclick="nxCloseStoryViewer()">✕</button>
+    </div>
+    <!-- Story options dropdown (own story only) -->
+    <div class="sv-opts-menu" id="svOptsMenu">
+      <button class="sv-opts-delete" onclick="nxCloseStoryOpts();nxDeleteCurrentStory()">🗑 Delete Story</button>
     </div>
     <div class="sv-media" id="svMedia">
       <div class="sv-tap-prev" onclick="nxStoryPrev()"></div>
       <div class="sv-tap-next" onclick="nxStoryNext()"></div>
     </div>
     <div class="sv-caption" id="svCaption"></div>
-    <!-- Bottom bar: seen-by (mine) + delete -->
-    <div class="sv-bottom-bar" id="svBottomBar">
+    <!-- Reply bar — shown for others' stories -->
+    <div class="sv-reply-bar" id="svReplyBar">
+      <div class="sv-emoji-strip">
+        <button onclick="nxStorySendReaction('❤️')" aria-label="React heart">❤️</button>
+        <button onclick="nxStorySendReaction('🔥')" aria-label="React fire">🔥</button>
+        <button onclick="nxStorySendReaction('😂')" aria-label="React laugh">😂</button>
+        <button onclick="nxStorySendReaction('😮')" aria-label="React wow">😮</button>
+        <button onclick="nxStorySendReaction('👏')" aria-label="React clap">👏</button>
+      </div>
+      <div class="sv-reply-row">
+        <input type="text" id="svReplyInput" placeholder="Reply to story…" maxlength="200"
+          oninput="nxStoryReplyTyping()"
+          onfocus="nxSvPauseForReply()"
+          onblur="nxSvResumeFromReply()"/>
+        <button class="sv-reply-send" id="svReplySendBtn" onclick="nxStorySendReply()" disabled aria-label="Send reply">➤</button>
+      </div>
+    </div>
+    <!-- Bottom bar: seen-by (own story) + swipe hint -->
+    <div class="sv-bottom-bar" id="svBottomBar" style="justify-content:center;">
       <button class="sv-seen-btn" id="svSeenBtn" onclick="nxOpenSeenBy()">
         <span class="sv-eye-ic">👁</span>
         <span id="svSeenCount">0</span>
       </button>
-      <button class="sv-delete-btn-inline" id="svDeleteBtn" onclick="nxDeleteCurrentStory()">🗑 Delete</button>
     </div>
+    <!-- Swipe-up hint for own stories -->
+    <div class="sv-swipe-hint" id="svSwipeHint">Swipe up for viewers</div>
     <!-- Seen-by slide-up panel -->
     <div class="sv-seen-panel" id="svSeenPanel">
       <div class="sv-seen-panel-inner">
@@ -1382,6 +1460,9 @@ const _cache = {
   /* Liked post IDs this session */
   likedPostIds: new Set(),
   blockedKeys: new Set(),
+
+  /* Presence: student_key -> {is_online, last_seen_at} */
+  presence: {},
 
   /* Misc */
   myVerified: false,
@@ -1840,6 +1921,48 @@ let _svTimer=null;            // auto-advance timer
 let _svProgressInterval=null; // progress bar interval
 let _storyPendingMedia=null;  // {dataUrl, mediaType}
 let _svPaused=false;          // paused while seen-by panel is open
+let _svReplyPaused=false;     // paused while reply input is focused
+let _svHoldTimer=null;        // finger-hold timer
+let _svHoldActive=false;      // true while finger is held down
+let _svTouchStartY=0;         // touchstart Y for swipe-up detection
+let _svTouchStartX=0;         // touchstart X
+
+/* ═══════════════════════════════════════════════════
+   PRESENCE HELPERS
+═══════════════════════════════════════════════════ */
+function formatPresence(pres){
+  if(!pres) return null;
+  if(pres.is_online) return {label:'Active now', online:true};
+  if(!pres.last_seen_at) return null;
+  const diff=Date.now()-new Date(pres.last_seen_at).getTime();
+  const mins=Math.round(diff/60000);
+  const hrs=Math.floor(diff/3600000);
+  const days=Math.floor(diff/86400000);
+  let label;
+  if(mins<2)            label='Active just now';
+  else if(mins<60)      label='Last seen '+mins+'m ago';
+  else if(hrs<24){
+    const d=new Date(pres.last_seen_at);
+    let h=d.getHours(), m=d.getMinutes();
+    const ap=h>=12?'PM':'AM'; h=h%12||12;
+    label='Last seen at '+h+':'+String(m).padStart(2,'0')+' '+ap;
+  } else if(days===1)   label='Last seen yesterday';
+  else if(days<7){
+    const dnames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    label='Last seen '+dnames[new Date(pres.last_seen_at).getDay()];
+  } else                label='Last seen a week ago';
+  return {label, online:false};
+}
+
+async function nxFetchPresenceForChats(){
+  const keys=_cache.chatList.map(c=>c.peer&&c.peer.student_key).filter(Boolean);
+  if(!keys.length) return;
+  const res=await edgeCall({action:'get_presence',keys});
+  if(res&&res.ok&&res.presence){
+    Object.assign(_cache.presence, res.presence);
+    nxRenderChatList();
+  }
+}
 
 /* ═══════════════════════════════════════════════════
    STORIES
@@ -2004,14 +2127,28 @@ function nxShowCurrentStory(){
       ? `<img src="${esc(grp.avatar_url)}" alt="${esc(grp.student_name||'')}" onerror="this.style.display='none'"/>`
       : esc(grp.emoji || initials(grp.student_name));
   }
-  $('svHdrName').textContent = grp.is_mine ? 'Your Story' : (grp.student_name||'Student');
+  // Header: gold gradient name for verified users
+  const nameEl=$('svHdrName');
+  if(grp.is_mine){
+    nameEl.textContent='Your Story';
+    nameEl.style.cssText='';
+  } else if(grp.is_verified){
+    nameEl.innerHTML=`<span class="gold-name" style="-webkit-background-clip:text;-webkit-text-fill-color:transparent;background:var(--gold-grad);">${esc(grp.student_name||'Student')}</span>`;
+  } else {
+    nameEl.textContent=grp.student_name||'Student';
+    nameEl.style.cssText='';
+  }
   $('svHdrTime').textContent = storySeenAt(story.created_at);
   $('svCaption').textContent = story.caption||'';
+
+  // 3-dot options button: only for own stories
+  const optsBtn=$('svOptsBtn');
+  if(optsBtn) optsBtn.style.display = grp.is_mine ? 'flex' : 'none';
+  nxCloseStoryOpts();
 
   // Bottom bar: only visible for own stories
   const bar=$('svBottomBar');
   const seenBtn=$('svSeenBtn');
-  const deleteBtn=$('svDeleteBtn');
   if(bar){
     if(grp.is_mine){
       bar.classList.add('visible');
@@ -2020,6 +2157,24 @@ function nxShowCurrentStory(){
       nxLoadSeenCount(story.id);
     } else {
       bar.classList.remove('visible');
+    }
+  }
+
+  // Swipe-up hint: only for own stories
+  const swipeHint=$('svSwipeHint');
+  if(swipeHint) swipeHint.classList.toggle('visible', !!grp.is_mine);
+
+  // Reply bar: shown for others' stories
+  const replyBar=$('svReplyBar');
+  if(replyBar){
+    if(!grp.is_mine){
+      replyBar.classList.add('visible');
+      const inp=$('svReplyInput');
+      if(inp) inp.value='';
+      const btn=$('svReplySendBtn');
+      if(btn) btn.disabled=true;
+    } else {
+      replyBar.classList.remove('visible');
     }
   }
 
@@ -2133,6 +2288,131 @@ function nxCloseSeenBy(){
     }
   }
   _svPaused=false;
+}
+
+/* ── Story 3-dot options menu ── */
+function nxOpenStoryOpts(){
+  _svPaused=true; clearTimeout(_svTimer); clearInterval(_svProgressInterval);
+  const vid=$('svMedia').querySelector('video'); if(vid) vid.pause();
+  const menu=$('svOptsMenu'); if(menu) menu.classList.add('open');
+}
+function nxCloseStoryOpts(){
+  const menu=$('svOptsMenu'); if(menu) menu.classList.remove('open');
+}
+
+/* ── Story touch: hold-to-pause + swipe-up for viewers ── */
+function nxSvTouchStart(e){
+  const tgt=e.target;
+  if(tgt.tagName==='INPUT'||tgt.tagName==='BUTTON') return;
+  _svTouchStartY=e.touches[0].clientY;
+  _svTouchStartX=e.touches[0].clientX;
+  _svHoldActive=false;
+  clearTimeout(_svHoldTimer);
+  _svHoldTimer=setTimeout(()=>{
+    _svHoldActive=true;
+    if(!_svPaused && !_svReplyPaused){
+      _svPaused=true;
+      clearTimeout(_svTimer); clearInterval(_svProgressInterval);
+      const vid=$('svMedia').querySelector('video'); if(vid) vid.pause();
+    }
+  }, 180);
+}
+function nxSvTouchEnd(e){
+  clearTimeout(_svHoldTimer);
+  if(_svHoldActive){
+    _svHoldActive=false;
+    if(_svPaused && !_svReplyPaused){
+      _svPaused=false;
+      const grp=_storyGroups[_svGroupIdx];
+      const story=grp&&grp.stories[_svStoryIdx];
+      if(story){
+        if(story.media_type==='video'){
+          const v=$('svMedia').querySelector('video');
+          if(v){ v.play().catch(()=>{}); nxRunStoryProgress((v.duration||8)*1000); }
+          else nxRunStoryProgress(STORY_VIDEO_FALLBACK_DURATION);
+        } else {
+          nxRunStoryProgress(STORY_IMG_DURATION);
+        }
+      }
+    }
+  }
+}
+function nxSvTouchMove(e){
+  if(e.target.tagName==='INPUT') return;
+  const dy=_svTouchStartY-e.touches[0].clientY;
+  const dx=Math.abs(e.touches[0].clientX-_svTouchStartX);
+  if(dx>25){ clearTimeout(_svHoldTimer); _svHoldActive=false; return; }
+  // Swipe up on own story → open seen-by
+  const grp=_storyGroups[_svGroupIdx];
+  if(grp&&grp.is_mine && dy>65 && dx<45){
+    clearTimeout(_svHoldTimer); _svHoldActive=false;
+    e.preventDefault();
+    nxOpenSeenBy();
+  }
+}
+
+/* ── Story reply / reaction helpers ── */
+function nxSvPauseForReply(){
+  if(!_svPaused){ _svPaused=true; _svReplyPaused=true; clearTimeout(_svTimer); clearInterval(_svProgressInterval); }
+}
+function nxSvResumeFromReply(){
+  if(!_svReplyPaused) return;
+  const inp=$('svReplyInput');
+  if(inp&&inp.value.trim()) return;
+  _svReplyPaused=false;
+  _svPaused=false;
+  const grp=_storyGroups[_svGroupIdx];
+  const story=grp&&grp.stories[_svStoryIdx];
+  if(story){
+    if(story.media_type==='video'){
+      const v=$('svMedia').querySelector('video');
+      if(v){ v.play().catch(()=>{}); nxRunStoryProgress((v.duration||8)*1000); }
+      else nxRunStoryProgress(STORY_VIDEO_FALLBACK_DURATION);
+    } else {
+      nxRunStoryProgress(STORY_IMG_DURATION);
+    }
+  }
+}
+function nxStoryReplyTyping(){
+  const inp=$('svReplyInput');
+  const btn=$('svReplySendBtn');
+  if(btn) btn.disabled=!(inp&&inp.value.trim());
+}
+async function nxStorySendReaction(emoji){
+  const grp=_storyGroups[_svGroupIdx];
+  if(!grp||grp.is_mine) return;
+  const peerKey=grp.student_key; if(!peerKey) return;
+  const res=await edgeCall({action:'send_dm', recipient_key:peerKey, text:emoji});
+  if(res&&res.ok){
+    const rb=$('svReplyBar');
+    if(rb){
+      const fb=document.createElement('div');
+      fb.textContent=emoji;
+      fb.style.cssText='position:absolute;bottom:80px;left:50%;transform:translateX(-50%);font-size:44px;opacity:1;transition:opacity .6s,transform .6s;pointer-events:none;z-index:10;';
+      rb.appendChild(fb);
+      requestAnimationFrame(()=>{ fb.style.opacity='0'; fb.style.transform='translateX(-50%) translateY(-40px) scale(1.4)'; });
+      setTimeout(()=>fb.remove(), 700);
+    }
+    nxSvResumeFromReply();
+  }
+}
+async function nxStorySendReply(){
+  const grp=_storyGroups[_svGroupIdx];
+  if(!grp||grp.is_mine) return;
+  const inp=$('svReplyInput');
+  const text=inp&&inp.value.trim(); if(!text) return;
+  const peerKey=grp.student_key; if(!peerKey) return;
+  const btn=$('svReplySendBtn');
+  if(btn) btn.disabled=true;
+  const res=await edgeCall({action:'send_dm', recipient_key:peerKey, text});
+  if(res&&res.ok){
+    if(inp) inp.value='';
+    inp&&inp.blur();
+    nxSvResumeFromReply();
+  } else {
+    if(btn) btn.disabled=false;
+    showToast('Failed to send reply. Try again.','warn');
+  }
 }
 
 let _svProgressStart=0;
@@ -2366,6 +2646,16 @@ window.nxHandleStoryMedia=nxHandleStoryMedia;
 window.nxPostStory=nxPostStory;
 window.nxOpenSeenBy=nxOpenSeenBy;
 window.nxCloseSeenBy=nxCloseSeenBy;
+window.nxOpenStoryOpts=nxOpenStoryOpts;
+window.nxCloseStoryOpts=nxCloseStoryOpts;
+window.nxSvTouchStart=nxSvTouchStart;
+window.nxSvTouchEnd=nxSvTouchEnd;
+window.nxSvTouchMove=nxSvTouchMove;
+window.nxStorySendReaction=nxStorySendReaction;
+window.nxStoryReplyTyping=nxStoryReplyTyping;
+window.nxStorySendReply=nxStorySendReply;
+window.nxSvPauseForReply=nxSvPauseForReply;
+window.nxSvResumeFromReply=nxSvResumeFromReply;
 
 function renderPostHtml(p, mk, admin, showPinned){
   const mine=String(p.student_key||'')===String(mk||'');
@@ -2569,6 +2859,8 @@ async function nxLoadChatsFromConnections(){
   // from cache before the network round-trip resolves (same pattern
   // as the feed/connections snapshots above).
   saveSnapshot('chats', _cache.chatList);
+  // Fetch online/last-seen status for all chat peers and re-render
+  nxFetchPresenceForChats();
 }
 
 /* ═══════════════════════════════════════════════════
@@ -3757,6 +4049,12 @@ function nxRenderChatList(){
     const nameHtml = isVer
       ? `<span class="gold-name">${esc(peer.student_name)}</span>${verBadgeHTML(true)}`
       : esc(peer.student_name);
+    const pres=formatPresence(_cache.presence[peer.student_key]);
+    const presHtml=pres
+      ? (pres.online
+          ? `<span class="presence-online">Active now</span>`
+          : `<span class="presence-offline">${esc(pres.label)}</span>`)
+      : '';
     return `<div class="conv-item${hasUnread?' unread':''}${isVer?' gold-conv':''}" onclick="nxOpenDM('${esc(peer.student_key)}','${esc(peer.student_name).replace(/'/g,"&#39;")}')">
       ${avatarHTML(peer.student_name,peer.emoji||'',peer.avatar_url||'',' avatar-sm','',isVer)}
       <div class="conv-info">
@@ -3766,7 +4064,10 @@ function nxRenderChatList(){
        </div>
        <div class="conv-preview" style="${hasUnread?'font-weight:700;color:var(--t1);':''}">${esc(c.latest.is_deleted?'Message deleted':(c.latest.image_url && !c.latest.text ? '📷 Image' : c.latest.text))}</div>
       </div>
-      <div class="conv-meta"><div class="conv-time">${esc(timeAgo(c.latest.ts))}</div></div>
+      <div class="conv-meta">
+        <div class="conv-time">${esc(timeAgo(c.latest.ts))}</div>
+        ${presHtml}
+      </div>
     </div>`;
   }).join('');
 }
@@ -3839,10 +4140,14 @@ async function nxOpenDM(peerKey,peerName){
     $('dmImageInput').disabled = false;
   }
 
+  if(res && res.peer_presence){
+    _cache.presence[peerKey] = res.peer_presence;
+    nxRenderChatList();
+  }
   if(profRes&&profRes.ok&&profRes.profile){
     const p=profRes.profile;
     _cache.profiles.set(peerKey, p);
-    _applyDMHeaderProfile(p);
+    _applyDMHeaderProfile(p, res && res.peer_presence);
   }
 
   // Only re-render if the thread is still open on this peer (guards
@@ -3855,7 +4160,7 @@ async function nxOpenDM(peerKey,peerName){
   markChatRead(peerKey);
 }
 
-function _applyDMHeaderProfile(p){
+function _applyDMHeaderProfile(p, pres){
   const isVer=!!p.is_verified;
   const av=$('dmPeerAvatar');
   if(p.avatar_url){
@@ -3877,11 +4182,24 @@ function _applyDMHeaderProfile(p){
     if(verBadgeEl) verBadgeEl.style.display='none';
   }
 
-  let roleStr='Community Member';
-  if(isVer) roleStr='Premium Verified Member';
-  else if(p.username) roleStr='@'+p.username;
-  $('dmHdrStatus').textContent=roleStr;
-  $('dmHdrStatus').style.color=isVer?'var(--gold)':'var(--tm)';
+  // Presence status in DM header (overrides role string when available)
+  const statusEl=$('dmHdrStatus');
+  const presInfo=pres ? formatPresence(pres) : null;
+  if(presInfo){
+    if(presInfo.online){
+      statusEl.innerHTML='<span class="presence-online" style="font-size:12px;">Active now</span>';
+      statusEl.style.color='';
+    } else {
+      statusEl.textContent=presInfo.label;
+      statusEl.style.color='var(--tm)';
+    }
+  } else {
+    let roleStr='Community Member';
+    if(isVer) roleStr='Premium Verified Member';
+    else if(p.username) roleStr='@'+p.username;
+    statusEl.textContent=roleStr;
+    statusEl.style.color=isVer?'var(--gold)':'var(--tm)';
+  }
   $('dmHdr').className='dm-hdr '+(isVer?'gold-chat-hdr':'');
   // Update local peer reference with full profile
   if(_dmPeer) _dmPeer.isVerified=isVer;
