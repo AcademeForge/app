@@ -744,6 +744,38 @@ textarea.compose.over{border-color:var(--err);}
 .sv-reply-send:disabled{opacity:.38;}
 .sv-reply-send:not(:disabled):active{transform:scale(.9);}
 
+/* ── STORY 3-DOT OPTIONS BUTTON ── */
+.sv-opts-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(255,255,255,.18);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;
+  letter-spacing:2px;
+}
+/* ── STORY OPTIONS DROPDOWN ── */
+.sv-opts-menu{
+  position:absolute;top:60px;right:10px;z-index:20;
+  background:rgba(20,18,40,.93);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.18);border-radius:12px;
+  padding:6px;min-width:160px;display:none;flex-direction:column;
+  box-shadow:0 8px 24px rgba(0,0,0,.5);
+}
+.sv-opts-menu.open{display:flex;}
+.sv-opts-menu button{
+  display:flex;align-items:center;gap:8px;padding:10px 14px;
+  border-radius:9px;color:#fff;font-size:13.5px;font-weight:600;
+  transition:background .15s;
+}
+.sv-opts-menu button:hover,.sv-opts-menu button:active{background:rgba(255,255,255,.12);}
+.sv-opts-menu .sv-opts-delete{color:#ff6b6b;}
+/* Swipe-up hint for own story */
+.sv-swipe-hint{
+  position:absolute;bottom:56px;left:50%;transform:translateX(-50%);
+  display:none;flex-direction:column;align-items:center;gap:2px;
+  color:rgba(255,255,255,.55);font-size:10px;font-weight:600;pointer-events:none;z-index:3;
+}
+.sv-swipe-hint.visible{display:flex;}
+.sv-swipe-hint::before{content:'∧';font-size:16px;color:rgba(255,255,255,.4);}
+
 #imgLightbox{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;pointer-events:none;touch-action:none;}
 #imgLightbox.open{background:rgba(0,0,0,.92);pointer-events:all;}
 #imgLightbox .lb-close{position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;opacity:0;transform:scale(.8);transition:opacity .22s ease,transform .22s ease,background .15s;}
@@ -758,6 +790,39 @@ textarea.compose.over{border-color:var(--err);}
 #imgLightbox.open .lb-img-wrap{opacity:1;transform:scale(1);}
 #imgLightbox .lb-img-wrap:active{cursor:grabbing;}
 #imgLightbox .lb-img-wrap img{display:block;border-radius:10px;max-width:min(90vw,440px);max-height:80dvh;object-fit:contain;pointer-events:none;box-shadow:0 20px 60px rgba(0,0,0,.55);}
+
+/* ── STORY BAR: seen fades, unseen glows ── */
+.story-item.story-other.story-seen{opacity:.5;filter:grayscale(30%);}
+.story-item.story-other:not(.story-seen) .story-ring:not(.seen){
+  box-shadow:0 0 0 0 transparent,0 0 14px 3px rgba(244,63,94,.45),0 0 22px 5px rgba(139,92,246,.25);
+  animation:story-glow 2.2s ease-in-out infinite alternate;
+}
+@keyframes story-glow{
+  from{box-shadow:0 0 8px 2px rgba(244,63,94,.35),0 0 18px 4px rgba(139,92,246,.2);}
+  to{box-shadow:0 0 16px 5px rgba(245,158,11,.5),0 0 26px 8px rgba(244,63,94,.3);}
+}
+/* Premium tick in story bar label */
+.story-ver-tick{
+  font-size:8px;color:var(--gold);margin-left:2px;
+  vertical-align:middle;font-style:normal;line-height:1;
+}
+/* Story ring on profile avatar */
+.avatar.story-ring-active{
+  box-shadow:0 0 0 2.5px var(--card-s),0 0 0 5px #f43f5e;
+  cursor:pointer;
+  transition:box-shadow .2s;
+}
+.avatar.story-ring-seen{
+  box-shadow:0 0 0 2.5px var(--card-s),0 0 0 5px var(--b1);
+  cursor:pointer;
+}
+.avatar.story-ring-active:active{opacity:.8;}
+/* Story viewer header: clickable name area */
+#svHdrClickable{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
+#svHdrClickable.sv-tappable{cursor:pointer;}
+#svHdrClickable.sv-tappable:active{opacity:.75;}
+/* Premium badge inline with sv-hdr-name */
+.sv-hdr-name .gold-badge{font-size:11px;margin-left:3px;vertical-align:middle;}
 </style>
 </head>
 <body>
@@ -1020,22 +1085,33 @@ textarea.compose.over{border-color:var(--err);}
   </div>
 
   <!-- ── STORY VIEWER ── -->
-  <div class="story-viewer" id="storyViewer">
+  <div class="story-viewer" id="storyViewer"
+    ontouchstart="nxSvTouchStart(event)"
+    ontouchend="nxSvTouchEnd(event)"
+    ontouchcancel="nxSvTouchEnd(event)"
+    ontouchmove="nxSvTouchMove(event)">
     <div class="sv-progress" id="svProgress"></div>
     <div class="sv-hdr">
-      <div class="sv-hdr-av" id="svHdrAv"></div>
-      <div class="sv-hdr-info">
-        <div class="sv-hdr-name" id="svHdrName"></div>
-        <div class="sv-hdr-time" id="svHdrTime"></div>
+      <div id="svHdrClickable">
+        <div class="sv-hdr-av" id="svHdrAv"></div>
+        <div class="sv-hdr-info">
+          <div class="sv-hdr-name" id="svHdrName"></div>
+          <div class="sv-hdr-time" id="svHdrTime"></div>
+        </div>
       </div>
+      <button class="sv-opts-btn" id="svOptsBtn" onclick="nxOpenStoryOpts()" style="display:none;" aria-label="Story options">⋯</button>
       <button class="sv-close" onclick="nxCloseStoryViewer()">✕</button>
+    </div>
+    <!-- Story options dropdown (own story only) -->
+    <div class="sv-opts-menu" id="svOptsMenu">
+      <button class="sv-opts-delete" onclick="nxCloseStoryOpts();nxDeleteCurrentStory()">🗑 Delete Story</button>
     </div>
     <div class="sv-media" id="svMedia">
       <div class="sv-tap-prev" onclick="nxStoryPrev()"></div>
       <div class="sv-tap-next" onclick="nxStoryNext()"></div>
     </div>
     <div class="sv-caption" id="svCaption"></div>
-    <!-- Reply bar — shown for other users' stories -->
+    <!-- Reply bar — shown for others' stories -->
     <div class="sv-reply-bar" id="svReplyBar">
       <div class="sv-emoji-strip">
         <button onclick="nxStorySendReaction('❤️')" aria-label="React heart">❤️</button>
@@ -1052,14 +1128,15 @@ textarea.compose.over{border-color:var(--err);}
         <button class="sv-reply-send" id="svReplySendBtn" onclick="nxStorySendReply()" disabled aria-label="Send reply">➤</button>
       </div>
     </div>
-    <!-- Bottom bar: seen-by (mine) + delete -->
-    <div class="sv-bottom-bar" id="svBottomBar">
+    <!-- Bottom bar: seen-by (own story) + swipe hint -->
+    <div class="sv-bottom-bar" id="svBottomBar" style="justify-content:center;">
       <button class="sv-seen-btn" id="svSeenBtn" onclick="nxOpenSeenBy()">
         <span class="sv-eye-ic">👁</span>
         <span id="svSeenCount">0</span>
       </button>
-      <button class="sv-delete-btn-inline" id="svDeleteBtn" onclick="nxDeleteCurrentStory()">🗑 Delete</button>
     </div>
+    <!-- Swipe-up hint for own stories -->
+    <div class="sv-swipe-hint" id="svSwipeHint">Swipe up for viewers</div>
     <!-- Seen-by slide-up panel -->
     <div class="sv-seen-panel" id="svSeenPanel">
       <div class="sv-seen-panel-inner">
@@ -1879,10 +1956,12 @@ let _svTimer=null;            // auto-advance timer
 let _svProgressInterval=null; // progress bar interval
 let _storyPendingMedia=null;  // {dataUrl, mediaType}
 let _svPaused=false;          // paused while seen-by panel is open
+let _svReplyPaused=false;     // paused while reply input is focused
+let _svHoldTimer=null;        // finger-hold timer
+let _svHoldActive=false;      // true while finger is held down
+let _svTouchStartY=0;         // touchstart Y for swipe-up detection
+let _svTouchStartX=0;         // touchstart X
 
-/* ═══════════════════════════════════════════════════
-   STORIES
-═══════════════════════════════════════════════════ */
 /* ═══════════════════════════════════════════════════
    PRESENCE HELPERS
 ═══════════════════════════════════════════════════ */
@@ -1920,6 +1999,9 @@ async function nxFetchPresenceForChats(){
   }
 }
 
+/* ═══════════════════════════════════════════════════
+   STORIES
+═══════════════════════════════════════════════════ */
 const STORY_IMG_DURATION = 5000;             // ms each image story stays on screen
 const STORY_VIDEO_FALLBACK_DURATION = 8000;  // ms, used until a video's real duration loads
 const STORY_IMG_MAX_BYTES = 2 * 1024 * 1024;  // 2 MB hard limit for image stories
@@ -1972,16 +2054,18 @@ function nxRenderStoriesBar(){
 }
 
 function renderStoryItemHtml(g, idx){
-  const seenClass = g.has_unviewed ? '' : ' seen';
+  const seen = !g.has_unviewed;
+  const seenClass = seen ? ' seen' : '';
   const avatarInner = g.avatar_url
     ? `<img src="${esc(g.avatar_url)}" alt="${esc(g.student_name||'')}" loading="lazy" decoding="async" onerror="this.style.display='none'"/>`
     : esc(g.emoji || initials(g.student_name));
   const label = g.username ? ('@'+esc(g.username)) : esc((g.student_name||'Student').split(/\s+/)[0]);
-  return `<div class="story-item story-other" onclick="nxOpenStoryViewer(${idx})">
+  const premTick = g.is_verified ? `<span class="story-ver-tick">✦</span>` : '';
+  return `<div class="story-item story-other${seen?' story-seen':''}" onclick="nxOpenStoryViewer(${idx})">
     <div class="story-ring${seenClass}">
       <div class="story-avatar-wrap">${avatarInner}</div>
     </div>
-    <span class="story-label">${label}</span>
+    <span class="story-label">${label}${premTick}</span>
   </div>`;
 }
 
@@ -2080,14 +2164,42 @@ function nxShowCurrentStory(){
       ? `<img src="${esc(grp.avatar_url)}" alt="${esc(grp.student_name||'')}" onerror="this.style.display='none'"/>`
       : esc(grp.emoji || initials(grp.student_name));
   }
-  $('svHdrName').textContent = grp.is_mine ? 'Your Story' : (grp.student_name||'Student');
+  // Header: gold gradient name for verified users + premium badge
+  const nameEl=$('svHdrName');
+  if(grp.is_mine){
+    nameEl.innerHTML=`<span>Your Story</span>`;
+    nameEl.style.cssText='';
+  } else if(grp.is_verified){
+    nameEl.innerHTML=`<span class="gold-name" style="-webkit-background-clip:text;-webkit-text-fill-color:transparent;background:var(--gold-grad);">${esc(grp.student_name||'Student')}</span>${verBadgeHTML(true)}`;
+  } else {
+    nameEl.textContent=grp.student_name||'Student';
+    nameEl.style.cssText='';
+  }
+  // Make header avatar+name clickable for other users' stories
+  const svHdrClickable=$('svHdrClickable');
+  if(svHdrClickable){
+    if(!grp.is_mine && grp.student_key){
+      svHdrClickable.classList.add('sv-tappable');
+      svHdrClickable.onclick=()=>{
+        nxCloseStoryViewer();
+        nxOpenProfile(grp.student_key, grp.student_name||'Student');
+      };
+    } else {
+      svHdrClickable.classList.remove('sv-tappable');
+      svHdrClickable.onclick=null;
+    }
+  }
   $('svHdrTime').textContent = storySeenAt(story.created_at);
   $('svCaption').textContent = story.caption||'';
+
+  // 3-dot options button: only for own stories
+  const optsBtn=$('svOptsBtn');
+  if(optsBtn) optsBtn.style.display = grp.is_mine ? 'flex' : 'none';
+  nxCloseStoryOpts();
 
   // Bottom bar: only visible for own stories
   const bar=$('svBottomBar');
   const seenBtn=$('svSeenBtn');
-  const deleteBtn=$('svDeleteBtn');
   if(bar){
     if(grp.is_mine){
       bar.classList.add('visible');
@@ -2099,14 +2211,17 @@ function nxShowCurrentStory(){
     }
   }
 
-  // Reply bar: shown for others' stories, hidden for own
+  // Swipe-up hint: only for own stories
+  const swipeHint=$('svSwipeHint');
+  if(swipeHint) swipeHint.classList.toggle('visible', !!grp.is_mine);
+
+  // Reply bar: shown for others' stories
   const replyBar=$('svReplyBar');
   if(replyBar){
     if(!grp.is_mine){
       replyBar.classList.add('visible');
-      // Reset reply input on each new story
       const inp=$('svReplyInput');
-      if(inp){ inp.value=''; }
+      if(inp) inp.value='';
       const btn=$('svReplySendBtn');
       if(btn) btn.disabled=true;
     } else {
@@ -2226,17 +2341,75 @@ function nxCloseSeenBy(){
   _svPaused=false;
 }
 
-/* ── Story reply / reaction helpers ── */
-let _svReplyPaused=false;
+/* ── Story 3-dot options menu ── */
+function nxOpenStoryOpts(){
+  _svPaused=true; clearTimeout(_svTimer); clearInterval(_svProgressInterval);
+  const vid=$('svMedia').querySelector('video'); if(vid) vid.pause();
+  const menu=$('svOptsMenu'); if(menu) menu.classList.add('open');
+}
+function nxCloseStoryOpts(){
+  const menu=$('svOptsMenu'); if(menu) menu.classList.remove('open');
+}
 
+/* ── Story touch: hold-to-pause + swipe-up for viewers ── */
+function nxSvTouchStart(e){
+  const tgt=e.target;
+  if(tgt.tagName==='INPUT'||tgt.tagName==='BUTTON') return;
+  _svTouchStartY=e.touches[0].clientY;
+  _svTouchStartX=e.touches[0].clientX;
+  _svHoldActive=false;
+  clearTimeout(_svHoldTimer);
+  _svHoldTimer=setTimeout(()=>{
+    _svHoldActive=true;
+    if(!_svPaused && !_svReplyPaused){
+      _svPaused=true;
+      clearTimeout(_svTimer); clearInterval(_svProgressInterval);
+      const vid=$('svMedia').querySelector('video'); if(vid) vid.pause();
+    }
+  }, 180);
+}
+function nxSvTouchEnd(e){
+  clearTimeout(_svHoldTimer);
+  if(_svHoldActive){
+    _svHoldActive=false;
+    if(_svPaused && !_svReplyPaused){
+      _svPaused=false;
+      const grp=_storyGroups[_svGroupIdx];
+      const story=grp&&grp.stories[_svStoryIdx];
+      if(story){
+        if(story.media_type==='video'){
+          const v=$('svMedia').querySelector('video');
+          if(v){ v.play().catch(()=>{}); nxRunStoryProgress((v.duration||8)*1000); }
+          else nxRunStoryProgress(STORY_VIDEO_FALLBACK_DURATION);
+        } else {
+          nxRunStoryProgress(STORY_IMG_DURATION);
+        }
+      }
+    }
+  }
+}
+function nxSvTouchMove(e){
+  if(e.target.tagName==='INPUT') return;
+  const dy=_svTouchStartY-e.touches[0].clientY;
+  const dx=Math.abs(e.touches[0].clientX-_svTouchStartX);
+  if(dx>25){ clearTimeout(_svHoldTimer); _svHoldActive=false; return; }
+  // Swipe up on own story → open seen-by
+  const grp=_storyGroups[_svGroupIdx];
+  if(grp&&grp.is_mine && dy>65 && dx<45){
+    clearTimeout(_svHoldTimer); _svHoldActive=false;
+    e.preventDefault();
+    nxOpenSeenBy();
+  }
+}
+
+/* ── Story reply / reaction helpers ── */
 function nxSvPauseForReply(){
   if(!_svPaused){ _svPaused=true; _svReplyPaused=true; clearTimeout(_svTimer); clearInterval(_svProgressInterval); }
 }
 function nxSvResumeFromReply(){
   if(!_svReplyPaused) return;
-  // Only resume if reply field is now blank (don't auto-resume while user is typing)
   const inp=$('svReplyInput');
-  if(inp && inp.value.trim()) return;
+  if(inp&&inp.value.trim()) return;
   _svReplyPaused=false;
   _svPaused=false;
   const grp=_storyGroups[_svGroupIdx];
@@ -2259,12 +2432,9 @@ function nxStoryReplyTyping(){
 async function nxStorySendReaction(emoji){
   const grp=_storyGroups[_svGroupIdx];
   if(!grp||grp.is_mine) return;
-  const peerKey=grp.student_key;
-  if(!peerKey) return;
-  // Send emoji as a DM to the story poster
+  const peerKey=grp.student_key; if(!peerKey) return;
   const res=await edgeCall({action:'send_dm', recipient_key:peerKey, text:emoji});
   if(res&&res.ok){
-    // Tiny visual feedback: flash the tapped emoji, resume story
     const rb=$('svReplyBar');
     if(rb){
       const fb=document.createElement('div');
@@ -2281,10 +2451,8 @@ async function nxStorySendReply(){
   const grp=_storyGroups[_svGroupIdx];
   if(!grp||grp.is_mine) return;
   const inp=$('svReplyInput');
-  const text=inp&&inp.value.trim();
-  if(!text) return;
-  const peerKey=grp.student_key;
-  if(!peerKey) return;
+  const text=inp&&inp.value.trim(); if(!text) return;
+  const peerKey=grp.student_key; if(!peerKey) return;
   const btn=$('svReplySendBtn');
   if(btn) btn.disabled=true;
   const res=await edgeCall({action:'send_dm', recipient_key:peerKey, text});
@@ -2529,6 +2697,11 @@ window.nxHandleStoryMedia=nxHandleStoryMedia;
 window.nxPostStory=nxPostStory;
 window.nxOpenSeenBy=nxOpenSeenBy;
 window.nxCloseSeenBy=nxCloseSeenBy;
+window.nxOpenStoryOpts=nxOpenStoryOpts;
+window.nxCloseStoryOpts=nxCloseStoryOpts;
+window.nxSvTouchStart=nxSvTouchStart;
+window.nxSvTouchEnd=nxSvTouchEnd;
+window.nxSvTouchMove=nxSvTouchMove;
 window.nxStorySendReaction=nxStorySendReaction;
 window.nxStoryReplyTyping=nxStoryReplyTyping;
 window.nxStorySendReply=nxStorySendReply;
@@ -3482,6 +3655,34 @@ async function nxUnblockFromList(key){
 /* ═══════════════════════════════════════════════════
    PROFILE (with in-memory cache for thumbnails)
 ═══════════════════════════════════════════════════ */
+
+/** Returns the story group for a given student_key, or null if none. */
+function nxGetUserStoryGroup(key){
+  if(!key || !_storyGroups) return null;
+  return _storyGroups.find(g=>String(g.student_key)===String(key)) || null;
+}
+
+/** Apply story ring to profileAvatar based on whether user has an active story. */
+function _applyProfileStoryRing(key){
+  const avatarEl=$('profileAvatar');
+  if(!avatarEl) return;
+  const grp = nxGetUserStoryGroup(key);
+  if(grp && grp.stories && grp.stories.length){
+    const hasUnviewed = !!grp.has_unviewed;
+    avatarEl.classList.remove('story-ring-active','story-ring-seen');
+    avatarEl.classList.add(hasUnviewed ? 'story-ring-active' : 'story-ring-seen');
+    avatarEl.title = hasUnviewed ? 'View story' : 'View story (seen)';
+    avatarEl.onclick = ()=>{
+      const grpIdx=_storyGroups.indexOf(grp);
+      if(grpIdx>=0) nxOpenStoryViewer(grpIdx);
+    };
+  } else {
+    avatarEl.classList.remove('story-ring-active','story-ring-seen');
+    avatarEl.title = '';
+    avatarEl.onclick = null;
+  }
+}
+
 async function nxOpenProfile(key,name){
   if(!key) return;
   _profileData={key,name};
@@ -3510,6 +3711,8 @@ async function nxOpenProfile(key,name){
 
   nxBringToFront('profileScreen');
   $('profileScreen').style.display='flex';
+  // Story ring: apply immediately if we already have story data in memory
+  _applyProfileStoryRing(key);
   nxLoadProfileMeta(key);
   nxLoadProfilePosts(key);
 }
@@ -3563,6 +3766,8 @@ async function nxLoadProfileMeta(key){
     $('profileFollowBtn').textContent=_profileIsFollowing?'Following':'Follow';
     $('profileFollowBtn').className=_profileIsFollowing?'af-btn-secondary-outline':'af-btn-primary';
   }
+  // Re-apply story ring in case stories were loaded after the profile was shown
+  _applyProfileStoryRing(key);
 }
 async function nxToggleFollow(){
   if(!_profileData) return;
@@ -3607,6 +3812,26 @@ function nxOpenMyProfile(){
   } else {
     avatarInner.innerHTML=`<span style="font-size:22px;font-weight:800;">${esc(initials(n))}</span>`;
     avatarInner.style.cssText='width:72px;height:72px;border-radius:18px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--p);color:#fff;';
+  }
+  // Story ring on my avatar if I have an active story
+  const myStoryGrp = _storyGroups && _storyGroups.find(g=>g.is_mine);
+  const avatarWrap = avatarInner.parentElement;
+  if(avatarWrap){
+    if(myStoryGrp && myStoryGrp.stories && myStoryGrp.stories.length){
+      avatarWrap.style.boxShadow='0 0 0 3px var(--card-s),0 0 0 6px #f43f5e';
+      avatarWrap.style.borderRadius='22px';
+      avatarWrap.style.cursor='pointer';
+      avatarWrap.title='View your story';
+      avatarWrap.onclick=()=>{
+        const grpIdx=_storyGroups.indexOf(myStoryGrp);
+        if(grpIdx>=0){ nxCloseMyProfile(); nxOpenStoryViewer(grpIdx); }
+      };
+    } else {
+      avatarWrap.style.boxShadow='';
+      avatarWrap.style.cursor='';
+      avatarWrap.title='';
+      avatarWrap.onclick=null;
+    }
   }
   $('myProfilePageScroll').scrollTop=0;
   nxBringToFront('myProfileScreen');
