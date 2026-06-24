@@ -451,7 +451,7 @@ textarea.compose.over{border-color:var(--err);}
 mark.dm-hl{background:rgba(251,191,36,.45);color:inherit;border-radius:3px;padding:0 1px;}
 .dm-search-current .bubble{outline:2px solid var(--p);outline-offset:2px;border-radius:14px;}
 .dm-messages{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:4px;}
-.bubble-wrap{display:flex;align-items:flex-end;gap:6px;padding:1px 0;}
+.bubble-wrap{display:flex;align-items:flex-end;gap:6px;padding:1px 0;position:relative;}
 .bubble-wrap.me{flex-direction:row-reverse;}
 .bubble-avatar-slot{width:28px;height:28px;flex-shrink:0;}
 .bubble{
@@ -661,9 +661,10 @@ mark.dm-hl{background:rgba(251,191,36,.45);color:inherit;border-radius:3px;paddi
 .story-viewer.open{display:flex;}
 /* Media area always dark so content pops */
 .sv-media{background:#000;}
-/* Header: always dark gradient so user name is readable over any story media */
-.sv-hdr{background:linear-gradient(rgba(0,0,0,.58),rgba(0,0,0,.18) 70%,transparent);}
-[data-theme="light"] .sv-hdr{background:linear-gradient(rgba(0,0,0,.82),rgba(0,0,0,.55) 60%,rgba(0,0,0,.15));}
+/* Header: solid dark background so name is always readable in any theme */
+.sv-hdr{background:rgba(0,0,0,.80);}
+[data-theme="light"] .sv-hdr{background:rgba(0,0,0,.88);}
+.story-viewer{background:#000!important;}
 .sv-hdr-name{color:#fff!important;}
 /* Force verified gold-name spans to white inside story header so they're readable */
 .sv-hdr-name .gold-name{color:#fff!important;}
@@ -1057,10 +1058,11 @@ body.light .sv-caught-up-btn{background:#111;color:#fff;}
 .bubble-tick.seen{color:#3b82f6;opacity:1;}       /* ✓✓ double blue = peer has read      */
 /* ── Older messages loader ── */
 .dm-load-older-btn{display:block;width:100%;text-align:center;padding:8px 0;font-size:12px;font-weight:700;color:var(--p);background:none;border:none;cursor:pointer;opacity:.8;}
-/* ── Bubble reply button ── */
-.bubble-reply-btn{background:none;border:none;font-size:13px;color:var(--tm);cursor:pointer;padding:0 3px;line-height:1;flex-shrink:0;opacity:.55;transition:opacity .15s;}
-.bubble-reply-btn:active{opacity:1;}
-.bubble-wrap:hover .bubble-reply-btn{opacity:.85;}
+/* ── Swipe-to-reply arrow hint ── shown beside bubble on swipe */
+.bubble-reply-hint{position:absolute;font-size:18px;color:var(--p);opacity:0;pointer-events:none;transition:opacity .15s;top:50%;transform:translateY(-50%);}
+.bubble-wrap.me .bubble-reply-hint{right:calc(100% + 6px);}
+.bubble-wrap:not(.me) .bubble-reply-hint{left:calc(100% + 6px);}
+.bubble-wrap.swiping .bubble-reply-hint{opacity:.75;}
 .bubble-meta{display:flex;align-items:center;gap:4px;}
 .bubble-meta.me{justify-content:flex-end;}
 </style>
@@ -2347,6 +2349,36 @@ async function nxSendReaction(emoji){
   const msgId=_emojiPickerMsgId;
   nxHideEmojiPicker();
   if(!msgId||!_dmPeer) return;
+
+  // ── Optimistic render: inject chip immediately so user sees it at once ──
+  const targetBubble=document.querySelector(`[data-msg-id="${msgId}"]`);
+  if(targetBubble){
+    const col=targetBubble.parentElement; // the flex-column wrapper
+    let rxRow=col.querySelector('.bubble-reactions');
+    if(!rxRow){
+      rxRow=document.createElement('div');
+      rxRow.className='bubble-reactions';
+      // Insert after the .bubble div, before .bubble-meta
+      const meta=col.querySelector('.bubble-meta');
+      if(meta) col.insertBefore(rxRow,meta);
+      else col.appendChild(rxRow);
+    }
+    // Check if a chip for this emoji already exists
+    const existing=[...rxRow.querySelectorAll('.reaction-chip')].find(c=>c.dataset.rxEmoji===emoji);
+    if(existing){
+      let cnt=existing.querySelector('.rx-count');
+      if(cnt){ cnt.textContent=parseInt(cnt.textContent||'1')+1; }
+      else { existing.insertAdjacentHTML('beforeend',` <span class="rx-count">2</span>`); }
+      existing.classList.add('mine');
+    } else {
+      const chip=document.createElement('span');
+      chip.className='reaction-chip mine';
+      chip.dataset.rxEmoji=emoji;
+      chip.textContent=emoji;
+      rxRow.appendChild(chip);
+    }
+  }
+
   await edgeCall({action:'send_dm',to_key:_dmPeer.key,to_name:_dmPeer.name,text:`[rx:${msgId}:${emoji}]`});
   if(_dmPeer) nxRefreshPeerChat(_dmPeer.key);
 }
@@ -2376,32 +2408,93 @@ function _renderRxChips(msgId, rxMap){
     html+=`<span class="reaction-chip${mine?' mine':''}">${emoji}${count>1?` <span class="rx-count">${count}</span>`:''}</span>`;
   return `<div class="bubble-reactions">${html}</div>`;
 }
-// Attach double-tap / dblclick reaction trigger on dmMessages box (run once per DM open)
+// Attach gesture events on dmMessages box — runs once per app lifetime (idempotent)
+// Gestures supported:
+//   Swipe right on a bubble → Reply (works on both sent & received)
+//   Double-tap a bubble     → Emoji reaction picker
+//   Desktop dblclick        → Emoji reaction picker
 function nxInitDMReactionEvents(){
   const box=$('dmMessages');
   if(!box||box._rxEventsInited) return;
   box._rxEventsInited=true;
-  // Desktop: dblclick → react
+
+  // ── Desktop: dblclick → emoji picker ──────────────────────────────
   box.addEventListener('dblclick',e=>{
     const b=e.target.closest('[data-msg-id]');
     if(b) nxShowEmojiPicker(e,b.dataset.msgId);
   });
-  // Mobile: double-tap → react
-  let _lt=0, _lbid=null;
-  // Mobile: long-press (500ms) → show reply option
-  let _lpTimer=null;
+
+  // ── Touch state ───────────────────────────────────────────────────
+  let _lt=0, _lbid=null;            // double-tap tracking
+  let _srStartX=0, _srStartY=0;     // swipe start coords
+  let _srBubble=null;               // bubble element being swiped
+  let _srBubbleInner=null;          // the .bubble div to translate
+  let _srSwiping=false;             // true once horizontal intent confirmed
+
+  function _snapBack(){
+    if(!_srBubbleInner) return;
+    _srBubbleInner.style.transition='transform .22s cubic-bezier(.25,.8,.25,1)';
+    _srBubbleInner.style.transform='translateX(0)';
+    setTimeout(()=>{ if(_srBubbleInner) _srBubbleInner.style.transition=''; }, 240);
+  }
+
   box.addEventListener('touchstart',e=>{
-    const b=e.target.closest('[data-msg-id]');
-    if(!b) return;
-    _lpTimer=setTimeout(()=>{
-      _lpTimer=null;
-      const t=e.touches&&e.touches[0];
-      nxShowBubbleContextMenu(b, t&&t.clientX, t&&t.clientY);
-    },500);
+    const touch=e.touches[0];
+    _srStartX=touch.clientX;
+    _srStartY=touch.clientY;
+    _srSwiping=false;
+    // Find the bubble elements
+    _srBubble=e.target.closest('[data-msg-id]');
+    _srBubbleInner=_srBubble||null;  // the element we'll translate IS the .bubble div
   },{passive:true});
-  box.addEventListener('touchmove',()=>{clearTimeout(_lpTimer);_lpTimer=null;},{passive:true});
+
+  box.addEventListener('touchmove',e=>{
+    const touch=e.touches[0];
+    const dx=touch.clientX-_srStartX;
+    const dy=Math.abs(touch.clientY-_srStartY);
+    const adx=Math.abs(dx);
+
+    // Confirm horizontal swipe intent once we've moved >12px and it's more horizontal than vertical
+    if(!_srSwiping && adx>12 && adx>dy*1.4 && _srBubble){
+      _srSwiping=true;
+    }
+    if(_srSwiping && _srBubbleInner){
+      // Add swiping class to bubble-wrap for the reply hint arrow
+      const wrap=_srBubbleInner.closest('.bubble-wrap');
+      if(wrap) wrap.classList.add('swiping');
+      // Allow swipe in BOTH directions, cap at 70px, add rubber-band feel past 55px
+      let clamp=dx;
+      if(adx>55) clamp=(dx>0?1:-1)*(55+(adx-55)*0.3);
+      clamp=Math.max(-70,Math.min(70,clamp));
+      _srBubbleInner.style.transition='none';
+      _srBubbleInner.style.transform=`translateX(${clamp}px)`;
+    }
+  },{passive:true});
+
   box.addEventListener('touchend',e=>{
-    if(_lpTimer){clearTimeout(_lpTimer);_lpTimer=null;}
+    const endX=e.changedTouches[0].clientX;
+    const rawDx=endX-_srStartX;
+    const adx=Math.abs(rawDx);
+
+    // Always remove swiping class from bubble-wrap
+    if(_srBubbleInner){
+      const wrap=_srBubbleInner.closest('.bubble-wrap');
+      if(wrap) wrap.classList.remove('swiping');
+    }
+
+    if(_srSwiping){
+      _snapBack();
+      // Trigger reply if swiped far enough (either direction)
+      if(adx>50 && _srBubble && _srBubble.dataset.msgId){
+        nxStartDMReply(_srBubble.dataset.msgId, _srBubble.dataset.msgText||'');
+      }
+      _srSwiping=false;
+      _srBubble=null; _srBubbleInner=null;
+      return; // don't fall through to double-tap check
+    }
+    _srBubble=null; _srBubbleInner=null;
+
+    // ── Double-tap → emoji picker ──────────────────────────────────
     const b=e.target.closest('[data-msg-id]');
     if(!b) return;
     const bid=b.dataset.msgId, now=Date.now();
@@ -2412,6 +2505,7 @@ function nxInitDMReactionEvents(){
       _lt=0; _lbid=null;
     } else { _lt=now; _lbid=bid; }
   },{passive:false});
+
   // Scroll to top → load older messages
   box.addEventListener('scroll',()=>{
     if(box.scrollTop===0 && !_dmLoadingOlder && _dmOldestTs && _dmPeer){
@@ -5226,14 +5320,14 @@ function nxRenderDMMessages(msgs, searchTerm=''){
     // Reaction chips rendered BELOW the bubble so they never overlap text
     const rxHtml = (m.id && !deleted) ? _renderRxChips(m.id, rxMap) : '';
 
-    // Delivery / read tick on the last message I sent (WhatsApp-style)
+    // Delivery / read receipt on the last message I sent
     const isLastMine = me && !deleted && String(m.id)===lastMyMsgId;
     let tickHtml = '';
     if(isLastMine){
       if(_dmPeerReadAt && new Date(m.ts)<=new Date(_dmPeerReadAt)){
-        tickHtml = '<div class="bubble-tick seen" title="Seen">✓✓</div>';
+        tickHtml = '<div class="bubble-tick seen">Seen ✓</div>';
       } else {
-        tickHtml = '<div class="bubble-tick sent" title="Delivered">✓</div>';
+        tickHtml = '<div class="bubble-tick sent">✓</div>';
       }
     }
 
@@ -5243,12 +5337,12 @@ function nxRenderDMMessages(msgs, searchTerm=''){
     // NOTE: This literal absolutely MUST NOT contain interior white space or newlines between <div class="bubble..."> and </div>
     // Otherwise `white-space: pre-wrap;` injects those hidden characters and stretches out the bubble.
     return `<div class="bubble-wrap${me?' me':''}${isConsecutive?' consecutive':''}${isMatch?' dm-search-match':''}"${clickAction}>
+      <span class="bubble-reply-hint">↩</span>
       ${!me?(isConsecutive?'<div class="bubble-avatar-slot"></div>':avatarHTML(_dmPeer.name,peerEmoji,peerAvatarUrl,' bubble-avatar-slot',`nxOpenProfile('${esc(_dmPeer.key)}','${esc(_dmPeer.name).replace(/'/g,"&#39;")}')`,peerVer)):''}
       <div style="display:flex;flex-direction:column;align-items:${me?'flex-end':'flex-start'};max-width:72%;min-width:0;">
         <div class="bubble${deleted?' deleted':''}${bubbleExtraClass}${isStoryReply?' story-reply-bubble':''}" data-msg-id="${m.id||''}" data-msg-text="${msgTextAttr}" style="${(!deleted && !m.text && isValidImg) ? 'padding:4px;' : ''}">${replyQuoteHtml}${imgHtml}${textHtml}</div>
         ${rxHtml}
         <div class="bubble-meta${me?' me':''}">
-          ${(!deleted&&m.id)?`<button class="bubble-reply-btn" onclick="event.stopPropagation();nxReplyFromBubbleBtn(this)" title="Reply">↩</button>`:''}
           <div class="bubble-time">${esc(timeAgo(m.ts))}</div>
         </div>
         ${tickHtml}
