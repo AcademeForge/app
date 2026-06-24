@@ -439,6 +439,36 @@ textarea.compose.over{border-color:var(--err);}
 .bubble-time{font-size:10px;color:var(--tm);font-weight:500;white-space:nowrap;margin-top:2px;padding:0 2px;}
 .bubble-wrap.consecutive{margin-top:-2px;}
 .bubble-wrap.consecutive .bubble-avatar-slot{visibility:hidden;}
+/* ── DM EMOJI REACTIONS ── */
+.emoji-picker-float{
+  position:fixed;z-index:9900;display:none;
+  background:var(--hdr);border:1px solid var(--b1);
+  border-radius:40px;padding:5px 8px;gap:2px;
+  align-items:center;justify-content:center;
+  box-shadow:0 8px 32px rgba(0,0,0,.28);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+}
+.emoji-picker-float button{
+  font-size:24px;line-height:1;background:none;border:none;cursor:pointer;
+  padding:4px 6px;border-radius:50%;
+  transition:transform .12s,background .12s;
+}
+.emoji-picker-float button:hover,.emoji-picker-float button:active{
+  background:var(--b1);transform:scale(1.3);
+}
+.bubble-reactions{
+  display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;
+}
+.reaction-chip{
+  display:inline-flex;align-items:center;gap:3px;
+  background:var(--hdr);border:1.5px solid var(--b1);
+  border-radius:20px;padding:2px 9px 2px 7px;
+  font-size:14px;cursor:default;
+  box-shadow:0 1px 4px rgba(0,0,0,.07);
+  transition:transform .1s;user-select:none;
+}
+.reaction-chip.mine{border-color:var(--p);background:rgba(99,102,241,.08);}
+.reaction-chip .rx-count{font-size:11px;font-weight:700;color:var(--tm);}
 .dm-input-area{display:flex;align-items:flex-end;gap:10px;padding:12px 14px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--b1);background:var(--hdr);flex-shrink:0;}
 .dm-textarea{flex:1;resize:none;outline:none;border-radius:20px;padding:12px 16px;font-size:14px;line-height:1.5;color:var(--t1);background:var(--inp);border:1.5px solid var(--b1);font-family:var(--fb);max-height:120px;min-height:44px;}
 .dm-send{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 4px 12px rgba(79,70,229,.3);}
@@ -1425,6 +1455,16 @@ body.light .sv-caught-up-btn{background:#111;color:#fff;}
     </div>
   </div>
 
+  <!-- Floating emoji reaction picker -->
+  <div class="emoji-picker-float" id="emojiPickerFloat">
+    <button onclick="nxSendReaction('❤️')">❤️</button>
+    <button onclick="nxSendReaction('👍')">👍</button>
+    <button onclick="nxSendReaction('😂')">😂</button>
+    <button onclick="nxSendReaction('😮')">😮</button>
+    <button onclick="nxSendReaction('😢')">😢</button>
+    <button onclick="nxSendReaction('🔥')">🔥</button>
+  </div>
+
   <div class="modal-ov" id="dmOptionsModal" onclick="nxCloseDMOptions()">
     <div class="menu-sheet" onclick="event.stopPropagation()">
       <div class="modal-drag"></div>
@@ -2085,6 +2125,88 @@ let _mode='relevant';
 let _curPostId=null, _replyParentId=null, _menuTarget=null;
 let _profileData=null, _profileIsFollowing=false;
 let _dmPeer=null, _dmEditingId=null, _dmPendingImage=null;
+let _emojiPickerMsgId=null;
+const _RX_EMOJIS=['❤️','👍','😂','😮','😢','🔥'];
+const _RX_RE=/^\[rx:([^:]+):(.+)\]$/;
+
+function nxShowEmojiPicker(e, msgId){
+  e.stopPropagation();
+  _emojiPickerMsgId=msgId;
+  const picker=$('emojiPickerFloat');
+  picker.style.display='flex';
+  // Wait one frame so offsetWidth is accurate
+  requestAnimationFrame(()=>{
+    const pw=picker.offsetWidth||290, ph=picker.offsetHeight||52;
+    const cx=(e.clientX!==undefined)?e.clientX:(e.pageX||window.innerWidth/2);
+    const cy=(e.clientY!==undefined)?e.clientY:(e.pageY||window.innerHeight/2);
+    let top=cy-ph-12;
+    let left=Math.max(8,Math.min(cx-pw/2, window.innerWidth-pw-8));
+    if(top<8) top=cy+16;
+    picker.style.top=top+'px';
+    picker.style.left=left+'px';
+  });
+}
+function nxHideEmojiPicker(){
+  $('emojiPickerFloat').style.display='none';
+  _emojiPickerMsgId=null;
+}
+async function nxSendReaction(emoji){
+  const msgId=_emojiPickerMsgId;
+  nxHideEmojiPicker();
+  if(!msgId||!_dmPeer) return;
+  await edgeCall({action:'send_dm',peer_key:_dmPeer.key,text:`[rx:${msgId}:${emoji}]`,image_url:null});
+  nxLoadDMMessages();
+}
+// Build reaction map: msgId -> Map<emoji -> {count,mine}>
+function _buildRxMap(msgs){
+  const rxMap=new Map();
+  const me=sKey();
+  msgs.forEach(m=>{
+    if(m.is_deleted||!m.text) return;
+    const match=m.text.match(_RX_RE);
+    if(!match) return;
+    const[,targetId,emoji]=match;
+    if(!rxMap.has(targetId)) rxMap.set(targetId,new Map());
+    const em=rxMap.get(targetId);
+    const entry=em.get(emoji)||{count:0,mine:false};
+    entry.count++;
+    if(m.sender===me) entry.mine=true;
+    em.set(emoji,entry);
+  });
+  return rxMap;
+}
+function _renderRxChips(msgId, rxMap){
+  const em=rxMap.get(String(msgId));
+  if(!em||!em.size) return '';
+  let html='';
+  for(const[emoji,{count,mine}] of em)
+    html+=`<span class="reaction-chip${mine?' mine':''}">${emoji}${count>1?` <span class="rx-count">${count}</span>`:''}</span>`;
+  return `<div class="bubble-reactions">${html}</div>`;
+}
+// Attach double-tap / dblclick reaction trigger on dmMessages box (run once per DM open)
+function nxInitDMReactionEvents(){
+  const box=$('dmMessages');
+  if(!box||box._rxEventsInited) return;
+  box._rxEventsInited=true;
+  // Desktop: dblclick
+  box.addEventListener('dblclick',e=>{
+    const b=e.target.closest('[data-msg-id]');
+    if(b) nxShowEmojiPicker(e,b.dataset.msgId);
+  });
+  // Mobile: double-tap
+  let _lt=0, _lbid=null;
+  box.addEventListener('touchend',e=>{
+    const b=e.target.closest('[data-msg-id]');
+    if(!b) return;
+    const bid=b.dataset.msgId, now=Date.now();
+    if(bid===_lbid && now-_lt<320){
+      e.preventDefault();
+      const t=e.changedTouches[0];
+      nxShowEmojiPicker({clientX:t.clientX,clientY:t.clientY,stopPropagation:()=>{}},bid);
+      _lt=0; _lbid=null;
+    } else { _lt=now; _lbid=bid; }
+  },{passive:false});
+}
 let _reportPostId=null, _reportReason=null;
 let _pendingAvatarDataUrl=null;
 let _pendingPostImageDataUrl=null;
@@ -4432,6 +4554,7 @@ async function nxOpenDM(peerKey,peerName){
   _newWhileFeed.delete(peerKey);
   _dmPeer={key:peerKey,name:peerName};
   _dmEditingId=null; hide('dmEditBanner');
+  nxInitDMReactionEvents(); // attach double-tap/dblclick reaction listener (idempotent)
   $('dmPeerName').textContent=peerName;
   $('dmInput').value='';
   nxRemoveDMImage(); // clear pending attachments
@@ -4643,11 +4766,18 @@ function nxRenderDMMessages(msgs){
   const peerEmoji=chatObj?chatObj.peer.emoji:'';
   const peerAvatarUrl=chatObj?chatObj.peer.avatar_url||'':'';
 
+  // Build reaction map before looping — reaction messages are rendered as chips, not bubbles
+  const rxMap=_buildRxMap(msgs);
   box.innerHTML=msgs.map((m,i)=>{
     // Explicitly parse boolean for me so undefined sender bugs don't happen
     const me = (m.sender === sKey()); 
     const deleted=!!m.is_deleted;
-    const isConsecutive=(i>0&&msgs[i-1].sender===m.sender&&!msgs[i-1].is_deleted);
+    const rawText = m.text || '';
+    // Skip reaction messages — they appear as chips below their target bubble
+    if(!deleted && rawText.match(_RX_RE)) return '';
+    // For consecutive detection, skip over any reaction-only messages in history
+    const prevReal = msgs.slice(0,i).reverse().find(p=>!p.text||!p.text.match(_RX_RE));
+    const isConsecutive=!!(prevReal&&prevReal.sender===m.sender&&!prevReal.is_deleted);
     const clickAction=(me&&!deleted&&m.id)?` onclick="nxOpenMenu('dm',${m.id},true,false)"`:'';
     // Gold bubble for verified peer messages
     const bubbleExtraClass=(!me&&peerVer)?' gold-bubble':'';
@@ -4659,7 +4789,6 @@ function nxRenderDMMessages(msgs){
       : '';
       
     // Detect story reply messages (prefixed by nxStorySendReply)
-    const rawText = m.text || '';
     const STORY_REPLY_PREFIX = '\u21A9 Replied to your story:\n';
     const isStoryReply = !deleted && rawText.startsWith(STORY_REPLY_PREFIX);
     let textHtml;
@@ -4672,12 +4801,16 @@ function nxRenderDMMessages(msgs){
       textHtml = esc(rawText);
     }
 
+    // Reaction chips rendered BELOW the bubble so they never overlap text
+    const rxHtml = (m.id && !deleted) ? _renderRxChips(m.id, rxMap) : '';
+
     // NOTE: This literal absolutely MUST NOT contain interior white space or newlines between <div class="bubble..."> and </div>
     // Otherwise `white-space: pre-wrap;` injects those hidden characters and stretches out the bubble.
     return `<div class="bubble-wrap${me?' me':''}${isConsecutive?' consecutive':''}"${clickAction}>
       ${!me?(isConsecutive?'<div class="bubble-avatar-slot"></div>':avatarHTML(_dmPeer.name,peerEmoji,peerAvatarUrl,' bubble-avatar-slot',`nxOpenProfile('${esc(_dmPeer.key)}','${esc(_dmPeer.name).replace(/'/g,"&#39;")}')`,peerVer)):''}
       <div style="display:flex;flex-direction:column;align-items:${me?'flex-end':'flex-start'};max-width:72%;min-width:0;">
-        <div class="bubble${deleted?' deleted':''}${bubbleExtraClass}${isStoryReply?' story-reply-bubble':''}" style="${(!deleted && !m.text && isValidImg) ? 'padding:4px;' : ''}">${imgHtml}${textHtml}</div>
+        <div class="bubble${deleted?' deleted':''}${bubbleExtraClass}${isStoryReply?' story-reply-bubble':''}" data-msg-id="${m.id||''}" style="${(!deleted && !m.text && isValidImg) ? 'padding:4px;' : ''}">${imgHtml}${textHtml}</div>
+        ${rxHtml}
         <div class="bubble-time">${esc(timeAgo(m.ts))}</div>
       </div>
     </div>`;
@@ -4833,6 +4966,11 @@ function nxCancelEditDM(){
 /* ═══════════════════════════════════════════════════
    KEYBOARD / ESC
 ═══════════════════════════════════════════════════ */
+// Close emoji reaction picker when tapping anywhere outside it
+document.addEventListener('click',e=>{
+  const picker=$('emojiPickerFloat');
+  if(picker&&picker.style.display!=='none'&&!picker.contains(e.target)) nxHideEmojiPicker();
+});
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape') return;
   if($('mainMenuModal').style.display==='flex'){nxCloseMainMenu();return;}
