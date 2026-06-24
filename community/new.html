@@ -601,21 +601,79 @@ textarea.compose.over{border-color:var(--err);}
 .sv-media img,.sv-media video{max-width:100%;max-height:100%;object-fit:contain;}
 .sv-media video{width:100%;}
 .sv-caption{
-  padding:16px;color:#fff;font-size:14px;font-weight:500;
+  padding:8px 16px 4px;color:#fff;font-size:14px;font-weight:500;
   text-align:center;flex-shrink:0;text-shadow:0 1px 6px rgba(0,0,0,.7);
+  min-height:0;
 }
 .sv-tap-prev,.sv-tap-next{
   position:absolute;top:0;bottom:0;width:40%;z-index:10;
 }
 .sv-tap-prev{left:0;}
 .sv-tap-next{right:0;}
-/* Delete story button */
-.sv-delete-btn{
-  position:absolute;bottom:18px;right:16px;
+
+/* ── STORY BOTTOM BAR (seen-by + delete) ── */
+.sv-bottom-bar{
+  display:none; /* shown only for own story */
+  align-items:center;justify-content:space-between;
+  padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));
+  flex-shrink:0;
+}
+.sv-bottom-bar.visible{display:flex;}
+.sv-seen-btn{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
+  color:#fff;font-size:13px;font-weight:700;
+  padding:8px 14px;border-radius:99px;
+  backdrop-filter:blur(8px);
+}
+.sv-eye-ic{font-size:15px;}
+.sv-delete-btn-inline{
   background:rgba(239,68,68,.85);color:#fff;font-size:12px;font-weight:800;
   padding:8px 16px;border-radius:99px;border:none;
-  box-shadow:0 4px 14px rgba(0,0,0,.4);z-index:20;display:none;
+  box-shadow:0 4px 14px rgba(0,0,0,.4);
 }
+.sv-delete-btn-inline:active{opacity:.8;}
+
+/* ── SEEN-BY PANEL ── */
+.sv-seen-panel{
+  position:absolute;bottom:0;left:0;right:0;z-index:20;
+  transform:translateY(100%);
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  pointer-events:none;
+}
+.sv-seen-panel.open{
+  transform:translateY(0);
+  pointer-events:all;
+}
+.sv-seen-panel-inner{
+  background:var(--shell);border-radius:20px 20px 0 0;
+  border-top:1px solid var(--b1);
+  max-height:60dvh;display:flex;flex-direction:column;
+}
+.sv-seen-drag{
+  width:36px;height:4px;background:var(--b1);border-radius:99px;
+  margin:10px auto 0;flex-shrink:0;
+}
+.sv-seen-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 18px 10px;border-bottom:1px solid var(--b1);flex-shrink:0;
+}
+.sv-seen-title{font-family:var(--fd);font-size:15px;font-weight:800;color:var(--t1);}
+.sv-seen-close{
+  width:28px;height:28px;border-radius:9px;background:var(--grp);
+  color:var(--t2);font-size:15px;display:flex;align-items:center;justify-content:center;
+}
+.sv-seen-list{
+  overflow-y:auto;flex:1;padding:8px 0;
+}
+.sv-seen-row{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 16px;border-bottom:1px solid var(--b1);
+}
+.sv-seen-row:last-child{border-bottom:none;}
+.sv-seen-info{flex:1;min-width:0;}
+.sv-seen-name{font-family:var(--fd);font-size:13.5px;font-weight:800;color:var(--t1);}
+.sv-seen-when{font-size:11.5px;color:var(--tm);font-weight:500;margin-top:2px;}
 
 /* ── STORY COMPOSER ── */
 .story-composer{
@@ -958,7 +1016,27 @@ textarea.compose.over{border-color:var(--err);}
       <div class="sv-tap-next" onclick="nxStoryNext()"></div>
     </div>
     <div class="sv-caption" id="svCaption"></div>
-    <button class="sv-delete-btn" id="svDeleteBtn" onclick="nxDeleteCurrentStory()">🗑 Delete</button>
+    <!-- Bottom bar: seen-by (mine) + delete -->
+    <div class="sv-bottom-bar" id="svBottomBar">
+      <button class="sv-seen-btn" id="svSeenBtn" onclick="nxOpenSeenBy()">
+        <span class="sv-eye-ic">👁</span>
+        <span id="svSeenCount">0</span>
+      </button>
+      <button class="sv-delete-btn-inline" id="svDeleteBtn" onclick="nxDeleteCurrentStory()">🗑 Delete</button>
+    </div>
+    <!-- Seen-by slide-up panel -->
+    <div class="sv-seen-panel" id="svSeenPanel">
+      <div class="sv-seen-panel-inner">
+        <div class="sv-seen-drag"></div>
+        <div class="sv-seen-hdr">
+          <span class="sv-seen-title">Seen by</span>
+          <button class="sv-seen-close" onclick="nxCloseSeenBy()">✕</button>
+        </div>
+        <div class="sv-seen-list" id="svSeenList">
+          <div class="state-msg">Loading…</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ── STORY COMPOSER ── -->
@@ -1761,6 +1839,7 @@ let _svStoryIdx=0;            // which story within the group
 let _svTimer=null;            // auto-advance timer
 let _svProgressInterval=null; // progress bar interval
 let _storyPendingMedia=null;  // {dataUrl, mediaType}
+let _svPaused=false;          // paused while seen-by panel is open
 
 /* ═══════════════════════════════════════════════════
    STORIES
@@ -1798,10 +1877,13 @@ function nxRenderStoriesBar(){
   }
   const mine = _storyGroups.find(g=>g.is_mine);
   const ring=$('yourStoryRing');
+  const plusBtn=$('yourStoryPlus');
   if(ring){
     const hasMine = !!(mine && mine.stories && mine.stories.length);
     ring.classList.toggle('mine-ring', hasMine);
     ring.classList.toggle('story-ring-add', !hasMine);
+    // Hide the "+" button if user already has a story (1 per user rule)
+    if(plusBtn) plusBtn.style.display = hasMine ? 'none' : '';
   }
 
   // Other users' story rings, appended after the static "Your Story" item
@@ -1826,10 +1908,13 @@ function renderStoryItemHtml(g, idx){
 }
 
 function nxYourStoryClick(){
-  const idx=_storyGroups.findIndex(g=>g.is_mine);
-  if(idx>=0 && _storyGroups[idx].stories && _storyGroups[idx].stories.length){
+  const mine=_storyGroups.find(g=>g.is_mine);
+  if(mine && mine.stories && mine.stories.length){
+    // Has a story → open the viewer
+    const idx=_storyGroups.indexOf(mine);
     nxOpenStoryViewer(idx);
   } else {
+    // No story → open composer
     nxOpenStoryComposer();
   }
 }
@@ -1838,6 +1923,7 @@ function nxYourStoryClick(){
 function nxOpenStoryViewer(groupIdx){
   if(!_storyGroups.length || groupIdx<0 || groupIdx>=_storyGroups.length) return;
   _svGroupIdx=groupIdx;
+  _svPaused=false;
   const grp=_storyGroups[groupIdx];
   const firstUnviewed = grp.stories.findIndex(s=>!s.is_viewed);
   _svStoryIdx = firstUnviewed>=0 ? firstUnviewed : 0;
@@ -1848,8 +1934,9 @@ function nxOpenStoryViewer(groupIdx){
 }
 
 function nxCloseStoryViewer(){
+  nxCloseSeenBy();
   clearTimeout(_svTimer); clearInterval(_svProgressInterval);
-  _svTimer=null; _svProgressInterval=null;
+  _svTimer=null; _svProgressInterval=null; _svPaused=false;
   const el=$('storyViewer');
   if(el) el.classList.remove('open');
   const media=$('svMedia');
@@ -1878,6 +1965,27 @@ function nxGoToGroup(newGroupIdx, enterFrom){
   nxShowCurrentStory();
 }
 
+/* Format a date/time for "seen at" display — e.g. "Today 3:42 PM", "Mon 9 Jun, 10:05 AM" */
+function storySeenAt(isoStr){
+  if(!isoStr) return '';
+  try{
+    const d=new Date(isoStr);
+    const now=new Date();
+    const isToday=d.toDateString()===now.toDateString();
+    const yesterday=new Date(now); yesterday.setDate(now.getDate()-1);
+    const isYesterday=d.toDateString()===yesterday.toDateString();
+    let h=d.getHours(), m=d.getMinutes();
+    const ampm=h>=12?'PM':'AM'; h=h%12||12;
+    const mm=String(m).padStart(2,'0');
+    const time=h+':'+mm+' '+ampm;
+    if(isToday) return 'Today '+time;
+    if(isYesterday) return 'Yesterday '+time;
+    const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return days[d.getDay()]+' '+d.getDate()+' '+months[d.getMonth()]+', '+time;
+  }catch(e){ return ''; }
+}
+
 function nxShowCurrentStory(){
   clearTimeout(_svTimer); clearInterval(_svProgressInterval);
   const grp=_storyGroups[_svGroupIdx];
@@ -1895,11 +2003,25 @@ function nxShowCurrentStory(){
       : esc(grp.emoji || initials(grp.student_name));
   }
   $('svHdrName').textContent = grp.is_mine ? 'Your Story' : (grp.student_name||'Student');
-  $('svHdrTime').textContent = timeAgo(story.created_at);
+  $('svHdrTime').textContent = storySeenAt(story.created_at);
   $('svCaption').textContent = story.caption||'';
-  $('svDeleteBtn').style.display = grp.is_mine ? 'flex' : 'none';
 
-  // Reset progress segments: before = full, current = empty, after = empty
+  // Bottom bar: only visible for own stories
+  const bar=$('svBottomBar');
+  const seenBtn=$('svSeenBtn');
+  const deleteBtn=$('svDeleteBtn');
+  if(bar){
+    if(grp.is_mine){
+      bar.classList.add('visible');
+      // Seen count will be loaded async
+      if(seenBtn) $('svSeenCount').textContent='…';
+      nxLoadSeenCount(story.id);
+    } else {
+      bar.classList.remove('visible');
+    }
+  }
+
+  // Reset progress segments
   grp.stories.forEach((_,i)=>{
     const seg=$('svSeg-'+i);
     if(!seg) return;
@@ -1938,6 +2060,79 @@ function nxShowCurrentStory(){
   }
 }
 
+async function nxLoadSeenCount(storyId){
+  const res=await edgeCall({action:'get_story_views',story_id:storyId});
+  const count = (res&&res.ok&&Array.isArray(res.views)) ? res.views.length : 0;
+  const el=$('svSeenCount');
+  if(el) el.textContent=count;
+}
+
+/* ── SEEN-BY PANEL ── */
+async function nxOpenSeenBy(){
+  const grp=_storyGroups[_svGroupIdx];
+  if(!grp||!grp.is_mine) return;
+  const story=grp.stories[_svStoryIdx];
+  if(!story) return;
+
+  // Pause the story while panel is open
+  _svPaused=true;
+  clearTimeout(_svTimer); clearInterval(_svProgressInterval);
+
+  const panel=$('svSeenPanel');
+  const list=$('svSeenList');
+  if(panel) panel.classList.add('open');
+  if(list) list.innerHTML='<div class="state-msg" style="color:var(--t2);">Loading…</div>';
+
+  const res=await edgeCall({action:'get_story_views',story_id:story.id});
+  if(!res||!res.ok){
+    if(list) list.innerHTML='<div class="state-msg" style="color:var(--t2);">Could not load.</div>';
+    return;
+  }
+  const views=Array.isArray(res.views)?res.views:[];
+  // Update count
+  const el=$('svSeenCount'); if(el) el.textContent=views.length;
+
+  if(!views.length){
+    if(list) list.innerHTML='<div class="state-msg" style="color:var(--t2);"><span>👁</span><span>No views yet.</span></div>';
+    return;
+  }
+
+  if(list) list.innerHTML=views.map(v=>{
+    const name=v.username?('@'+esc(v.username)):esc(v.student_name||'Student');
+    const when=storySeenAt(v.viewed_at);
+    const av=avatarHTML(v.student_name||'Student',v.emoji||'',v.avatar_url||'',' avatar-sm',`nxCloseSeenBy();nxOpenProfile('${esc(v.viewer_key)}','${esc(v.student_name||'Student').replace(/'/g,"&#39;")}')`,!!v.is_verified);
+    return `<div class="sv-seen-row">
+      ${av}
+      <div class="sv-seen-info">
+        <div class="sv-seen-name">${name}</div>
+        ${when?`<div class="sv-seen-when">${esc(when)}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function nxCloseSeenBy(){
+  const panel=$('svSeenPanel');
+  if(panel) panel.classList.remove('open');
+  // Resume story only if viewer is still open
+  if(_svPaused && $('storyViewer').classList.contains('open')){
+    _svPaused=false;
+    // Re-run the progress from current position (restart the current story)
+    const grp=_storyGroups[_svGroupIdx];
+    const story=grp&&grp.stories[_svStoryIdx];
+    if(story){
+      if(story.media_type==='video'){
+        const v=$('svMedia').querySelector('video');
+        if(v){ v.play().catch(()=>{}); nxRunStoryProgress((v.duration||8)*1000); }
+        else nxRunStoryProgress(STORY_VIDEO_FALLBACK_DURATION);
+      } else {
+        nxRunStoryProgress(STORY_IMG_DURATION);
+      }
+    }
+  }
+  _svPaused=false;
+}
+
 let _svProgressStart=0;
 function nxRunStoryProgress(durationMs){
   clearInterval(_svProgressInterval); clearTimeout(_svTimer);
@@ -1945,6 +2140,7 @@ function nxRunStoryProgress(durationMs){
   if(seg){ seg.style.transition='none'; seg.style.width='0%'; }
   _svProgressStart=Date.now();
   _svProgressInterval=setInterval(()=>{
+    if(_svPaused) return;
     const pct=Math.min(100, ((Date.now()-_svProgressStart)/durationMs)*100);
     if(seg) seg.style.width=pct+'%';
     if(pct>=100){
@@ -1954,7 +2150,7 @@ function nxRunStoryProgress(durationMs){
     }
   },50);
   // Safety-net timer in case the interval is ever throttled/dropped
-  _svTimer=setTimeout(()=>nxStoryNext(), durationMs+150);
+  _svTimer=setTimeout(()=>{ if(!_svPaused) nxStoryNext(); }, durationMs+150);
 }
 
 function nxStoryNext(){
@@ -1977,6 +2173,7 @@ async function nxDeleteCurrentStory(){
   if(!res||!res.ok){ showToast(res?.message||'Could not delete story.','err'); return; }
   grp.stories.splice(_svStoryIdx,1);
   showToast('Story deleted.');
+  nxCloseSeenBy();
   if(!grp.stories.length){
     _storyGroups.splice(_svGroupIdx,1);
     nxCloseStoryViewer();
@@ -1991,6 +2188,12 @@ async function nxDeleteCurrentStory(){
 /* ── STORY COMPOSER ────────────────────────────────── */
 function nxOpenStoryComposer(){
   if(!isLoggedIn()){ goToLogin(); return; }
+  // Enforce 1 story per user — show toast if they already have one
+  const mine=_storyGroups.find(g=>g.is_mine);
+  if(mine && mine.stories && mine.stories.length){
+    showToast('You already have a story. Delete it first to post a new one.','err');
+    return;
+  }
   _storyPendingMedia=null;
   if($('scImageInput')) $('scImageInput').value='';
   if($('scVideoInput')) $('scVideoInput').value='';
@@ -2037,6 +2240,13 @@ function nxHandleStoryMedia(input, type){
 
 async function nxPostStory(){
   if(!_storyPendingMedia) return;
+  // Double-check 1-per-user before uploading
+  const mine=_storyGroups.find(g=>g.is_mine);
+  if(mine && mine.stories && mine.stories.length){
+    showToast('You already have a story. Delete it first to post a new one.','err');
+    nxCloseStoryComposer();
+    return;
+  }
   $('scPostBtn').disabled=true;
   const uploadRes=await edgeCall({action:'upload_story_media',media_data_url:_storyPendingMedia.dataUrl});
   if(!uploadRes||!uploadRes.ok){
@@ -2066,6 +2276,8 @@ window.nxOpenStoryComposer=nxOpenStoryComposer;
 window.nxCloseStoryComposer=nxCloseStoryComposer;
 window.nxHandleStoryMedia=nxHandleStoryMedia;
 window.nxPostStory=nxPostStory;
+window.nxOpenSeenBy=nxOpenSeenBy;
+window.nxCloseSeenBy=nxCloseSeenBy;
 
 function renderPostHtml(p, mk, admin, showPinned){
   const mine=String(p.student_key||'')===String(mk||'');
