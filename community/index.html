@@ -422,6 +422,12 @@ textarea.compose.over{border-color:var(--err);}
 .dm-hdr-info{flex:1;min-width:0;cursor:pointer;}
 .dm-hdr-name{font-family:var(--fd);font-size:15px;font-weight:800;color:var(--t1);}
 .dm-hdr-status{font-size:11.5px;color:var(--tm);font-weight:600;margin-top:2px;}
+/* ── TYPING INDICATOR ── */
+.typing-indicator{display:inline-flex;align-items:center;gap:3px;color:var(--p);font-size:12px;font-weight:600;}
+.typing-dot{width:5px;height:5px;border-radius:50%;background:var(--p);display:inline-block;animation:typingBounce 1.2s ease-in-out infinite;}
+.typing-dot:nth-child(2){animation-delay:.22s;}
+.typing-dot:nth-child(3){animation-delay:.44s;}
+@keyframes typingBounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-5px);}}
 .dm-messages{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:4px;}
 .bubble-wrap{display:flex;align-items:flex-end;gap:6px;padding:1px 0;}
 .bubble-wrap.me{flex-direction:row-reverse;}
@@ -2128,6 +2134,50 @@ let _dmPeer=null, _dmEditingId=null, _dmPendingImage=null;
 let _emojiPickerMsgId=null;
 const _RX_EMOJIS=['❤️','👍','😂','😮','😢','🔥'];
 const _RX_RE=/^\[rx:([^:]+):(.+)\]$/;
+let _myTypingTimer=null;     // debounce: stop broadcasting after idle
+let _myTypingSendTimer=null; // throttle: don't spam set_typing on every keystroke
+let _peerTypingTimer=null;   // auto-expire peer's typing indicator
+
+function nxSendTypingSignal(){
+  if(!_dmPeer) return;
+  // Throttle: only actually call the API once per 2s
+  if(!_myTypingSendTimer){
+    edgeCall({action:'set_typing',peer_key:_dmPeer.key}).catch(()=>{});
+    _myTypingSendTimer=setTimeout(()=>{ _myTypingSendTimer=null; },2000);
+  }
+  // Stop signal after 3s of no further keystrokes
+  clearTimeout(_myTypingTimer);
+  _myTypingTimer=setTimeout(()=>{ _myTypingTimer=null; },3000);
+}
+function nxStopTypingSignal(){
+  clearTimeout(_myTypingTimer); _myTypingTimer=null;
+  clearTimeout(_myTypingSendTimer); _myTypingSendTimer=null;
+}
+function nxShowPeerTyping(){
+  const el=$('dmHdrStatus');
+  if(!el) return;
+  el.innerHTML='<span class="typing-indicator"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>&nbsp;typing…</span>';
+  clearTimeout(_peerTypingTimer);
+  _peerTypingTimer=setTimeout(nxClearPeerTyping,4000);
+}
+function nxClearPeerTyping(){
+  clearTimeout(_peerTypingTimer); _peerTypingTimer=null;
+  // Restore the status line — cheaply refresh it from cached presence
+  const statusEl=$('dmHdrStatus');
+  if(!statusEl||!_dmPeer) return;
+  const pres=_cache.presence[_dmPeer.key];
+  const presInfo=pres?formatPresence(pres):null;
+  if(presInfo&&presInfo.online){
+    statusEl.innerHTML='<span class="presence-online" style="font-size:12px;">Active now</span>';
+    statusEl.style.color='';
+  } else if(presInfo){
+    statusEl.textContent=presInfo.label;
+    statusEl.style.color='var(--tm)';
+  } else {
+    statusEl.textContent='Community Member';
+    statusEl.style.color='var(--tm)';
+  }
+}
 
 function nxShowEmojiPicker(e, msgId){
   e.stopPropagation();
@@ -3360,6 +3410,8 @@ async function nxRefreshPeerChat(peerKey){
     if($('dmScreen').style.display==='flex'&&_dmPeer&&_dmPeer.key===peerKey){
       nxRenderDMMessages(res.messages);
       markChatRead(peerKey);
+      // Show or clear the typing indicator based on the server response
+      if(res.peer_is_typing) nxShowPeerTyping();
     } else {
       // Detect genuinely NEW messages (not already seen before this poll)
       const latest=res.messages&&res.messages[res.messages.length-1];
@@ -4689,6 +4741,8 @@ function nxOpenProfileFromDM(){
 function nxCloseDM(){
   $('dmScreen').style.display='none';
   $('bnav').classList.remove('kb-hidden');
+  nxStopTypingSignal();       // stop broadcasting our typing state
+  nxClearPeerTyping();        // clear peer typing timer and indicator
   _dmPeer=null; _dmEditingId=null;
   nxRemoveDMImage();
   nxStopDMPoll();
@@ -4849,6 +4903,8 @@ function nxRemoveDMImage() {
 function nxDMTyping(){
   const v=($('dmInput').value||'').trim();
   $('dmSendBtn').disabled = !(v || _dmPendingImage);
+  // Broadcast typing signal to peer while there is text in the box
+  if(v) nxSendTypingSignal();
 }
 
 async function nxSendDM(){
@@ -4882,6 +4938,7 @@ async function nxSendDM(){
   
   $('dmSendBtn').disabled=true;
   inp.value='';
+  nxStopTypingSignal(); // stop broadcasting typing when message is sent
   const imgData = _dmPendingImage;
   nxRemoveDMImage(); // clear attachment from UI immediately
   
