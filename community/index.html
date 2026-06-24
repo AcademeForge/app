@@ -1664,6 +1664,8 @@ async function edgeCall(payload){
       // FunctionsHttpError/FunctionsFetchError class names, etc.) and is
       // never shown to the user — only our own classified copy is.
       if(_isLikelyNetworkError(error)) return {ok:false,message:EDGE_ERR_NETWORK};
+      // `data` may still carry our own structured response body on 4xx — use it.
+      if(data && data.ok===false && typeof data.message==='string' && data.message) return data;
       return {ok:false,message:EDGE_ERR_SERVER};
     }
     if(!data) return {ok:false,message:EDGE_ERR_SERVER};
@@ -2482,7 +2484,19 @@ function nxCropConfirm(){
     Math.min(sw,_cropImgNW-Math.max(0,sx)),
     Math.min(sh,_cropImgNH-Math.max(0,sy)),
     0,0,1080,1350);
-  const croppedDataUrl=canvas.toDataURL('image/jpeg',0.92);
+  // Adaptive quality: reduce until output fits within 2 MB
+  const _approxBytes=url=>Math.round((url.length-url.indexOf(',')-1)*3/4);
+  let croppedDataUrl=canvas.toDataURL('image/jpeg',0.92);
+  for(const q of [0.82,0.72,0.60,0.48,0.36]){
+    if(_approxBytes(croppedDataUrl)<=STORY_IMG_MAX_BYTES) break;
+    croppedDataUrl=canvas.toDataURL('image/jpeg',q);
+  }
+  if(_approxBytes(croppedDataUrl)>STORY_IMG_MAX_BYTES){
+    nxCloseCropUI();
+    if($('scImageInput')) $('scImageInput').value='';
+    showToast('Image is too detailed to compress under 2 MB. Try a simpler image.','err');
+    return;
+  }
   nxCloseCropUI();
   _storyPendingMedia={dataUrl:croppedDataUrl, mediaType:'image'};
   nxRenderStoryComposerPreview();
