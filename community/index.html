@@ -562,11 +562,20 @@ textarea.compose.over{border-color:var(--err);}
 
 /* ── STORY VIEWER ── */
 .story-viewer{
-  position:absolute;inset:0;z-index:9500;background:#000;
+  position:absolute;inset:0;z-index:9500;background:var(--bg);
   display:none;flex-direction:column;
   touch-action:none;
 }
 .story-viewer.open{display:flex;}
+/* Media area always dark so content pops */
+.sv-media{background:#000;}
+/* Header: gradient on dark, frosted on light */
+.sv-hdr{background:linear-gradient(rgba(0,0,0,.35),transparent);}
+body.light .sv-hdr{background:rgba(255,255,255,.9);backdrop-filter:blur(8px);}
+body.light .sv-hdr-name,body.light .sv-hdr-time{color:var(--t1);}
+body.light .sv-close,body.light .sv-opts-btn{background:rgba(0,0,0,.08);color:var(--t1);}
+body.light .sv-prog-seg{background:rgba(0,0,0,.2);}
+body.light .sv-prog-seg-fill{background:var(--t1);}
 .sv-progress{
   display:flex;gap:3px;padding:12px 12px 0;flex-shrink:0;
 }
@@ -601,10 +610,10 @@ textarea.compose.over{border-color:var(--err);}
 .sv-media img,.sv-media video{max-width:100%;max-height:100%;object-fit:contain;}
 .sv-media video{width:100%;}
 .sv-caption{
-  padding:8px 16px 6px;color:#fff;font-size:14px;font-weight:600;
-  text-align:center;flex-shrink:0;text-shadow:0 1px 8px rgba(0,0,0,.9);
-  min-height:0;background:rgba(0,0,0,.28);
-  display:none; /* shown via JS only when caption exists */
+  padding:8px 16px 6px;color:var(--t1);font-size:14px;font-weight:600;
+  text-align:center;flex-shrink:0;
+  min-height:0;background:var(--card-s);
+  display:none;
 }
 .sv-caption.has-text{display:block;}
 .sv-tap-prev,.sv-tap-next{
@@ -613,20 +622,20 @@ textarea.compose.over{border-color:var(--err);}
 .sv-tap-prev{left:0;}
 .sv-tap-next{right:0;}
 
-/* ── STORY BOTTOM BAR (seen-by + delete) ── */
+/* ── STORY BOTTOM BAR (seen-by + swipe hint) ── */
 .sv-bottom-bar{
-  display:none; /* shown only for own story */
-  align-items:center;justify-content:space-between;
-  padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));
-  flex-shrink:0;
+  display:none;flex-direction:column;
+  align-items:center;justify-content:center;gap:6px;
+  padding:8px 16px calc(14px + env(safe-area-inset-bottom,0px));
+  flex-shrink:0;background:var(--card-s);
+  border-top:1px solid var(--b1);
 }
 .sv-bottom-bar.visible{display:flex;}
 .sv-seen-btn{
   display:flex;align-items:center;gap:6px;
-  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
-  color:#fff;font-size:13px;font-weight:700;
+  background:var(--bg);border:1px solid var(--b1);
+  color:var(--t1);font-size:13px;font-weight:700;
   padding:8px 14px;border-radius:99px;
-  backdrop-filter:blur(8px);
 }
 .sv-eye-ic{font-size:15px;}
 .sv-delete-btn-inline{
@@ -733,14 +742,12 @@ textarea.compose.over{border-color:var(--err);}
 .presence-offline{color:var(--tm);font-size:11.5px;}
 
 /* ── STORY REPLY BAR ── */
-.sv-reply-bar{padding:8px 16px calc(20px + env(safe-area-inset-bottom,0px));background:rgba(0,0,0,.52);display:none;flex-direction:column;gap:8px;flex-shrink:0;border-top:1px solid rgba(255,255,255,.08);}
+.sv-reply-bar{padding:8px 16px calc(20px + env(safe-area-inset-bottom,0px));background:var(--card-s);display:none;flex-direction:column;gap:8px;flex-shrink:0;border-top:1px solid var(--b1);}
 .sv-reply-bar.visible{display:flex;}
 .sv-reply-row{display:flex;align-items:center;gap:8px;}
-.sv-heart-btn{font-size:22px;background:rgba(255,255,255,.13);border:1.5px solid rgba(255,255,255,.22);border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:transform .15s,background .15s;touch-action:manipulation;}
-.sv-heart-btn:active{transform:scale(1.35);background:rgba(244,63,94,.45);}
-.sv-reply-row input{flex:1;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);border-radius:22px;padding:9px 14px;color:#fff;font-family:var(--fb);font-size:14px;outline:none;min-width:0;}
-.sv-reply-row input::placeholder{color:rgba(255,255,255,.55);}
-.sv-reply-row input:focus{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.5);}
+.sv-reply-row input{flex:1;background:var(--bg);border:1.5px solid var(--b1);border-radius:22px;padding:9px 14px;color:var(--t1);font-family:var(--fb);font-size:14px;outline:none;min-width:0;}
+.sv-reply-row input::placeholder{color:var(--tm);}
+.sv-reply-row input:focus{border-color:var(--ac);}
 .sv-reply-send{width:40px;height:40px;border-radius:50%;background:var(--ac);color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .15s,transform .12s;}
 .sv-reply-send:disabled{opacity:.38;}
 .sv-reply-send:not(:disabled):active{transform:scale(.9);}
@@ -768,18 +775,16 @@ textarea.compose.over{border-color:var(--err);}
 }
 .sv-opts-menu button:hover,.sv-opts-menu button:active{background:rgba(255,255,255,.12);}
 .sv-opts-menu .sv-opts-delete{color:#ff6b6b;}
-/* Swipe-up hint for own story */
+/* Swipe-up hint — lives inside sv-bottom-bar */
 .sv-swipe-hint{
-  position:absolute;bottom:56px;left:50%;transform:translateX(-50%);
-  display:none;flex-direction:column;align-items:center;gap:2px;
-  color:rgba(255,255,255,.55);font-size:10px;font-weight:600;pointer-events:none;z-index:3;
+  display:flex;align-items:center;gap:4px;
+  color:var(--tm);font-size:11px;font-weight:600;pointer-events:none;
 }
-.sv-swipe-hint.visible{display:flex;}
-.sv-swipe-hint::before{content:'∧';font-size:16px;color:rgba(255,255,255,.4);}
+.sv-swipe-hint::before{content:'↑';font-size:13px;}
 
 /* ── All Caught Up card ── */
 .sv-caught-up{
-  position:absolute;inset:0;z-index:60;background:#000;
+  position:absolute;inset:0;z-index:60;background:var(--bg);
   display:none;flex-direction:column;align-items:center;justify-content:center;
   gap:14px;padding:32px;text-align:center;
 }
@@ -790,14 +795,16 @@ textarea.compose.over{border-color:var(--err);}
   display:flex;align-items:center;justify-content:center;
   color:#22c55e;font-size:34px;font-weight:800;margin-bottom:6px;
 }
-.sv-caught-up-title{color:#fff;font-size:20px;font-weight:800;font-family:var(--fd);}
-.sv-caught-up-sub{color:rgba(255,255,255,.5);font-size:14px;line-height:1.5;max-width:240px;}
+.sv-caught-up-title{color:var(--t1);font-size:20px;font-weight:800;font-family:var(--fd);}
+.sv-caught-up-sub{color:var(--t2);font-size:14px;line-height:1.5;max-width:240px;}
 .sv-caught-up-btn{
   margin-top:14px;padding:13px 36px;
-  background:var(--ac);color:#fff;border-radius:26px;
+  background:#fff;color:#111;border-radius:26px;
   font-size:15px;font-weight:700;font-family:var(--fb);
+  box-shadow:0 2px 12px rgba(0,0,0,.18);
   transition:opacity .15s,transform .12s;
 }
+body.light .sv-caught-up-btn{background:#111;color:#fff;}
 .sv-caught-up-btn:active{opacity:.85;transform:scale(.97);}
 
 #imgLightbox{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;pointer-events:none;touch-action:none;}
@@ -1137,23 +1144,21 @@ textarea.compose.over{border-color:var(--err);}
     <!-- Reply bar — shown for others' stories -->
     <div class="sv-reply-bar" id="svReplyBar">
       <div class="sv-reply-row">
-        <button class="sv-heart-btn" onclick="nxStorySendReaction('❤️')" aria-label="Like story">❤️</button>
-        <input type="text" id="svReplyInput" placeholder="Send message…" maxlength="200"
+        <input type="text" id="svReplyInput" placeholder="Reply to this story…" maxlength="200"
           oninput="nxStoryReplyTyping()"
           onfocus="nxSvPauseForReply()"
           onblur="nxSvResumeFromReply()"/>
         <button class="sv-reply-send" id="svReplySendBtn" onclick="nxStorySendReply()" disabled aria-label="Send">➤</button>
       </div>
     </div>
-    <!-- Bottom bar: seen-by (own story) + swipe hint -->
-    <div class="sv-bottom-bar" id="svBottomBar" style="justify-content:center;">
+    <!-- Bottom bar: seen-by + swipe hint (own story only) -->
+    <div class="sv-bottom-bar" id="svBottomBar">
+      <div class="sv-swipe-hint" id="svSwipeHint">Swipe up for viewers</div>
       <button class="sv-seen-btn" id="svSeenBtn" onclick="nxOpenSeenBy()">
         <span class="sv-eye-ic">👁</span>
         <span id="svSeenCount">0</span>
       </button>
     </div>
-    <!-- Swipe-up hint for own stories -->
-    <div class="sv-swipe-hint" id="svSwipeHint">Swipe up for viewers</div>
     <!-- Seen-by slide-up panel -->
     <div class="sv-seen-panel" id="svSeenPanel">
       <div class="sv-seen-panel-inner">
@@ -2252,9 +2257,7 @@ function nxShowCurrentStory(){
     }
   }
 
-  // Swipe-up hint: only for own stories
-  const swipeHint=$('svSwipeHint');
-  if(swipeHint) swipeHint.classList.toggle('visible', !!grp.is_mine);
+  // Swipe-up hint lives inside sv-bottom-bar — no separate toggle needed
 
   // Reply bar: shown for others' stories
   const replyBar=$('svReplyBar');
@@ -2499,7 +2502,7 @@ async function nxStorySendReaction(emoji){
   const grp=_storyGroups[_svGroupIdx];
   if(!grp||grp.is_mine) return;
   const peerKey=grp.student_key; if(!peerKey) return;
-  const res=await edgeCall({action:'send_dm', recipient_key:peerKey, text:emoji});
+  const res=await edgeCall({action:'send_dm', to_key:peerKey, to_name:grp.student_name||'Student', text:emoji});
   if(res&&res.ok){
     const rb=$('svReplyBar');
     if(rb){
@@ -2518,17 +2521,20 @@ async function nxStorySendReply(){
   if(!grp||grp.is_mine) return;
   const inp=$('svReplyInput');
   const text=inp&&inp.value.trim(); if(!text) return;
-  const peerKey=grp.student_key; if(!peerKey) return;
+  const peerKey=grp.student_key;
+  if(!peerKey){ showToast('Cannot identify story owner.','warn'); return; }
   const btn=$('svReplySendBtn');
   if(btn) btn.disabled=true;
-  const res=await edgeCall({action:'send_dm', recipient_key:peerKey, text});
+  const res=await edgeCall({action:'send_dm', to_key:peerKey, to_name:grp.student_name||'Student', text});
   if(res&&res.ok){
-    if(inp) inp.value='';
+    if(inp){ inp.value=''; }
+    if(btn) btn.disabled=true; // stays disabled until user types again
     inp&&inp.blur();
     nxSvResumeFromReply();
+    showToast('Message sent!');
   } else {
     if(btn) btn.disabled=false;
-    showToast('Failed to send reply. Try again.','warn');
+    showToast(res?.message||'Failed to send. Try again.','warn');
   }
 }
 
