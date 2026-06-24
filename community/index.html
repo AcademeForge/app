@@ -643,7 +643,7 @@ mark.dm-hl{background:rgba(251,191,36,.45);color:inherit;border-radius:3px;paddi
 .sv-media{background:#000;}
 /* Header: always dark gradient so user name is readable over any story media */
 .sv-hdr{background:linear-gradient(rgba(0,0,0,.58),rgba(0,0,0,.18) 70%,transparent);}
-[data-theme="light"] .sv-hdr{background:linear-gradient(rgba(0,0,0,.62),rgba(0,0,0,.22) 70%,transparent);}
+[data-theme="light"] .sv-hdr{background:linear-gradient(rgba(0,0,0,.82),rgba(0,0,0,.55) 60%,rgba(0,0,0,.15));}
 .sv-hdr-name{color:#fff!important;}
 /* Force verified gold-name spans to white inside story header so they're readable */
 .sv-hdr-name .gold-name{color:#fff!important;}
@@ -1024,6 +1024,25 @@ body.light .sv-caught-up-btn{background:#111;color:#fff;}
   background:rgba(129,140,248,.1);
   border-left-color:var(--pl);
 }
+/* ── DM Reply Quote (inside a sent/received bubble) ── */
+.dm-reply-quote{display:block;border-left:3px solid var(--p);padding:4px 8px;background:rgba(0,0,0,.08);border-radius:6px;font-size:11.5px;color:var(--tm);margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
+[data-theme="dark"] .dm-reply-quote{background:rgba(255,255,255,.08);}
+/* ── DM Reply Banner (above input area, shown when replying) ── */
+.dm-reply-banner{display:flex;align-items:center;gap:8px;padding:7px 14px;background:var(--hdr);border-top:1px solid var(--b1);border-left:3px solid var(--p);}
+.dm-reply-banner-text{flex:1;font-size:12px;color:var(--tm);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dm-reply-cancel{margin-left:auto;font-size:18px;color:var(--tm);background:none;border:none;cursor:pointer;padding:0 4px;flex-shrink:0;line-height:1;}
+/* ── Bubble delivery / read ticks (WhatsApp-style) ── */
+.bubble-tick{font-size:11px;font-weight:800;text-align:right;margin-top:2px;padding-right:2px;line-height:1;letter-spacing:-1px;user-select:none;}
+.bubble-tick.sent{color:var(--tm);opacity:.7;}   /* ✓  single grey = delivered to server */
+.bubble-tick.seen{color:#3b82f6;opacity:1;}       /* ✓✓ double blue = peer has read      */
+/* ── Older messages loader ── */
+.dm-load-older-btn{display:block;width:100%;text-align:center;padding:8px 0;font-size:12px;font-weight:700;color:var(--p);background:none;border:none;cursor:pointer;opacity:.8;}
+/* ── Bubble reply button ── */
+.bubble-reply-btn{background:none;border:none;font-size:13px;color:var(--tm);cursor:pointer;padding:0 3px;line-height:1;flex-shrink:0;opacity:.55;transition:opacity .15s;}
+.bubble-reply-btn:active{opacity:1;}
+.bubble-wrap:hover .bubble-reply-btn{opacity:.85;}
+.bubble-meta{display:flex;align-items:center;gap:4px;}
+.bubble-meta.me{justify-content:flex-end;}
 </style>
 </head>
 <body>
@@ -1231,6 +1250,11 @@ body.light .sv-caught-up-btn{background:#111;color:#fff;}
     <div class="dm-edit-banner hidden" id="dmEditBanner">
       <span>Editing message…</span>
       <button onclick="nxCancelEditDM()">Cancel</button>
+    </div>
+    <div class="dm-reply-banner hidden" id="dmReplyBanner">
+      <span style="font-size:13px;flex-shrink:0;">↩</span>
+      <span class="dm-reply-banner-text" id="dmReplyPreview"></span>
+      <button class="dm-reply-cancel" onclick="nxCancelDMReply()">✕</button>
     </div>
     <div class="dm-input-area" style="position:relative;">
       <div id="dmBlockedBanner" class="hidden" style="position:absolute;inset:0;background:var(--hdr);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--tm);z-index:5;backdrop-filter:blur(16px);border-top:1px solid var(--b1);">You cannot send messages to this user.</div>
@@ -2165,11 +2189,16 @@ let _dmPeer=null, _dmEditingId=null, _dmPendingImage=null;
 let _emojiPickerMsgId=null;
 const _RX_EMOJIS=['❤️','👍','😂','😮','😢','🔥'];
 const _RX_RE=/^\[rx:([^:]+):(.+)\]$/;
+const _DM_REPLY_RE=/^\u21A9\[(\d+)\] ([^\n]{0,80})\n([\s\S]*)$/;
 let _myTypingTimer=null;     // debounce: stop broadcasting after idle
 let _myTypingSendTimer=null; // throttle: don't spam set_typing on every keystroke
 let _peerTypingTimer=null;   // auto-expire peer's typing indicator
 let _dmSearchMatches=[];     // NodeList of matching bubble-wrap elements
 let _dmSearchIdx=-1;         // currently focused match index
+let _dmReplyTo=null;         // {id,text} — message being replied to
+let _dmOldestTs=null;        // oldest message ts loaded (for pagination)
+let _dmLoadingOlder=false;   // guard against concurrent pagination fetches
+let _dmPeerReadAt=null;      // server-reported timestamp when peer last read this thread
 
 /* ── Escape text then wrap search-term hits in <mark> ── */
 function _hlText(raw, term){
@@ -2298,8 +2327,8 @@ async function nxSendReaction(emoji){
   const msgId=_emojiPickerMsgId;
   nxHideEmojiPicker();
   if(!msgId||!_dmPeer) return;
-  await edgeCall({action:'send_dm',peer_key:_dmPeer.key,text:`[rx:${msgId}:${emoji}]`,image_url:null});
-  nxLoadDMMessages();
+  await edgeCall({action:'send_dm',to_key:_dmPeer.key,to_name:_dmPeer.name,text:`[rx:${msgId}:${emoji}]`});
+  if(_dmPeer) nxRefreshPeerChat(_dmPeer.key);
 }
 // Build reaction map: msgId -> Map<emoji -> {count,mine}>
 function _buildRxMap(msgs){
@@ -2332,14 +2361,27 @@ function nxInitDMReactionEvents(){
   const box=$('dmMessages');
   if(!box||box._rxEventsInited) return;
   box._rxEventsInited=true;
-  // Desktop: dblclick
+  // Desktop: dblclick → react
   box.addEventListener('dblclick',e=>{
     const b=e.target.closest('[data-msg-id]');
     if(b) nxShowEmojiPicker(e,b.dataset.msgId);
   });
-  // Mobile: double-tap
+  // Mobile: double-tap → react
   let _lt=0, _lbid=null;
+  // Mobile: long-press (500ms) → show reply option
+  let _lpTimer=null;
+  box.addEventListener('touchstart',e=>{
+    const b=e.target.closest('[data-msg-id]');
+    if(!b) return;
+    _lpTimer=setTimeout(()=>{
+      _lpTimer=null;
+      const t=e.touches&&e.touches[0];
+      nxShowBubbleContextMenu(b, t&&t.clientX, t&&t.clientY);
+    },500);
+  },{passive:true});
+  box.addEventListener('touchmove',()=>{clearTimeout(_lpTimer);_lpTimer=null;},{passive:true});
   box.addEventListener('touchend',e=>{
+    if(_lpTimer){clearTimeout(_lpTimer);_lpTimer=null;}
     const b=e.target.closest('[data-msg-id]');
     if(!b) return;
     const bid=b.dataset.msgId, now=Date.now();
@@ -2350,6 +2392,95 @@ function nxInitDMReactionEvents(){
       _lt=0; _lbid=null;
     } else { _lt=now; _lbid=bid; }
   },{passive:false});
+  // Scroll to top → load older messages
+  box.addEventListener('scroll',()=>{
+    if(box.scrollTop===0 && !_dmLoadingOlder && _dmOldestTs && _dmPeer){
+      nxLoadOlderDMs();
+    }
+  },{passive:true});
+}
+
+/* Show a small floating context menu above a bubble (reply + react) */
+function nxShowBubbleContextMenu(bubbleEl, cx, cy){
+  if(!bubbleEl) return;
+  const msgId=bubbleEl.dataset.msgId;
+  const msgText=bubbleEl.dataset.msgText||'';
+  let menu=$('bubbleCtxMenu');
+  if(!menu){
+    menu=document.createElement('div');
+    menu.id='bubbleCtxMenu';
+    menu.style.cssText='position:fixed;z-index:9800;background:var(--card-s);border:1px solid var(--b1);border-radius:12px;box-shadow:var(--sh);display:flex;gap:0;overflow:hidden;font-size:13px;font-weight:700;';
+    document.body.appendChild(menu);
+    document.addEventListener('click',()=>{menu.style.display='none';},{capture:true,once:false});
+  }
+  menu.innerHTML=`
+    <button onclick="nxStartDMReply('${msgId}',decodeURIComponent('${encodeURIComponent(msgText)}'));document.getElementById('bubbleCtxMenu').style.display='none';" style="padding:10px 16px;background:none;border:none;color:var(--t1);cursor:pointer;border-right:1px solid var(--b1);">↩ Reply</button>
+    <button onclick="nxShowEmojiPicker({clientX:${cx||100},clientY:${cy||100},stopPropagation:()=>{}},${msgId});document.getElementById('bubbleCtxMenu').style.display='none';" style="padding:10px 16px;background:none;border:none;color:var(--t1);cursor:pointer;">☺ React</button>
+  `;
+  menu.style.display='flex';
+  const vw=window.innerWidth, vh=window.innerHeight;
+  const mw=180;
+  let left=(cx||vw/2)-mw/2;
+  let top=(cy||vh/2)-52;
+  left=Math.max(8,Math.min(left,vw-mw-8));
+  top=Math.max(8,Math.min(top,vh-60));
+  menu.style.left=left+'px';
+  menu.style.top=top+'px';
+}
+
+/* Safe wrapper: reads text from the bubble's data-msg-text attribute to avoid JS escaping issues */
+function nxReplyFromBubbleBtn(btn){
+  const bubble=btn.closest('[data-msg-id]');
+  if(!bubble) return;
+  nxStartDMReply(bubble.dataset.msgId, bubble.dataset.msgText||'');
+}
+
+/* DM reply-to */
+function nxStartDMReply(msgId, text){
+  _dmReplyTo={id:msgId, text};
+  const preview=(text||'').slice(0,80);
+  $('dmReplyPreview').textContent=preview||'message';
+  show('dmReplyBanner');
+  hide('dmEditBanner');
+  _dmEditingId=null;
+  const inp=$('dmInput');
+  if(inp) inp.focus();
+}
+function nxCancelDMReply(){
+  _dmReplyTo=null;
+  hide('dmReplyBanner');
+}
+
+/* Load older DM messages (pagination — swipe-up) */
+async function nxLoadOlderDMs(){
+  if(_dmLoadingOlder||!_dmPeer||!_dmOldestTs) return;
+  _dmLoadingOlder=true;
+  const box=$('dmMessages');
+  const loader=document.createElement('div');
+  loader.className='dm-load-older-btn';
+  loader.textContent='Loading older messages…';
+  box.prepend(loader);
+  const prevScrollHeight=box.scrollHeight;
+
+  const res=await edgeCall({action:'fetch_dms',peer_key:_dmPeer.key,before_ts:_dmOldestTs});
+  loader.remove();
+  _dmLoadingOlder=false;
+
+  if(!res||!res.ok) return;
+  const allOlder=(res.messages||[]).filter(m=>new Date(m.ts).getTime()<new Date(_dmOldestTs).getTime());
+  if(!allOlder.length) return; // nothing older
+
+  const chatObj=_cache.chatList.find(c=>c.peer.student_key===_dmPeer.key);
+  if(!chatObj) return;
+  const existingIds=new Set(chatObj.messages.map(m=>String(m.id)));
+  const newOlder=allOlder.filter(m=>!existingIds.has(String(m.id)));
+  if(!newOlder.length) return;
+
+  chatObj.messages=[...newOlder,...chatObj.messages];
+  const scrollDiff=box.scrollHeight-box.scrollTop;
+  nxRenderDMMessages(chatObj.messages);
+  // Restore scroll so user stays at the same spot
+  requestAnimationFrame(()=>{ box.scrollTop=box.scrollHeight-scrollDiff; });
 }
 let _reportPostId=null, _reportReason=null;
 let _pendingAvatarDataUrl=null;
@@ -3308,6 +3439,7 @@ async function init(){
   $('lockedBox').style.display='none';
   _cache.chatReadTs = loadChatReadTs();
   _cache.likedPostIds = loadLikedPostIds();
+  nxRequestNotifyPermission();
   nxLoadMyProfile();
   await Promise.all([nxLoadPosts(), nxPreloadConnections(), nxLoadBlockedUsers()]);
   nxLoadStories();
@@ -3502,6 +3634,7 @@ async function nxRefreshPeerChat(peerKey){
     nxRenderChatList(); // always keep chat list in sync
     nxUpdateUnreadBadge();
     if($('dmScreen').style.display==='flex'&&_dmPeer&&_dmPeer.key===peerKey){
+      if(res.peer_read_at) _dmPeerReadAt=res.peer_read_at;
       nxRenderDMMessages(res.messages);
       markChatRead(peerKey);
       // Show or clear the typing indicator based on the server response
@@ -3520,16 +3653,59 @@ async function nxRefreshPeerChat(peerKey){
           const name=peerObj?.student_name||'Someone';
           const rawPreview = latest.text||'';
           const STORY_REPLY_PREFIX = '\u21A9 Replied to your story:\n';
-          const displayText = rawPreview.startsWith(STORY_REPLY_PREFIX)
+          const replyMatchPrev = rawPreview.match(_DM_REPLY_RE);
+          const cleanPreview = replyMatchPrev ? replyMatchPrev[3] : rawPreview;
+          const displayText = cleanPreview.startsWith(STORY_REPLY_PREFIX)
             ? '↩ Replied to your story'
-            : (rawPreview.length>40 ? rawPreview.slice(0,40)+'…' : rawPreview) || '📷 Image';
+            : (cleanPreview.length>40 ? cleanPreview.slice(0,40)+'…' : cleanPreview) || '📷 Image';
           showToast(`💬 ${name}: ${displayText}`,'info');
+          // Push notification when tab is hidden or unfocused
+          nxPushNotify(name, displayText, peerObj?.avatar_url||'');
         }
       }
       // Always record the latest timestamp we've seen for this peer
       if(latest) _peerLastMsgTs.set(peerKey, new Date(latest.ts).getTime());
     }
   }
+}
+
+/* ═══════════════════════════════════════════════════
+   PUSH NOTIFICATIONS (Web Notifications API)
+   Only fires when the tab is hidden or not focused.
+   Permission is requested once per session after login.
+═══════════════════════════════════════════════════ */
+function nxRequestNotifyPermission(){
+  if(!('Notification' in window)) return;
+  if(Notification.permission==='default'){
+    // Use a gentle user-gesture-independent request; most browsers
+    // allow this on page load if the user has interacted previously.
+    Notification.requestPermission().catch(()=>{});
+  }
+}
+
+function nxPushNotify(senderName, bodyText, iconUrl){
+  if(!('Notification' in window)) return;
+  if(Notification.permission!=='granted') return;
+  // Only fire when tab is hidden OR the window doesn't have focus
+  if(!document.hidden && document.hasFocus()) return;
+  try{
+    const opts={
+      body: bodyText,
+      icon: iconUrl||undefined,
+      badge: iconUrl||undefined,
+      tag: 'af-nexus-dm',   // replace previous notification from same app
+      renotify: true,        // still alert even if same tag
+      silent: false,
+    };
+    const n=new Notification(`💬 ${senderName}`, opts);
+    // Clicking the notification focuses the tab
+    n.onclick=()=>{
+      window.focus();
+      n.close();
+    };
+    // Auto-close after 6 seconds
+    setTimeout(()=>n.close(), 6000);
+  }catch(e){/* Notification API can throw in certain contexts */}
 }
 
 /* ── Global background chat poll (fallback when realtime is unavailable) ── */
@@ -4700,6 +4876,8 @@ async function nxOpenDM(peerKey,peerName){
   _newWhileFeed.delete(peerKey);
   _dmPeer={key:peerKey,name:peerName};
   _dmEditingId=null; hide('dmEditBanner');
+  _dmReplyTo=null; hide('dmReplyBanner');
+  _dmOldestTs=null; _dmLoadingOlder=false; _dmPeerReadAt=null;
   nxInitDMReactionEvents(); // attach double-tap/dblclick reaction listener (idempotent)
   $('dmPeerName').textContent=peerName;
   $('dmInput').value='';
@@ -4773,6 +4951,9 @@ async function nxOpenDM(peerKey,peerName){
     _applyDMHeaderProfile(p, res && res.peer_presence);
   }
 
+  // Capture peer's read receipt if server returned one
+  if(res && res.peer_read_at) _dmPeerReadAt=res.peer_read_at;
+
   // Only re-render if the thread is still open on this peer (guards
   // against a race if the user backed out before the network resolved)
   // and only if we got a real response — never blow away the instantly
@@ -4781,6 +4962,8 @@ async function nxOpenDM(peerKey,peerName){
     nxRenderDMMessages(msgs);
   }
   markChatRead(peerKey);
+  // Signal to the server that we've read this thread (read receipt)
+  edgeCall({action:'mark_dm_read',peer_key:peerKey}).catch(()=>{});
 }
 
 function _applyDMHeaderProfile(p, pres){
@@ -4916,6 +5099,14 @@ function nxRenderDMMessages(msgs, searchTerm=''){
   // Normalise search term for case-insensitive matching
   const srchLow=searchTerm.toLowerCase();
 
+  // Track oldest ts for swipe-up pagination
+  const realMsgs=msgs.filter(m=>!m.is_deleted&&!m.text?.match(_RX_RE));
+  if(realMsgs.length) _dmOldestTs=realMsgs[0].ts;
+
+  // Find the last message I sent (for seen receipt)
+  const myMsgs=msgs.filter(m=>m.sender===sKey()&&!m.is_deleted&&!m.text?.match(_RX_RE));
+  const lastMyMsgId=myMsgs.length?String(myMsgs[myMsgs.length-1].id):null;
+
   // Build reaction map before looping — reaction messages are rendered as chips, not bubbles
   const rxMap=_buildRxMap(msgs);
   box.innerHTML=msgs.map((m,i)=>{
@@ -4940,10 +5131,19 @@ function nxRenderDMMessages(msgs, searchTerm=''){
     const imgHtml = (!deleted && isValidImg) 
       ? `<img src="${esc(m.image_url)}" onclick="nxOpenLightbox(this.src)" style="max-width:220px; border-radius:${m.text?'10px 10px 4px 4px':'10px'}; margin-bottom:${m.text?'6px':'0'}; display:block; max-height:220px; object-fit:cover; cursor:zoom-in;"/>` 
       : '';
-      
-    // Detect story reply messages (prefixed by nxStorySendReply)
+
+    // Detect DM reply-to prefix: ↩[msgId] quotedText\nactualMessage
     const STORY_REPLY_PREFIX = '\u21A9 Replied to your story:\n';
     const isStoryReply = !deleted && rawText.startsWith(STORY_REPLY_PREFIX);
+    const replyMatch = !deleted && !isStoryReply && rawText.match(_DM_REPLY_RE);
+    let displayText = rawText;
+    let replyQuoteHtml = '';
+    if(replyMatch){
+      const [,, quotedText, bodyText] = replyMatch;
+      displayText = bodyText;
+      replyQuoteHtml = `<span class="dm-reply-quote">${esc(quotedText)}</span>`;
+    }
+
     let textHtml;
     if(deleted){
       textHtml = 'Message deleted';
@@ -4951,20 +5151,38 @@ function nxRenderDMMessages(msgs, searchTerm=''){
       const replyBody = _hlText(rawText.slice(STORY_REPLY_PREFIX.length), searchTerm);
       textHtml = `<div class="story-reply-badge">↩ Replied to story</div><div class="story-reply-body">${replyBody}</div>`;
     } else {
-      textHtml = _hlText(rawText, searchTerm);
+      textHtml = _hlText(displayText, searchTerm);
     }
 
     // Reaction chips rendered BELOW the bubble so they never overlap text
     const rxHtml = (m.id && !deleted) ? _renderRxChips(m.id, rxMap) : '';
+
+    // Delivery / read tick on the last message I sent (WhatsApp-style)
+    const isLastMine = me && !deleted && String(m.id)===lastMyMsgId;
+    let tickHtml = '';
+    if(isLastMine){
+      if(_dmPeerReadAt && new Date(m.ts)<=new Date(_dmPeerReadAt)){
+        tickHtml = '<div class="bubble-tick seen" title="Seen">✓✓</div>';
+      } else {
+        tickHtml = '<div class="bubble-tick sent" title="Delivered">✓</div>';
+      }
+    }
+
+    // Safe text attr for long-press reply (encode for inline event)
+    const msgTextAttr = !deleted ? esc(displayText).replace(/'/g,'&#39;').replace(/"/g,'&quot;') : '';
 
     // NOTE: This literal absolutely MUST NOT contain interior white space or newlines between <div class="bubble..."> and </div>
     // Otherwise `white-space: pre-wrap;` injects those hidden characters and stretches out the bubble.
     return `<div class="bubble-wrap${me?' me':''}${isConsecutive?' consecutive':''}${isMatch?' dm-search-match':''}"${clickAction}>
       ${!me?(isConsecutive?'<div class="bubble-avatar-slot"></div>':avatarHTML(_dmPeer.name,peerEmoji,peerAvatarUrl,' bubble-avatar-slot',`nxOpenProfile('${esc(_dmPeer.key)}','${esc(_dmPeer.name).replace(/'/g,"&#39;")}')`,peerVer)):''}
       <div style="display:flex;flex-direction:column;align-items:${me?'flex-end':'flex-start'};max-width:72%;min-width:0;">
-        <div class="bubble${deleted?' deleted':''}${bubbleExtraClass}${isStoryReply?' story-reply-bubble':''}" data-msg-id="${m.id||''}" style="${(!deleted && !m.text && isValidImg) ? 'padding:4px;' : ''}">${imgHtml}${textHtml}</div>
+        <div class="bubble${deleted?' deleted':''}${bubbleExtraClass}${isStoryReply?' story-reply-bubble':''}" data-msg-id="${m.id||''}" data-msg-text="${msgTextAttr}" style="${(!deleted && !m.text && isValidImg) ? 'padding:4px;' : ''}">${replyQuoteHtml}${imgHtml}${textHtml}</div>
         ${rxHtml}
-        <div class="bubble-time">${esc(timeAgo(m.ts))}</div>
+        <div class="bubble-meta${me?' me':''}">
+          ${(!deleted&&m.id)?`<button class="bubble-reply-btn" onclick="event.stopPropagation();nxReplyFromBubbleBtn(this)" title="Reply">↩</button>`:''}
+          <div class="bubble-time">${esc(timeAgo(m.ts))}</div>
+        </div>
+        ${tickHtml}
       </div>
     </div>`;
   }).join('');
@@ -5040,8 +5258,18 @@ async function nxSendDM(){
   nxStopTypingSignal(); // stop broadcasting typing when message is sent
   const imgData = _dmPendingImage;
   nxRemoveDMImage(); // clear attachment from UI immediately
+
+  // Build the final text — prefix with reply-to if one is active
+  let finalText = text;
+  if(_dmReplyTo && text){
+    const quotedPreview = (_dmReplyTo.text||'').slice(0,80);
+    finalText = `\u21A9[${_dmReplyTo.id}] ${quotedPreview}\n${text}`;
+    nxCancelDMReply();
+  } else if(_dmReplyTo){
+    nxCancelDMReply();
+  }
   
-  const payload = {action:'send_dm', to_key:_dmPeer.key, to_name:_dmPeer.name, text};
+  const payload = {action:'send_dm', to_key:_dmPeer.key, to_name:_dmPeer.name, text:finalText};
   if(imgData) payload.image_data_url = imgData;
 
   const res=await edgeCall(payload);
@@ -5243,7 +5471,38 @@ function nxStopChatListPoll(){
   });
 })();
 
-/* SWIPE NAV removed — tab navigation via buttons only */
+/* ═══════════════════════════════════════════════════
+   SWIPE NAV — horizontal swipe on the main view switches tabs
+   Left swipe  → Chats tab
+   Right swipe → Feed tab
+═══════════════════════════════════════════════════ */
+(function(){
+  const mv=document.getElementById('mainView');
+  if(!mv) return;
+  let _sx=0,_sy=0;
+  mv.addEventListener('touchstart',e=>{
+    _sx=e.touches[0].clientX;
+    _sy=e.touches[0].clientY;
+  },{passive:true});
+  mv.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-_sx;
+    const dy=Math.abs(e.changedTouches[0].clientY-_sy);
+    // Must be mostly horizontal and at least 60px
+    if(Math.abs(dx)<60||dy>Math.abs(dx)*0.8) return;
+    // Don't trigger if a full-screen overlay is open
+    const overlays=['dmScreen','profileScreen','searchScreen','myProfileScreen',
+                    'storyViewer','commentsModal','composerModal','editProfileModal',
+                    'menuModal','reportModal','followListModal','blockListModal',
+                    'mainMenuModal','clearChatModal','dmOptionsModal','replyModal'];
+    for(const id of overlays){
+      const el=document.getElementById(id);
+      if(el&&el.style.display==='flex'){return;}
+      if(el&&el.classList.contains('open')){return;}
+    }
+    if(dx<0) nxSwitchTab('chats'); // swipe left → Chats
+    else     nxSwitchTab('feed');  // swipe right → Feed
+  },{passive:true});
+})();
 
 /* ═══════════════════════════════════════════════════
    EXPOSE GLOBALS
@@ -5292,6 +5551,11 @@ window.nxDMTyping=nxDMTyping;
 window.nxHandleDMImage=nxHandleDMImage;
 window.nxRemoveDMImage=nxRemoveDMImage;
 window.nxCancelEditDM=nxCancelEditDM;
+window.nxStartDMReply=nxStartDMReply;
+window.nxCancelDMReply=nxCancelDMReply;
+window.nxReplyFromBubbleBtn=nxReplyFromBubbleBtn;
+window.nxLoadOlderDMs=nxLoadOlderDMs;
+window.nxShowBubbleContextMenu=nxShowBubbleContextMenu;
 window.nxSaveProfile=nxSaveProfile;
 window.nxDisplayNameTyping=nxDisplayNameTyping;
 window.nxUsernameTyping=nxUsernameTyping;
