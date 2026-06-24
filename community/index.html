@@ -553,6 +553,20 @@ textarea.compose.over{border-color:var(--err);}
   position:absolute;bottom:0;right:0;
   border:2px solid var(--shell);
 }
+/* ── STORY AVATAR ONLINE DOT ── */
+.story-online-dot{
+  position:absolute;bottom:1px;right:1px;
+  width:13px;height:13px;border-radius:50%;
+  background:#22c55e;
+  border:2.5px solid var(--shell);
+  box-shadow:0 0 0 1.5px rgba(34,197,94,.35);
+  animation:storyOnlinePulse 2.4s ease-in-out infinite;
+  pointer-events:none;z-index:2;
+}
+@keyframes storyOnlinePulse{
+  0%,100%{box-shadow:0 0 0 1.5px rgba(34,197,94,.35);}
+  50%{box-shadow:0 0 0 3.5px rgba(34,197,94,.15);}
+}
 .story-label{
   font-size:10.5px;font-weight:700;color:var(--t2);
   text-align:center;overflow:hidden;text-overflow:ellipsis;
@@ -928,6 +942,30 @@ body.light .sv-caught-up-btn{background:#111;color:#fff;}
 
 /* Smooth tab switch animation */
 .af-view{will-change:opacity;}
+
+/* ── NEW MESSAGE DOT (arrives while on feed tab) ── */
+.conv-new-badge{
+  display:inline-flex;align-items:center;
+  background:var(--rose);color:#fff;
+  font-size:9.5px;font-weight:800;letter-spacing:.04em;
+  padding:2px 7px;border-radius:99px;
+  margin-left:6px;flex-shrink:0;
+  animation:newMsgPulse 1.4s ease-in-out infinite;
+  text-transform:uppercase;
+}
+@keyframes newMsgPulse{
+  0%,100%{opacity:1;transform:scale(1);}
+  50%{opacity:.7;transform:scale(.92);}
+}
+/* Highlight the entire row for extra pop */
+.conv-item.has-new-msg{
+  background:var(--p-soft);
+  border-left:2.5px solid var(--p);
+}
+[data-theme="dark"] .conv-item.has-new-msg{
+  background:rgba(129,140,248,.1);
+  border-left-color:var(--pl);
+}
 </style>
 </head>
 <body>
@@ -2099,6 +2137,8 @@ async function nxFetchPresenceForChats(){
   if(res&&res.ok&&res.presence){
     Object.assign(_cache.presence, res.presence);
     nxRenderChatList();
+    // Re-render stories bar so online dots appear/disappear as presence updates
+    nxRenderStoriesBar();
   }
 }
 
@@ -2164,9 +2204,14 @@ function renderStoryItemHtml(g, idx){
     : esc(g.emoji || initials(g.student_name));
   const label = g.username ? ('@'+esc(g.username)) : esc((g.student_name||'Student').split(/\s+/)[0]);
   const premTick = g.is_verified ? `<span class="story-ver-tick">✦</span>` : '';
+  // Show green dot if this contact is currently online
+  const presData = g.student_key ? _cache.presence[g.student_key] : null;
+  const presInfo = presData ? formatPresence(presData) : null;
+  const onlineDot = (presInfo && presInfo.online) ? '<div class="story-online-dot"></div>' : '';
   return `<div class="story-item story-other${seen?' story-seen':''}" onclick="nxOpenStoryViewer(${idx})">
-    <div class="story-ring${seenClass}">
+    <div class="story-ring${seenClass}" style="position:relative;">
       <div class="story-avatar-wrap">${avatarInner}</div>
+      ${onlineDot}
     </div>
     <span class="story-label">${label}${premTick}</span>
   </div>`;
@@ -2975,6 +3020,9 @@ function nxSwitchTab(tab){
     nxStopChatListPoll();
   } else {
     hide('feed'); show('chatsTab'); hide('fab');
+    // Clear all "new while feed" markers — user is now looking at the chats list
+    _newWhileFeed.clear();
+    nxRenderChatList();
     nxStartChatListPoll(); // begin polling the chat list for new messages
   }
 }
@@ -3102,6 +3150,11 @@ let _realtimeChannel=null;
 let _realtimePostsChannel=null;
 let _presencePingTimer=null;
 
+// Tracks which peer keys sent messages while the user was on the feed tab
+const _newWhileFeed = new Set();
+// Tracks the last message timestamp we rendered per peer — used to detect truly new arrivals
+const _peerLastMsgTs = new Map();
+
 function startPresencePing(){
   // Ping every 60s to keep online status fresh
   edgeCall({action:'ping_presence'}).catch(()=>{});
@@ -3186,14 +3239,27 @@ async function nxRefreshPeerChat(peerKey){
       nxRenderDMMessages(res.messages);
       markChatRead(peerKey);
     } else {
-      // Notify user of incoming message when they're NOT in this conversation
+      // Detect genuinely NEW messages (not already seen before this poll)
       const latest=res.messages&&res.messages[res.messages.length-1];
       if(latest && latest.sender!==sKey()){
-        const peerObj=_cache.chatList.find(c=>c.peer.student_key===peerKey)?.peer;
-        const name=peerObj?.student_name||'Someone';
-        const preview=latest.text?(latest.text.length>40?latest.text.slice(0,40)+'…':latest.text):'📷 Image';
-        showToast(`💬 ${name}: ${preview}`,'info');
+        const newTs=new Date(latest.ts).getTime();
+        const prevTs=_peerLastMsgTs.get(peerKey)||0;
+        if(newTs > prevTs){
+          // Brand-new message arrived — mark the row as "new" and toast on feed
+          _newWhileFeed.add(peerKey);
+          nxRenderChatList(); // re-render to show the pulsing dot
+          const peerObj=_cache.chatList.find(c=>c.peer.student_key===peerKey)?.peer;
+          const name=peerObj?.student_name||'Someone';
+          const rawPreview = latest.text||'';
+          const STORY_REPLY_PREFIX = '\u21A9 Replied to your story:\n';
+          const displayText = rawPreview.startsWith(STORY_REPLY_PREFIX)
+            ? '↩ Replied to your story'
+            : (rawPreview.length>40 ? rawPreview.slice(0,40)+'…' : rawPreview) || '📷 Image';
+          showToast(`💬 ${name}: ${displayText}`,'info');
+        }
       }
+      // Always record the latest timestamp we've seen for this peer
+      if(latest) _peerLastMsgTs.set(peerKey, new Date(latest.ts).getTime());
     }
   }
 }
@@ -4338,14 +4404,16 @@ function nxRenderChatList(){
           ? `<span class="presence-online">Active now</span>`
           : `<span class="presence-offline">${esc(pres.label)}</span>`)
       : '';
-    return `<div class="conv-item${hasUnread?' unread':''}${isVer?' gold-conv':''}" onclick="nxOpenDM('${esc(peer.student_key)}','${esc(peer.student_name).replace(/'/g,"&#39;")}')">
+    const isNewMsg = _newWhileFeed.has(peer.student_key);
+    return `<div class="conv-item${hasUnread?' unread':''}${isVer?' gold-conv':''}${isNewMsg?' has-new-msg':''}" onclick="nxOpenDM('${esc(peer.student_key)}','${esc(peer.student_name).replace(/'/g,"&#39;")}')">
       ${avatarHTML(peer.student_name,peer.emoji||'',peer.avatar_url||'',' avatar-sm','',isVer)}
       <div class="conv-info">
        <div class="conv-name" style="display:flex;align-items:center;gap:0;">
           ${nameHtml}
           ${hasUnread?'<span class="unread-dot"></span>':''}
+          ${isNewMsg?'<span class="conv-new-badge">new</span>':''}
        </div>
-       <div class="conv-preview" style="${hasUnread?'font-weight:700;color:var(--t1);':''}">${esc(c.latest.is_deleted?'Message deleted':(c.latest.image_url && !c.latest.text ? '📷 Image' : c.latest.text))}</div>
+       <div class="conv-preview" style="${(hasUnread||isNewMsg)?'font-weight:700;color:var(--t1);':''}">${esc(c.latest.is_deleted?'Message deleted':(c.latest.image_url && !c.latest.text ? '📷 Image' : c.latest.text))}</div>
       </div>
       <div class="conv-meta">
         <div class="conv-time">${esc(timeAgo(c.latest.ts))}</div>
@@ -4360,6 +4428,8 @@ function nxRenderChatList(){
 ═══════════════════════════════════════════════════ */
 async function nxOpenDM(peerKey,peerName){
   if(peerKey===sKey()) return;
+  // Clear the "new message" row indicator for this conversation
+  _newWhileFeed.delete(peerKey);
   _dmPeer={key:peerKey,name:peerName};
   _dmEditingId=null; hide('dmEditBanner');
   $('dmPeerName').textContent=peerName;
