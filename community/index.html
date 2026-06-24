@@ -428,6 +428,28 @@ textarea.compose.over{border-color:var(--err);}
 .typing-dot:nth-child(2){animation-delay:.22s;}
 .typing-dot:nth-child(3){animation-delay:.44s;}
 @keyframes typingBounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-5px);}}
+/* ── DM SEARCH BAR ── */
+.dm-search-bar{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 12px;border-bottom:1px solid var(--b1);
+  background:var(--hdr);flex-shrink:0;
+  animation:slideDown .18s ease;
+}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+.dm-search-input{
+  flex:1;background:var(--inp);border:1.5px solid var(--b1);
+  border-radius:20px;padding:7px 14px;font-size:13.5px;
+  color:var(--t1);font-family:var(--fb);outline:none;
+  transition:border-color .15s;
+}
+.dm-search-input:focus{border-color:var(--p);}
+.dm-search-count{font-size:12px;font-weight:700;color:var(--tm);white-space:nowrap;min-width:36px;text-align:center;}
+.dm-search-nav{background:none;border:1px solid var(--b1);border-radius:50%;width:30px;height:30px;font-size:14px;color:var(--t1);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .12s;}
+.dm-search-nav:hover{background:var(--b1);}
+.dm-search-nav:disabled{opacity:.3;cursor:not-allowed;}
+.dm-search-close{font-size:16px;color:var(--tm);background:none;border:none;padding:0 2px;flex-shrink:0;}
+mark.dm-hl{background:rgba(251,191,36,.45);color:inherit;border-radius:3px;padding:0 1px;}
+.dm-search-current .bubble{outline:2px solid var(--p);outline-offset:2px;border-radius:14px;}
 .dm-messages{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:4px;}
 .bubble-wrap{display:flex;align-items:flex-end;gap:6px;padding:1px 0;}
 .bubble-wrap.me{flex-direction:row-reverse;}
@@ -1183,7 +1205,16 @@ body.light .sv-caught-up-btn{background:#111;color:#fff;}
         </div>
         <div class="dm-hdr-status" id="dmHdrStatus"></div>
       </div>
-      <button class="af-hdr-icon-btn" onclick="nxOpenDMOptions()" style="margin-left:auto;" aria-label="Chat options">⋯</button>
+      <button class="af-hdr-icon-btn" onclick="nxOpenDMSearch()" style="margin-left:auto;margin-right:2px;" aria-label="Search messages">🔍</button>
+      <button class="af-hdr-icon-btn" onclick="nxOpenDMOptions()" aria-label="Chat options">⋯</button>
+    </div>
+    <!-- DM inline search bar (hidden until search icon tapped) -->
+    <div class="dm-search-bar hidden" id="dmSearchBar">
+      <input id="dmSearchInput" class="dm-search-input" type="search" placeholder="Search messages…" oninput="nxDMSearchInput()" autocomplete="off"/>
+      <span id="dmSearchCount" class="dm-search-count"></span>
+      <button class="dm-search-nav" id="dmSearchPrev" onclick="nxDMSearchNav(-1)" aria-label="Previous match" disabled>↑</button>
+      <button class="dm-search-nav" id="dmSearchNext" onclick="nxDMSearchNav(1)"  aria-label="Next match"     disabled>↓</button>
+      <button class="dm-search-close" onclick="nxCloseDMSearch()" aria-label="Close search">✕</button>
     </div>
     <div class="dm-messages" id="dmMessages">
       <div class="state-msg">Loading…</div>
@@ -2137,6 +2168,69 @@ const _RX_RE=/^\[rx:([^:]+):(.+)\]$/;
 let _myTypingTimer=null;     // debounce: stop broadcasting after idle
 let _myTypingSendTimer=null; // throttle: don't spam set_typing on every keystroke
 let _peerTypingTimer=null;   // auto-expire peer's typing indicator
+let _dmSearchMatches=[];     // NodeList of matching bubble-wrap elements
+let _dmSearchIdx=-1;         // currently focused match index
+
+/* ── Escape text then wrap search-term hits in <mark> ── */
+function _hlText(raw, term){
+  const escaped=esc(raw);
+  if(!term) return escaped;
+  // Escape special regex chars in the (already HTML-escaped) term
+  const safeTerm=esc(term).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  return escaped.replace(new RegExp('('+safeTerm+')','gi'),'<mark class="dm-hl">$1</mark>');
+}
+
+function nxOpenDMSearch(){
+  show('dmSearchBar');
+  $('dmSearchInput').value='';
+  $('dmSearchCount').textContent='';
+  $('dmSearchPrev').disabled=true;
+  $('dmSearchNext').disabled=true;
+  _dmSearchMatches=[]; _dmSearchIdx=-1;
+  setTimeout(()=>$('dmSearchInput').focus(),80);
+}
+function nxCloseDMSearch(){
+  hide('dmSearchBar');
+  $('dmSearchInput').value='';
+  _dmSearchMatches=[]; _dmSearchIdx=-1;
+  // Re-render without highlights
+  const chatObj=_cache.chatList.find(c=>c.peer.student_key===(_dmPeer&&_dmPeer.key));
+  if(chatObj) nxRenderDMMessages(chatObj.messages,'');
+}
+function nxDMSearchInput(){
+  const term=($('dmSearchInput').value||'').trim();
+  const chatObj=_cache.chatList.find(c=>c.peer.student_key===(_dmPeer&&_dmPeer.key));
+  if(!chatObj) return;
+  nxRenderDMMessages(chatObj.messages, term);
+  // Collect all highlighted rows
+  _dmSearchMatches=Array.from($('dmMessages').querySelectorAll('.dm-search-match'));
+  _dmSearchIdx=_dmSearchMatches.length>0?0:-1;
+  _nxDMSearchUpdateUI();
+  if(_dmSearchIdx>=0) _nxDMSearchFocus(_dmSearchIdx);
+}
+function nxDMSearchNav(dir){
+  if(!_dmSearchMatches.length) return;
+  _dmSearchIdx=(_dmSearchIdx+dir+_dmSearchMatches.length)%_dmSearchMatches.length;
+  _nxDMSearchUpdateUI();
+  _nxDMSearchFocus(_dmSearchIdx);
+}
+function _nxDMSearchFocus(idx){
+  // Remove previous current highlight
+  _dmSearchMatches.forEach(el=>el.classList.remove('dm-search-current'));
+  const el=_dmSearchMatches[idx];
+  if(!el) return;
+  el.classList.add('dm-search-current');
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function _nxDMSearchUpdateUI(){
+  const total=_dmSearchMatches.length;
+  const countEl=$('dmSearchCount');
+  const term=($('dmSearchInput').value||'').trim();
+  if(!term){ countEl.textContent=''; $('dmSearchPrev').disabled=true; $('dmSearchNext').disabled=true; return; }
+  countEl.textContent=total?`${_dmSearchIdx+1}/${total}`:'0 found';
+  $('dmSearchPrev').disabled=total<2;
+  $('dmSearchNext').disabled=total<2;
+}
 
 function nxSendTypingSignal(){
   if(!_dmPeer) return;
@@ -4806,7 +4900,7 @@ async function nxConfirmClearChat(){
   showToast('Chat history cleared.');
 }
 
-function nxRenderDMMessages(msgs){
+function nxRenderDMMessages(msgs, searchTerm=''){
   const box=$('dmMessages'); if(!box) return;
   if(!_dmPeer) return;
   if(!msgs||!msgs.length){
@@ -4819,6 +4913,8 @@ function nxRenderDMMessages(msgs){
   const peerVer=chatObj?!!chatObj.peer.is_verified:(cachedP?!!cachedP.is_verified:false);
   const peerEmoji=chatObj?chatObj.peer.emoji:'';
   const peerAvatarUrl=chatObj?chatObj.peer.avatar_url||'':'';
+  // Normalise search term for case-insensitive matching
+  const srchLow=searchTerm.toLowerCase();
 
   // Build reaction map before looping — reaction messages are rendered as chips, not bubbles
   const rxMap=_buildRxMap(msgs);
@@ -4836,6 +4932,9 @@ function nxRenderDMMessages(msgs){
     // Gold bubble for verified peer messages
     const bubbleExtraClass=(!me&&peerVer)?' gold-bubble':'';
 
+    // Determine if this message matches the search term
+    const isMatch=srchLow&&!deleted&&rawText.toLowerCase().includes(srchLow);
+
     // Assemble the image preview if image URL is present and completely valid
     const isValidImg = m.image_url && m.image_url !== 'null' && m.image_url !== 'undefined';
     const imgHtml = (!deleted && isValidImg) 
@@ -4849,10 +4948,10 @@ function nxRenderDMMessages(msgs){
     if(deleted){
       textHtml = 'Message deleted';
     } else if(isStoryReply){
-      const replyBody = esc(rawText.slice(STORY_REPLY_PREFIX.length));
+      const replyBody = _hlText(rawText.slice(STORY_REPLY_PREFIX.length), searchTerm);
       textHtml = `<div class="story-reply-badge">↩ Replied to story</div><div class="story-reply-body">${replyBody}</div>`;
     } else {
-      textHtml = esc(rawText);
+      textHtml = _hlText(rawText, searchTerm);
     }
 
     // Reaction chips rendered BELOW the bubble so they never overlap text
@@ -4860,7 +4959,7 @@ function nxRenderDMMessages(msgs){
 
     // NOTE: This literal absolutely MUST NOT contain interior white space or newlines between <div class="bubble..."> and </div>
     // Otherwise `white-space: pre-wrap;` injects those hidden characters and stretches out the bubble.
-    return `<div class="bubble-wrap${me?' me':''}${isConsecutive?' consecutive':''}"${clickAction}>
+    return `<div class="bubble-wrap${me?' me':''}${isConsecutive?' consecutive':''}${isMatch?' dm-search-match':''}"${clickAction}>
       ${!me?(isConsecutive?'<div class="bubble-avatar-slot"></div>':avatarHTML(_dmPeer.name,peerEmoji,peerAvatarUrl,' bubble-avatar-slot',`nxOpenProfile('${esc(_dmPeer.key)}','${esc(_dmPeer.name).replace(/'/g,"&#39;")}')`,peerVer)):''}
       <div style="display:flex;flex-direction:column;align-items:${me?'flex-end':'flex-start'};max-width:72%;min-width:0;">
         <div class="bubble${deleted?' deleted':''}${bubbleExtraClass}${isStoryReply?' story-reply-bubble':''}" data-msg-id="${m.id||''}" style="${(!deleted && !m.text && isValidImg) ? 'padding:4px;' : ''}">${imgHtml}${textHtml}</div>
