@@ -531,6 +531,26 @@ mark.dm-hl{background:rgba(251,191,36,.45);color:inherit;border-radius:3px;paddi
 /* Skeleton loader */
 .af-skel{background:linear-gradient(90deg,var(--grp) 25%,var(--b1) 50%,var(--grp) 75%);background-size:200% 100%;animation:skel 1.4s ease infinite;border-radius:14px;}
 @keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* Rich skeleton sub-parts (all shimmer via af-skel) */
+.af-skel-circle{border-radius:50%;flex-shrink:0;}
+.af-skel-line{height:10px;border-radius:6px;margin:4px 0;}
+/* Image progressive fade-in — every img inside .post-image / .dm-img starts invisible */
+.post-image img,.dm-img img,.dm-bubble-img{opacity:0;transition:opacity .28s ease;}
+/* Story skeleton circles */
+.story-skel-item{display:inline-flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;padding:0 6px;}
+.story-skel-ring{width:54px;height:54px;border-radius:50%;}
+.story-skel-label{width:38px;height:8px;border-radius:6px;margin-top:2px;}
+/* Chat skeleton rows */
+.chat-skel-row{display:flex;gap:12px;padding:13px 16px;align-items:center;}
+.chat-skel-avatar{width:46px;height:46px;border-radius:50%;flex-shrink:0;}
+.chat-skel-body{flex:1;display:flex;flex-direction:column;gap:8px;}
+.chat-skel-name{height:10px;border-radius:6px;width:42%;}
+.chat-skel-preview{height:9px;border-radius:6px;width:72%;}
+/* DM bubble skeletons */
+.dm-skel-wrap{padding:4px 10px;}
+.dm-skel-bubble{height:38px;border-radius:20px;}
+.dm-skel-bubble.me{width:55%;margin-left:auto;}
+.dm-skel-bubble.peer{width:60%;margin-right:auto;}
 .spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
 
@@ -2488,6 +2508,7 @@ let _pendingPostImageDataUrl=null;
 
 // ── STORIES STATE ──────────────────────────────────────────
 let _storyGroups=[];          // [{student_key, student_name, stories:[...], ...}]
+let _chatsLoaded=false;       // true after the first real chat-list fetch completes
 let _svGroupIdx=0;            // which group is open
 let _svStoryIdx=0;            // which story within the group
 let _svTimer=null;            // auto-advance timer
@@ -2549,8 +2570,23 @@ const STORY_VID_MAX_BYTES = 3 * 1024 * 1024;  // 3 MB hard limit for video stori
 const STORY_VID_MAX_SECS  = 15;               // auto-trim videos longer than 15 s
 
 async function nxLoadStories(){
+  // Paint skeleton rings immediately before the network call
+  const scroll=$('storiesScroll');
+  if(scroll && !_storyGroups.length){
+    const skelItem=`<div class="story-skel-item story-item story-other">
+      <div class="af-skel story-skel-ring"></div>
+      <div class="af-skel story-skel-label"></div>
+    </div>`;
+    // Remove any existing skeleton items, then inject 5 placeholders
+    scroll.querySelectorAll('.story-skel-item').forEach(el=>el.remove());
+    scroll.insertAdjacentHTML('beforeend', skelItem.repeat(5));
+  }
   const res=await edgeCall({action:'fetch_stories'});
-  if(!res||!res.ok) return;
+  if(!res||!res.ok){
+    // Remove skeleton items even on failure
+    scroll&&scroll.querySelectorAll('.story-skel-item').forEach(el=>el.remove());
+    return;
+  }
   _storyGroups = Array.isArray(res.groups)?res.groups:[];
   nxRenderStoriesBar();
 }
@@ -3330,9 +3366,9 @@ function renderPostHtml(p, mk, admin, showPinned){
     : `<p class="post-text" onclick="nxOpenComments(${p.id},'${prev}')" style="cursor:pointer;">${esc(rawContent)}</p>`)
     : '';
 
-  // Post image
+  // Post image — opacity starts at 0, fades in once loaded (no jarring pop-in)
   const imageHtml = p.image_url
-    ? `<div class="post-image" onclick="nxOpenLightbox('${esc(p.image_url)}')"><img src="${esc(p.image_url)}" alt="Post image" loading="lazy" decoding="async"/></div>`
+    ? `<div class="post-image" onclick="nxOpenLightbox('${esc(p.image_url)}')"><img src="${esc(p.image_url)}" alt="Post image" loading="lazy" decoding="async" onload="this.style.opacity=1"/></div>`
     : '';
 
   return `<div class="post-card${cardClass}" data-post-id="${p.id}">
@@ -3506,6 +3542,7 @@ async function nxLoadChatsFromConnections(){
   }));
   chats.sort((a,b)=>new Date(b.latest.ts)-new Date(a.latest.ts));
   _cache.chatList=chats;
+  _chatsLoaded=true;
   nxRenderChatList();
   // Persist so the NEXT app open can paint this chat list instantly
   // from cache before the network round-trip resolves (same pattern
@@ -3755,10 +3792,25 @@ async function nxLoadPosts(isRefresh=false){
       _cache.posts=cachedFeed;
       renderListToContainer(_cache.posts, 'postsList', true);
     } else {
-      $('postsList').innerHTML=`
-        <div class="post-card af-skel" style="height:120px;"></div>
-        <div class="post-card af-skel" style="height:100px;"></div>
-        <div class="post-card af-skel" style="height:130px;"></div>`;
+      // Rich Instagram-style skeleton cards — mimic real card shape so layout doesn't jump
+      const postSkelCard = `
+        <div class="post-card" style="pointer-events:none;">
+          <div class="post-top" style="gap:10px;">
+            <div class="af-skel af-skel-circle" style="width:36px;height:36px;"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:6px;justify-content:center;">
+              <div class="af-skel af-skel-line" style="width:44%;"></div>
+              <div class="af-skel af-skel-line" style="width:28%;height:8px;"></div>
+            </div>
+          </div>
+          <div class="af-skel af-skel-line" style="width:92%;margin:10px 0 4px;"></div>
+          <div class="af-skel af-skel-line" style="width:75%;"></div>
+          <div class="af-skel" style="height:180px;border-radius:12px;margin:10px 0;"></div>
+          <div style="display:flex;gap:16px;padding:6px 0;">
+            <div class="af-skel af-skel-line" style="width:52px;height:28px;border-radius:20px;margin:0;"></div>
+            <div class="af-skel af-skel-line" style="width:52px;height:28px;border-radius:20px;margin:0;"></div>
+          </div>
+        </div>`;
+      $('postsList').innerHTML = postSkelCard + postSkelCard + postSkelCard;
     }
   }
 
@@ -4832,7 +4884,20 @@ async function nxSaveProfile(){
 function nxRenderChatList(){
   const box=$('chatList'); if(!box) return;
   if(!_cache.chatList.length){
-    box.innerHTML='<div class="state-msg"><span>💬</span><span>No conversations yet.<br>Use search to message someone.</span></div>';
+    // Only show "no conversations" if we've already finished loading
+    if(_chatsLoaded){
+      box.innerHTML='<div class="state-msg"><span>💬</span><span>No conversations yet.<br>Use search to message someone.</span></div>';
+    } else {
+      // Shimmer skeleton rows while chats are still being fetched
+      const skelRow=`<div class="chat-skel-row">
+        <div class="af-skel chat-skel-avatar"></div>
+        <div class="chat-skel-body">
+          <div class="af-skel chat-skel-name"></div>
+          <div class="af-skel chat-skel-preview"></div>
+        </div>
+      </div>`;
+      box.innerHTML = skelRow.repeat(5);
+    }
     return;
   }
   box.innerHTML=_cache.chatList.map(c=>{
@@ -4898,12 +4963,16 @@ async function nxOpenDM(peerKey,peerName){
   // (preloaded at app start, or from a previous open this session), render
   // them immediately — no spinner, no blank screen — exactly like opening
   // a thread you've already opened before in Instagram. Only fall back to
-  // a loading state when there is truly nothing to show yet.
+  // skeleton bubbles when there is truly nothing to show yet.
   const cachedChat=_cache.chatList.find(c=>c.peer.student_key===peerKey);
   if(cachedChat && cachedChat.messages && cachedChat.messages.length){
     nxRenderDMMessages(cachedChat.messages);
   } else {
-    $('dmMessages').innerHTML='<div class="state-msg">Loading…</div>';
+    // Shimmer bubble skeletons — feels alive instead of a blank "Loading…"
+    const dmSkel = (side)=>`<div class="dm-skel-wrap"><div class="af-skel dm-skel-bubble ${side}"></div></div>`;
+    $('dmMessages').innerHTML =
+      dmSkel('peer') + dmSkel('me') + dmSkel('peer') +
+      dmSkel('me') + dmSkel('peer') + dmSkel('me');
   }
 
   // Paint the header instantly from any cached profile thumbnail too.
@@ -5271,6 +5340,35 @@ async function nxSendDM(){
   
   const payload = {action:'send_dm', to_key:_dmPeer.key, to_name:_dmPeer.name, text:finalText};
   if(imgData) payload.image_data_url = imgData;
+
+  // ── Optimistic paint ── show the bubble immediately before the server round-trip
+  // so the UI feels instant (same as iMessage / Instagram). The real server
+  // response will replace this via nxAppendSentMessage moments later.
+  const _optimisticTs = new Date().toISOString();
+  const _optimisticMsg = {
+    id: '__optimistic__', sender: sKey(), receiver: _dmPeer.key,
+    text: finalText, ts: _optimisticTs, image_url: imgData||null,
+  };
+  const chatObjOpt = _cache.chatList.find(c=>c.peer.student_key===_dmPeer.key);
+  if(chatObjOpt){
+    // Temporarily push the optimistic message into the cache for rendering
+    chatObjOpt.messages = [...(chatObjOpt.messages||[]), _optimisticMsg];
+    nxRenderDMMessages(chatObjOpt.messages);
+    // Remove the temporary entry so the real server message replaces it cleanly
+    chatObjOpt.messages = chatObjOpt.messages.filter(m=>m.id!=='__optimistic__');
+  } else {
+    // No thread in cache yet — inject a one-off optimistic bubble directly into the DOM
+    const box=$('dmMessages');
+    if(box){
+      const now=new Date(_optimisticTs);
+      const hhmm=now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+      box.insertAdjacentHTML('beforeend',
+        `<div class="dm-bubble-row me" id="opt-bubble">
+           <div class="dm-bubble me"><div class="dm-bubble-text">${esc(text)}</div>
+           <div class="bubble-meta me"><div class="bubble-time">${hhmm}</div></div></div></div>`);
+      box.scrollTop=box.scrollHeight;
+    }
+  }
 
   const res=await edgeCall(payload);
   if(res&&res.ok&&res.message){
