@@ -777,6 +777,29 @@ textarea.compose.over{border-color:var(--err);}
 .sv-swipe-hint.visible{display:flex;}
 .sv-swipe-hint::before{content:'∧';font-size:16px;color:rgba(255,255,255,.4);}
 
+/* ── All Caught Up card ── */
+.sv-caught-up{
+  position:absolute;inset:0;z-index:60;background:#000;
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;padding:32px;text-align:center;
+}
+.sv-caught-up.active{display:flex;}
+.sv-caught-up-check{
+  width:76px;height:76px;border-radius:50%;
+  background:rgba(34,197,94,.12);border:2.5px solid #22c55e;
+  display:flex;align-items:center;justify-content:center;
+  color:#22c55e;font-size:34px;font-weight:800;margin-bottom:6px;
+}
+.sv-caught-up-title{color:#fff;font-size:20px;font-weight:800;font-family:var(--fd);}
+.sv-caught-up-sub{color:rgba(255,255,255,.5);font-size:14px;line-height:1.5;max-width:240px;}
+.sv-caught-up-btn{
+  margin-top:14px;padding:13px 36px;
+  background:var(--ac);color:#fff;border-radius:26px;
+  font-size:15px;font-weight:700;font-family:var(--fb);
+  transition:opacity .15s,transform .12s;
+}
+.sv-caught-up-btn:active{opacity:.85;transform:scale(.97);}
+
 #imgLightbox{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;pointer-events:none;touch-action:none;}
 #imgLightbox.open{background:rgba(0,0,0,.92);pointer-events:all;}
 #imgLightbox .lb-close{position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;opacity:0;transform:scale(.8);transition:opacity .22s ease,transform .22s ease,background .15s;}
@@ -1143,6 +1166,13 @@ textarea.compose.over{border-color:var(--err);}
           <div class="state-msg">Loading…</div>
         </div>
       </div>
+    </div>
+    <!-- All caught up screen (after last story) -->
+    <div class="sv-caught-up" id="svCaughtUp">
+      <div class="sv-caught-up-check">✓</div>
+      <div class="sv-caught-up-title">You're all caught up!</div>
+      <div class="sv-caught-up-sub">You've seen every story from your network.</div>
+      <button class="sv-caught-up-btn" onclick="nxCloseStoryViewer();nxSwitchTab('feed')">Go to Feed</button>
     </div>
   </div>
 
@@ -2091,6 +2121,7 @@ function nxOpenStoryViewer(groupIdx){
 
 function nxCloseStoryViewer(){
   nxCloseSeenBy();
+  const cu=$('svCaughtUp'); if(cu) cu.classList.remove('active');
   clearTimeout(_svTimer); clearInterval(_svProgressInterval);
   _svTimer=null; _svProgressInterval=null; _svPaused=false;
   const el=$('storyViewer');
@@ -2113,12 +2144,20 @@ function nxRenderStoryProgressBars(){
 }
 
 function nxGoToGroup(newGroupIdx, enterFrom){
-  if(newGroupIdx<0 || newGroupIdx>=_storyGroups.length){ nxCloseStoryViewer(); return; }
+  if(newGroupIdx<0){ nxCloseStoryViewer(); return; }
+  if(newGroupIdx>=_storyGroups.length){ nxShowCaughtUp(); return; }
   _svGroupIdx=newGroupIdx;
   const grp=_storyGroups[newGroupIdx];
   _svStoryIdx = enterFrom==='end' ? grp.stories.length-1 : 0;
   nxRenderStoryProgressBars();
   nxShowCurrentStory();
+}
+function nxShowCaughtUp(){
+  clearTimeout(_svTimer); clearInterval(_svProgressInterval);
+  nxCloseSeenBy();
+  const media=$('svMedia');
+  if(media){ const v=media.querySelector('video'); if(v) try{v.pause();}catch(e){} }
+  const cu=$('svCaughtUp'); if(cu) cu.classList.add('active');
 }
 
 /* Format a date/time for "seen at" display — e.g. "Today 3:42 PM", "Mon 9 Jun, 10:05 AM" */
@@ -2144,6 +2183,8 @@ function storySeenAt(isoStr){
 
 function nxShowCurrentStory(){
   clearTimeout(_svTimer); clearInterval(_svProgressInterval);
+  nxCloseSeenBy();
+  const cu=$('svCaughtUp'); if(cu) cu.classList.remove('active');
   const grp=_storyGroups[_svGroupIdx];
   if(!grp){ nxCloseStoryViewer(); return; }
   if(_svStoryIdx<0){ nxGoToGroup(_svGroupIdx-1, 'end'); return; }
@@ -2386,13 +2427,38 @@ function nxSvTouchEnd(e){
         }
       }
     }
+    return; // hold-release, no swipe processing
+  }
+  // Seen panel open: no story swipes
+  const panel=$('svSeenPanel');
+  if(panel && panel.classList.contains('open')) return;
+  // Horizontal swipe → change story (left=next, right=prev)
+  const dx=e.changedTouches[0].clientX-_svTouchStartX;
+  const dy=Math.abs(e.changedTouches[0].clientY-_svTouchStartY);
+  if(Math.abs(dx)>60 && dy<80 && Math.abs(dx)>dy){
+    if(dx<0) nxStoryNext(); // swipe left → next
+    else nxStoryPrev();     // swipe right → prev
   }
 }
 function nxSvTouchMove(e){
   if(e.target.tagName==='INPUT') return;
   const dy=_svTouchStartY-e.touches[0].clientY;
   const dx=Math.abs(e.touches[0].clientX-_svTouchStartX);
-  if(dx>25){ clearTimeout(_svHoldTimer); _svHoldActive=false; return; }
+
+  // Seen panel open: swipe down closes it
+  const panel=$('svSeenPanel');
+  if(panel && panel.classList.contains('open')){
+    const inner=panel.querySelector('.sv-seen-panel-inner');
+    const atTop=!inner || inner.scrollTop<=4;
+    if(atTop && dy < -70 && dx<55){
+      clearTimeout(_svHoldTimer); _svHoldActive=false;
+      e.preventDefault();
+      nxCloseSeenBy();
+    }
+    return; // don't process other gestures while panel is open
+  }
+
+  if(dx>30){ clearTimeout(_svHoldTimer); _svHoldActive=false; return; }
   // Swipe up on own story → open seen-by
   const grp=_storyGroups[_svGroupIdx];
   if(grp&&grp.is_mine && dy>65 && dx<45){
