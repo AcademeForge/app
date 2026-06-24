@@ -601,10 +601,12 @@ textarea.compose.over{border-color:var(--err);}
 .sv-media img,.sv-media video{max-width:100%;max-height:100%;object-fit:contain;}
 .sv-media video{width:100%;}
 .sv-caption{
-  padding:8px 16px 4px;color:#fff;font-size:14px;font-weight:500;
-  text-align:center;flex-shrink:0;text-shadow:0 1px 6px rgba(0,0,0,.7);
-  min-height:0;
+  padding:8px 16px 6px;color:#fff;font-size:14px;font-weight:600;
+  text-align:center;flex-shrink:0;text-shadow:0 1px 8px rgba(0,0,0,.9);
+  min-height:0;background:rgba(0,0,0,.28);
+  display:none; /* shown via JS only when caption exists */
 }
+.sv-caption.has-text{display:block;}
 .sv-tap-prev,.sv-tap-next{
   position:absolute;top:0;bottom:0;width:40%;z-index:10;
 }
@@ -731,13 +733,12 @@ textarea.compose.over{border-color:var(--err);}
 .presence-offline{color:var(--tm);font-size:11.5px;}
 
 /* ── STORY REPLY BAR ── */
-.sv-reply-bar{position:absolute;bottom:0;left:0;right:0;padding:12px 16px 28px;background:linear-gradient(transparent,rgba(0,0,0,.68));display:none;flex-direction:column;gap:10px;z-index:4;}
+.sv-reply-bar{padding:8px 16px calc(20px + env(safe-area-inset-bottom,0px));background:rgba(0,0,0,.52);display:none;flex-direction:column;gap:8px;flex-shrink:0;border-top:1px solid rgba(255,255,255,.08);}
 .sv-reply-bar.visible{display:flex;}
-.sv-emoji-strip{display:flex;gap:6px;justify-content:center;}
-.sv-emoji-strip button{font-size:26px;background:rgba(255,255,255,.13);border:1.5px solid rgba(255,255,255,.22);border-radius:50%;width:46px;height:46px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .14s,background .14s;touch-action:manipulation;}
-.sv-emoji-strip button:active{transform:scale(1.28);background:rgba(255,255,255,.28);}
 .sv-reply-row{display:flex;align-items:center;gap:8px;}
-.sv-reply-row input{flex:1;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);border-radius:22px;padding:9px 16px;color:#fff;font-family:var(--fb);font-size:14px;outline:none;min-width:0;}
+.sv-heart-btn{font-size:22px;background:rgba(255,255,255,.13);border:1.5px solid rgba(255,255,255,.22);border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:transform .15s,background .15s;touch-action:manipulation;}
+.sv-heart-btn:active{transform:scale(1.35);background:rgba(244,63,94,.45);}
+.sv-reply-row input{flex:1;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);border-radius:22px;padding:9px 14px;color:#fff;font-family:var(--fb);font-size:14px;outline:none;min-width:0;}
 .sv-reply-row input::placeholder{color:rgba(255,255,255,.55);}
 .sv-reply-row input:focus{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.5);}
 .sv-reply-send{width:40px;height:40px;border-radius:50%;background:var(--ac);color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .15s,transform .12s;}
@@ -947,8 +948,7 @@ textarea.compose.over{border-color:var(--err);}
     <div class="af-topbar">
       <button class="af-back" onclick="nxCloseMyProfile()">←</button>
       <div class="af-topbar-title">My Profile</div>
-      <button class="af-hdr-icon-btn" onclick="nxCloseMyProfile();nxOpenEditProfile();" style="margin-left:auto;" aria-label="Edit profile">✏️</button>
-      <button class="af-hdr-icon-btn" onclick="nxOpenMainMenu()" aria-label="Settings" style="font-size:18px;">⋮</button>
+      <button class="af-hdr-icon-btn" onclick="nxOpenMainMenu()" aria-label="Settings" style="margin-left:auto;font-size:18px;">⋮</button>
     </div>
     <div class="af-page" id="myProfilePageScroll" style="padding:0;">
       <div id="myProfileTopCard" style="padding:24px 20px;background:var(--card-s);border-bottom:1px solid var(--b1);">
@@ -1113,19 +1113,13 @@ textarea.compose.over{border-color:var(--err);}
     <div class="sv-caption" id="svCaption"></div>
     <!-- Reply bar — shown for others' stories -->
     <div class="sv-reply-bar" id="svReplyBar">
-      <div class="sv-emoji-strip">
-        <button onclick="nxStorySendReaction('❤️')" aria-label="React heart">❤️</button>
-        <button onclick="nxStorySendReaction('🔥')" aria-label="React fire">🔥</button>
-        <button onclick="nxStorySendReaction('😂')" aria-label="React laugh">😂</button>
-        <button onclick="nxStorySendReaction('😮')" aria-label="React wow">😮</button>
-        <button onclick="nxStorySendReaction('👏')" aria-label="React clap">👏</button>
-      </div>
       <div class="sv-reply-row">
-        <input type="text" id="svReplyInput" placeholder="Reply to story…" maxlength="200"
+        <button class="sv-heart-btn" onclick="nxStorySendReaction('❤️')" aria-label="Like story">❤️</button>
+        <input type="text" id="svReplyInput" placeholder="Send message…" maxlength="200"
           oninput="nxStoryReplyTyping()"
           onfocus="nxSvPauseForReply()"
           onblur="nxSvResumeFromReply()"/>
-        <button class="sv-reply-send" id="svReplySendBtn" onclick="nxStorySendReply()" disabled aria-label="Send reply">➤</button>
+        <button class="sv-reply-send" id="svReplySendBtn" onclick="nxStorySendReply()" disabled aria-label="Send">➤</button>
       </div>
     </div>
     <!-- Bottom bar: seen-by (own story) + swipe hint -->
@@ -2002,7 +1996,7 @@ async function nxFetchPresenceForChats(){
 /* ═══════════════════════════════════════════════════
    STORIES
 ═══════════════════════════════════════════════════ */
-const STORY_IMG_DURATION = 5000;             // ms each image story stays on screen
+const STORY_IMG_DURATION = 15000;            // ms each image story stays on screen
 const STORY_VIDEO_FALLBACK_DURATION = 8000;  // ms, used until a video's real duration loads
 const STORY_IMG_MAX_BYTES = 2 * 1024 * 1024;  // 2 MB hard limit for image stories
 const STORY_VID_MAX_BYTES = 3 * 1024 * 1024;  // 3 MB hard limit for video stories (after trim)
@@ -2170,7 +2164,8 @@ function nxShowCurrentStory(){
     nameEl.innerHTML=`<span>Your Story</span>`;
     nameEl.style.cssText='';
   } else if(grp.is_verified){
-    nameEl.innerHTML=`<span class="gold-name" style="-webkit-background-clip:text;-webkit-text-fill-color:transparent;background:var(--gold-grad);">${esc(grp.student_name||'Student')}</span>${verBadgeHTML(true)}`;
+    nameEl.innerHTML=`<span style="color:#f59e0b;font-weight:800;">${esc(grp.student_name||'Student')}</span>${verBadgeHTML(true)}`;
+    nameEl.style.cssText='';
   } else {
     nameEl.textContent=grp.student_name||'Student';
     nameEl.style.cssText='';
@@ -2190,7 +2185,12 @@ function nxShowCurrentStory(){
     }
   }
   $('svHdrTime').textContent = storySeenAt(story.created_at);
-  $('svCaption').textContent = story.caption||'';
+  const captionEl=$('svCaption');
+  if(captionEl){
+    const cap = story.caption||'';
+    captionEl.textContent = cap;
+    captionEl.classList.toggle('has-text', cap.length > 0);
+  }
 
   // 3-dot options button: only for own stories
   const optsBtn=$('svOptsBtn');
@@ -4189,6 +4189,7 @@ async function nxOpenDM(peerKey,peerName){
   nxBringToFront('dmScreen');
   $('dmScreen').style.display='flex';
   $('bnav').classList.add('kb-hidden');
+  nxStartDMPoll(peerKey); // polling fallback for instant message sync
 
   // Hide both badges initially
   const verBadgeEl=$('dmPeerVerifiedBadge');
@@ -4317,6 +4318,7 @@ function nxCloseDM(){
   $('bnav').classList.remove('kb-hidden');
   _dmPeer=null; _dmEditingId=null;
   nxRemoveDMImage();
+  nxStopDMPoll();
   nxForceRepaint();
 }
 
@@ -4615,6 +4617,53 @@ document.addEventListener('keydown',e=>{
       $('pullIndicator').style.display='none';
     }
     pulling=false;
+  });
+})();
+
+/* ═══════════════════════════════════════════════════
+   DM POLLING FALLBACK (backs up Supabase realtime)
+═══════════════════════════════════════════════════ */
+let _dmPollTimer=null;
+function nxStartDMPoll(peerKey){
+  nxStopDMPoll();
+  _dmPollTimer=setInterval(async()=>{
+    if($('dmScreen').style.display!=='flex'||!_dmPeer||_dmPeer.key!==peerKey){
+      nxStopDMPoll(); return;
+    }
+    await nxRefreshPeerChat(peerKey);
+  }, 8000);
+}
+function nxStopDMPoll(){
+  clearInterval(_dmPollTimer);
+  _dmPollTimer=null;
+}
+
+/* ═══════════════════════════════════════════════════
+   STORY VIEWER: DESKTOP DOUBLE-CLICK PAUSE/RESUME
+═══════════════════════════════════════════════════ */
+(function(){
+  const sv=document.getElementById('storyViewer');
+  if(!sv) return;
+  sv.addEventListener('dblclick',e=>{
+    if(e.target.tagName==='BUTTON'||e.target.tagName==='INPUT') return;
+    if(_svPaused){
+      _svPaused=false;
+      const grp=_storyGroups[_svGroupIdx];
+      const story=grp&&grp.stories[_svStoryIdx];
+      if(story){
+        if(story.media_type==='video'){
+          const v=$('svMedia').querySelector('video');
+          if(v){ v.play().catch(()=>{}); nxRunStoryProgress((v.duration||8)*1000); }
+          else nxRunStoryProgress(STORY_VIDEO_FALLBACK_DURATION);
+        } else {
+          nxRunStoryProgress(STORY_IMG_DURATION);
+        }
+      }
+    } else {
+      _svPaused=true;
+      clearTimeout(_svTimer); clearInterval(_svProgressInterval);
+      const v=$('svMedia').querySelector('video'); if(v) v.pause();
+    }
   });
 })();
 
