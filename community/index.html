@@ -450,12 +450,6 @@ textarea.compose.over{border-color:var(--err);}
 .dm-search-close{font-size:16px;color:var(--tm);background:none;border:none;padding:0 2px;flex-shrink:0;}
 mark.dm-hl{background:rgba(251,191,36,.45);color:inherit;border-radius:3px;padding:0 1px;}
 .dm-search-current .bubble{outline:2px solid var(--p);outline-offset:2px;border-radius:14px;}
-/* DM pagination pill */
-.dm-load-older{display:flex;justify-content:center;padding:6px 0 10px;}
-.dm-load-older button{background:var(--card-s);border:1px solid var(--b1);border-radius:99px;padding:5px 16px;font-size:12px;font-weight:700;color:var(--tm);cursor:pointer;transition:background .15s;}
-.dm-load-older button:hover{background:var(--b1);}
-.dm-load-older button:active{opacity:.7;}
-.dm-conv-start{text-align:center;font-size:11.5px;color:var(--tm);padding:4px 0 12px;}
 .dm-messages{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:4px;}
 .bubble-wrap{display:flex;align-items:flex-end;gap:6px;padding:1px 0;}
 .bubble-wrap.me{flex-direction:row-reverse;}
@@ -649,8 +643,7 @@ mark.dm-hl{background:rgba(251,191,36,.45);color:inherit;border-radius:3px;paddi
 .sv-media{background:#000;}
 /* Header: always dark gradient so user name is readable over any story media */
 .sv-hdr{background:linear-gradient(rgba(0,0,0,.58),rgba(0,0,0,.18) 70%,transparent);}
-/* Light mode: solid dark band so the name is always readable on bright backgrounds */
-[data-theme="light"] .sv-hdr{background:rgba(0,0,0,.78)!important;}
+[data-theme="light"] .sv-hdr{background:linear-gradient(rgba(0,0,0,.62),rgba(0,0,0,.22) 70%,transparent);}
 .sv-hdr-name{color:#fff!important;}
 /* Force verified gold-name spans to white inside story header so they're readable */
 .sv-hdr-name .gold-name{color:#fff!important;}
@@ -2170,7 +2163,6 @@ let _curPostId=null, _replyParentId=null, _menuTarget=null;
 let _profileData=null, _profileIsFollowing=false;
 let _dmPeer=null, _dmEditingId=null, _dmPendingImage=null;
 let _emojiPickerMsgId=null;
-let _dmVisibleCount=50; // how many messages to render (grow by 30 on each "load older")
 const _RX_EMOJIS=['❤️','👍','😂','😮','😢','🔥'];
 const _RX_RE=/^\[rx:([^:]+):(.+)\]$/;
 let _myTypingTimer=null;     // debounce: stop broadcasting after idle
@@ -2335,72 +2327,28 @@ function _renderRxChips(msgId, rxMap){
     html+=`<span class="reaction-chip${mine?' mine':''}">${emoji}${count>1?` <span class="rx-count">${count}</span>`:''}</span>`;
   return `<div class="bubble-reactions">${html}</div>`;
 }
-// Attach tap/dblclick reaction + edit/delete triggers on dmMessages box (run once per DM open)
-// Interaction model:
-//   Single-tap on any bubble → show emoji reaction picker
-//   Double-tap on own bubble  → open Edit / Delete / Cancel sheet
+// Attach double-tap / dblclick reaction trigger on dmMessages box (run once per DM open)
 function nxInitDMReactionEvents(){
   const box=$('dmMessages');
   if(!box||box._rxEventsInited) return;
   box._rxEventsInited=true;
-
-  // ── Desktop: click with double-click detection ─────────────────────────────
-  let _deskTimer=null, _deskLastBid=null;
-  box.addEventListener('click',e=>{
-    // Ignore clicks on images (lightbox), reaction chips, and avatar slots
-    if(e.target.tagName==='IMG') return;
-    if(e.target.closest('.bubble-reactions,.bubble-avatar-slot')) return;
+  // Desktop: dblclick
+  box.addEventListener('dblclick',e=>{
     const b=e.target.closest('[data-msg-id]');
-    if(!b||!b.dataset.msgId) return;
-    const bid=b.dataset.msgId;
-    if(_deskTimer && _deskLastBid===bid){
-      // Second click within 300ms → double-click
-      clearTimeout(_deskTimer); _deskTimer=null; _deskLastBid=null;
-      const wrap=b.closest('.bubble-wrap');
-      if(wrap&&wrap.dataset.mine==='1'){
-        nxOpenMenu('dm',bid,true,false);
-      }
-    } else {
-      clearTimeout(_deskTimer);
-      _deskLastBid=bid;
-      const snapE=e;
-      _deskTimer=setTimeout(()=>{
-        _deskTimer=null; _deskLastBid=null;
-        // Single-click → show emoji picker
-        nxShowEmojiPicker(snapE, bid);
-      },300);
-    }
+    if(b) nxShowEmojiPicker(e,b.dataset.msgId);
   });
-
-  // ── Mobile: touchend with double-tap detection ────────────────────────────
-  let _lt=0, _lbid=null, _tapTimer=null;
+  // Mobile: double-tap
+  let _lt=0, _lbid=null;
   box.addEventListener('touchend',e=>{
-    // Ignore taps on images, reaction chips, and avatar slots
-    if(e.target.tagName==='IMG') return;
-    if(e.target.closest('.bubble-reactions,.bubble-avatar-slot')) return;
     const b=e.target.closest('[data-msg-id]');
-    if(!b||!b.dataset.msgId) return;
+    if(!b) return;
     const bid=b.dataset.msgId, now=Date.now();
     if(bid===_lbid && now-_lt<320){
-      // Double-tap
       e.preventDefault();
-      clearTimeout(_tapTimer); _tapTimer=null;
+      const t=e.changedTouches[0];
+      nxShowEmojiPicker({clientX:t.clientX,clientY:t.clientY,stopPropagation:()=>{}},bid);
       _lt=0; _lbid=null;
-      const wrap=b.closest('.bubble-wrap');
-      if(wrap&&wrap.dataset.mine==='1'){
-        nxOpenMenu('dm',bid,true,false);
-      }
-    } else {
-      _lt=now; _lbid=bid;
-      clearTimeout(_tapTimer);
-      const touch=e.changedTouches[0];
-      const snapE={clientX:touch.clientX,clientY:touch.clientY,stopPropagation:()=>{}};
-      _tapTimer=setTimeout(()=>{
-        _tapTimer=null; _lbid=null;
-        // Single-tap → show emoji picker
-        nxShowEmojiPicker(snapE, bid);
-      },300);
-    }
+    } else { _lt=now; _lbid=bid; }
   },{passive:false});
 }
 let _reportPostId=null, _reportReason=null;
@@ -2729,15 +2677,6 @@ function nxShowCurrentStory(){
     mediaEl.src=story.media_url;
     mediaEl.playsInline=true;
     mediaEl.autoplay=true;
-    mediaEl.muted=true;
-    // Start invisible — reveal only when first frame is decoded to avoid the
-    // browser's default video-placeholder icon flashing before content appears.
-    mediaEl.style.opacity='0';
-    mediaEl.style.transition='opacity 0.18s ease';
-    const _revealVideo=()=>{ mediaEl.style.opacity='1'; };
-    mediaEl.addEventListener('canplay',_revealVideo,{once:true});
-    // Safety: always reveal after 600ms even if canplay is slow
-    setTimeout(()=>{ mediaEl.style.opacity='1'; },600);
     mediaEl.onended=()=>nxStoryNext();
     mediaEl.onloadedmetadata=()=>{ nxRunStoryProgress((mediaEl.duration||8)*1000); };
     mediaEl.play().catch(()=>{});
@@ -4761,7 +4700,6 @@ async function nxOpenDM(peerKey,peerName){
   _newWhileFeed.delete(peerKey);
   _dmPeer={key:peerKey,name:peerName};
   _dmEditingId=null; hide('dmEditBanner');
-  _dmVisibleCount=50; // reset pagination to most recent 50 messages
   nxInitDMReactionEvents(); // attach double-tap/dblclick reaction listener (idempotent)
   $('dmPeerName').textContent=peerName;
   $('dmInput').value='';
@@ -4899,7 +4837,7 @@ function nxCloseDM(){
   $('bnav').classList.remove('kb-hidden');
   nxStopTypingSignal();       // stop broadcasting our typing state
   nxClearPeerTyping();        // clear peer typing timer and indicator
-  _dmPeer=null; _dmEditingId=null; _dmVisibleCount=50;
+  _dmPeer=null; _dmEditingId=null;
   nxRemoveDMImage();
   nxStopDMPoll();
   nxForceRepaint();
@@ -4962,7 +4900,7 @@ async function nxConfirmClearChat(){
   showToast('Chat history cleared.');
 }
 
-function nxRenderDMMessages(msgs, searchTerm='', preserveScroll=false){
+function nxRenderDMMessages(msgs, searchTerm=''){
   const box=$('dmMessages'); if(!box) return;
   if(!_dmPeer) return;
   if(!msgs||!msgs.length){
@@ -4978,24 +4916,9 @@ function nxRenderDMMessages(msgs, searchTerm='', preserveScroll=false){
   // Normalise search term for case-insensitive matching
   const srchLow=searchTerm.toLowerCase();
 
-  // Pagination: only render the last _dmVisibleCount messages.
-  // When searching, always show all so every match is navigable.
-  const allMsgs=msgs;
-  const paginated=srchLow ? msgs : msgs.slice(-_dmVisibleCount);
-  const hasMore=(!srchLow) && msgs.length > _dmVisibleCount;
-
-  // Build reaction map from ALL msgs so reactions on older messages still resolve
-  const rxMap=_buildRxMap(allMsgs);
-
-  // Remember scroll height before re-render so we can restore position when
-  // loading older messages (prevents the viewport jumping to the top).
-  const prevScrollHeight = preserveScroll ? box.scrollHeight : 0;
-
-  const topHtml = hasMore
-    ? `<div class="dm-load-older"><button onclick="nxLoadOlderDMs()">↑ Load older messages</button></div>`
-    : `<div class="dm-conv-start">Beginning of conversation</div>`;
-
-  box.innerHTML= topHtml + paginated.map((m,i)=>{
+  // Build reaction map before looping — reaction messages are rendered as chips, not bubbles
+  const rxMap=_buildRxMap(msgs);
+  box.innerHTML=msgs.map((m,i)=>{
     // Explicitly parse boolean for me so undefined sender bugs don't happen
     const me = (m.sender === sKey()); 
     const deleted=!!m.is_deleted;
@@ -5003,8 +4926,9 @@ function nxRenderDMMessages(msgs, searchTerm='', preserveScroll=false){
     // Skip reaction messages — they appear as chips below their target bubble
     if(!deleted && rawText.match(_RX_RE)) return '';
     // For consecutive detection, skip over any reaction-only messages in history
-    const prevReal = paginated.slice(0,i).reverse().find(p=>!p.text||!p.text.match(_RX_RE));
+    const prevReal = msgs.slice(0,i).reverse().find(p=>!p.text||!p.text.match(_RX_RE));
     const isConsecutive=!!(prevReal&&prevReal.sender===m.sender&&!prevReal.is_deleted);
+    const clickAction=(me&&!deleted&&m.id)?` onclick="nxOpenMenu('dm',${m.id},true,false)"`:'';
     // Gold bubble for verified peer messages
     const bubbleExtraClass=(!me&&peerVer)?' gold-bubble':'';
 
@@ -5035,8 +4959,7 @@ function nxRenderDMMessages(msgs, searchTerm='', preserveScroll=false){
 
     // NOTE: This literal absolutely MUST NOT contain interior white space or newlines between <div class="bubble..."> and </div>
     // Otherwise `white-space: pre-wrap;` injects those hidden characters and stretches out the bubble.
-    // data-mine="1" lets the tap handler know it's the user's own message for the double-tap menu
-    return `<div class="bubble-wrap${me?' me':''}${isConsecutive?' consecutive':''}${isMatch?' dm-search-match':''}"${(me&&!deleted&&m.id)?' data-mine="1"':''}>
+    return `<div class="bubble-wrap${me?' me':''}${isConsecutive?' consecutive':''}${isMatch?' dm-search-match':''}"${clickAction}>
       ${!me?(isConsecutive?'<div class="bubble-avatar-slot"></div>':avatarHTML(_dmPeer.name,peerEmoji,peerAvatarUrl,' bubble-avatar-slot',`nxOpenProfile('${esc(_dmPeer.key)}','${esc(_dmPeer.name).replace(/'/g,"&#39;")}')`,peerVer)):''}
       <div style="display:flex;flex-direction:column;align-items:${me?'flex-end':'flex-start'};max-width:72%;min-width:0;">
         <div class="bubble${deleted?' deleted':''}${bubbleExtraClass}${isStoryReply?' story-reply-bubble':''}" data-msg-id="${m.id||''}" style="${(!deleted && !m.text && isValidImg) ? 'padding:4px;' : ''}">${imgHtml}${textHtml}</div>
@@ -5045,24 +4968,7 @@ function nxRenderDMMessages(msgs, searchTerm='', preserveScroll=false){
       </div>
     </div>`;
   }).join('');
-
-  // Scroll behaviour:
-  // • Normal render → jump to newest (bottom)
-  // • preserveScroll (load-older) → keep the user's viewport at the same message,
-  //   compensating for the new content prepended above.
-  if(preserveScroll){
-    box.scrollTop = box.scrollHeight - prevScrollHeight;
-  } else {
-    box.scrollTop = box.scrollHeight;
-  }
-}
-
-/* Load 30 more older messages above the currently visible window */
-function nxLoadOlderDMs(){
-  const chatObj=_cache.chatList.find(c=>c.peer.student_key===(_dmPeer&&_dmPeer.key));
-  if(!chatObj) return;
-  _dmVisibleCount = Math.min(_dmVisibleCount + 30, chatObj.messages.length);
-  nxRenderDMMessages(chatObj.messages, '', true);
+  box.scrollTop=box.scrollHeight;
 }
 
 /* ═══════════════════════════════════════════════════
@@ -5337,57 +5243,7 @@ function nxStopChatListPoll(){
   });
 })();
 
-/* ═══════════════════════════════════════════════════
-   SWIPE NAV — horizontal swipe on main view switches tabs
-   Left  swipe → Chats tab
-   Right swipe → Feed tab
-   Ignored when any overlay / DM / story viewer is open.
-═══════════════════════════════════════════════════ */
-(function(){
-  const SWIPE_MIN_X = 55;   // minimum horizontal distance to count as a swipe
-  const SWIPE_MAX_RATIO = 1.2; // horizontal must exceed vertical * this ratio
-  let _sx=0, _sy=0, _sTracking=false;
-
-  function _anyOverlayOpen(){
-    // Don't swipe when another screen/modal is in front
-    const ids=['dmScreen','storyViewer','profileScreen','myProfileScreen',
-               'searchScreen','commentsModal','composerModal','replyModal',
-               'menuModal','dmOptionsModal','editProfileModal','reportModal',
-               'followListModal','blockListModal','mainMenuModal','clearChatModal'];
-    return ids.some(id=>{
-      const el=document.getElementById(id);
-      if(!el) return false;
-      const s=el.style.display;
-      return s==='flex'||s==='block';
-    });
-  }
-
-  const shell=document.getElementById('shell')||document.body;
-
-  shell.addEventListener('touchstart',e=>{
-    if(_anyOverlayOpen()){_sTracking=false;return;}
-    _sx=e.touches[0].clientX;
-    _sy=e.touches[0].clientY;
-    _sTracking=true;
-  },{passive:true});
-
-  shell.addEventListener('touchend',e=>{
-    if(!_sTracking){return;}
-    _sTracking=false;
-    if(_anyOverlayOpen()) return;
-    const dx=e.changedTouches[0].clientX - _sx;
-    const dy=e.changedTouches[0].clientY - _sy;
-    const adx=Math.abs(dx), ady=Math.abs(dy);
-    if(adx < SWIPE_MIN_X || adx < ady * SWIPE_MAX_RATIO) return;
-    if(dx < 0){
-      // swipe left → open Chats
-      if(_activeTab!=='chats') nxSwitchTab('chats');
-    } else {
-      // swipe right → open Feed
-      if(_activeTab!=='feed') nxSwitchTab('feed');
-    }
-  },{passive:true});
-})();
+/* SWIPE NAV removed — tab navigation via buttons only */
 
 /* ═══════════════════════════════════════════════════
    EXPOSE GLOBALS
@@ -5436,7 +5292,6 @@ window.nxDMTyping=nxDMTyping;
 window.nxHandleDMImage=nxHandleDMImage;
 window.nxRemoveDMImage=nxRemoveDMImage;
 window.nxCancelEditDM=nxCancelEditDM;
-window.nxLoadOlderDMs=nxLoadOlderDMs;
 window.nxSaveProfile=nxSaveProfile;
 window.nxDisplayNameTyping=nxDisplayNameTyping;
 window.nxUsernameTyping=nxUsernameTyping;
