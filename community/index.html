@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1847,7 +1846,9 @@ let _svPaused=false;          // paused while seen-by panel is open
 ═══════════════════════════════════════════════════ */
 const STORY_IMG_DURATION = 5000;             // ms each image story stays on screen
 const STORY_VIDEO_FALLBACK_DURATION = 8000;  // ms, used until a video's real duration loads
-const STORY_MAX_BYTES = 50 * 1024 * 1024;    // 50MB, matches the edge function limit
+const STORY_IMG_MAX_BYTES = 2 * 1024 * 1024;  // 2 MB hard limit for image stories
+const STORY_VID_MAX_BYTES = 3 * 1024 * 1024;  // 3 MB hard limit for video stories (after trim)
+const STORY_VID_MAX_SECS  = 15;               // auto-trim videos longer than 15 s
 
 async function nxLoadStories(){
   const res=await edgeCall({action:'fetch_stories'});
@@ -1883,8 +1884,8 @@ function nxRenderStoriesBar(){
     const hasMine = !!(mine && mine.stories && mine.stories.length);
     ring.classList.toggle('mine-ring', hasMine);
     ring.classList.toggle('story-ring-add', !hasMine);
-    // Hide the "+" button if user already has a story (1 per user rule)
-    if(plusBtn) plusBtn.style.display = hasMine ? 'none' : '';
+    // Always show "+" so the user can replace their story
+    if(plusBtn) plusBtn.style.display = '';
   }
 
   // Other users' story rings, appended after the static "Your Story" item
@@ -2189,11 +2190,10 @@ async function nxDeleteCurrentStory(){
 /* ── STORY COMPOSER ────────────────────────────────── */
 function nxOpenStoryComposer(){
   if(!isLoggedIn()){ goToLogin(); return; }
-  // Enforce 1 story per user — show toast if they already have one
+  // Allow re-posting — the edge function atomically replaces the existing story
   const mine=_storyGroups.find(g=>g.is_mine);
   if(mine && mine.stories && mine.stories.length){
-    showToast('You already have a story. Delete it first to post a new one.','err');
-    return;
+    showToast('Posting a new story will replace your current one.','info');
   }
   _storyPendingMedia=null;
   if($('scImageInput')) $('scImageInput').value='';
@@ -2228,26 +2228,107 @@ function nxRenderStoryComposerPreview(){
 function nxHandleStoryMedia(input, type){
   const file=input.files&&input.files[0];
   if(!file) return;
-  if(file.size>STORY_MAX_BYTES){ showToast('File too large (max 50MB).','err'); input.value=''; return; }
-  const reader=new FileReader();
-  reader.onload=e=>{
-    _storyPendingMedia={dataUrl:e.target.result, mediaType:type};
+
+  if(type==='image'){
+    if(file.size>STORY_IMG_MAX_BYTES){
+      showToast('Image too large — please keep it under 2 MB.','err');
+      input.value=''; return;
+    }
+    const reader=new FileReader();
+    reader.onload=e=>{
+      _storyPendingMedia={dataUrl:e.target.result, mediaType:'image'};
+      nxRenderStoryComposerPreview();
+      $('scPostBtn').disabled=false;
+    };
+    reader.onerror=()=>{ showToast('Could not read image.','err'); };
+    reader.readAsDataURL(file);
+    return;
+  }
+
+  // ── VIDEO path ──
+  // Step 1: load into a hidden video element to read duration, then trim to 15 s
+  $('scPostBtn').disabled=true;
+  const objUrl=URL.createObjectURL(file);
+  const vid=document.createElement('video');
+  vid.muted=true; vid.playsInline=true; vid.preload='metadata';
+  vid.src=objUrl;
+
+  vid.onloadedmetadata=async ()=>{
+    const rawDuration=isFinite(vid.duration)&&vid.duration>0 ? vid.duration : 0;
+    const needsTrim = rawDuration > STORY_VID_MAX_SECS;
+
+    const readBlob=blob=>new Promise((res,rej)=>{
+      const r=new FileReader();
+      r.onload=e=>res(e.target.result);
+      r.onerror=rej;
+      r.readAsDataURL(blob);
+    });
+
+    let dataUrl;
+    if(!needsTrim){
+      // Video is ≤15 s — just read original file
+      try{ dataUrl=await readBlob(file); }
+      catch(e){ showToast('Could not read video.','err'); URL.revokeObjectURL(objUrl); $('scPostBtn').disabled=false; input.value=''; return; }
+    } else {
+      // Trim to STORY_VID_MAX_SECS using captureStream + MediaRecorder
+      showToast('Video is longer than 15 s — trimming…');
+      try{
+        const stream = vid.captureStream ? vid.captureStream() : (vid.mozCaptureStream ? vid.mozCaptureStream() : null);
+        if(!stream) throw new Error('captureStream not supported');
+        const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp8') ? 'video/webm;codecs=vp8' : 'video/webm';
+        const chunks=[];
+        const recorder=new MediaRecorder(stream,{mimeType});
+        recorder.ondataavailable=e=>{ if(e.data&&e.data.size>0) chunks.push(e.data); };
+        await new Promise((res,rej)=>{
+          recorder.onstop=res;
+          recorder.onerror=rej;
+          recorder.start(100);
+          vid.currentTime=0;
+          vid.play().catch(()=>{});
+          setTimeout(()=>{ try{ vid.pause(); recorder.stop(); }catch(e){rej(e);} }, STORY_VID_MAX_SECS*1000);
+        });
+        const trimmedBlob=new Blob(chunks,{type:mimeType});
+        if(trimmedBlob.size>STORY_VID_MAX_BYTES){
+          URL.revokeObjectURL(objUrl);
+          showToast('Video file is too large even after trimming (max 3 MB). Please pick a shorter clip.','err');
+          $('scPostBtn').disabled=false; input.value=''; return;
+        }
+        dataUrl=await readBlob(trimmedBlob);
+      } catch(err){
+        // captureStream/MediaRecorder unavailable — fall back to original file with size check
+        if(file.size>STORY_VID_MAX_BYTES){
+          URL.revokeObjectURL(objUrl);
+          showToast('Video file too large (max 3 MB). Please choose a shorter clip.','err');
+          $('scPostBtn').disabled=false; input.value=''; return;
+        }
+        try{ dataUrl=await readBlob(file); }
+        catch(e){ showToast('Could not read video.','err'); URL.revokeObjectURL(objUrl); $('scPostBtn').disabled=false; input.value=''; return; }
+      }
+    }
+
+    // Final size guard on the selected / trimmed data URL
+    const approxBytes = Math.round((dataUrl.length - dataUrl.indexOf(',') - 1) * 3/4);
+    if(approxBytes > STORY_VID_MAX_BYTES){
+      URL.revokeObjectURL(objUrl);
+      showToast('Video file too large (max 3 MB). Please choose a shorter clip.','err');
+      $('scPostBtn').disabled=false; input.value=''; return;
+    }
+
+    URL.revokeObjectURL(objUrl);
+    _storyPendingMedia={dataUrl, mediaType:'video'};
     nxRenderStoryComposerPreview();
     $('scPostBtn').disabled=false;
   };
-  reader.onerror=()=>{ showToast('Could not read file.','err'); };
-  reader.readAsDataURL(file);
+
+  vid.onerror=()=>{
+    URL.revokeObjectURL(objUrl);
+    showToast('Could not load video file.','err');
+    $('scPostBtn').disabled=false; input.value='';
+  };
 }
 
 async function nxPostStory(){
   if(!_storyPendingMedia) return;
-  // Double-check 1-per-user before uploading
-  const mine=_storyGroups.find(g=>g.is_mine);
-  if(mine && mine.stories && mine.stories.length){
-    showToast('You already have a story. Delete it first to post a new one.','err');
-    nxCloseStoryComposer();
-    return;
-  }
   $('scPostBtn').disabled=true;
   const uploadRes=await edgeCall({action:'upload_story_media',media_data_url:_storyPendingMedia.dataUrl});
   if(!uploadRes||!uploadRes.ok){
@@ -2256,7 +2337,13 @@ async function nxPostStory(){
     return;
   }
   const caption=(($('scCaption')&&$('scCaption').value)||'').trim();
-  const res=await edgeCall({action:'create_story',media_url:uploadRes.media_url,media_type:uploadRes.media_type,caption});
+  const res=await edgeCall({
+    action:'create_story',
+    media_url:uploadRes.media_url,
+    media_type:uploadRes.media_type,
+    media_path:uploadRes.media_path||'',
+    caption
+  });
   if(!res||!res.ok){
     showToast(res?.message||'Could not post story.','err');
     $('scPostBtn').disabled=false;
