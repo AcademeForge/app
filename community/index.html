@@ -3097,13 +3097,38 @@ async function nxRefreshPeerChat(peerKey){
       }
     }
     _cache.chatList.sort((a,b)=>new Date(b.latest.ts)-new Date(a.latest.ts));
-    if(_activeTab==='chats') nxRenderChatList();
+    nxRenderChatList(); // always keep chat list in sync
     nxUpdateUnreadBadge();
     if($('dmScreen').style.display==='flex'&&_dmPeer&&_dmPeer.key===peerKey){
       nxRenderDMMessages(res.messages);
       markChatRead(peerKey);
+    } else {
+      // Notify user of incoming message when they're NOT in this conversation
+      const latest=res.messages&&res.messages[res.messages.length-1];
+      if(latest && latest.sender!==sKey()){
+        const peerObj=_cache.chatList.find(c=>c.peer.student_key===peerKey)?.peer;
+        const name=peerObj?.student_name||'Someone';
+        const preview=latest.text?(latest.text.length>40?latest.text.slice(0,40)+'…':latest.text):'📷 Image';
+        showToast(`💬 ${name}: ${preview}`,'info');
+      }
     }
   }
+}
+
+/* ── Global background chat poll (fallback when realtime is unavailable) ── */
+let _globalChatPollTimer=null;
+function startGlobalChatPoll(){
+  stopGlobalChatPoll();
+  _globalChatPollTimer=setInterval(async()=>{
+    if(!isLoggedIn()) return;
+    const peers=_cache.chatList.slice(0,6).map(c=>c.peer?.student_key).filter(Boolean);
+    if(!peers.length) return;
+    await Promise.all(peers.map(pk=>nxRefreshPeerChat(pk)));
+  }, 14000); // every 14 s — tight enough to feel instant, light enough not to spam
+}
+function stopGlobalChatPoll(){
+  clearInterval(_globalChatPollTimer);
+  _globalChatPollTimer=null;
 }
 
 /* ═══════════════════════════════════════════════════
@@ -4740,7 +4765,7 @@ function nxStopDMPoll(){
 })();
 
 /* ═══════════════════════════════════════════════════
-   SWIPE NAV (Slide features implemented)
+   SWIPE NAV (feed ↔ chats only)
 ═══════════════════════════════════════════════════ */
 (function(){
   let startX=0,startY=0;
@@ -4750,29 +4775,12 @@ function nxStopDMPoll(){
     if($('profileScreen').style.display==='flex') return;
     if($('myProfileScreen').style.display==='flex') return;
     if($('searchScreen') && $('searchScreen').style.display==='flex') return;
-    
     const diffX=e.changedTouches[0].clientX-startX;
     const diffY=e.changedTouches[0].clientY-startY;
-    
     if(Math.abs(diffY)>Math.abs(diffX)) return;
-    
     const threshold=80;
-    
-    if(diffX < -threshold) { 
-      // Swiped Left (Navigate right across the tabs/pages)
-      if(_activeTab === 'feed') {
-        nxSwitchTab('chats');
-      } else if (_activeTab === 'chats') {
-        window.location.href='/setting/index.html';
-      }
-    } else if(diffX > threshold) { 
-      // Swiped Right (Navigate left across the tabs/pages)
-      if(_activeTab === 'chats') {
-        nxSwitchTab('feed');
-      } else if (_activeTab === 'feed') {
-        window.location.href='/batches/index.html';
-      }
-    }
+    if(diffX < -threshold && _activeTab==='feed') nxSwitchTab('chats');
+    else if(diffX > threshold && _activeTab==='chats') nxSwitchTab('feed');
   },{passive:true});
 })();
 
