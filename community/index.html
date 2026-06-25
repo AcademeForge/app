@@ -5335,7 +5335,7 @@ async function nxBlockFromFollowerList(key, name, btn){
   if(!key) return;
   const ok=await raConfirm({
     title:'Block this user?',
-    message:'Block <strong>'+esc(name)+'</strong>? They won\'t be able to follow you or send DMs.',
+    message:'Block <strong>'+esc(name)+'</strong>? They won\'t be able to send DMs.',
     confirmText:'Block'
   });
   if(!ok) return;
