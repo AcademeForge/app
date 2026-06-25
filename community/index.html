@@ -2638,6 +2638,8 @@ let _pendingPostImageDataUrl=null;
 // that (→20, →40, …) until every pending follower has been shown.
 let _suggestedVisibleCount=5;
 let _suggestedNextIncrement=5;
+let _followListType='';       // 'followers' or 'following' — set when the modal opens
+let _followListIsOwn=false;   // true when viewing your own list (shows action buttons)
 
 // ── STORIES STATE ──────────────────────────────────────────
 let _storyGroups=[];          // [{student_key, student_name, stories:[...], ...}]
@@ -2812,11 +2814,22 @@ async function nxPutCachedStoryVideo(url,blob){
 // De-dupe concurrent fetch+cache attempts for the same video (e.g. fast
 // prev/next swiping back onto the same uncached story before it finishes).
 const _storyVidFetchInFlight=new Map();
+// Pre-resolved blob URLs: populated by background prefetch so nxShowCurrentStory
+// can start playback synchronously (zero IDB lookup delay) when the user taps.
+// Each entry is consumed (deleted) on first use so the video element owns the
+// object URL and nxClearStoryMediaEl can safely revoke it.
+const _preResolvedBlobUrls=new Map();
 function nxFetchAndCacheStoryVideo(url){
   if(_storyVidFetchInFlight.has(url)) return _storyVidFetchInFlight.get(url);
-  const p=fetch(url).then(r=>r.ok?r.blob():null).then(blob=>{
+  const p=fetch(url).then(r=>r.ok?r.blob():null).then(async blob=>{
     if(blob && blob.size>0 && blob.size<=STORY_VID_CACHE_MAX_BYTES){
-      return nxPutCachedStoryVideo(url,blob);
+      await nxPutCachedStoryVideo(url,blob);
+      // Create a blob URL immediately and stash it in memory so the next
+      // nxShowCurrentStory call for this URL can assign src synchronously —
+      // no IDB read, no network wait, instant first frame.
+      if(!_preResolvedBlobUrls.has(url)){
+        try{ _preResolvedBlobUrls.set(url, URL.createObjectURL(blob)); }catch(e){}
+      }
     }
   }).catch(()=>{}).finally(()=>{ _storyVidFetchInFlight.delete(url); });
   _storyVidFetchInFlight.set(url,p);
@@ -2834,6 +2847,69 @@ async function nxResolveStoryVideoSrc(url){
   }
   nxFetchAndCacheStoryVideo(url);
   return url;
+}
+
+/* ── INSTAGRAM-STYLE STORY PREFETCHING ──────────────────────
+   Two prefetch moments, same as Instagram:
+   1. The instant the stories bar loads, warm the first 5 stories'
+      media in the background — before the user has even tapped a ring —
+      so opening any of them feels instant.
+   2. The instant a story is actually being viewed, quietly warm the
+      *next* story's media too, so swiping forward never shows a spinner. */
+const _storyImagePreloadCache=new Set(); // url -> already requested this session
+function nxPreloadStoryMedia(url, mediaType){
+  if(!url) return;
+  if(mediaType==='video'){
+    // Reuses the existing IndexedDB blob cache + in-flight de-dupe —
+    // exactly the same path nxResolveStoryVideoSrc uses when actually
+    // playing a video, just triggered earlier.
+    nxFetchAndCacheStoryVideo(url);
+  } else {
+    if(_storyImagePreloadCache.has(url)) return;
+    _storyImagePreloadCache.add(url);
+    // Warms the browser's own HTTP cache for the image so the <img> the
+    // viewer creates later paints from cache instead of the network.
+    const img=new Image();
+    img.decoding='async';
+    img.src=url;
+  }
+}
+function nxPreloadInitialStories(){
+  // ── Tiered Instagram-style warm-up ──────────────────────────────────
+  // Tier 1 (groups 0-1): preload EVERY story — these are the first rings
+  //   the user sees and most likely to tap straight through.
+  // Tier 2 (groups 2-4): preload only the first story per group — a quick
+  //   head-start so opening any of these feels instant too.
+  _storyGroups.slice(0,2).forEach(g=>{
+    (g.stories||[]).forEach(s=>{ if(s) nxPreloadStoryMedia(s.media_url, s.media_type); });
+  });
+  _storyGroups.slice(2,5).forEach(g=>{
+    const first = g.stories && g.stories[0];
+    if(first) nxPreloadStoryMedia(first.media_url, first.media_type);
+  });
+}
+function nxPrefetchNextStoryMedia(grp, storyIdx){
+  // While viewing story N, warm stories N+1 AND N+2 so two taps forward
+  // are always already cached. Also warm the previous story for backwards
+  // swipes — Instagram does the same.
+  const stories=grp.stories||[];
+  const nextGrp=_storyGroups[_svGroupIdx+1];
+  const prevGrp=_storyGroups[_svGroupIdx-1];
+
+  // N+1 and N+2 (spill into next group when at the end of this one)
+  for(let offset=1; offset<=2; offset++){
+    let s=stories[storyIdx+offset];
+    if(!s && nextGrp){
+      const spill=(storyIdx+offset)-stories.length;
+      s=(nextGrp.stories||[])[spill>=0?spill:0];
+    }
+    if(s) nxPreloadStoryMedia(s.media_url, s.media_type);
+  }
+
+  // N-1 (previous story or last story of previous group)
+  const prevStory=stories[storyIdx-1]||
+    (prevGrp&&(prevGrp.stories||[]).slice(-1)[0]);
+  if(prevStory) nxPreloadStoryMedia(prevStory.media_url, prevStory.media_type);
 }
 // Revokes any blob: video src currently in #svMedia, then clears the slide.
 // Centralized here so every place that clears story media also releases
@@ -2867,6 +2943,7 @@ async function nxLoadStories(){
   }
   _storyGroups = Array.isArray(res.groups)?res.groups:[];
   nxRenderStoriesBar();
+  nxPreloadInitialStories(); // warm the first 5 stories' media before any tap (Instagram-style)
 }
 
 function syncMyStoryAvatar(){
@@ -3125,35 +3202,44 @@ function nxShowCurrentStory(){
     mediaEl.playsInline=true;
     mediaEl.preload='auto';
     mediaEl.muted=false;
-    // Keep it visually hidden until the very first frame is ready — prevents
-    // the gray placeholder / black flash before playback starts.
-    mediaEl.style.opacity='0';
-    mediaEl.style.transition='opacity .12s linear';
-    const revealOnReady=()=>{ mediaEl.style.opacity='1'; };
-    mediaEl.addEventListener('loadeddata', revealOnReady, {once:true});
-    mediaEl.addEventListener('canplay', revealOnReady, {once:true});
-    // If reveal events never fire (edge case), unhide after 2s anyway
-    mediaEl.addEventListener('error', ()=>{ mediaEl.style.opacity='1'; }, {once:true});
-    setTimeout(()=>{ if(mediaEl.style.opacity==='0') mediaEl.style.opacity='1'; }, 2000);
     mediaEl.onended=()=>nxStoryNext();
     mediaEl.onloadedmetadata=()=>{
       // Start accurate progress now that we know the real duration
       nxRunStoryProgress((mediaEl.duration||8)*1000);
     };
     mediaWrap.appendChild(mediaEl);
-    // Assign src then play: DO NOT set autoplay on the element because some
-    // browsers ignore autoplay when src is not yet set at construction time.
-    nxResolveStoryVideoSrc(story.media_url).then(src=>{
-      if(_renderToken!==_svRenderToken) return; // user navigated away
-      mediaEl.src=src;
+
+    // ── FAST PATH: prefetch already resolved a blob URL into memory ──
+    // Blob URL is synchronous — assign src immediately, play with no delay
+    // and no flash. Delete from map so nxClearStoryMediaEl owns the URL.
+    const preResolved=_preResolvedBlobUrls.get(story.media_url);
+    if(preResolved){
+      _preResolvedBlobUrls.delete(story.media_url);
+      mediaEl.style.opacity='1';
+      mediaEl.src=preResolved;
       mediaEl.load();
-      const playPromise = mediaEl.play();
-      if(playPromise) playPromise.catch(()=>{
-        // Autoplay blocked (e.g. policy): reveal and start progress anyway
-        revealOnReady();
-        nxRunStoryProgress(STORY_VIDEO_FALLBACK_DURATION);
-      });
-    });
+      const pp=mediaEl.play();
+      if(pp) pp.catch(()=>{ nxRunStoryProgress(STORY_VIDEO_FALLBACK_DURATION); });
+    } else {
+      // ── STREAMING PATH: set network URL synchronously — browser starts
+      // buffering immediately, first frame appears as soon as bandwidth allows.
+      // This is strictly faster than the old approach of waiting for an async
+      // IDB lookup before setting the src at all.
+      mediaEl.style.opacity='0';
+      mediaEl.style.transition='opacity .12s linear';
+      const revealOnReady=()=>{ mediaEl.style.opacity='1'; };
+      mediaEl.addEventListener('loadeddata', revealOnReady, {once:true});
+      mediaEl.addEventListener('canplay', revealOnReady, {once:true});
+      mediaEl.addEventListener('error', ()=>{ mediaEl.style.opacity='1'; }, {once:true});
+      // Fallback: unhide after 2s even if events never fire
+      setTimeout(()=>{ if(mediaEl.style.opacity==='0') mediaEl.style.opacity='1'; }, 2000);
+      mediaEl.src=story.media_url;
+      mediaEl.load();
+      const pp=mediaEl.play();
+      if(pp) pp.catch(()=>{ revealOnReady(); nxRunStoryProgress(STORY_VIDEO_FALLBACK_DURATION); });
+      // Fetch + cache in background — next view of this story will hit the fast path
+      nxFetchAndCacheStoryVideo(story.media_url);
+    }
   } else {
     mediaEl=document.createElement('img');
     mediaEl.src=story.media_url;
@@ -3169,6 +3255,10 @@ function nxShowCurrentStory(){
     edgeCall({action:'view_story',story_id:story.id}).catch(()=>{});
     _storyBarDirty=true;
   }
+
+  // Instagram-style read-ahead: warm the next story's media now, while
+  // this one is on screen, so advancing never shows a loading state.
+  nxPrefetchNextStoryMedia(grp, _svStoryIdx);
 }
 
 const _seenCountCache = new Map();
@@ -5037,28 +5127,42 @@ function _renderFollowListBox(list){
   const box=$('followListBody');
   if(!list.length){box.innerHTML='<div class="state-msg"><span>No users here yet.</span></div>';return;}
   box.innerHTML=list.map(u=>{
-    const key=u.student_key||u.key||u.follower_key||u.following_key||'';
+    const key=String(u.student_key||u.key||u.follower_key||u.following_key||'');
     const name=u.student_name||u.name||'Student';
     const username=u.username||'';
     const emoji=u.emoji||'';
     const avatarUrl=u.avatar_url||'';
     const isVer=!!u.is_verified;
+    const safeKey=esc(key);
+    const safeName=esc(name).replace(/'/g,'&#39;');
     const nameHtml = isVer
       ? `<span class="gold-name">${esc(name)}</span>${verBadgeHTML(true)}`
       : esc(name);
-    return `<div style="display:flex;align-items:center;gap:12px;padding:12px 18px;cursor:pointer;border-bottom:1px solid var(--b1);" onclick="nxCloseFollowList();nxOpenProfile('${esc(key)}','${esc(name).replace(/'/g,"&#39;")}')">
-      ${avatarHTML(name,emoji,avatarUrl,' avatar-sm','',isVer)}
-      <div style="flex:1;min-width:0;">
+    let actionBtns='';
+    if(_followListIsOwn){
+      if(_followListType==='following'){
+        actionBtns=`<button onclick="event.stopPropagation();nxUnfollowFromList('${safeKey}','${safeName}',this)" style="flex-shrink:0;padding:6px 14px;border-radius:20px;border:1.5px solid var(--tm);background:transparent;color:var(--tm);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--fd);">Unfollow</button>`;
+      } else {
+        actionBtns=`<button onclick="event.stopPropagation();nxRemoveFollowerFromList('${safeKey}','${safeName}',this)" style="flex-shrink:0;padding:6px 12px;border-radius:20px;border:1.5px solid var(--tm);background:transparent;color:var(--tm);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--fd);">Remove</button>
+          <button onclick="event.stopPropagation();nxBlockFromFollowerList('${safeKey}','${safeName}',this)" title="Block user" style="flex-shrink:0;width:32px;height:32px;border-radius:50%;border:1.5px solid var(--b1);background:transparent;color:var(--tm);font-size:18px;font-weight:900;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">⋯</button>`;
+      }
+    }
+    return `<div data-follow-row="${safeKey}" style="display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--b1);" onclick="nxCloseFollowList();nxOpenProfile('${safeKey}','${safeName}')">
+      <div style="flex-shrink:0;cursor:pointer;">${avatarHTML(name,emoji,avatarUrl,' avatar-sm','',isVer)}</div>
+      <div style="flex:1;min-width:0;cursor:pointer;">
         <div style="font-family:var(--fd);font-size:14px;font-weight:800;color:var(--t1);display:flex;align-items:center;gap:0;">
           ${nameHtml}
         </div>
         ${username?`<div style="font-size:12px;color:var(--tm);font-weight:600;margin-top:2px;">@${esc(username)}</div>`:'<div style="font-size:12px;color:var(--tm);margin-top:2px;">No username set</div>'}
       </div>
+      ${actionBtns?`<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">${actionBtns}</div>`:''}
     </div>`;
   }).join('');
 }
 
 async function loadFollowList(type,targetKey){
+  _followListType=type;
+  _followListIsOwn=(targetKey===sKey());
   $('followListTitle').textContent=type==='followers'?'Followers':'Following';
   nxBringToFront('followListModal');
   $('followListModal').style.display='flex';
@@ -5105,6 +5209,60 @@ async function loadFollowList(type,targetKey){
 function nxCloseFollowList(){
   $('followListModal').style.display='none';
   nxForceRepaint();
+}
+
+async function nxUnfollowFromList(key, name, btn){
+  if(!key) return;
+  btn.disabled=true; btn.textContent='…';
+  const res=await edgeCall({action:'toggle_follow',target_key:key});
+  if(res && res.ok && !res.following){
+    _cache.followingKeys.delete(key);
+    _cache.myFollowing=_cache.myFollowing.filter(u=>String(u.student_key||u.key||'')!==key);
+    showToast('Unfollowed '+name+'.');
+    const row=btn.closest('[data-follow-row]');
+    if(row){row.style.transition='opacity .3s';row.style.opacity='0';setTimeout(()=>row.remove(),300);}
+  } else {
+    btn.disabled=false; btn.textContent='Unfollow';
+    showToast(res?.message||'Could not unfollow.','err');
+  }
+}
+
+async function nxRemoveFollowerFromList(key, name, btn){
+  if(!key) return;
+  if(!confirm('Remove '+name+' from your followers?')) return;
+  btn.disabled=true; btn.textContent='…';
+  // No dedicated remove-follower API; block then immediately unblock —
+  // this drops their follow relationship without keeping a permanent block.
+  const r1=await edgeCall({action:'block_user',target_key:key});
+  if(r1 && r1.ok){
+    await edgeCall({action:'unblock_user',target_key:key});
+    _cache.myFollowers=_cache.myFollowers.filter(u=>String(u.student_key||u.key||u.follower_key||'')!==key);
+    saveSnapshot('followers_me',_cache.myFollowers);
+    showToast(name+' removed from followers.');
+    const row=btn.closest('[data-follow-row]');
+    if(row){row.style.transition='opacity .3s';row.style.opacity='0';setTimeout(()=>row.remove(),300);}
+  } else {
+    btn.disabled=false; btn.textContent='Remove';
+    showToast(r1?.message||'Could not remove follower.','err');
+  }
+}
+
+async function nxBlockFromFollowerList(key, name, btn){
+  if(!key) return;
+  if(!confirm('Block '+name+'? They won\'t be able to follow you or send DMs.')) return;
+  btn.disabled=true;
+  const res=await edgeCall({action:'block_user',target_key:key});
+  if(res && res.ok){
+    _cache.blockedKeys.add(key);
+    _cache.myFollowers=_cache.myFollowers.filter(u=>String(u.student_key||u.key||u.follower_key||'')!==key);
+    saveSnapshot('followers_me',_cache.myFollowers);
+    showToast(name+' blocked.');
+    const row=btn.closest('[data-follow-row]');
+    if(row){row.style.transition='opacity .3s';row.style.opacity='0';setTimeout(()=>row.remove(),300);}
+  } else {
+    btn.disabled=false;
+    showToast(res?.message||'Could not block user.','err');
+  }
 }
 
 /* ═══════════════════════════════════════════════════
@@ -5367,10 +5525,10 @@ function nxRenderSuggestedUsers(){
     const safeName=esc(name).replace(/'/g,"&#39;");
     const safeKey=esc(key);
     return `<div class="suggested-user-card" id="su-card-${safeKey}">
-      ${avatarHTML(name,emoji,avatarUrl,'','',isVer)}
-      <div class="su-info">
+      <div onclick="nxOpenProfile('${safeKey}','${safeName}')" style="cursor:pointer;flex-shrink:0;" title="View profile">${avatarHTML(name,emoji,avatarUrl,'','',isVer)}</div>
+      <div class="su-info" onclick="nxOpenProfile('${safeKey}','${safeName}')" style="cursor:pointer;" title="View profile">
         <div class="su-name">${isVer?`<span class="gold-name">${esc(name)}</span>${verBadgeHTML(true)}`:esc(name)}</div>
-        <div class="su-sub">Follows you · Follow back to chat</div>
+        <div class="su-sub"><span style="color:var(--accent);font-weight:700;">Follows you</span> · Follow back to chat</div>
       </div>
       <button class="su-btn" id="su-btn-${safeKey}" onclick="nxSuggestedFollow('${safeKey}','${safeName}',this)">Follow</button>
     </div>`;
@@ -6234,6 +6392,9 @@ window.nxOpenFollowing=nxOpenFollowing;
 window.nxOpenFollowersFor=nxOpenFollowersFor;
 window.nxOpenFollowingFor=nxOpenFollowingFor;
 window.nxCloseFollowList=nxCloseFollowList;
+window.nxUnfollowFromList=nxUnfollowFromList;
+window.nxRemoveFollowerFromList=nxRemoveFollowerFromList;
+window.nxBlockFromFollowerList=nxBlockFromFollowerList;
 window.nxOpenSearchScreen=nxOpenSearchScreen;
 window.nxCloseSearchScreen=nxCloseSearchScreen;
 window.nxClearFullSearch=nxClearFullSearch;
