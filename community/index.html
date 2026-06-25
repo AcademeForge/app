@@ -2672,39 +2672,116 @@ const STORY_VID_MAX_SECS  = 15;               // auto-trim videos longer than 15
    storage for this and gives the exact "no re-download on re-view" result.) */
 const STORY_VID_DB_NAME='nx_story_video_cache';
 const STORY_VID_STORE='videos';
-const STORY_VID_CACHE_MAX_BYTES = 8*1024*1024; // skip caching unusually large files
+const STORY_VID_CACHE_MAX_BYTES = 8*1024*1024;  // skip caching unusually large files
+const STORY_VID_CACHE_MAX_ENTRIES = 30;         // evict oldest once cache grows past this
 let _storyVidDbPromise=null;
 function nxStoryVidDB(){
   if(_storyVidDbPromise) return _storyVidDbPromise;
-  _storyVidDbPromise=new Promise((resolve,reject)=>{
+  _storyVidDbPromise=new Promise(resolve=>{
+    let settled=false;
+    const finish=v=>{ if(!settled){ settled=true; resolve(v); } };
     try{
       const req=indexedDB.open(STORY_VID_DB_NAME,1);
-      req.onupgradeneeded=()=>{ try{ req.result.createObjectStore(STORY_VID_STORE); }catch(e){} };
-      req.onsuccess=()=>resolve(req.result);
-      req.onerror=()=>reject(req.error);
-    }catch(e){ reject(e); }
-  }).catch(()=>null);
+      req.onupgradeneeded=()=>{
+        try{
+          const store=req.result.createObjectStore(STORY_VID_STORE);
+          store.createIndex('by_t','t',{unique:false});
+        }catch(e){}
+      };
+      req.onsuccess=()=>finish(req.result);
+      req.onerror=()=>finish(null);
+      // If another tab is mid-upgrade this can stall indefinitely — don't
+      // let that ever block story playback.
+      req.onblocked=()=>finish(null);
+      // Safety net: cache is a nice-to-have, story playback is not allowed
+      // to wait on it forever.
+      setTimeout(()=>finish(null), 2500);
+    }catch(e){ finish(null); }
+  });
   return _storyVidDbPromise;
 }
 async function nxGetCachedStoryVideo(url){
   try{
     const db=await nxStoryVidDB();
     if(!db) return null;
-    return await new Promise(res=>{
-      const tx=db.transaction(STORY_VID_STORE,'readonly');
-      const req=tx.objectStore(STORY_VID_STORE).get(url);
-      req.onsuccess=()=>res(req.result||null);
-      req.onerror=()=>res(null);
+    const rec=await new Promise(res=>{
+      try{
+        const tx=db.transaction(STORY_VID_STORE,'readonly');
+        const req=tx.objectStore(STORY_VID_STORE).get(url);
+        req.onsuccess=()=>res(req.result||null);
+        req.onerror=()=>res(null);
+        tx.onerror=()=>{}; // already resolved above; just prevent an uncaught tx error
+      }catch(e){ res(null); }
     });
+    return (rec && rec.blob) ? rec.blob : null;
   }catch(e){ return null; }
+}
+function nxStoryVidPutOnce(db,url,blob){
+  return new Promise((resolve,reject)=>{
+    try{
+      const tx=db.transaction(STORY_VID_STORE,'readwrite');
+      tx.oncomplete=()=>resolve(true);
+      tx.onerror=()=>reject(tx.error);
+      tx.onabort=()=>reject(tx.error);
+      tx.objectStore(STORY_VID_STORE).put({blob,t:Date.now()},url);
+    }catch(e){ reject(e); }
+  });
+}
+function nxEvictOldStoryVideos(db,keepCount){
+  return new Promise(resolve=>{
+    try{
+      const tx=db.transaction(STORY_VID_STORE,'readwrite');
+      const store=tx.objectStore(STORY_VID_STORE);
+      const countReq=store.count();
+      countReq.onsuccess=()=>{
+        const toDelete=(countReq.result||0)-keepCount;
+        if(toDelete<=0){ resolve(); return; }
+        let deleted=0;
+        const cursorReq=store.index('by_t').openCursor(); // oldest first
+        cursorReq.onsuccess=e=>{
+          const cursor=e.target.result;
+          if(!cursor || deleted>=toDelete){ resolve(); return; }
+          cursor.delete();
+          deleted++;
+          cursor.continue();
+        };
+        cursorReq.onerror=()=>resolve();
+      };
+      countReq.onerror=()=>resolve();
+      tx.onerror=()=>resolve();
+      tx.onabort=()=>resolve();
+    }catch(e){ resolve(); }
+  });
 }
 async function nxPutCachedStoryVideo(url,blob){
   try{
     const db=await nxStoryVidDB();
     if(!db) return;
-    const tx=db.transaction(STORY_VID_STORE,'readwrite');
-    tx.objectStore(STORY_VID_STORE).put(blob,url);
+    try{
+      await nxStoryVidPutOnce(db,url,blob);
+    }catch(e){
+      // Most likely QuotaExceededError — drop the oldest cached videos and
+      // retry once rather than failing silently forever.
+      try{
+        await nxEvictOldStoryVideos(db,0);
+        await nxStoryVidPutOnce(db,url,blob);
+      }catch(e2){ return; } // give up quietly; video already played fine from network
+    }
+    nxEvictOldStoryVideos(db,STORY_VID_CACHE_MAX_ENTRIES).catch(()=>{});
   }catch(e){}
+}
+// De-dupe concurrent fetch+cache attempts for the same video (e.g. fast
+// prev/next swiping back onto the same uncached story before it finishes).
+const _storyVidFetchInFlight=new Map();
+function nxFetchAndCacheStoryVideo(url){
+  if(_storyVidFetchInFlight.has(url)) return _storyVidFetchInFlight.get(url);
+  const p=fetch(url).then(r=>r.ok?r.blob():null).then(blob=>{
+    if(blob && blob.size>0 && blob.size<=STORY_VID_CACHE_MAX_BYTES){
+      return nxPutCachedStoryVideo(url,blob);
+    }
+  }).catch(()=>{}).finally(()=>{ _storyVidFetchInFlight.delete(url); });
+  _storyVidFetchInFlight.set(url,p);
+  return p;
 }
 // Resolves the src to actually assign to the <video> element:
 // - instant local blob: URL if this video was already cached
@@ -2716,12 +2793,19 @@ async function nxResolveStoryVideoSrc(url){
   if(cached){
     try{ return URL.createObjectURL(cached); }catch(e){ return url; }
   }
-  fetch(url).then(r=>r.ok?r.blob():null).then(blob=>{
-    if(blob && blob.size>0 && blob.size<=STORY_VID_CACHE_MAX_BYTES){
-      nxPutCachedStoryVideo(url,blob);
-    }
-  }).catch(()=>{});
+  nxFetchAndCacheStoryVideo(url);
   return url;
+}
+// Revokes any blob: video src currently in #svMedia, then clears the slide.
+// Centralized here so every place that clears story media also releases
+// the previous cached-video blob: URL instead of leaking it.
+function nxClearStoryMediaEl(){
+  const media=$('svMedia');
+  if(!media) return;
+  media.querySelectorAll('video').forEach(v=>{
+    if(v.src && v.src.startsWith('blob:')){ try{ URL.revokeObjectURL(v.src); }catch(e){} }
+  });
+  media.querySelectorAll('img,video').forEach(n=>n.remove());
 }
 
 async function nxLoadStories(){
@@ -2843,8 +2927,8 @@ function nxCloseStoryViewer(){
   if(media){
     const v=media.querySelector('video');
     if(v){ try{ v.pause(); }catch(e){} }
-    media.querySelectorAll('img,video').forEach(n=>n.remove());
   }
+  nxClearStoryMediaEl();
   if(_storyBarDirty){ nxRenderStoriesBar(); _storyBarDirty=false; }
   _seenCountCache.clear();
   nxForceRepaint();
@@ -2995,7 +3079,7 @@ function nxShowCurrentStory(){
 
   // Media
   const mediaWrap=$('svMedia');
-  mediaWrap.querySelectorAll('img,video').forEach(n=>n.remove());
+  nxClearStoryMediaEl();
   let mediaEl;
   if(story.media_type==='video'){
     mediaEl=document.createElement('video');
@@ -3336,7 +3420,7 @@ function nxOpenStoryComposer(){
   if(!isLoggedIn()){ goToLogin(); return; }
   // FIX v64: only premium (is_verified) members can post stories
   if(!_cache.myVerified){
-    showToast('Only Premium members can post stories. Upgrade to Premium to share your moments!','err');
+    showToast('Premium is unlocked automatically based on your activity and contribution. Keep posting and engaging!', 'err');
     return;
   }
   // Allow re-posting — the edge function atomically replaces the existing story
