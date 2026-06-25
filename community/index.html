@@ -401,6 +401,13 @@ textarea.compose.over{border-color:var(--err);}
 
 /* ── CHAT LIST ── */
 .chat-list{flex:1;overflow-y:auto;padding:12px;}
+[data-theme="dark"] #profileFollowsYouBadge{background:rgba(255,255,255,.08);}
+.suggested-user-card{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--card-s);border-radius:14px;border:1px solid var(--b1);}
+.suggested-user-card .su-info{flex:1;min-width:0;}
+.suggested-user-card .su-name{font-size:14px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.suggested-user-card .su-sub{font-size:12px;color:var(--tm);margin-top:2px;}
+.suggested-user-card .su-btn{flex-shrink:0;padding:6px 14px;border-radius:10px;background:var(--p);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;}
+.suggested-user-card .su-btn:active{opacity:.8;}
 .conv-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;background:var(--card-s);border:1px solid var(--b1);margin-bottom:10px;box-shadow:var(--sh);cursor:pointer;}
 .conv-item:active{opacity:.85;}
 .conv-item.unread{border-color:var(--rose);background:rgba(244,63,94,.02);}
@@ -1104,7 +1111,7 @@ body.light .sv-caught-up-btn{background:#111;color:#fff;}
 
     <div class="view-switch" id="mainTabBar">
       <button class="view-switch-btn active" id="tabFeed" onclick="nxSwitchTab('feed')">Feed</button>
-      <button class="view-switch-btn" id="tabChats" onclick="nxSwitchTab('chats')">Chats <span class="vs-badge hidden" id="chatBadge" style="background:var(--rose);color:#fff;padding:2px 6px;border-radius:99px;font-size:10px;">0 new</span></button>
+      <button class="view-switch-btn" id="tabChats" onclick="nxSwitchTab('chats')">Chats <span class="vs-badge hidden" id="chatBadge" style="background:var(--rose);color:#fff;padding:2px 6px;border-radius:99px;font-size:10px;">0 new</span><span id="pendingFollowsBadge" style="display:none;background:#6366f1;color:#fff;padding:2px 6px;border-radius:99px;font-size:10px;margin-left:2px;font-weight:700;"></span></button>
     </div>
 
     <!-- FEED TAB -->
@@ -1143,6 +1150,12 @@ body.light .sv-caught-up-btn{background:#111;color:#fff;}
 
     <!-- CHATS TAB -->
     <div class="af-page hidden" id="chatsTab" style="padding-bottom:120px;display:flex;flex-direction:column;background:var(--bg);">
+      <!-- Suggested Users: people who follow you but you don't follow back -->
+      <div id="suggestedUsersWrap" style="display:none;padding:14px 14px 0;">
+        <div style="font-size:13px;font-weight:700;color:var(--tm);letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px;">Follow Back to Unlock DMs</div>
+        <div id="suggestedUsersList" style="display:flex;flex-direction:column;gap:8px;"></div>
+        <div style="height:1px;background:var(--b1);margin:14px 0 0;"></div>
+      </div>
       <div class="chat-list" id="chatList">
         <div class="state-msg">Loading…</div>
       </div>
@@ -1162,7 +1175,10 @@ body.light .sv-caught-up-btn{background:#111;color:#fff;}
            <div class="avatar avatar-lg" id="profileAvatar" style="width:72px;height:72px;font-size:32px;"></div>
            <div style="flex:1;min-width:0;">
              <h2 id="profileName" style="font-family:var(--fd);font-size:20px;font-weight:800;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></h2>
-             <div id="profileUsername" style="font-size:13.5px;color:var(--tm);font-weight:600;"></div>
+             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+               <div id="profileUsername" style="font-size:13.5px;color:var(--tm);font-weight:600;"></div>
+               <span id="profileFollowsYouBadge" style="display:none;font-size:11px;font-weight:700;color:var(--tm);background:var(--b1);border-radius:6px;padding:2px 7px;letter-spacing:.02em;">Follows you</span>
+             </div>
            </div>
         </div>
         <div id="profileBio" style="margin-top:16px;font-size:14px;color:var(--t2);line-height:1.6;"></div>
@@ -3084,28 +3100,36 @@ function nxShowCurrentStory(){
   if(story.media_type==='video'){
     mediaEl=document.createElement('video');
     mediaEl.playsInline=true;
-    mediaEl.autoplay=true;
     mediaEl.preload='auto';
     mediaEl.muted=false;
-    // Keep it visually hidden (svMedia bg is already pure black) until the
-    // very first frame is actually ready — this is what removes the
-    // gray "play button" placeholder frame that used to flash before
-    // playback started. Black-to-video is an invisible swap either way.
+    // Keep it visually hidden until the very first frame is ready — prevents
+    // the gray placeholder / black flash before playback starts.
     mediaEl.style.opacity='0';
-    mediaEl.style.transition='opacity .08s linear';
+    mediaEl.style.transition='opacity .12s linear';
     const revealOnReady=()=>{ mediaEl.style.opacity='1'; };
     mediaEl.addEventListener('loadeddata', revealOnReady, {once:true});
     mediaEl.addEventListener('canplay', revealOnReady, {once:true});
+    // If reveal events never fire (edge case), unhide after 2s anyway
+    mediaEl.addEventListener('error', ()=>{ mediaEl.style.opacity='1'; }, {once:true});
+    setTimeout(()=>{ if(mediaEl.style.opacity==='0') mediaEl.style.opacity='1'; }, 2000);
     mediaEl.onended=()=>nxStoryNext();
-    mediaEl.onloadedmetadata=()=>{ nxRunStoryProgress((mediaEl.duration||8)*1000); };
+    mediaEl.onloadedmetadata=()=>{
+      // Start accurate progress now that we know the real duration
+      nxRunStoryProgress((mediaEl.duration||8)*1000);
+    };
     mediaWrap.appendChild(mediaEl);
-    nxRunStoryProgress(STORY_VIDEO_FALLBACK_DURATION);
-    // Serve from on-device cache instantly if we've watched this video
-    // before; otherwise stream it now and cache it for next time.
+    // Assign src then play: DO NOT set autoplay on the element because some
+    // browsers ignore autoplay when src is not yet set at construction time.
     nxResolveStoryVideoSrc(story.media_url).then(src=>{
-      if(_renderToken!==_svRenderToken) return; // user already navigated away
+      if(_renderToken!==_svRenderToken) return; // user navigated away
       mediaEl.src=src;
-      mediaEl.play().catch(()=>{});
+      mediaEl.load();
+      const playPromise = mediaEl.play();
+      if(playPromise) playPromise.catch(()=>{
+        // Autoplay blocked (e.g. policy): reveal and start progress anyway
+        revealOnReady();
+        nxRunStoryProgress(STORY_VIDEO_FALLBACK_DURATION);
+      });
     });
   } else {
     mediaEl=document.createElement('img');
@@ -3818,6 +3842,7 @@ async function nxPreloadConnections(){
     _cache.followingKeys = new Set(_cache.myFollowing.map(u=>String(u.student_key||'')));
     saveSnapshot('following_me', _cache.myFollowing);
   }
+  nxUpdatePendingFollowsBadge(); // update badge now that follow data is fresh
   await nxLoadChatsFromConnections();
 }
 
@@ -4245,6 +4270,29 @@ async function nxCreatePost(){
   if(!res||!res.ok){showToast(res?.message||'Could not post.','err');$('postSubmitBtn').disabled=false;return;}
   inp.value=''; nxRemovePostImage(); nxCloseComposer();
   showToast('Posted successfully!');
+  // Optimistic prepend: immediately show the new post at top of feed
+  // without waiting for the next refresh cycle.
+  if(res.post){
+    const newPost={
+      ...res.post,
+      student_name: sName(),
+      emoji: getMyEmoji(),
+      avatar_url: getMyAvatarUrl(),
+      is_verified: _cache.myVerified,
+      is_liked: false,
+    };
+    _cache.posts.unshift(newPost);
+    const list=$('postsList');
+    if(list){
+      const tmp=document.createElement('div');
+      tmp.innerHTML=renderPostHtml(newPost, sKey(), isAdmin(), false);
+      const card=tmp.firstElementChild;
+      if(card){
+        list.insertBefore(card, list.firstChild);
+        _seenObserver.observe(card);
+      }
+    }
+  }
 }
 
 /* ═══════════════════════════════════════════════════
@@ -4756,6 +4804,8 @@ async function nxOpenProfile(key,name){
   $('profileFollowBtn').className='af-btn-primary';
   $('profileFollowBtn').style.display=key===sKey()?'none':'flex';
   $('profileMessageBtn').style.display=key===sKey()?'none':'flex';
+  const _pfyBadge=$('profileFollowsYouBadge');
+  if(_pfyBadge) _pfyBadge.style.display='none';
   $('profilePostsList').innerHTML='<div class="state-msg">Loading…</div>';
   $('profilePageScroll').scrollTop=0;
 
@@ -4818,9 +4868,24 @@ async function nxLoadProfileMeta(key){
   $('profileFollowersCount').textContent=res.followers_count||0;
   $('profileFollowingCount').textContent=res.following_count||0;
   _profileIsFollowing=!!res.is_following;
+  const _theyFollowMe=!!res.they_follow_me;
+  // Store on _profileData so nxMessageFromProfile can use it
+  if(_profileData && _profileData.key===key){
+    _profileData.is_following=_profileIsFollowing;
+    _profileData.they_follow_me=_theyFollowMe;
+  }
   if(key!==sKey()){
-    $('profileFollowBtn').textContent=_profileIsFollowing?'Following':'Follow';
-    $('profileFollowBtn').className=_profileIsFollowing?'af-btn-secondary-outline':'af-btn-primary';
+    // "Follows you" badge — real data, no fabrication
+    const _fyBadge=$('profileFollowsYouBadge');
+    if(_fyBadge) _fyBadge.style.display=_theyFollowMe?'inline-block':'none';
+    // Button: "Follow Back" when they follow me but I don't follow them
+    if(!_profileIsFollowing && _theyFollowMe){
+      $('profileFollowBtn').textContent='Follow Back';
+      $('profileFollowBtn').className='af-btn-primary';
+    } else {
+      $('profileFollowBtn').textContent=_profileIsFollowing?'Following':'Follow';
+      $('profileFollowBtn').className=_profileIsFollowing?'af-btn-secondary-outline':'af-btn-primary';
+    }
   }
   // Re-apply story ring in case stories were loaded after the profile was shown
   _applyProfileStoryRing(key);
@@ -4830,8 +4895,21 @@ async function nxToggleFollow(){
   const res=await edgeCall({action:'toggle_follow',target_key:_profileData.key});
   if(!res||!res.ok){showToast(res?.message||'Could not update follow.','err');return;}
   _profileIsFollowing=!!res.following;
-  $('profileFollowBtn').textContent=_profileIsFollowing?'Following':'Follow';
-  $('profileFollowBtn').className=_profileIsFollowing?'af-btn-secondary-outline':'af-btn-primary';
+  const _stillFollowsMe=!!(_profileData&&_profileData.they_follow_me);
+  if(!_profileIsFollowing && _stillFollowsMe){
+    $('profileFollowBtn').textContent='Follow Back';
+    $('profileFollowBtn').className='af-btn-primary';
+  } else {
+    $('profileFollowBtn').textContent=_profileIsFollowing?'Following':'Follow';
+    $('profileFollowBtn').className=_profileIsFollowing?'af-btn-secondary-outline':'af-btn-primary';
+  }
+  // Update local following cache
+  if(_profileIsFollowing){
+    _cache.followingKeys.add(_profileData.key);
+  } else {
+    _cache.followingKeys.delete(_profileData.key);
+  }
+  nxRenderSuggestedUsers(); // refresh suggested list in DMs tab
   const c=$('profileFollowersCount');
   c.textContent=Math.max(0,Number(c.textContent||0)+(_profileIsFollowing?1:-1));
   // Update following keys cache
@@ -4847,6 +4925,16 @@ async function nxLoadProfilePosts(key){
 
 function nxMessageFromProfile(){
   if(!_profileData||_profileData.key===sKey()) return;
+  // Mutual follow check: both users must follow each other to DM
+  const iFollowThem = !!_profileData.is_following;
+  // Check if they follow me back using cached follower list
+  const followerKeys = new Set(_cache.myFollowers.map(u=>(u.student_key||u.follower_key||u.key||'')));
+  // they_follow_me is now populated from get_profile; fallback to local follower cache
+  const theyFollowMe = !!_profileData.they_follow_me || followerKeys.has(_profileData.key);
+  if(!iFollowThem || !theyFollowMe){
+    nxOpenNoMutualFollowModal(_profileData.name || _profileData.student_name);
+    return;
+  }
   nxOpenDM(_profileData.key, _profileData.name);
 }
 
@@ -5195,7 +5283,95 @@ async function nxSaveProfile(){
 /* ═══════════════════════════════════════════════════
    CHAT LIST RENDER (with gold verified styling)
 ═══════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════
+   PENDING FOLLOWS BADGE
+   Badge on the Chats tab showing how many people follow
+   you but you haven't followed back yet (= potential DMs).
+═══════════════════════════════════════════════════ */
+function nxUpdatePendingFollowsBadge(){
+  const badge=$('pendingFollowsBadge');
+  if(!badge) return;
+  const count=_cache.myFollowers.filter(u=>{
+    const key=String(u.student_key||u.key||'');
+    return key && key!==sKey() && !_cache.followingKeys.has(key);
+  }).length;
+  if(count>0){
+    badge.textContent=count+' pending';
+    badge.style.display='inline-block';
+  } else {
+    badge.style.display='none';
+  }
+}
+window.nxUpdatePendingFollowsBadge=nxUpdatePendingFollowsBadge;
+
+/* ═══════════════════════════════════════════════════
+   SUGGESTED USERS TO FOLLOW
+   Shows followers who aren't followed back yet —
+   tapping "Follow Back" makes the follow mutual so DMs unlock.
+═══════════════════════════════════════════════════ */
+function nxRenderSuggestedUsers(){
+  nxUpdatePendingFollowsBadge(); // keep badge in sync with suggestion count
+  const wrap=$('suggestedUsersWrap');
+  const list=$('suggestedUsersList');
+  if(!wrap||!list) return;
+
+  // People who follow me but I don't follow back yet
+  const suggestions=_cache.myFollowers.filter(u=>{
+    const key=String(u.student_key||u.key||'');
+    return key && key!==sKey() && !_cache.followingKeys.has(key);
+  }).slice(0,8); // cap at 8 suggestions
+
+  if(!suggestions.length){ wrap.style.display='none'; return; }
+  wrap.style.display='block';
+
+  list.innerHTML=suggestions.map(u=>{
+    const key=String(u.student_key||u.key||'');
+    const name=u.student_name||u.name||'Student';
+    const emoji=u.emoji||'';
+    const avatarUrl=u.avatar_url||'';
+    const isVer=!!u.is_verified;
+    const safeName=esc(name).replace(/'/g,"&#39;");
+    const safeKey=esc(key);
+    return `<div class="suggested-user-card" id="su-card-${safeKey}">
+      ${avatarHTML(name,emoji,avatarUrl,'','',isVer)}
+      <div class="su-info">
+        <div class="su-name">${isVer?`<span class="gold-name">${esc(name)}</span>${verBadgeHTML(true)}`:esc(name)}</div>
+        <div class="su-sub">Follows you · Follow back to chat</div>
+      </div>
+      <button class="su-btn" id="su-btn-${safeKey}" onclick="nxSuggestedFollow('${safeKey}','${safeName}',this)">Follow</button>
+    </div>`;
+  }).join('');
+}
+
+async function nxSuggestedFollow(key, name, btn){
+  if(!key) return;
+  btn.disabled=true; btn.textContent='…';
+  const res=await edgeCall({action:'toggle_follow',target_key:key});
+  if(res&&res.ok&&res.following){
+    // Update local cache
+    _cache.followingKeys.add(key);
+    const profile=_cache.profiles.get(key)||{student_key:key,student_name:name};
+    _cache.myFollowing.push(profile);
+    btn.textContent='Following';
+    btn.style.background='var(--tm)';
+    btn.disabled=true;
+    // Animate card out after 1.2s
+    setTimeout(()=>{
+      const card=$('su-card-'+key);
+      if(card){ card.style.transition='opacity .3s,max-height .4s'; card.style.opacity='0'; card.style.maxHeight='0'; card.style.overflow='hidden';
+        setTimeout(()=>{ card.remove(); nxRenderSuggestedUsers(); },400);
+      }
+    },1200);
+    showToast('Following '+name+'! DMs are now unlocked.');
+  } else {
+    btn.disabled=false; btn.textContent='Follow';
+    showToast(res?.message||'Could not follow.','err');
+  }
+}
+window.nxSuggestedFollow=nxSuggestedFollow;
+
 function nxRenderChatList(){
+  nxRenderSuggestedUsers(); // refresh suggested users panel
   const box=$('chatList'); if(!box) return;
   if(!_cache.chatList.length){
     // Only show "no conversations" if we've already finished loading
@@ -5413,6 +5589,30 @@ function nxCloseDM(){
 /* ═══════════════════════════════════════════════════
    DM OPTIONS / CLEAR CHAT HISTORY
 ═══════════════════════════════════════════════════ */
+<!-- ── NO MUTUAL FOLLOW MODAL ── -->
+<div id="noMutualFollowModal" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);">
+  <div style="background:var(--card);border-radius:20px;padding:28px 24px;max-width:340px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.3);">
+    <div style="font-size:40px;margin-bottom:12px;">🔒</div>
+    <div style="font-size:18px;font-weight:800;color:var(--t1);margin-bottom:8px;">Messaging Restricted</div>
+    <div id="noMutualFollowMsg" style="font-size:14px;color:var(--t2);line-height:1.5;margin-bottom:20px;">You need to follow each other to send messages. Follow them first — once they follow you back, DMs will be unlocked.</div>
+    <button class="af-btn-primary" style="width:100%;margin-bottom:10px;" onclick="nxCloseNoMutualFollowModal()">Got it</button>
+  </div>
+</div>
+
+function nxOpenNoMutualFollowModal(peerName){
+  const msg=$('noMutualFollowMsg');
+  if(msg) msg.textContent=(peerName?'To message '+peerName+', you need to follow each other. Follow them first — once they follow you back, DMs unlock automatically.':'You need to follow each other to send messages. Follow them first — once they follow you back, DMs will be unlocked.');
+  const el=$('noMutualFollowModal');
+  if(el){ nxBringToFront('noMutualFollowModal'); el.style.display='flex'; }
+}
+function nxCloseNoMutualFollowModal(){
+  const el=$('noMutualFollowModal');
+  if(el) el.style.display='none';
+  nxForceRepaint();
+}
+window.nxOpenNoMutualFollowModal=nxOpenNoMutualFollowModal;
+window.nxCloseNoMutualFollowModal=nxCloseNoMutualFollowModal;
+
 function nxOpenDMOptions(){
   if(!_dmPeer) return;
   const isBlocked = _cache.blockedKeys.has(_dmPeer.key);
@@ -5724,7 +5924,13 @@ async function nxSendDM(){
        $('dmImagePreview').src = _dmPendingImage;
        show('dmImagePreviewWrap');
     }
-    showToast(res?.message||'Could not send DM','err');
+    const errMsg = res?.message||'Could not send DM';
+    // Mutual follow restriction: show a professional modal instead of a plain toast
+    if(errMsg && (errMsg.includes('follow each other') || errMsg.includes('mutual') || errMsg.includes('Follow them first'))){
+      nxOpenNoMutualFollowModal(_dmPeer?_dmPeer.name:'');
+    } else {
+      showToast(errMsg,'err');
+    }
   }
 }
 
