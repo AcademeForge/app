@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -375,22 +376,6 @@ input,textarea{-webkit-user-select:text;-moz-user-select:text;user-select:text;}
 .modal-head p{font-size:12px;color:var(--tm);margin-top:2px;font-weight:500;}
 .modal-close{width:30px;height:30px;border-radius:10px;background:var(--grp);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--t2);}
 .modal-close:active{opacity:.7;}
-
-/* ── Red Alert Confirm Modal ── */
-.ra-ov{position:absolute;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(10,0,2,.65);backdrop-filter:blur(4px);}
-.ra-card{width:100%;max-width:340px;background:linear-gradient(180deg,#1a0a0d,#170709);border:1px solid rgba(239,68,68,.35);border-radius:20px;box-shadow:0 0 0 1px rgba(239,68,68,.08),0 20px 50px rgba(0,0,0,.6),0 0 40px rgba(239,68,68,.12);overflow:hidden;animation:raPop .22s cubic-bezier(.2,.9,.3,1.2);}
-@keyframes raPop{from{opacity:0;transform:scale(.92) translateY(8px);}to{opacity:1;transform:scale(1) translateY(0);}}
-.ra-top{display:flex;flex-direction:column;align-items:center;text-align:center;padding:26px 22px 4px;}
-.ra-icon{width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 50% 35%,rgba(239,68,68,.35),rgba(239,68,68,.08));display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:14px;box-shadow:0 0 0 1px rgba(239,68,68,.4),0 0 24px rgba(239,68,68,.35);animation:raPulse 1.8s ease-in-out infinite;}
-@keyframes raPulse{0%,100%{box-shadow:0 0 0 1px rgba(239,68,68,.4),0 0 18px rgba(239,68,68,.25);}50%{box-shadow:0 0 0 1px rgba(239,68,68,.55),0 0 30px rgba(239,68,68,.45);}}
-.ra-title{font-family:var(--fd);font-size:17px;font-weight:800;color:#fff;letter-spacing:.01em;}
-.ra-msg{font-size:13.5px;color:#d8b3b8;line-height:1.55;margin-top:8px;padding:0 4px;}
-.ra-msg strong{color:#fff;font-weight:800;}
-.ra-actions{display:flex;flex-direction:column;gap:10px;padding:22px;}
-.ra-btn-danger{height:46px;border-radius:13px;background:linear-gradient(180deg,#f43f5e,#e11d2e);color:#fff;font-family:var(--fd);font-size:14.5px;font-weight:800;border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 20px rgba(225,29,46,.35);letter-spacing:.01em;}
-.ra-btn-danger:active{transform:scale(.97);filter:brightness(.92);}
-.ra-btn-cancel{height:46px;border-radius:13px;background:rgba(255,255,255,.05);color:#cfa9ad;font-family:var(--fd);font-size:14.5px;font-weight:700;border:1px solid rgba(255,255,255,.08);}
-.ra-btn-cancel:active{background:rgba(255,255,255,.09);}
 .modal-body{padding:16px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;flex:1;}
 textarea.compose,input.field{width:100%;resize:none;outline:none;border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.6;color:var(--t1);background:var(--inp);border:1.5px solid var(--b1);font-family:var(--fb);}
 textarea.compose.over{border-color:var(--err);}
@@ -1130,7 +1115,7 @@ body.light .sv-caught-up-btn{background:#111;color:#fff;}
 
     <div class="view-switch" id="mainTabBar">
       <button class="view-switch-btn active" id="tabFeed" onclick="nxSwitchTab('feed')">Feed</button>
-      <button class="view-switch-btn" id="tabChats" onclick="nxSwitchTab('chats')">Chats <span class="vs-badge hidden" id="chatBadge" style="background:var(--rose);color:#fff;padding:2px 6px;border-radius:99px;font-size:10px;">0 new</span></button>
+      <button class="view-switch-btn" id="tabChats" onclick="nxSwitchTab('chats')">Chats <span class="vs-badge hidden" id="chatBadge" style="background:var(--rose);color:#fff;padding:2px 6px;border-radius:99px;font-size:10px;">0 new</span><span id="pendingFollowsBadge" style="display:none;background:#6366f1;color:#fff;padding:2px 6px;border-radius:99px;font-size:10px;margin-left:2px;font-weight:700;"></span></button>
     </div>
 
     <!-- FEED TAB -->
@@ -1636,20 +1621,6 @@ body.light .sv-caught-up-btn{background:#111;color:#fff;}
     </div>
   </div>
 
-  <div class="ra-ov" id="raConfirmModal">
-    <div class="ra-card" onclick="event.stopPropagation()">
-      <div class="ra-top">
-        <div class="ra-icon">⚠️</div>
-        <div class="ra-title" id="raTitle">Are you sure?</div>
-        <div class="ra-msg" id="raMsg"></div>
-      </div>
-      <div class="ra-actions">
-        <button class="ra-btn-danger" id="raConfirmBtn">Confirm</button>
-        <button class="ra-btn-cancel" id="raCancelBtn">Cancel</button>
-      </div>
-    </div>
-  </div>
-
   <nav class="af-bnav" id="bnav" role="navigation" aria-label="Main">
     <button class="af-nav-btn" onclick="window.location.href='/index.html'" type="button" aria-label="Home">
       <span class="af-nav-icon">🏠</span><span class="af-nav-label">Home</span>
@@ -1885,36 +1856,6 @@ const isAdmin = ()=>ADMIN_KEYS.includes(sKey());
 function wordCount(t){const s=String(t||'').trim();return s?s.split(/\s+/).filter(Boolean).length:0;}
 function initials(n){return String(n||'AF').trim().split(/\s+/).slice(0,2).map(v=>v.charAt(0).toUpperCase()).join('');}
 function esc(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-/* ── Custom red-alert confirm (replaces native confirm()) ── */
-function raConfirm(opts){
-  if(typeof opts==='string') opts={message:opts};
-  const {title='Are you sure?', message='', confirmText='Confirm', cancelText='Cancel'} = opts;
-  return new Promise(resolve=>{
-    const ov=$('raConfirmModal');
-    $('raTitle').textContent=title;
-    $('raMsg').innerHTML=message;
-    const cBtn=$('raConfirmBtn'), xBtn=$('raCancelBtn');
-    cBtn.textContent=confirmText;
-    xBtn.textContent=cancelText;
-    nxBringToFront('raConfirmModal');
-    ov.style.display='flex';
-    const cleanup=(result)=>{
-      ov.style.display='none';
-      cBtn.removeEventListener('click',onConfirm);
-      xBtn.removeEventListener('click',onCancel);
-      ov.removeEventListener('click',onOverlay);
-      resolve(result);
-    };
-    const onConfirm=()=>cleanup(true);
-    const onCancel=()=>cleanup(false);
-    const onOverlay=(e)=>{ if(e.target===ov) cleanup(false); };
-    cBtn.addEventListener('click',onConfirm);
-    xBtn.addEventListener('click',onCancel);
-    ov.addEventListener('click',onOverlay);
-  });
-}
-
 function timeAgo(v){
   if(!v) return '';
   try{
@@ -5305,12 +5246,7 @@ async function nxUnfollowFromList(key, name, btn){
 
 async function nxRemoveFollowerFromList(key, name, btn){
   if(!key) return;
-  const ok=await raConfirm({
-    title:'Remove Follower?',
-    message:'Remove <strong>'+esc(name)+'</strong> from your followers?',
-    confirmText:'Remove'
-  });
-  if(!ok) return;
+  if(!confirm('Remove '+name+' from your followers?')) return;
 
   // OPTIMISTIC: remove row + update cache immediately — UI unfreezes at once
   const row=btn.closest('[data-follow-row]');
@@ -5333,12 +5269,7 @@ async function nxRemoveFollowerFromList(key, name, btn){
 
 async function nxBlockFromFollowerList(key, name, btn){
   if(!key) return;
-  const ok=await raConfirm({
-    title:'Block this user?',
-    message:'Block DMs with <strong>'+esc(name)+'</strong>? They won\'t be able to send DMs.',
-    confirmText:'Block'
-  });
-  if(!ok) return;
+  if(!confirm('Block '+name+'? They won\'t be able to follow you or send DMs.')) return;
   btn.disabled=true;
   const res=await edgeCall({action:'block_user',target_key:key});
   if(res && res.ok){
