@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -422,8 +423,36 @@ textarea.compose.over{border-color:var(--err);}
 .dm-hdr-info{flex:1;min-width:0;cursor:pointer;}
 .dm-hdr-name{font-family:var(--fd);font-size:15px;font-weight:800;color:var(--t1);}
 .dm-hdr-status{font-size:11.5px;color:var(--tm);font-weight:600;margin-top:2px;}
+/* ── TYPING INDICATOR ── */
+.typing-indicator{display:inline-flex;align-items:center;gap:3px;color:var(--p);font-size:12px;font-weight:600;}
+.typing-dot{width:5px;height:5px;border-radius:50%;background:var(--p);display:inline-block;animation:typingBounce 1.2s ease-in-out infinite;}
+.typing-dot:nth-child(2){animation-delay:.22s;}
+.typing-dot:nth-child(3){animation-delay:.44s;}
+@keyframes typingBounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-5px);}}
+/* ── DM SEARCH BAR ── */
+.dm-search-bar{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 12px;border-bottom:1px solid var(--b1);
+  background:var(--hdr);flex-shrink:0;
+  animation:slideDown .18s ease;
+}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+.dm-search-input{
+  flex:1;background:var(--inp);border:1.5px solid var(--b1);
+  border-radius:20px;padding:7px 14px;font-size:13.5px;
+  color:var(--t1);font-family:var(--fb);outline:none;
+  transition:border-color .15s;
+}
+.dm-search-input:focus{border-color:var(--p);}
+.dm-search-count{font-size:12px;font-weight:700;color:var(--tm);white-space:nowrap;min-width:36px;text-align:center;}
+.dm-search-nav{background:none;border:1px solid var(--b1);border-radius:50%;width:30px;height:30px;font-size:14px;color:var(--t1);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .12s;}
+.dm-search-nav:hover{background:var(--b1);}
+.dm-search-nav:disabled{opacity:.3;cursor:not-allowed;}
+.dm-search-close{font-size:16px;color:var(--tm);background:none;border:none;padding:0 2px;flex-shrink:0;}
+mark.dm-hl{background:rgba(251,191,36,.45);color:inherit;border-radius:3px;padding:0 1px;}
+.dm-search-current .bubble{outline:2px solid var(--p);outline-offset:2px;border-radius:14px;}
 .dm-messages{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:4px;}
-.bubble-wrap{display:flex;align-items:flex-end;gap:6px;padding:1px 0;}
+.bubble-wrap{display:flex;align-items:flex-end;gap:6px;padding:1px 0;position:relative;}
 .bubble-wrap.me{flex-direction:row-reverse;}
 .bubble-avatar-slot{width:28px;height:28px;flex-shrink:0;}
 .bubble{
@@ -439,6 +468,36 @@ textarea.compose.over{border-color:var(--err);}
 .bubble-time{font-size:10px;color:var(--tm);font-weight:500;white-space:nowrap;margin-top:2px;padding:0 2px;}
 .bubble-wrap.consecutive{margin-top:-2px;}
 .bubble-wrap.consecutive .bubble-avatar-slot{visibility:hidden;}
+/* ── DM EMOJI REACTIONS ── */
+.emoji-picker-float{
+  position:fixed;z-index:9900;display:none;
+  background:var(--hdr);border:1px solid var(--b1);
+  border-radius:40px;padding:5px 8px;gap:2px;
+  align-items:center;justify-content:center;
+  box-shadow:0 8px 32px rgba(0,0,0,.28);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+}
+.emoji-picker-float button{
+  font-size:24px;line-height:1;background:none;border:none;cursor:pointer;
+  padding:4px 6px;border-radius:50%;
+  transition:transform .12s,background .12s;
+}
+.emoji-picker-float button:hover,.emoji-picker-float button:active{
+  background:var(--b1);transform:scale(1.3);
+}
+.bubble-reactions{
+  display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;
+}
+.reaction-chip{
+  display:inline-flex;align-items:center;gap:3px;
+  background:var(--hdr);border:1.5px solid var(--b1);
+  border-radius:20px;padding:2px 9px 2px 7px;
+  font-size:14px;cursor:default;
+  box-shadow:0 1px 4px rgba(0,0,0,.07);
+  transition:transform .1s;user-select:none;
+}
+.reaction-chip.mine{border-color:var(--p);background:rgba(99,102,241,.08);}
+.reaction-chip .rx-count{font-size:11px;font-weight:700;color:var(--tm);}
 .dm-input-area{display:flex;align-items:flex-end;gap:10px;padding:12px 14px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--b1);background:var(--hdr);flex-shrink:0;}
 .dm-textarea{flex:1;resize:none;outline:none;border-radius:20px;padding:12px 16px;font-size:14px;line-height:1.5;color:var(--t1);background:var(--inp);border:1.5px solid var(--b1);font-family:var(--fb);max-height:120px;min-height:44px;}
 .dm-send{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 4px 12px rgba(79,70,229,.3);}
@@ -473,6 +532,26 @@ textarea.compose.over{border-color:var(--err);}
 /* Skeleton loader */
 .af-skel{background:linear-gradient(90deg,var(--grp) 25%,var(--b1) 50%,var(--grp) 75%);background-size:200% 100%;animation:skel 1.4s ease infinite;border-radius:14px;}
 @keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* Rich skeleton sub-parts (all shimmer via af-skel) */
+.af-skel-circle{border-radius:50%;flex-shrink:0;}
+.af-skel-line{height:10px;border-radius:6px;margin:4px 0;}
+/* Image progressive fade-in — every img inside .post-image / .dm-img starts invisible */
+.post-image img,.dm-img img,.dm-bubble-img{opacity:0;transition:opacity .28s ease;}
+/* Story skeleton circles */
+.story-skel-item{display:inline-flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;padding:0 6px;}
+.story-skel-ring{width:54px;height:54px;border-radius:50%;}
+.story-skel-label{width:38px;height:8px;border-radius:6px;margin-top:2px;}
+/* Chat skeleton rows */
+.chat-skel-row{display:flex;gap:12px;padding:13px 16px;align-items:center;}
+.chat-skel-avatar{width:46px;height:46px;border-radius:50%;flex-shrink:0;}
+.chat-skel-body{flex:1;display:flex;flex-direction:column;gap:8px;}
+.chat-skel-name{height:10px;border-radius:6px;width:42%;}
+.chat-skel-preview{height:9px;border-radius:6px;width:72%;}
+/* DM bubble skeletons */
+.dm-skel-wrap{padding:4px 10px;}
+.dm-skel-bubble{height:38px;border-radius:20px;}
+.dm-skel-bubble.me{width:55%;margin-left:auto;}
+.dm-skel-bubble.peer{width:60%;margin-right:auto;}
 .spin{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
 
@@ -553,6 +632,20 @@ textarea.compose.over{border-color:var(--err);}
   position:absolute;bottom:0;right:0;
   border:2px solid var(--shell);
 }
+/* ── STORY AVATAR ONLINE DOT ── */
+.story-online-dot{
+  position:absolute;bottom:1px;right:1px;
+  width:13px;height:13px;border-radius:50%;
+  background:#22c55e;
+  border:2.5px solid var(--shell);
+  box-shadow:0 0 0 1.5px rgba(34,197,94,.35);
+  animation:storyOnlinePulse 2.4s ease-in-out infinite;
+  pointer-events:none;z-index:2;
+}
+@keyframes storyOnlinePulse{
+  0%,100%{box-shadow:0 0 0 1.5px rgba(34,197,94,.35);}
+  50%{box-shadow:0 0 0 3.5px rgba(34,197,94,.15);}
+}
 .story-label{
   font-size:10.5px;font-weight:700;color:var(--t2);
   text-align:center;overflow:hidden;text-overflow:ellipsis;
@@ -562,23 +655,24 @@ textarea.compose.over{border-color:var(--err);}
 
 /* ── STORY VIEWER ── */
 .story-viewer{
-  position:absolute;inset:0;z-index:9500;background:#000;
+  position:absolute;inset:0;z-index:9500;background:var(--bg);
   display:none;flex-direction:column;
   touch-action:none;
 }
 .story-viewer.open{display:flex;}
 /* Media area always dark so content pops */
 .sv-media{background:#000;}
-/* Header: dark gradient overlay (Instagram-style) */
-.sv-hdr{background:linear-gradient(rgba(0,0,0,.45),transparent);}
-/* Light mode overrides */
-body.light .story-viewer{background:var(--bg);}
-body.light .sv-hdr{background:rgba(255,255,255,.88);backdrop-filter:blur(10px);}
-body.light .sv-hdr-name{color:var(--t1);}
-body.light .sv-hdr-time{color:var(--t2);}
-body.light .sv-close,body.light .sv-opts-btn{background:rgba(0,0,0,.08);color:var(--t1);}
-body.light .sv-prog-seg{background:rgba(0,0,0,.18);}
-body.light .sv-prog-seg-fill{background:#111;}
+/* Header: solid dark background so name is always readable in any theme */
+.sv-hdr{background:rgba(0,0,0,.80);}
+[data-theme="light"] .sv-hdr{background:rgba(0,0,0,.88);}
+.story-viewer{background:#000!important;}
+.sv-hdr-name{color:#fff!important;}
+/* Force verified gold-name spans to white inside story header so they're readable */
+.sv-hdr-name .gold-name{color:#fff!important;}
+.sv-hdr-time{color:rgba(255,255,255,.8)!important;}
+.sv-close,.sv-opts-btn{background:rgba(0,0,0,.32)!important;color:#fff!important;}
+.sv-prog-seg{background:rgba(255,255,255,.35);}
+.sv-prog-seg-fill{background:#fff;}
 .sv-progress{
   display:flex;gap:3px;padding:12px 12px 0;flex-shrink:0;
 }
@@ -612,15 +706,12 @@ body.light .sv-prog-seg-fill{background:#111;}
 .sv-media{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
 .sv-media img,.sv-media video{max-width:100%;max-height:100%;object-fit:contain;}
 .sv-media video{width:100%;}
-@keyframes sv-media-in{from{opacity:0;transform:scale(1.018);}to{opacity:1;transform:scale(1);}}
-.sv-media img,.sv-media video{animation:sv-media-in .2s ease;}
 .sv-caption{
-  padding:8px 16px 6px;color:#fff;font-size:14px;font-weight:600;
+  padding:8px 16px 6px;color:var(--t1);font-size:14px;font-weight:600;
   text-align:center;flex-shrink:0;
-  min-height:0;background:rgba(0,0,0,.72);
+  min-height:0;background:var(--card-s);
   display:none;
 }
-body.light .sv-caption{background:var(--card-s);color:var(--t1);}
 .sv-caption.has-text{display:block;}
 .sv-tap-prev,.sv-tap-next{
   position:absolute;top:0;bottom:0;width:40%;z-index:10;
@@ -633,19 +724,16 @@ body.light .sv-caption{background:var(--card-s);color:var(--t1);}
   display:none;flex-direction:column;
   align-items:center;justify-content:center;gap:6px;
   padding:8px 16px calc(14px + env(safe-area-inset-bottom,0px));
-  flex-shrink:0;background:rgba(0,0,0,.72);
-  border-top:1px solid rgba(255,255,255,.1);
+  flex-shrink:0;background:var(--card-s);
+  border-top:1px solid var(--b1);
 }
 .sv-bottom-bar.visible{display:flex;}
-body.light .sv-bottom-bar{background:var(--card-s);border-top:1px solid var(--b1);}
 .sv-seen-btn{
   display:flex;align-items:center;gap:6px;
-  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
-  color:#fff;font-size:13px;font-weight:700;
+  background:var(--bg);border:1px solid var(--b1);
+  color:var(--t1);font-size:13px;font-weight:700;
   padding:8px 14px;border-radius:99px;
-  backdrop-filter:blur(6px);
 }
-body.light .sv-seen-btn{background:var(--bg);border-color:var(--b1);color:var(--t1);backdrop-filter:none;}
 .sv-eye-ic{font-size:15px;}
 .sv-delete-btn-inline{
   background:rgba(239,68,68,.85);color:#fff;font-size:12px;font-weight:800;
@@ -751,16 +839,12 @@ body.light .sv-seen-btn{background:var(--bg);border-color:var(--b1);color:var(--
 .presence-offline{color:var(--tm);font-size:11.5px;}
 
 /* ── STORY REPLY BAR ── */
-.sv-reply-bar{padding:8px 16px calc(20px + env(safe-area-inset-bottom,0px));background:rgba(0,0,0,.72);display:none;flex-direction:column;gap:8px;flex-shrink:0;border-top:1px solid rgba(255,255,255,.1);}
+.sv-reply-bar{padding:8px 16px calc(20px + env(safe-area-inset-bottom,0px));background:var(--card-s);display:none;flex-direction:column;gap:8px;flex-shrink:0;border-top:1px solid var(--b1);}
 .sv-reply-bar.visible{display:flex;}
-body.light .sv-reply-bar{background:var(--card-s);border-top:1px solid var(--b1);}
 .sv-reply-row{display:flex;align-items:center;gap:8px;}
-.sv-reply-row input{flex:1;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.2);border-radius:22px;padding:9px 14px;color:#fff;font-family:var(--fb);font-size:14px;outline:none;min-width:0;}
-.sv-reply-row input::placeholder{color:rgba(255,255,255,.45);}
-.sv-reply-row input:focus{border-color:rgba(255,255,255,.55);}
-body.light .sv-reply-row input{background:var(--bg);border-color:var(--b1);color:var(--t1);}
-body.light .sv-reply-row input::placeholder{color:var(--tm);}
-body.light .sv-reply-row input:focus{border-color:var(--ac);}
+.sv-reply-row input{flex:1;background:var(--bg);border:1.5px solid var(--b1);border-radius:22px;padding:9px 14px;color:var(--t1);font-family:var(--fb);font-size:14px;outline:none;min-width:0;}
+.sv-reply-row input::placeholder{color:var(--tm);}
+.sv-reply-row input:focus{border-color:var(--ac);}
 .sv-reply-send{width:40px;height:40px;border-radius:50%;background:var(--ac);color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .15s,transform .12s;}
 .sv-reply-send:disabled{opacity:.38;}
 .sv-reply-send:not(:disabled):active{transform:scale(.9);}
@@ -791,37 +875,33 @@ body.light .sv-reply-row input:focus{border-color:var(--ac);}
 /* Swipe-up hint — lives inside sv-bottom-bar */
 .sv-swipe-hint{
   display:flex;align-items:center;gap:4px;
-  color:rgba(255,255,255,.6);font-size:11px;font-weight:600;pointer-events:none;
+  color:var(--tm);font-size:11px;font-weight:600;pointer-events:none;
 }
 .sv-swipe-hint::before{content:'↑';font-size:13px;}
-body.light .sv-swipe-hint{color:var(--tm);}
 
 /* ── All Caught Up card ── */
 .sv-caught-up{
-  position:absolute;inset:0;z-index:60;background:#000;
+  position:absolute;inset:0;z-index:60;background:var(--bg);
   display:none;flex-direction:column;align-items:center;justify-content:center;
   gap:14px;padding:32px;text-align:center;
 }
 .sv-caught-up.active{display:flex;}
-body.light .sv-caught-up{background:var(--bg);}
 .sv-caught-up-check{
   width:76px;height:76px;border-radius:50%;
-  background:rgba(34,197,94,.15);border:2.5px solid #22c55e;
+  background:rgba(34,197,94,.12);border:2.5px solid #22c55e;
   display:flex;align-items:center;justify-content:center;
   color:#22c55e;font-size:34px;font-weight:800;margin-bottom:6px;
 }
-.sv-caught-up-title{color:#fff;font-size:20px;font-weight:800;font-family:var(--fd);}
-.sv-caught-up-sub{color:rgba(255,255,255,.6);font-size:14px;line-height:1.5;max-width:240px;}
-body.light .sv-caught-up-title{color:var(--t1);}
-body.light .sv-caught-up-sub{color:var(--t2);}
+.sv-caught-up-title{color:var(--t1);font-size:20px;font-weight:800;font-family:var(--fd);}
+.sv-caught-up-sub{color:var(--t2);font-size:14px;line-height:1.5;max-width:240px;}
 .sv-caught-up-btn{
   margin-top:14px;padding:13px 36px;
   background:#fff;color:#111;border-radius:26px;
   font-size:15px;font-weight:700;font-family:var(--fb);
-  box-shadow:0 2px 18px rgba(255,255,255,.15);
+  box-shadow:0 2px 12px rgba(0,0,0,.18);
   transition:opacity .15s,transform .12s;
 }
-body.light .sv-caught-up-btn{background:#111;color:#fff;box-shadow:0 2px 12px rgba(0,0,0,.18);}
+body.light .sv-caught-up-btn{background:#111;color:#fff;}
 .sv-caught-up-btn:active{opacity:.85;transform:scale(.97);}
 
 #imgLightbox{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;pointer-events:none;touch-action:none;}
@@ -871,6 +951,121 @@ body.light .sv-caught-up-btn{background:#111;color:#fff;box-shadow:0 2px 12px rg
 #svHdrClickable.sv-tappable:active{opacity:.75;}
 /* Premium badge inline with sv-hdr-name */
 .sv-hdr-name .gold-badge{font-size:11px;margin-left:3px;vertical-align:middle;}
+
+/* ── STORY REPLY BUBBLES ── */
+.story-reply-bubble{padding:8px 12px!important;}
+.story-reply-badge{
+  font-size:10.5px;font-weight:700;
+  color:rgba(255,255,255,.75);
+  background:rgba(255,255,255,.14);
+  border-left:2px solid rgba(255,255,255,.5);
+  padding:2px 8px;border-radius:0 6px 6px 0;
+  margin-bottom:5px;letter-spacing:.01em;
+  display:inline-block;
+}
+.bubble.me .story-reply-badge{
+  color:rgba(255,255,255,.85);
+  background:rgba(255,255,255,.18);
+  border-left-color:rgba(255,255,255,.6);
+}
+[data-theme="light"] .bubble:not(.me) .story-reply-badge{
+  color:rgba(79,70,229,.7);
+  background:rgba(79,70,229,.1);
+  border-left-color:rgba(79,70,229,.5);
+}
+.story-reply-body{font-size:13.5px;white-space:pre-wrap;word-break:break-word;}
+
+/* ── PREMIUM FEED/CHAT DESIGN ── */
+/* Richer post cards */
+.post-card{
+  background:var(--card-s);
+  border:1px solid var(--b1);
+  box-shadow:var(--sh);
+  transition:box-shadow .15s var(--ease);
+}
+.post-card:active{box-shadow:var(--she);}
+
+/* Premium stories bar */
+.stories-bar{
+  background:var(--shell);
+  border-bottom:1px solid var(--b1);
+}
+
+/* Chat list items — elevated design */
+.chat-row{
+  background:var(--card-s);
+  border-radius:14px;
+  margin:0 10px 6px;
+  border:1px solid var(--b1);
+  box-shadow:0 1px 4px rgba(0,0,0,.04);
+  overflow:hidden;
+  transition:background .1s,box-shadow .1s;
+}
+.chat-row:active{background:var(--grp);box-shadow:var(--she);}
+
+/* Feed tab pill buttons — premium look */
+.feed-pills{gap:6px;}
+.feed-pills .pill-btn{
+  border-radius:99px;
+  font-size:12.5px;
+  font-weight:700;
+  padding:5px 16px;
+  transition:background .15s,color .15s,box-shadow .15s;
+}
+.feed-pills .pill-btn.active{
+  box-shadow:0 2px 8px rgba(79,70,229,.25);
+}
+
+/* Premium action buttons — smooth hover state */
+.action-btn{transition:opacity .12s,transform .1s;}
+.action-btn:active{opacity:.7;transform:scale(.93);}
+
+/* Smooth tab switch animation */
+.af-view{will-change:opacity;}
+
+/* ── NEW MESSAGE DOT (arrives while on feed tab) ── */
+.conv-new-badge{
+  display:inline-flex;align-items:center;
+  background:var(--rose);color:#fff;
+  font-size:9.5px;font-weight:800;letter-spacing:.04em;
+  padding:2px 7px;border-radius:99px;
+  margin-left:6px;flex-shrink:0;
+  animation:newMsgPulse 1.4s ease-in-out infinite;
+  text-transform:uppercase;
+}
+@keyframes newMsgPulse{
+  0%,100%{opacity:1;transform:scale(1);}
+  50%{opacity:.7;transform:scale(.92);}
+}
+/* Highlight the entire row for extra pop */
+.conv-item.has-new-msg{
+  background:var(--p-soft);
+  border-left:2.5px solid var(--p);
+}
+[data-theme="dark"] .conv-item.has-new-msg{
+  background:rgba(129,140,248,.1);
+  border-left-color:var(--pl);
+}
+/* ── DM Reply Quote (inside a sent/received bubble) ── */
+.dm-reply-quote{display:block;border-left:3px solid var(--p);padding:4px 8px;background:rgba(0,0,0,.08);border-radius:6px;font-size:11.5px;color:var(--tm);margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
+[data-theme="dark"] .dm-reply-quote{background:rgba(255,255,255,.08);}
+/* ── DM Reply Banner (above input area, shown when replying) ── */
+.dm-reply-banner{display:flex;align-items:center;gap:8px;padding:7px 14px;background:var(--hdr);border-top:1px solid var(--b1);border-left:3px solid var(--p);}
+.dm-reply-banner-text{flex:1;font-size:12px;color:var(--tm);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dm-reply-cancel{margin-left:auto;font-size:18px;color:var(--tm);background:none;border:none;cursor:pointer;padding:0 4px;flex-shrink:0;line-height:1;}
+/* ── Bubble delivery / read ticks (WhatsApp-style) ── */
+.bubble-tick{font-size:11px;font-weight:800;text-align:right;margin-top:2px;padding-right:2px;line-height:1;letter-spacing:-1px;user-select:none;}
+.bubble-tick.sent{color:var(--tm);opacity:.7;}   /* ✓  single grey = delivered to server */
+.bubble-tick.seen{color:#3b82f6;opacity:1;}       /* ✓✓ double blue = peer has read      */
+/* ── Older messages loader ── */
+.dm-load-older-btn{display:block;width:100%;text-align:center;padding:8px 0;font-size:12px;font-weight:700;color:var(--p);background:none;border:none;cursor:pointer;opacity:.8;}
+/* ── Swipe-to-reply arrow hint ── shown beside bubble on swipe */
+.bubble-reply-hint{position:absolute;font-size:18px;color:var(--p);opacity:0;pointer-events:none;transition:opacity .15s;top:50%;transform:translateY(-50%);}
+.bubble-wrap.me .bubble-reply-hint{right:calc(100% + 6px);}
+.bubble-wrap:not(.me) .bubble-reply-hint{left:calc(100% + 6px);}
+.bubble-wrap.swiping .bubble-reply-hint{opacity:.75;}
+.bubble-meta{display:flex;align-items:center;gap:4px;}
+.bubble-meta.me{justify-content:flex-end;}
 </style>
 </head>
 <body>
@@ -1052,7 +1247,16 @@ body.light .sv-caught-up-btn{background:#111;color:#fff;box-shadow:0 2px 12px rg
         </div>
         <div class="dm-hdr-status" id="dmHdrStatus"></div>
       </div>
-      <button class="af-hdr-icon-btn" onclick="nxOpenDMOptions()" style="margin-left:auto;" aria-label="Chat options">⋯</button>
+      <button class="af-hdr-icon-btn" onclick="nxOpenDMSearch()" style="margin-left:auto;margin-right:2px;" aria-label="Search messages">🔍</button>
+      <button class="af-hdr-icon-btn" onclick="nxOpenDMOptions()" aria-label="Chat options">⋯</button>
+    </div>
+    <!-- DM inline search bar (hidden until search icon tapped) -->
+    <div class="dm-search-bar hidden" id="dmSearchBar">
+      <input id="dmSearchInput" class="dm-search-input" type="search" placeholder="Search messages…" oninput="nxDMSearchInput()" autocomplete="off"/>
+      <span id="dmSearchCount" class="dm-search-count"></span>
+      <button class="dm-search-nav" id="dmSearchPrev" onclick="nxDMSearchNav(-1)" aria-label="Previous match" disabled>↑</button>
+      <button class="dm-search-nav" id="dmSearchNext" onclick="nxDMSearchNav(1)"  aria-label="Next match"     disabled>↓</button>
+      <button class="dm-search-close" onclick="nxCloseDMSearch()" aria-label="Close search">✕</button>
     </div>
     <div class="dm-messages" id="dmMessages">
       <div class="state-msg">Loading…</div>
@@ -1069,6 +1273,11 @@ body.light .sv-caught-up-btn{background:#111;color:#fff;box-shadow:0 2px 12px rg
     <div class="dm-edit-banner hidden" id="dmEditBanner">
       <span>Editing message…</span>
       <button onclick="nxCancelEditDM()">Cancel</button>
+    </div>
+    <div class="dm-reply-banner hidden" id="dmReplyBanner">
+      <span style="font-size:13px;flex-shrink:0;">↩</span>
+      <span class="dm-reply-banner-text" id="dmReplyPreview"></span>
+      <button class="dm-reply-cancel" onclick="nxCancelDMReply()">✕</button>
     </div>
     <div class="dm-input-area" style="position:relative;">
       <div id="dmBlockedBanner" class="hidden" style="position:absolute;inset:0;background:var(--hdr);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--tm);z-index:5;backdrop-filter:blur(16px);border-top:1px solid var(--b1);">You cannot send messages to this user.</div>
@@ -1328,6 +1537,16 @@ body.light .sv-caught-up-btn{background:#111;color:#fff;box-shadow:0 2px 12px rg
       <button id="menuDeleteBtn" class="danger" style="display:none;" onclick="nxDeleteTarget()">🗑 Delete</button>
       <button onclick="nxCloseMenu()">✕ Cancel</button>
     </div>
+  </div>
+
+  <!-- Floating emoji reaction picker -->
+  <div class="emoji-picker-float" id="emojiPickerFloat">
+    <button onclick="nxSendReaction('❤️')">❤️</button>
+    <button onclick="nxSendReaction('👍')">👍</button>
+    <button onclick="nxSendReaction('😂')">😂</button>
+    <button onclick="nxSendReaction('😮')">😮</button>
+    <button onclick="nxSendReaction('😢')">😢</button>
+    <button onclick="nxSendReaction('🔥')">🔥</button>
   </div>
 
   <div class="modal-ov" id="dmOptionsModal" onclick="nxCloseDMOptions()">
@@ -1990,12 +2209,401 @@ let _mode='relevant';
 let _curPostId=null, _replyParentId=null, _menuTarget=null;
 let _profileData=null, _profileIsFollowing=false;
 let _dmPeer=null, _dmEditingId=null, _dmPendingImage=null;
+let _emojiPickerMsgId=null;
+const _RX_EMOJIS=['❤️','👍','😂','😮','😢','🔥'];
+const _RX_RE=/^\[rx:([^:]+):(.+)\]$/;
+const _DM_REPLY_RE=/^\u21A9\[(\d+)\] ([^\n]{0,80})\n([\s\S]*)$/;
+let _myTypingTimer=null;     // debounce: stop broadcasting after idle
+let _myTypingSendTimer=null; // throttle: don't spam set_typing on every keystroke
+let _peerTypingTimer=null;   // auto-expire peer's typing indicator
+let _dmSearchMatches=[];     // NodeList of matching bubble-wrap elements
+let _dmSearchIdx=-1;         // currently focused match index
+let _dmReplyTo=null;         // {id,text} — message being replied to
+let _dmOldestTs=null;        // oldest message ts loaded (for pagination)
+let _dmLoadingOlder=false;   // guard against concurrent pagination fetches
+let _dmPeerReadAt=null;      // server-reported timestamp when peer last read this thread
+
+/* ── Escape text then wrap search-term hits in <mark> ── */
+function _hlText(raw, term){
+  const escaped=esc(raw);
+  if(!term) return escaped;
+  // Escape special regex chars in the (already HTML-escaped) term
+  const safeTerm=esc(term).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  return escaped.replace(new RegExp('('+safeTerm+')','gi'),'<mark class="dm-hl">$1</mark>');
+}
+
+function nxOpenDMSearch(){
+  show('dmSearchBar');
+  $('dmSearchInput').value='';
+  $('dmSearchCount').textContent='';
+  $('dmSearchPrev').disabled=true;
+  $('dmSearchNext').disabled=true;
+  _dmSearchMatches=[]; _dmSearchIdx=-1;
+  setTimeout(()=>$('dmSearchInput').focus(),80);
+}
+function nxCloseDMSearch(){
+  hide('dmSearchBar');
+  $('dmSearchInput').value='';
+  _dmSearchMatches=[]; _dmSearchIdx=-1;
+  // Re-render without highlights
+  const chatObj=_cache.chatList.find(c=>c.peer.student_key===(_dmPeer&&_dmPeer.key));
+  if(chatObj) nxRenderDMMessages(chatObj.messages,'');
+}
+function nxDMSearchInput(){
+  const term=($('dmSearchInput').value||'').trim();
+  const chatObj=_cache.chatList.find(c=>c.peer.student_key===(_dmPeer&&_dmPeer.key));
+  if(!chatObj) return;
+  nxRenderDMMessages(chatObj.messages, term);
+  // Collect all highlighted rows
+  _dmSearchMatches=Array.from($('dmMessages').querySelectorAll('.dm-search-match'));
+  _dmSearchIdx=_dmSearchMatches.length>0?0:-1;
+  _nxDMSearchUpdateUI();
+  if(_dmSearchIdx>=0) _nxDMSearchFocus(_dmSearchIdx);
+}
+function nxDMSearchNav(dir){
+  if(!_dmSearchMatches.length) return;
+  _dmSearchIdx=(_dmSearchIdx+dir+_dmSearchMatches.length)%_dmSearchMatches.length;
+  _nxDMSearchUpdateUI();
+  _nxDMSearchFocus(_dmSearchIdx);
+}
+function _nxDMSearchFocus(idx){
+  // Remove previous current highlight
+  _dmSearchMatches.forEach(el=>el.classList.remove('dm-search-current'));
+  const el=_dmSearchMatches[idx];
+  if(!el) return;
+  el.classList.add('dm-search-current');
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function _nxDMSearchUpdateUI(){
+  const total=_dmSearchMatches.length;
+  const countEl=$('dmSearchCount');
+  const term=($('dmSearchInput').value||'').trim();
+  if(!term){ countEl.textContent=''; $('dmSearchPrev').disabled=true; $('dmSearchNext').disabled=true; return; }
+  countEl.textContent=total?`${_dmSearchIdx+1}/${total}`:'0 found';
+  $('dmSearchPrev').disabled=total<2;
+  $('dmSearchNext').disabled=total<2;
+}
+
+function nxSendTypingSignal(){
+  if(!_dmPeer) return;
+  // Throttle: only actually call the API once per 2s
+  if(!_myTypingSendTimer){
+    edgeCall({action:'set_typing',peer_key:_dmPeer.key}).catch(()=>{});
+    _myTypingSendTimer=setTimeout(()=>{ _myTypingSendTimer=null; },2000);
+  }
+  // Stop signal after 3s of no further keystrokes
+  clearTimeout(_myTypingTimer);
+  _myTypingTimer=setTimeout(()=>{ _myTypingTimer=null; },3000);
+}
+function nxStopTypingSignal(){
+  clearTimeout(_myTypingTimer); _myTypingTimer=null;
+  clearTimeout(_myTypingSendTimer); _myTypingSendTimer=null;
+}
+function nxShowPeerTyping(){
+  const el=$('dmHdrStatus');
+  if(!el) return;
+  el.innerHTML='<span class="typing-indicator"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>&nbsp;typing…</span>';
+  clearTimeout(_peerTypingTimer);
+  _peerTypingTimer=setTimeout(nxClearPeerTyping,4000);
+}
+function nxClearPeerTyping(){
+  clearTimeout(_peerTypingTimer); _peerTypingTimer=null;
+  // Restore the status line — cheaply refresh it from cached presence
+  const statusEl=$('dmHdrStatus');
+  if(!statusEl||!_dmPeer) return;
+  const pres=_cache.presence[_dmPeer.key];
+  const presInfo=pres?formatPresence(pres):null;
+  if(presInfo&&presInfo.online){
+    statusEl.innerHTML='<span class="presence-online" style="font-size:12px;">Active now</span>';
+    statusEl.style.color='';
+  } else if(presInfo){
+    statusEl.textContent=presInfo.label;
+    statusEl.style.color='var(--tm)';
+  } else {
+    statusEl.textContent='Community Member';
+    statusEl.style.color='var(--tm)';
+  }
+}
+
+function nxShowEmojiPicker(e, msgId){
+  e.stopPropagation();
+  _emojiPickerMsgId=msgId;
+  const picker=$('emojiPickerFloat');
+  picker.style.display='flex';
+  // Wait one frame so offsetWidth is accurate
+  requestAnimationFrame(()=>{
+    const pw=picker.offsetWidth||290, ph=picker.offsetHeight||52;
+    const cx=(e.clientX!==undefined)?e.clientX:(e.pageX||window.innerWidth/2);
+    const cy=(e.clientY!==undefined)?e.clientY:(e.pageY||window.innerHeight/2);
+    let top=cy-ph-12;
+    let left=Math.max(8,Math.min(cx-pw/2, window.innerWidth-pw-8));
+    if(top<8) top=cy+16;
+    picker.style.top=top+'px';
+    picker.style.left=left+'px';
+  });
+}
+function nxHideEmojiPicker(){
+  $('emojiPickerFloat').style.display='none';
+  _emojiPickerMsgId=null;
+}
+async function nxSendReaction(emoji){
+  const msgId=_emojiPickerMsgId;
+  nxHideEmojiPicker();
+  if(!msgId||!_dmPeer) return;
+
+  // ── Optimistic render: inject chip immediately so user sees it at once ──
+  const targetBubble=document.querySelector(`[data-msg-id="${msgId}"]`);
+  if(targetBubble){
+    const col=targetBubble.parentElement; // the flex-column wrapper
+    let rxRow=col.querySelector('.bubble-reactions');
+    if(!rxRow){
+      rxRow=document.createElement('div');
+      rxRow.className='bubble-reactions';
+      // Insert after the .bubble div, before .bubble-meta
+      const meta=col.querySelector('.bubble-meta');
+      if(meta) col.insertBefore(rxRow,meta);
+      else col.appendChild(rxRow);
+    }
+    // Check if a chip for this emoji already exists
+    const existing=[...rxRow.querySelectorAll('.reaction-chip')].find(c=>c.dataset.rxEmoji===emoji);
+    if(existing){
+      let cnt=existing.querySelector('.rx-count');
+      if(cnt){ cnt.textContent=parseInt(cnt.textContent||'1')+1; }
+      else { existing.insertAdjacentHTML('beforeend',` <span class="rx-count">2</span>`); }
+      existing.classList.add('mine');
+    } else {
+      const chip=document.createElement('span');
+      chip.className='reaction-chip mine';
+      chip.dataset.rxEmoji=emoji;
+      chip.textContent=emoji;
+      rxRow.appendChild(chip);
+    }
+  }
+
+  await edgeCall({action:'send_dm',to_key:_dmPeer.key,to_name:_dmPeer.name,text:`[rx:${msgId}:${emoji}]`});
+  if(_dmPeer) nxRefreshPeerChat(_dmPeer.key);
+}
+// Build reaction map: msgId -> Map<emoji -> {count,mine}>
+function _buildRxMap(msgs){
+  const rxMap=new Map();
+  const me=sKey();
+  msgs.forEach(m=>{
+    if(m.is_deleted||!m.text) return;
+    const match=m.text.match(_RX_RE);
+    if(!match) return;
+    const[,targetId,emoji]=match;
+    if(!rxMap.has(targetId)) rxMap.set(targetId,new Map());
+    const em=rxMap.get(targetId);
+    const entry=em.get(emoji)||{count:0,mine:false};
+    entry.count++;
+    if(m.sender===me) entry.mine=true;
+    em.set(emoji,entry);
+  });
+  return rxMap;
+}
+function _renderRxChips(msgId, rxMap){
+  const em=rxMap.get(String(msgId));
+  if(!em||!em.size) return '';
+  let html='';
+  for(const[emoji,{count,mine}] of em)
+    html+=`<span class="reaction-chip${mine?' mine':''}">${emoji}${count>1?` <span class="rx-count">${count}</span>`:''}</span>`;
+  return `<div class="bubble-reactions">${html}</div>`;
+}
+// Attach gesture events on dmMessages box — runs once per app lifetime (idempotent)
+// Gestures supported:
+//   Swipe right on a bubble → Reply (works on both sent & received)
+//   Double-tap a bubble     → Emoji reaction picker
+//   Desktop dblclick        → Emoji reaction picker
+function nxInitDMReactionEvents(){
+  const box=$('dmMessages');
+  if(!box||box._rxEventsInited) return;
+  box._rxEventsInited=true;
+
+  // ── Desktop: dblclick → emoji picker ──────────────────────────────
+  box.addEventListener('dblclick',e=>{
+    const b=e.target.closest('[data-msg-id]');
+    if(b) nxShowEmojiPicker(e,b.dataset.msgId);
+  });
+
+  // ── Touch state ───────────────────────────────────────────────────
+  let _lt=0, _lbid=null;            // double-tap tracking
+  let _srStartX=0, _srStartY=0;     // swipe start coords
+  let _srBubble=null;               // bubble element being swiped
+  let _srBubbleInner=null;          // the .bubble div to translate
+  let _srSwiping=false;             // true once horizontal intent confirmed
+
+  function _snapBack(){
+    if(!_srBubbleInner) return;
+    _srBubbleInner.style.transition='transform .22s cubic-bezier(.25,.8,.25,1)';
+    _srBubbleInner.style.transform='translateX(0)';
+    setTimeout(()=>{ if(_srBubbleInner) _srBubbleInner.style.transition=''; }, 240);
+  }
+
+  box.addEventListener('touchstart',e=>{
+    const touch=e.touches[0];
+    _srStartX=touch.clientX;
+    _srStartY=touch.clientY;
+    _srSwiping=false;
+    // Find the bubble elements
+    _srBubble=e.target.closest('[data-msg-id]');
+    _srBubbleInner=_srBubble||null;  // the element we'll translate IS the .bubble div
+  },{passive:true});
+
+  box.addEventListener('touchmove',e=>{
+    const touch=e.touches[0];
+    const dx=touch.clientX-_srStartX;
+    const dy=Math.abs(touch.clientY-_srStartY);
+    const adx=Math.abs(dx);
+
+    // Confirm horizontal swipe intent once we've moved >12px and it's more horizontal than vertical
+    if(!_srSwiping && adx>12 && adx>dy*1.4 && _srBubble){
+      _srSwiping=true;
+    }
+    if(_srSwiping && _srBubbleInner){
+      // Add swiping class to bubble-wrap for the reply hint arrow
+      const wrap=_srBubbleInner.closest('.bubble-wrap');
+      if(wrap) wrap.classList.add('swiping');
+      // Allow swipe in BOTH directions, cap at 70px, add rubber-band feel past 55px
+      let clamp=dx;
+      if(adx>55) clamp=(dx>0?1:-1)*(55+(adx-55)*0.3);
+      clamp=Math.max(-70,Math.min(70,clamp));
+      _srBubbleInner.style.transition='none';
+      _srBubbleInner.style.transform=`translateX(${clamp}px)`;
+    }
+  },{passive:true});
+
+  box.addEventListener('touchend',e=>{
+    const endX=e.changedTouches[0].clientX;
+    const rawDx=endX-_srStartX;
+    const adx=Math.abs(rawDx);
+
+    // Always remove swiping class from bubble-wrap
+    if(_srBubbleInner){
+      const wrap=_srBubbleInner.closest('.bubble-wrap');
+      if(wrap) wrap.classList.remove('swiping');
+    }
+
+    if(_srSwiping){
+      _snapBack();
+      // Trigger reply if swiped far enough (either direction)
+      if(adx>50 && _srBubble && _srBubble.dataset.msgId){
+        nxStartDMReply(_srBubble.dataset.msgId, _srBubble.dataset.msgText||'');
+      }
+      _srSwiping=false;
+      _srBubble=null; _srBubbleInner=null;
+      return; // don't fall through to double-tap check
+    }
+    _srBubble=null; _srBubbleInner=null;
+
+    // ── Double-tap → emoji picker ──────────────────────────────────
+    const b=e.target.closest('[data-msg-id]');
+    if(!b) return;
+    const bid=b.dataset.msgId, now=Date.now();
+    if(bid===_lbid && now-_lt<320){
+      e.preventDefault();
+      const t=e.changedTouches[0];
+      nxShowEmojiPicker({clientX:t.clientX,clientY:t.clientY,stopPropagation:()=>{}},bid);
+      _lt=0; _lbid=null;
+    } else { _lt=now; _lbid=bid; }
+  },{passive:false});
+
+  // Scroll to top → load older messages
+  box.addEventListener('scroll',()=>{
+    if(box.scrollTop===0 && !_dmLoadingOlder && _dmOldestTs && _dmPeer){
+      nxLoadOlderDMs();
+    }
+  },{passive:true});
+}
+
+/* Show a small floating context menu above a bubble (reply + react) */
+function nxShowBubbleContextMenu(bubbleEl, cx, cy){
+  if(!bubbleEl) return;
+  const msgId=bubbleEl.dataset.msgId;
+  const msgText=bubbleEl.dataset.msgText||'';
+  let menu=$('bubbleCtxMenu');
+  if(!menu){
+    menu=document.createElement('div');
+    menu.id='bubbleCtxMenu';
+    menu.style.cssText='position:fixed;z-index:9800;background:var(--card-s);border:1px solid var(--b1);border-radius:12px;box-shadow:var(--sh);display:flex;gap:0;overflow:hidden;font-size:13px;font-weight:700;';
+    document.body.appendChild(menu);
+    document.addEventListener('click',()=>{menu.style.display='none';},{capture:true,once:false});
+  }
+  menu.innerHTML=`
+    <button onclick="nxStartDMReply('${msgId}',decodeURIComponent('${encodeURIComponent(msgText)}'));document.getElementById('bubbleCtxMenu').style.display='none';" style="padding:10px 16px;background:none;border:none;color:var(--t1);cursor:pointer;border-right:1px solid var(--b1);">↩ Reply</button>
+    <button onclick="nxShowEmojiPicker({clientX:${cx||100},clientY:${cy||100},stopPropagation:()=>{}},${msgId});document.getElementById('bubbleCtxMenu').style.display='none';" style="padding:10px 16px;background:none;border:none;color:var(--t1);cursor:pointer;">☺ React</button>
+  `;
+  menu.style.display='flex';
+  const vw=window.innerWidth, vh=window.innerHeight;
+  const mw=180;
+  let left=(cx||vw/2)-mw/2;
+  let top=(cy||vh/2)-52;
+  left=Math.max(8,Math.min(left,vw-mw-8));
+  top=Math.max(8,Math.min(top,vh-60));
+  menu.style.left=left+'px';
+  menu.style.top=top+'px';
+}
+
+/* Safe wrapper: reads text from the bubble's data-msg-text attribute to avoid JS escaping issues */
+function nxReplyFromBubbleBtn(btn){
+  const bubble=btn.closest('[data-msg-id]');
+  if(!bubble) return;
+  nxStartDMReply(bubble.dataset.msgId, bubble.dataset.msgText||'');
+}
+
+/* DM reply-to */
+function nxStartDMReply(msgId, text){
+  _dmReplyTo={id:msgId, text};
+  const preview=(text||'').slice(0,80);
+  $('dmReplyPreview').textContent=preview||'message';
+  show('dmReplyBanner');
+  hide('dmEditBanner');
+  _dmEditingId=null;
+  const inp=$('dmInput');
+  if(inp) inp.focus();
+}
+function nxCancelDMReply(){
+  _dmReplyTo=null;
+  hide('dmReplyBanner');
+}
+
+/* Load older DM messages (pagination — swipe-up) */
+async function nxLoadOlderDMs(){
+  if(_dmLoadingOlder||!_dmPeer||!_dmOldestTs) return;
+  _dmLoadingOlder=true;
+  const box=$('dmMessages');
+  const loader=document.createElement('div');
+  loader.className='dm-load-older-btn';
+  loader.textContent='Loading older messages…';
+  box.prepend(loader);
+  const prevScrollHeight=box.scrollHeight;
+
+  const res=await edgeCall({action:'fetch_dms',peer_key:_dmPeer.key,before_ts:_dmOldestTs});
+  loader.remove();
+  _dmLoadingOlder=false;
+
+  if(!res||!res.ok) return;
+  const allOlder=(res.messages||[]).filter(m=>new Date(m.ts).getTime()<new Date(_dmOldestTs).getTime());
+  if(!allOlder.length) return; // nothing older
+
+  const chatObj=_cache.chatList.find(c=>c.peer.student_key===_dmPeer.key);
+  if(!chatObj) return;
+  const existingIds=new Set(chatObj.messages.map(m=>String(m.id)));
+  const newOlder=allOlder.filter(m=>!existingIds.has(String(m.id)));
+  if(!newOlder.length) return;
+
+  chatObj.messages=[...newOlder,...chatObj.messages];
+  const scrollDiff=box.scrollHeight-box.scrollTop;
+  nxRenderDMMessages(chatObj.messages);
+  // Restore scroll so user stays at the same spot
+  requestAnimationFrame(()=>{ box.scrollTop=box.scrollHeight-scrollDiff; });
+}
 let _reportPostId=null, _reportReason=null;
 let _pendingAvatarDataUrl=null;
 let _pendingPostImageDataUrl=null;
 
 // ── STORIES STATE ──────────────────────────────────────────
 let _storyGroups=[];          // [{student_key, student_name, stories:[...], ...}]
+let _chatsLoaded=false;       // true after the first real chat-list fetch completes
 let _svGroupIdx=0;            // which group is open
 let _svStoryIdx=0;            // which story within the group
 let _svTimer=null;            // auto-advance timer
@@ -2042,6 +2650,8 @@ async function nxFetchPresenceForChats(){
   if(res&&res.ok&&res.presence){
     Object.assign(_cache.presence, res.presence);
     nxRenderChatList();
+    // Re-render stories bar so online dots appear/disappear as presence updates
+    nxRenderStoriesBar();
   }
 }
 
@@ -2055,8 +2665,23 @@ const STORY_VID_MAX_BYTES = 3 * 1024 * 1024;  // 3 MB hard limit for video stori
 const STORY_VID_MAX_SECS  = 15;               // auto-trim videos longer than 15 s
 
 async function nxLoadStories(){
+  // Paint skeleton rings immediately before the network call
+  const scroll=$('storiesScroll');
+  if(scroll && !_storyGroups.length){
+    const skelItem=`<div class="story-skel-item story-item story-other">
+      <div class="af-skel story-skel-ring"></div>
+      <div class="af-skel story-skel-label"></div>
+    </div>`;
+    // Remove any existing skeleton items, then inject 5 placeholders
+    scroll.querySelectorAll('.story-skel-item').forEach(el=>el.remove());
+    scroll.insertAdjacentHTML('beforeend', skelItem.repeat(5));
+  }
   const res=await edgeCall({action:'fetch_stories'});
-  if(!res||!res.ok) return;
+  if(!res||!res.ok){
+    // Remove skeleton items even on failure
+    scroll&&scroll.querySelectorAll('.story-skel-item').forEach(el=>el.remove());
+    return;
+  }
   _storyGroups = Array.isArray(res.groups)?res.groups:[];
   nxRenderStoriesBar();
 }
@@ -2107,9 +2732,14 @@ function renderStoryItemHtml(g, idx){
     : esc(g.emoji || initials(g.student_name));
   const label = g.username ? ('@'+esc(g.username)) : esc((g.student_name||'Student').split(/\s+/)[0]);
   const premTick = g.is_verified ? `<span class="story-ver-tick">✦</span>` : '';
+  // Show green dot if this contact is currently online
+  const presData = g.student_key ? _cache.presence[g.student_key] : null;
+  const presInfo = presData ? formatPresence(presData) : null;
+  const onlineDot = (presInfo && presInfo.online) ? '<div class="story-online-dot"></div>' : '';
   return `<div class="story-item story-other${seen?' story-seen':''}" onclick="nxOpenStoryViewer(${idx})">
-    <div class="story-ring${seenClass}">
+    <div class="story-ring${seenClass}" style="position:relative;">
       <div class="story-avatar-wrap">${avatarInner}</div>
+      ${onlineDot}
     </div>
     <span class="story-label">${label}${premTick}</span>
   </div>`;
@@ -2141,6 +2771,7 @@ function nxOpenStoryViewer(groupIdx){
   nxShowCurrentStory();
 }
 
+let _storyBarDirty = false;
 function nxCloseStoryViewer(){
   nxCloseSeenBy();
   const cu=$('svCaughtUp'); if(cu) cu.classList.remove('active');
@@ -2154,7 +2785,8 @@ function nxCloseStoryViewer(){
     if(v){ try{ v.pause(); }catch(e){} }
     media.querySelectorAll('img,video').forEach(n=>n.remove());
   }
-  nxRenderStoriesBar();
+  if(_storyBarDirty){ nxRenderStoriesBar(); _storyBarDirty=false; }
+  _seenCountCache.clear();
   nxForceRepaint();
 }
 
@@ -2326,12 +2958,20 @@ function nxShowCurrentStory(){
     story.is_viewed=true;
     grp.has_unviewed = grp.stories.some(s=>!s.is_viewed);
     edgeCall({action:'view_story',story_id:story.id}).catch(()=>{});
+    _storyBarDirty=true;
   }
 }
 
+const _seenCountCache = new Map();
 async function nxLoadSeenCount(storyId){
+  if(_seenCountCache.has(storyId)){
+    const el=$('svSeenCount');
+    if(el) el.textContent=_seenCountCache.get(storyId);
+    return;
+  }
   const res=await edgeCall({action:'get_story_views',story_id:storyId});
   const count = (res&&res.ok&&Array.isArray(res.views)) ? res.views.length : 0;
+  _seenCountCache.set(storyId,count);
   const el=$('svSeenCount');
   if(el) el.textContent=count;
 }
@@ -2542,8 +3182,14 @@ async function nxStorySendReply(){
   if(!peerKey){ showToast('Cannot identify story owner.','warn'); return; }
   const btn=$('svReplySendBtn');
   if(btn) btn.disabled=true;
-  const res=await edgeCall({action:'send_dm', to_key:peerKey, to_name:grp.student_name||'Student', text});
+  // Prefix message so recipient sees story context in DM thread
+  const fullText='\u21A9 Replied to your story:\n'+text;
+  const res=await edgeCall({action:'send_dm', to_key:peerKey, to_name:grp.student_name||'Student', text:fullText});
   if(res&&res.ok){
+    // Also update the local chat cache so the reply appears instantly in chats tab
+    if(res.message){
+      nxAppendSentMessage(peerKey, res.message);
+    }
     if(inp){ inp.value=''; }
     if(btn) btn.disabled=true; // stays disabled until user types again
     inp&&inp.blur();
@@ -2596,6 +3242,7 @@ async function nxDeleteCurrentStory(){
   grp.stories.splice(_svStoryIdx,1);
   showToast('Story deleted.');
   nxCloseSeenBy();
+  _storyBarDirty=true;
   if(!grp.stories.length){
     _storyGroups.splice(_svGroupIdx,1);
     nxCloseStoryViewer();
@@ -2604,12 +3251,16 @@ async function nxDeleteCurrentStory(){
     nxRenderStoryProgressBars();
     nxShowCurrentStory();
   }
-  nxRenderStoriesBar();
 }
 
 /* ── STORY COMPOSER ────────────────────────────────── */
 function nxOpenStoryComposer(){
   if(!isLoggedIn()){ goToLogin(); return; }
+  // FIX v64: only premium (is_verified) members can post stories
+  if(!_cache.myVerified){
+    showToast('Only Premium members can post stories. Upgrade to Premium to share your moments!','err');
+    return;
+  }
   // Allow re-posting — the edge function atomically replaces the existing story
   const mine=_storyGroups.find(g=>g.is_mine);
   if(mine && mine.stories && mine.stories.length){
@@ -2825,9 +3476,9 @@ function renderPostHtml(p, mk, admin, showPinned){
     : `<p class="post-text" onclick="nxOpenComments(${p.id},'${prev}')" style="cursor:pointer;">${esc(rawContent)}</p>`)
     : '';
 
-  // Post image
+  // Post image — opacity starts at 0, fades in once loaded (no jarring pop-in)
   const imageHtml = p.image_url
-    ? `<div class="post-image" onclick="nxOpenLightbox('${esc(p.image_url)}')"><img src="${esc(p.image_url)}" alt="Post image" loading="lazy" decoding="async"/></div>`
+    ? `<div class="post-image" onclick="nxOpenLightbox('${esc(p.image_url)}')"><img src="${esc(p.image_url)}" alt="Post image" loading="lazy" decoding="async" onload="this.style.opacity=1"/></div>`
     : '';
 
   return `<div class="post-card${cardClass}" data-post-id="${p.id}">
@@ -2851,7 +3502,7 @@ function renderPostHtml(p, mk, admin, showPinned){
         <span class="heart-ic" id="like-icon-${p.id}"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.8-10.2-9.6C.2 8.4 1.4 4.8 4.8 3.6c2.1-.7 4.3 0 5.6 1.7l1.6 2 1.6-2c1.3-1.7 3.5-2.4 5.6-1.7 3.4 1.2 4.6 4.8 3 7.8C19.5 16.2 12 21 12 21z"/></svg></span>
         <span class="cnt" id="like-cnt-${p.id}">${p.likes_count>0?p.likes_count:''}</span>
       </button>
-      <button class="action-btn" onclick="nxOpenComments(${p.id},'${prev}')">💬 <span class="cnt">${p.comments_count||0}</span></button>
+      <button class="action-btn" onclick="nxOpenComments(${p.id},'${prev}')">💬 <span class="cnt" id="cmt-cnt-${p.id}">${p.comments_count||0}</span></button>
     </div>
   </div>`;
 }
@@ -2886,6 +3537,27 @@ function renderListToContainer(posts, containerId, checkPinned){
     const normal=posts.filter(p=>!p.is_pinned);
     ordered=[...pinned,...normal];
   }
+
+  // Diff against currently rendered cards to avoid wiping the whole feed on every realtime INSERT.
+  const existingCards=[...box.querySelectorAll(':scope > [data-post-id]')];
+  const existingIds=existingCards.map(el=>el.getAttribute('data-post-id'));
+  const incomingIds=ordered.map(p=>String(p.id));
+  const existingSet=new Set(existingIds);
+  const newOnes=ordered.filter(p=>!existingSet.has(String(p.id)));
+  const changedRatio = existingIds.length ? (newOnes.length / Math.max(existingIds.length, incomingIds.length)) : 1;
+  const isFirstPaint = existingCards.length===0;
+
+  if(!isFirstPaint && changedRatio<=0.5){
+    // Partial update: prepend only genuinely new cards, leave the rest of the DOM untouched.
+    if(newOnes.length){
+      const frag=document.createElement('div');
+      frag.innerHTML=newOnes.map(p=>renderPostHtml(p,mk,admin,checkPinned)).join('');
+      while(frag.firstChild){ box.insertBefore(frag.firstChild, box.firstChild); }
+    }
+    requestAnimationFrame(observePostCards);
+    return;
+  }
+
   box.innerHTML=ordered.map(p=>renderPostHtml(p,mk,admin,checkPinned)).join('');
   // Append feed-end marker if this is the main feed
   if(containerId==='postsList' && posts.length > 0){
@@ -2909,8 +3581,15 @@ function nxSwitchTab(tab){
     show('feed'); hide('chatsTab'); show('fab');
     // Restore scroll position
     requestAnimationFrame(()=>{ $('feed').scrollTop = _cache.feedScrollTop; });
+    nxStopChatListPoll();
+    nxUpdateUnreadBadge(); // re-show badge now that user left chats tab
   } else {
     hide('feed'); show('chatsTab'); hide('fab');
+    // Clear all "new while feed" markers — user is now looking at the chats list
+    _newWhileFeed.clear();
+    nxRenderChatList();
+    nxUpdateUnreadBadge(); // FIX v64: hide badge immediately when entering chats tab
+    nxStartChatListPoll(); // begin polling the chat list for new messages
   }
 }
 
@@ -2929,13 +3608,14 @@ async function init(){
   $('lockedBox').style.display='none';
   _cache.chatReadTs = loadChatReadTs();
   _cache.likedPostIds = loadLikedPostIds();
+  nxRequestNotifyPermission();
   nxLoadMyProfile();
   await Promise.all([nxLoadPosts(), nxPreloadConnections(), nxLoadBlockedUsers()]);
   nxLoadStories();
   setupRealtime();
   startPresencePing();
-  startGlobalChatPoll(); // background chat poll — catches messages even when realtime lags
   syncMyStoryAvatar();
+  nxStartChatListPoll(); // auto-refresh chat list so new messages appear without manual pull
 }
 
 /* ═══════════════════════════════════════════════════
@@ -2980,26 +3660,15 @@ async function nxPreloadConnections(){
 }
 
 async function nxLoadChatsFromConnections(){
-  const peerMap={};
-  _cache.myFollowers.forEach(u=>{if(u.student_key!==sKey()) peerMap[u.student_key]=u;});
-  _cache.myFollowing.forEach(u=>{if(u.student_key!==sKey()) peerMap[u.student_key]=u;});
-  const peerKeys=Object.keys(peerMap).slice(0,10);
-  const chats=[];
-  await Promise.all(peerKeys.map(async key=>{
-    const res=await edgeCall({action:'fetch_dms',peer_key:key});
-    if(res&&res.ok&&res.messages&&res.messages.length>0){
-      chats.push({peer:peerMap[key],messages:res.messages,latest:res.messages[res.messages.length-1]});
-      // Cache profile thumbnail
-      if(peerMap[key]) _cache.profiles.set(key, peerMap[key]);
-    }
-  }));
-  chats.sort((a,b)=>new Date(b.latest.ts)-new Date(a.latest.ts));
-  _cache.chatList=chats;
+  const res=await edgeCall({action:'get_chat_list'});
+  if(!res||!res.ok) return;
+  _cache.chatList=res.chats||[];
+  _chatsLoaded=true;
   nxRenderChatList();
   // Persist so the NEXT app open can paint this chat list instantly
   // from cache before the network round-trip resolves (same pattern
   // as the feed/connections snapshots above).
-  saveSnapshot('chats', _cache.chatList);
+  saveSnapshot('chats',_cache.chatList);
   // Fetch online/last-seen status for all chat peers and re-render
   nxFetchPresenceForChats();
 }
@@ -3026,7 +3695,8 @@ function nxUpdateUnreadBadge(){
   const badge=$('chatBadge');
   if(badge){
     badge.textContent = total>9 ? '9+ new' : (total+' new');
-    badge.classList.toggle('hidden',total===0);
+    // FIX v64: never show the badge while the user is already viewing the chats tab
+    badge.classList.toggle('hidden', total===0 || _activeTab==='chats');
   }
 }
 
@@ -3036,6 +3706,11 @@ function nxUpdateUnreadBadge(){
 let _realtimeChannel=null;
 let _realtimePostsChannel=null;
 let _presencePingTimer=null;
+
+// Tracks which peer keys sent messages while the user was on the feed tab
+const _newWhileFeed = new Set();
+// Tracks the last message timestamp we rendered per peer — used to detect truly new arrivals
+const _peerLastMsgTs = new Map();
 
 function startPresencePing(){
   // Ping every 60s to keep online status fresh
@@ -3082,7 +3757,8 @@ function setupRealtime(){
 
   // Stories realtime
   sb.channel('realtime_stories')
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'af_nexus_stories_v1'},_payload=>{
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'af_nexus_stories_v1'},payload=>{
+      if(payload.new && String(payload.new.student_key) === String(sKey())) return;
       nxLoadStories();
     })
     .subscribe();
@@ -3118,19 +3794,81 @@ async function nxRefreshPeerChat(peerKey){
     nxRenderChatList(); // always keep chat list in sync
     nxUpdateUnreadBadge();
     if($('dmScreen').style.display==='flex'&&_dmPeer&&_dmPeer.key===peerKey){
+      if(res.peer_read_at) _dmPeerReadAt=res.peer_read_at;
       nxRenderDMMessages(res.messages);
       markChatRead(peerKey);
+      // Show or clear the typing indicator based on the server response
+      if(res.peer_is_typing) nxShowPeerTyping();
     } else {
-      // Notify user of incoming message when they're NOT in this conversation
+      // Detect genuinely NEW messages (not already seen before this poll)
       const latest=res.messages&&res.messages[res.messages.length-1];
       if(latest && latest.sender!==sKey()){
-        const peerObj=_cache.chatList.find(c=>c.peer.student_key===peerKey)?.peer;
-        const name=peerObj?.student_name||'Someone';
-        const preview=latest.text?(latest.text.length>40?latest.text.slice(0,40)+'…':latest.text):'📷 Image';
-        showToast(`💬 ${name}: ${preview}`,'info');
+        const newTs=new Date(latest.ts).getTime();
+        const prevTs=_peerLastMsgTs.get(peerKey)||0;
+        if(newTs > prevTs){
+          // FIX v64: only mark as "new" and toast when user is NOT on chats tab
+          // (no notification needed if they're already looking at the chat list)
+          if(_activeTab !== 'chats'){
+            _newWhileFeed.add(peerKey);
+          nxRenderChatList(); // re-render to show the pulsing dot
+          const peerObj=_cache.chatList.find(c=>c.peer.student_key===peerKey)?.peer;
+          const name=peerObj?.student_name||'Someone';
+          const rawPreview = latest.text||'';
+          const STORY_REPLY_PREFIX = '\u21A9 Replied to your story:\n';
+          const replyMatchPrev = rawPreview.match(_DM_REPLY_RE);
+          const cleanPreview = replyMatchPrev ? replyMatchPrev[3] : rawPreview;
+          const displayText = cleanPreview.startsWith(STORY_REPLY_PREFIX)
+            ? '↩ Replied to your story'
+            : (cleanPreview.length>40 ? cleanPreview.slice(0,40)+'…' : cleanPreview) || '📷 Image';
+          showToast(`💬 ${name}: ${displayText}`,'info');
+          // Push notification when tab is hidden or unfocused
+          nxPushNotify(name, displayText, peerObj?.avatar_url||'');
+          } // end if(_activeTab !== 'chats')
+        }
       }
+      // Always record the latest timestamp we've seen for this peer
+      if(latest) _peerLastMsgTs.set(peerKey, new Date(latest.ts).getTime());
     }
   }
+}
+
+/* ═══════════════════════════════════════════════════
+   PUSH NOTIFICATIONS (Web Notifications API)
+   Only fires when the tab is hidden or not focused.
+   Permission is requested once per session after login.
+═══════════════════════════════════════════════════ */
+function nxRequestNotifyPermission(){
+  if(!('Notification' in window)) return;
+  if(Notification.permission==='default'){
+    // Use a gentle user-gesture-independent request; most browsers
+    // allow this on page load if the user has interacted previously.
+    Notification.requestPermission().catch(()=>{});
+  }
+}
+
+function nxPushNotify(senderName, bodyText, iconUrl){
+  if(!('Notification' in window)) return;
+  if(Notification.permission!=='granted') return;
+  // Only fire when tab is hidden OR the window doesn't have focus
+  if(!document.hidden && document.hasFocus()) return;
+  try{
+    const opts={
+      body: bodyText,
+      icon: iconUrl||undefined,
+      badge: iconUrl||undefined,
+      tag: 'af-nexus-dm',   // replace previous notification from same app
+      renotify: true,        // still alert even if same tag
+      silent: false,
+    };
+    const n=new Notification(`💬 ${senderName}`, opts);
+    // Clicking the notification focuses the tab
+    n.onclick=()=>{
+      window.focus();
+      n.close();
+    };
+    // Auto-close after 6 seconds
+    setTimeout(()=>n.close(), 6000);
+  }catch(e){/* Notification API can throw in certain contexts */}
 }
 
 /* ── Global background chat poll (fallback when realtime is unavailable) ── */
@@ -3142,7 +3880,7 @@ function startGlobalChatPoll(){
     const peers=_cache.chatList.slice(0,6).map(c=>c.peer?.student_key).filter(Boolean);
     if(!peers.length) return;
     await Promise.all(peers.map(pk=>nxRefreshPeerChat(pk)));
-  }, 14000); // every 14 s — tight enough to feel instant, light enough not to spam
+  }, 8000); // FIX v64: 8 s for faster feel without hammering the server
 }
 function stopGlobalChatPoll(){
   clearInterval(_globalChatPollTimer);
@@ -3180,10 +3918,25 @@ async function nxLoadPosts(isRefresh=false){
       _cache.posts=cachedFeed;
       renderListToContainer(_cache.posts, 'postsList', true);
     } else {
-      $('postsList').innerHTML=`
-        <div class="post-card af-skel" style="height:120px;"></div>
-        <div class="post-card af-skel" style="height:100px;"></div>
-        <div class="post-card af-skel" style="height:130px;"></div>`;
+      // Rich Instagram-style skeleton cards — mimic real card shape so layout doesn't jump
+      const postSkelCard = `
+        <div class="post-card" style="pointer-events:none;">
+          <div class="post-top" style="gap:10px;">
+            <div class="af-skel af-skel-circle" style="width:36px;height:36px;"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:6px;justify-content:center;">
+              <div class="af-skel af-skel-line" style="width:44%;"></div>
+              <div class="af-skel af-skel-line" style="width:28%;height:8px;"></div>
+            </div>
+          </div>
+          <div class="af-skel af-skel-line" style="width:92%;margin:10px 0 4px;"></div>
+          <div class="af-skel af-skel-line" style="width:75%;"></div>
+          <div class="af-skel" style="height:180px;border-radius:12px;margin:10px 0;"></div>
+          <div style="display:flex;gap:16px;padding:6px 0;">
+            <div class="af-skel af-skel-line" style="width:52px;height:28px;border-radius:20px;margin:0;"></div>
+            <div class="af-skel af-skel-line" style="width:52px;height:28px;border-radius:20px;margin:0;"></div>
+          </div>
+        </div>`;
+      $('postsList').innerHTML = postSkelCard + postSkelCard + postSkelCard;
     }
   }
 
@@ -3236,7 +3989,6 @@ async function nxRefreshGlobal(){
 
 function nxSetMode(m){
   _mode=m==='recent'?'recent':'relevant';
-  _cache.posts=[];
   $('pillRelevant').classList.toggle('active',_mode==='relevant');
   $('pillRecent').classList.toggle('active',_mode==='recent');
   nxLoadPosts(false);
@@ -3308,15 +4060,16 @@ async function nxCreatePost(){
   const res=await edgeCall(payload);
   if(!res||!res.ok){showToast(res?.message||'Could not post.','err');$('postSubmitBtn').disabled=false;return;}
   inp.value=''; nxRemovePostImage(); nxCloseComposer();
-  await nxLoadPosts(true);
   showToast('Posted successfully!');
 }
 
 /* ═══════════════════════════════════════════════════
    LIKE (optimistic, prevents double count)
 ═══════════════════════════════════════════════════ */
+const _likeInFlight = new Set();
 async function nxLikePost(pid, btnEl){
-  if(!sKey()) return;
+  if(!sKey() || _likeInFlight.has(pid)) return;
+  _likeInFlight.add(pid);
   const wasLiked = _cache.likedPostIds.has(pid);
   const cntEl = $('like-cnt-'+pid);
   const iconEl = $('like-icon-'+pid);
@@ -3347,8 +4100,17 @@ async function nxLikePost(pid, btnEl){
   // Persist locally so the red/liked state survives refresh & app reopen
   saveLikedPostIds();
 
-  // 2. Fire and forget backend call (NO await nxLoadPosts after)
-  edgeCall({action:'toggle_post_like',post_id:pid}).catch(()=>{/* silent fail */});
+  try{
+    await edgeCall({action:'toggle_post_like',post_id:pid});
+  } catch(e){
+    // rollback: re-toggle the optimistic update
+    const wasLikedNow = !_cache.likedPostIds.has(pid);
+    if(wasLikedNow){ _cache.likedPostIds.delete(pid); btnEl&&btnEl.classList.remove('liked'); }
+    else { _cache.likedPostIds.add(pid); btnEl&&btnEl.classList.add('liked'); }
+    saveLikedPostIds();
+  } finally {
+    _likeInFlight.delete(pid);
+  }
 }
 
 /* ═══════════════════════════════════════════════════
@@ -3368,12 +4130,22 @@ function nxCloseComments(){
   _curPostId=null;
   nxForceRepaint();
 }
+const _commentsCache = new Map();
 async function nxLoadComments(pid){
   const box=$('commentsList'); if(!box) return;
-  box.innerHTML='<div class="state-msg">Loading…</div>';
+  if(_commentsCache.has(pid)){
+    renderComments(_commentsCache.get(pid));
+  } else {
+    box.innerHTML='<div class="state-msg">Loading…</div>';
+  }
   const res=await edgeCall({action:'fetch_comments',post_id:pid});
-  if(!res||!res.ok){box.innerHTML='<div class="state-msg"><span>Could not load.</span></div>';return;}
-  renderComments(Array.isArray(res.comments)?res.comments:[]);
+  if(!res||!res.ok){
+    if(!_commentsCache.has(pid)) box.innerHTML='<div class="state-msg"><span>Could not load.</span></div>';
+    return;
+  }
+  const list=Array.isArray(res.comments)?res.comments:[];
+  _commentsCache.set(pid,list);
+  renderComments(list);
 }
 function renderComments(list){
   const box=$('commentsList'); if(!box) return;
@@ -3473,15 +4245,10 @@ async function nxCreateComment(){
   // Optimistic Update UI directly
   const pIdx = _cache.posts.findIndex(p=>p.id===_curPostId);
   if(pIdx>=0) _cache.posts[pIdx].comments_count = (_cache.posts[pIdx].comments_count||0) + 1;
-  const pc = document.querySelector(`.post-card[data-post-id="${_curPostId}"]`);
-  if(pc){
-    const btns = pc.querySelectorAll('.action-btn');
-    if(btns && btns.length > 1){
-      const cc = btns[1].querySelector('.cnt');
-      if(cc) cc.textContent = parseInt(cc.textContent||0) + 1;
-    }
-  }
+  const cc=$('cmt-cnt-'+_curPostId);
+  if(cc) cc.textContent=Math.max(0,parseInt(cc.textContent||0)+1);
 
+  _commentsCache.delete(_curPostId);
   // Refetch ONLY the comments array dynamically without fetching the entire feed
   await nxLoadComments(_curPostId);
 }
@@ -3542,15 +4309,10 @@ async function nxCreateReply(){
   // Optimistic UI directly 
   const pIdx = _cache.posts.findIndex(p=>p.id===_curPostId);
   if(pIdx>=0) _cache.posts[pIdx].comments_count = (_cache.posts[pIdx].comments_count||0) + 1;
-  const pc = document.querySelector(`.post-card[data-post-id="${_curPostId}"]`);
-  if(pc){
-    const btns = pc.querySelectorAll('.action-btn');
-    if(btns && btns.length > 1){
-      const cc = btns[1].querySelector('.cnt');
-      if(cc) cc.textContent = parseInt(cc.textContent||0) + 1;
-    }
-  }
+  const cc=$('cmt-cnt-'+_curPostId);
+  if(cc) cc.textContent=Math.max(0,parseInt(cc.textContent||0)+1);
 
+  _commentsCache.delete(_curPostId);
   // Reload only comments for this post
   await nxLoadComments(_curPostId);
 }
@@ -3608,14 +4370,9 @@ async function nxDeleteTarget(){
   if(t.type==='comment'&&_curPostId){
     const pIdx = _cache.posts.findIndex(p=>p.id===_curPostId);
     if(pIdx>=0 && _cache.posts[pIdx].comments_count > 0) _cache.posts[pIdx].comments_count--;
-    const pc = document.querySelector(`.post-card[data-post-id="${_curPostId}"]`);
-    if(pc){
-      const btns = pc.querySelectorAll('.action-btn');
-      if(btns && btns.length > 1){
-        const cc = btns[1].querySelector('.cnt');
-        if(cc) cc.textContent = Math.max(0, parseInt(cc.textContent||0) - 1);
-      }
-    }
+    const cc=$('cmt-cnt-'+_curPostId);
+    if(cc) cc.textContent=Math.max(0,parseInt(cc.textContent||0)-1);
+    _commentsCache.delete(_curPostId);
     await nxLoadComments(_curPostId);
   }
   showToast('Deleted successfully.');
@@ -4257,7 +5014,20 @@ async function nxSaveProfile(){
 function nxRenderChatList(){
   const box=$('chatList'); if(!box) return;
   if(!_cache.chatList.length){
-    box.innerHTML='<div class="state-msg"><span>💬</span><span>No conversations yet.<br>Use search to message someone.</span></div>';
+    // Only show "no conversations" if we've already finished loading
+    if(_chatsLoaded){
+      box.innerHTML='<div class="state-msg"><span>💬</span><span>No conversations yet.<br>Use search to message someone.</span></div>';
+    } else {
+      // Shimmer skeleton rows while chats are still being fetched
+      const skelRow=`<div class="chat-skel-row">
+        <div class="af-skel chat-skel-avatar"></div>
+        <div class="chat-skel-body">
+          <div class="af-skel chat-skel-name"></div>
+          <div class="af-skel chat-skel-preview"></div>
+        </div>
+      </div>`;
+      box.innerHTML = skelRow.repeat(5);
+    }
     return;
   }
   box.innerHTML=_cache.chatList.map(c=>{
@@ -4273,14 +5043,16 @@ function nxRenderChatList(){
           ? `<span class="presence-online">Active now</span>`
           : `<span class="presence-offline">${esc(pres.label)}</span>`)
       : '';
-    return `<div class="conv-item${hasUnread?' unread':''}${isVer?' gold-conv':''}" onclick="nxOpenDM('${esc(peer.student_key)}','${esc(peer.student_name).replace(/'/g,"&#39;")}')">
+    const isNewMsg = _newWhileFeed.has(peer.student_key);
+    return `<div class="conv-item${hasUnread?' unread':''}${isVer?' gold-conv':''}${isNewMsg?' has-new-msg':''}" onclick="nxOpenDM('${esc(peer.student_key)}','${esc(peer.student_name).replace(/'/g,"&#39;")}')">
       ${avatarHTML(peer.student_name,peer.emoji||'',peer.avatar_url||'',' avatar-sm','',isVer)}
       <div class="conv-info">
        <div class="conv-name" style="display:flex;align-items:center;gap:0;">
           ${nameHtml}
           ${hasUnread?'<span class="unread-dot"></span>':''}
+          ${isNewMsg?'<span class="conv-new-badge">new</span>':''}
        </div>
-       <div class="conv-preview" style="${hasUnread?'font-weight:700;color:var(--t1);':''}">${esc(c.latest.is_deleted?'Message deleted':(c.latest.image_url && !c.latest.text ? '📷 Image' : c.latest.text))}</div>
+       <div class="conv-preview" style="${(hasUnread||isNewMsg)?'font-weight:700;color:var(--t1);':''}">${esc(c.latest.is_deleted?'Message deleted':(c.latest.image_url && !c.latest.text ? '📷 Image' : c.latest.text))}</div>
       </div>
       <div class="conv-meta">
         <div class="conv-time">${esc(timeAgo(c.latest.ts))}</div>
@@ -4295,8 +5067,13 @@ function nxRenderChatList(){
 ═══════════════════════════════════════════════════ */
 async function nxOpenDM(peerKey,peerName){
   if(peerKey===sKey()) return;
+  // Clear the "new message" row indicator for this conversation
+  _newWhileFeed.delete(peerKey);
   _dmPeer={key:peerKey,name:peerName};
   _dmEditingId=null; hide('dmEditBanner');
+  _dmReplyTo=null; hide('dmReplyBanner');
+  _dmOldestTs=null; _dmLoadingOlder=false; _dmPeerReadAt=null;
+  nxInitDMReactionEvents(); // attach double-tap/dblclick reaction listener (idempotent)
   $('dmPeerName').textContent=peerName;
   $('dmInput').value='';
   nxRemoveDMImage(); // clear pending attachments
@@ -4316,12 +5093,16 @@ async function nxOpenDM(peerKey,peerName){
   // (preloaded at app start, or from a previous open this session), render
   // them immediately — no spinner, no blank screen — exactly like opening
   // a thread you've already opened before in Instagram. Only fall back to
-  // a loading state when there is truly nothing to show yet.
+  // skeleton bubbles when there is truly nothing to show yet.
   const cachedChat=_cache.chatList.find(c=>c.peer.student_key===peerKey);
   if(cachedChat && cachedChat.messages && cachedChat.messages.length){
     nxRenderDMMessages(cachedChat.messages);
   } else {
-    $('dmMessages').innerHTML='<div class="state-msg">Loading…</div>';
+    // Shimmer bubble skeletons — feels alive instead of a blank "Loading…"
+    const dmSkel = (side)=>`<div class="dm-skel-wrap"><div class="af-skel dm-skel-bubble ${side}"></div></div>`;
+    $('dmMessages').innerHTML =
+      dmSkel('peer') + dmSkel('me') + dmSkel('peer') +
+      dmSkel('me') + dmSkel('peer') + dmSkel('me');
   }
 
   // Paint the header instantly from any cached profile thumbnail too.
@@ -4369,6 +5150,9 @@ async function nxOpenDM(peerKey,peerName){
     _applyDMHeaderProfile(p, res && res.peer_presence);
   }
 
+  // Capture peer's read receipt if server returned one
+  if(res && res.peer_read_at) _dmPeerReadAt=res.peer_read_at;
+
   // Only re-render if the thread is still open on this peer (guards
   // against a race if the user backed out before the network resolved)
   // and only if we got a real response — never blow away the instantly
@@ -4377,6 +5161,8 @@ async function nxOpenDM(peerKey,peerName){
     nxRenderDMMessages(msgs);
   }
   markChatRead(peerKey);
+  // Signal to the server that we've read this thread (read receipt)
+  edgeCall({action:'mark_dm_read',peer_key:peerKey}).catch(()=>{});
 }
 
 function _applyDMHeaderProfile(p, pres){
@@ -4431,6 +5217,8 @@ function nxOpenProfileFromDM(){
 function nxCloseDM(){
   $('dmScreen').style.display='none';
   $('bnav').classList.remove('kb-hidden');
+  nxStopTypingSignal();       // stop broadcasting our typing state
+  nxClearPeerTyping();        // clear peer typing timer and indicator
   _dmPeer=null; _dmEditingId=null;
   nxRemoveDMImage();
   nxStopDMPoll();
@@ -4494,7 +5282,7 @@ async function nxConfirmClearChat(){
   showToast('Chat history cleared.');
 }
 
-function nxRenderDMMessages(msgs){
+function nxRenderDMMessages(msgs, searchTerm=''){
   const box=$('dmMessages'); if(!box) return;
   if(!_dmPeer) return;
   if(!msgs||!msgs.length){
@@ -4507,32 +5295,93 @@ function nxRenderDMMessages(msgs){
   const peerVer=chatObj?!!chatObj.peer.is_verified:(cachedP?!!cachedP.is_verified:false);
   const peerEmoji=chatObj?chatObj.peer.emoji:'';
   const peerAvatarUrl=chatObj?chatObj.peer.avatar_url||'':'';
+  // Normalise search term for case-insensitive matching
+  const srchLow=searchTerm.toLowerCase();
 
+  // Track oldest ts for swipe-up pagination
+  const realMsgs=msgs.filter(m=>!m.is_deleted&&!m.text?.match(_RX_RE));
+  if(realMsgs.length) _dmOldestTs=realMsgs[0].ts;
+
+  // Find the last message I sent (for seen receipt)
+  const myMsgs=msgs.filter(m=>m.sender===sKey()&&!m.is_deleted&&!m.text?.match(_RX_RE));
+  const lastMyMsgId=myMsgs.length?String(myMsgs[myMsgs.length-1].id):null;
+
+  // Build reaction map before looping — reaction messages are rendered as chips, not bubbles
+  const rxMap=_buildRxMap(msgs);
   box.innerHTML=msgs.map((m,i)=>{
     // Explicitly parse boolean for me so undefined sender bugs don't happen
     const me = (m.sender === sKey()); 
     const deleted=!!m.is_deleted;
-    const isConsecutive=(i>0&&msgs[i-1].sender===m.sender&&!msgs[i-1].is_deleted);
+    const rawText = m.text || '';
+    // Skip reaction messages — they appear as chips below their target bubble
+    if(!deleted && rawText.match(_RX_RE)) return '';
+    // For consecutive detection, skip over any reaction-only messages in history
+    const prevReal = msgs.slice(0,i).reverse().find(p=>!p.text||!p.text.match(_RX_RE));
+    const isConsecutive=!!(prevReal&&prevReal.sender===m.sender&&!prevReal.is_deleted);
     const clickAction=(me&&!deleted&&m.id)?` onclick="nxOpenMenu('dm',${m.id},true,false)"`:'';
     // Gold bubble for verified peer messages
     const bubbleExtraClass=(!me&&peerVer)?' gold-bubble':'';
+
+    // Determine if this message matches the search term
+    const isMatch=srchLow&&!deleted&&rawText.toLowerCase().includes(srchLow);
 
     // Assemble the image preview if image URL is present and completely valid
     const isValidImg = m.image_url && m.image_url !== 'null' && m.image_url !== 'undefined';
     const imgHtml = (!deleted && isValidImg) 
       ? `<img src="${esc(m.image_url)}" onclick="nxOpenLightbox(this.src)" style="max-width:220px; border-radius:${m.text?'10px 10px 4px 4px':'10px'}; margin-bottom:${m.text?'6px':'0'}; display:block; max-height:220px; object-fit:cover; cursor:zoom-in;"/>` 
       : '';
-      
-    // The text content or deletion notice
-    const textHtml = deleted ? 'Message deleted' : esc(m.text || '');
+
+    // Detect DM reply-to prefix: ↩[msgId] quotedText\nactualMessage
+    const STORY_REPLY_PREFIX = '\u21A9 Replied to your story:\n';
+    const isStoryReply = !deleted && rawText.startsWith(STORY_REPLY_PREFIX);
+    const replyMatch = !deleted && !isStoryReply && rawText.match(_DM_REPLY_RE);
+    let displayText = rawText;
+    let replyQuoteHtml = '';
+    if(replyMatch){
+      const [,, quotedText, bodyText] = replyMatch;
+      displayText = bodyText;
+      replyQuoteHtml = `<span class="dm-reply-quote">${esc(quotedText)}</span>`;
+    }
+
+    let textHtml;
+    if(deleted){
+      textHtml = 'Message deleted';
+    } else if(isStoryReply){
+      const replyBody = _hlText(rawText.slice(STORY_REPLY_PREFIX.length), searchTerm);
+      textHtml = `<div class="story-reply-badge">↩ Replied to story</div><div class="story-reply-body">${replyBody}</div>`;
+    } else {
+      textHtml = _hlText(displayText, searchTerm);
+    }
+
+    // Reaction chips rendered BELOW the bubble so they never overlap text
+    const rxHtml = (m.id && !deleted) ? _renderRxChips(m.id, rxMap) : '';
+
+    // Delivery / read receipt on the last message I sent
+    const isLastMine = me && !deleted && String(m.id)===lastMyMsgId;
+    let tickHtml = '';
+    if(isLastMine){
+      if(_dmPeerReadAt && new Date(m.ts)<=new Date(_dmPeerReadAt)){
+        tickHtml = '<div class="bubble-tick seen">Seen ✓</div>';
+      } else {
+        tickHtml = '<div class="bubble-tick sent">✓</div>';
+      }
+    }
+
+    // Safe text attr for long-press reply (encode for inline event)
+    const msgTextAttr = !deleted ? esc(displayText).replace(/'/g,'&#39;').replace(/"/g,'&quot;') : '';
 
     // NOTE: This literal absolutely MUST NOT contain interior white space or newlines between <div class="bubble..."> and </div>
     // Otherwise `white-space: pre-wrap;` injects those hidden characters and stretches out the bubble.
-    return `<div class="bubble-wrap${me?' me':''}${isConsecutive?' consecutive':''}"${clickAction}>
+    return `<div class="bubble-wrap${me?' me':''}${isConsecutive?' consecutive':''}${isMatch?' dm-search-match':''}"${clickAction}>
+      <span class="bubble-reply-hint">↩</span>
       ${!me?(isConsecutive?'<div class="bubble-avatar-slot"></div>':avatarHTML(_dmPeer.name,peerEmoji,peerAvatarUrl,' bubble-avatar-slot',`nxOpenProfile('${esc(_dmPeer.key)}','${esc(_dmPeer.name).replace(/'/g,"&#39;")}')`,peerVer)):''}
       <div style="display:flex;flex-direction:column;align-items:${me?'flex-end':'flex-start'};max-width:72%;min-width:0;">
-        <div class="bubble${deleted?' deleted':''}${bubbleExtraClass}" style="${(!deleted && !m.text && isValidImg) ? 'padding:4px;' : ''}">${imgHtml}${textHtml}</div>
-        <div class="bubble-time">${esc(timeAgo(m.ts))}</div>
+        <div class="bubble${deleted?' deleted':''}${bubbleExtraClass}${isStoryReply?' story-reply-bubble':''}" data-msg-id="${m.id||''}" data-msg-text="${msgTextAttr}" style="${(!deleted && !m.text && isValidImg) ? 'padding:4px;' : ''}">${replyQuoteHtml}${imgHtml}${textHtml}</div>
+        ${rxHtml}
+        <div class="bubble-meta${me?' me':''}">
+          <div class="bubble-time">${esc(timeAgo(m.ts))}</div>
+        </div>
+        ${tickHtml}
       </div>
     </div>`;
   }).join('');
@@ -4570,6 +5419,8 @@ function nxRemoveDMImage() {
 function nxDMTyping(){
   const v=($('dmInput').value||'').trim();
   $('dmSendBtn').disabled = !(v || _dmPendingImage);
+  // Broadcast typing signal to peer while there is text in the box
+  if(v) nxSendTypingSignal();
 }
 
 async function nxSendDM(){
@@ -4603,11 +5454,51 @@ async function nxSendDM(){
   
   $('dmSendBtn').disabled=true;
   inp.value='';
+  nxStopTypingSignal(); // stop broadcasting typing when message is sent
   const imgData = _dmPendingImage;
   nxRemoveDMImage(); // clear attachment from UI immediately
+
+  // Build the final text — prefix with reply-to if one is active
+  let finalText = text;
+  if(_dmReplyTo && text){
+    const quotedPreview = (_dmReplyTo.text||'').slice(0,80);
+    finalText = `\u21A9[${_dmReplyTo.id}] ${quotedPreview}\n${text}`;
+    nxCancelDMReply();
+  } else if(_dmReplyTo){
+    nxCancelDMReply();
+  }
   
-  const payload = {action:'send_dm', to_key:_dmPeer.key, to_name:_dmPeer.name, text};
+  const payload = {action:'send_dm', to_key:_dmPeer.key, to_name:_dmPeer.name, text:finalText};
   if(imgData) payload.image_data_url = imgData;
+
+  // ── Optimistic paint ── show the bubble immediately before the server round-trip
+  // so the UI feels instant (same as iMessage / Instagram). The real server
+  // response will replace this via nxAppendSentMessage moments later.
+  const _optimisticTs = new Date().toISOString();
+  const _optimisticMsg = {
+    id: '__optimistic__', sender: sKey(), receiver: _dmPeer.key,
+    text: finalText, ts: _optimisticTs, image_url: imgData||null,
+  };
+  const chatObjOpt = _cache.chatList.find(c=>c.peer.student_key===_dmPeer.key);
+  if(chatObjOpt){
+    // Temporarily push the optimistic message into the cache for rendering
+    chatObjOpt.messages = [...(chatObjOpt.messages||[]), _optimisticMsg];
+    nxRenderDMMessages(chatObjOpt.messages);
+    // Remove the temporary entry so the real server message replaces it cleanly
+    chatObjOpt.messages = chatObjOpt.messages.filter(m=>m.id!=='__optimistic__');
+  } else {
+    // No thread in cache yet — inject a one-off optimistic bubble directly into the DOM
+    const box=$('dmMessages');
+    if(box){
+      const now=new Date(_optimisticTs);
+      const hhmm=now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+      box.insertAdjacentHTML('beforeend',
+        `<div class="dm-bubble-row me" id="opt-bubble">
+           <div class="dm-bubble me"><div class="dm-bubble-text">${esc(text)}</div>
+           <div class="bubble-meta me"><div class="bubble-time">${hhmm}</div></div></div></div>`);
+      box.scrollTop=box.scrollHeight;
+    }
+  }
 
   const res=await edgeCall(payload);
   if(res&&res.ok&&res.message){
@@ -4687,6 +5578,11 @@ function nxCancelEditDM(){
 /* ═══════════════════════════════════════════════════
    KEYBOARD / ESC
 ═══════════════════════════════════════════════════ */
+// Close emoji reaction picker when tapping anywhere outside it
+document.addEventListener('click',e=>{
+  const picker=$('emojiPickerFloat');
+  if(picker&&picker.style.display!=='none'&&!picker.contains(e.target)) nxHideEmojiPicker();
+});
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape') return;
   if($('mainMenuModal').style.display==='flex'){nxCloseMainMenu();return;}
@@ -4746,11 +5642,32 @@ function nxStartDMPoll(peerKey){
       nxStopDMPoll(); return;
     }
     await nxRefreshPeerChat(peerKey);
-  }, 8000);
+  }, 4000);
 }
 function nxStopDMPoll(){
   clearInterval(_dmPollTimer);
   _dmPollTimer=null;
+}
+
+/* ═══════════════════════════════════════════════════
+   CHAT LIST BACKGROUND POLL
+   When the user is on the chats tab (not inside a DM),
+   refresh the chat list every 6 seconds so new messages
+   appear without any manual pull-to-refresh.
+═══════════════════════════════════════════════════ */
+let _chatListPollTimer=null;
+function nxStartChatListPoll(){
+  nxStopChatListPoll();
+  _chatListPollTimer=setInterval(async()=>{
+    // Only poll when chats tab is visible and no DM thread is open
+    if(_activeTab!=='chats') return;
+    if($('dmScreen')&&$('dmScreen').style.display==='flex') return;
+    await nxLoadChatsFromConnections();
+  }, 6000);
+}
+function nxStopChatListPoll(){
+  clearInterval(_chatListPollTimer);
+  _chatListPollTimer=null;
 }
 
 /* ═══════════════════════════════════════════════════
@@ -4783,22 +5700,35 @@ function nxStopDMPoll(){
 })();
 
 /* ═══════════════════════════════════════════════════
-   SWIPE NAV (feed ↔ chats only)
+   SWIPE NAV — horizontal swipe on the main view switches tabs
+   Left swipe  → Chats tab
+   Right swipe → Feed tab
 ═══════════════════════════════════════════════════ */
 (function(){
-  let startX=0,startY=0;
-  document.addEventListener('touchstart',e=>{startX=e.touches[0].clientX;startY=e.touches[0].clientY;},{passive:true});
-  document.addEventListener('touchend',e=>{
-    if($('dmScreen').style.display==='flex') return;
-    if($('profileScreen').style.display==='flex') return;
-    if($('myProfileScreen').style.display==='flex') return;
-    if($('searchScreen') && $('searchScreen').style.display==='flex') return;
-    const diffX=e.changedTouches[0].clientX-startX;
-    const diffY=e.changedTouches[0].clientY-startY;
-    if(Math.abs(diffY)>Math.abs(diffX)) return;
-    const threshold=80;
-    if(diffX < -threshold && _activeTab==='feed') nxSwitchTab('chats');
-    else if(diffX > threshold && _activeTab==='chats') nxSwitchTab('feed');
+  const mv=document.getElementById('mainView');
+  if(!mv) return;
+  let _sx=0,_sy=0;
+  mv.addEventListener('touchstart',e=>{
+    _sx=e.touches[0].clientX;
+    _sy=e.touches[0].clientY;
+  },{passive:true});
+  mv.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-_sx;
+    const dy=Math.abs(e.changedTouches[0].clientY-_sy);
+    // Must be mostly horizontal and at least 60px
+    if(Math.abs(dx)<60||dy>Math.abs(dx)*0.8) return;
+    // Don't trigger if a full-screen overlay is open
+    const overlays=['dmScreen','profileScreen','searchScreen','myProfileScreen',
+                    'storyViewer','commentsModal','composerModal','editProfileModal',
+                    'menuModal','reportModal','followListModal','blockListModal',
+                    'mainMenuModal','clearChatModal','dmOptionsModal','replyModal'];
+    for(const id of overlays){
+      const el=document.getElementById(id);
+      if(el&&el.style.display==='flex'){return;}
+      if(el&&el.classList.contains('open')){return;}
+    }
+    if(dx<0) nxSwitchTab('chats'); // swipe left → Chats
+    else     nxSwitchTab('feed');  // swipe right → Feed
   },{passive:true});
 })();
 
@@ -4849,6 +5779,11 @@ window.nxDMTyping=nxDMTyping;
 window.nxHandleDMImage=nxHandleDMImage;
 window.nxRemoveDMImage=nxRemoveDMImage;
 window.nxCancelEditDM=nxCancelEditDM;
+window.nxStartDMReply=nxStartDMReply;
+window.nxCancelDMReply=nxCancelDMReply;
+window.nxReplyFromBubbleBtn=nxReplyFromBubbleBtn;
+window.nxLoadOlderDMs=nxLoadOlderDMs;
+window.nxShowBubbleContextMenu=nxShowBubbleContextMenu;
 window.nxSaveProfile=nxSaveProfile;
 window.nxDisplayNameTyping=nxDisplayNameTyping;
 window.nxUsernameTyping=nxUsernameTyping;
