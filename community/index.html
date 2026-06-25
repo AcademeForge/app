@@ -1282,7 +1282,7 @@ body.light .sv-caught-up-btn{background:#111;color:#fff;}
       <div id="dmBlockedBanner" class="hidden" style="position:absolute;inset:0;background:var(--hdr);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--tm);z-index:5;backdrop-filter:blur(16px);border-top:1px solid var(--b1);">You cannot send messages to this user.</div>
       
       <!-- Attachment Icon -->
-      <button onclick="document.getElementById('dmImageInput').click()" style="font-size:20px; color:var(--t2); display:flex; align-items:center; justify-content:center; flex-shrink:0; padding-bottom:10px;">📎</button>
+      <button id="dmAttachBtn" onclick="nxAttachDMImage()" style="font-size:20px; color:var(--t2); display:flex; align-items:center; justify-content:center; flex-shrink:0; padding-bottom:10px;">📎</button>
       <input type="file" id="dmImageInput" accept="image/*" class="hidden" onchange="nxHandleDMImage(this)"/>
 
       <textarea class="dm-textarea" id="dmInput" rows="1" placeholder="Type a message…" oninput="nxDMTyping()"></textarea>
@@ -1453,7 +1453,7 @@ body.light .sv-caught-up-btn{background:#111;color:#fff;}
         </div>
         <div class="compose-foot">
           <div style="display:flex;align-items:center;gap:10px;">
-            <button onclick="document.getElementById('postImageInput').click()" style="color:var(--tm);font-size:22px;display:flex;align-items:center;" aria-label="Add image">
+            <button id="postAttachBtn" onclick="nxAttachPostImage()" style="color:var(--tm);font-size:22px;display:flex;align-items:center;" aria-label="Add image">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             </button>
             <input type="file" id="postImageInput" accept="image/*" class="hidden" onchange="nxHandlePostImage(this)"/>
@@ -3420,7 +3420,7 @@ function nxOpenStoryComposer(){
   if(!isLoggedIn()){ goToLogin(); return; }
   // FIX v64: only premium (is_verified) members can post stories
   if(!_cache.myVerified){
-    showToast('Premium is unlocked automatically based on your activity and contribution. Keep posting and engaging!', 'err');
+    showToast('Only Premium members can post stories. Premium is unlocked automatically based on your activity and contribution. Keep posting and engaging!', 'err');
     return;
   }
   // Allow re-posting — the edge function atomically replaces the existing story
@@ -4166,8 +4166,23 @@ function nxOpenComposer(){
   _pendingPostImageDataUrl=null;
   hide('postImagePreviewWrap');
   if($('postImageInput')) $('postImageInput').value='';
+  nxApplyPostAttachGate();
   nxBringToFront('composerModal');
   $('composerModal').style.display='flex';
+}
+// Only Premium (verified) members can attach images to posts — mirrors the
+// existing story-posting restriction.
+function nxApplyPostAttachGate(){
+  const btn=$('postAttachBtn');
+  if(btn) btn.style.opacity=_cache.myVerified?'1':'.4';
+}
+function nxAttachPostImage(){
+  if(!_cache.myVerified){
+    showToast('Only Premium members can attach images to posts. Premium is unlocked automatically based on your activity and contribution. Keep posting and engaging!', 'err');
+    return;
+  }
+  const input=$('postImageInput');
+  if(input) input.click();
 }
 function nxCloseComposer(){
   $('composerModal').style.display='none';
@@ -4183,6 +4198,13 @@ function nxPostTyping(){
 function nxHandlePostImage(input){
   const file=input.files&&input.files[0];
   if(!file) return;
+  if(!_cache.myVerified){
+    // Defense in depth — in case this handler is ever reached without
+    // going through the nxAttachPostImage() gate above.
+    showToast('Only Premium members can attach images to posts. Premium is unlocked automatically based on your activity and contribution. Keep posting and engaging!', 'err');
+    input.value='';
+    return;
+  }
   if(file.size>2*1024*1024){showToast('Image must be under 2MB.','err');return;}
   const reader=new FileReader();
   reader.onload=e=>{
@@ -5301,6 +5323,7 @@ async function nxOpenDM(peerKey,peerName){
     $('dmInput').disabled = false;
     $('dmImageInput').disabled = false;
   }
+  nxApplyDMAttachGate();
 
   if(res && res.peer_presence){
     _cache.presence[peerKey] = res.peer_presence;
@@ -5553,9 +5576,35 @@ function nxRenderDMMessages(msgs, searchTerm=''){
 /* ═══════════════════════════════════════════════════
    DM IMAGE UPLOADING
 ═══════════════════════════════════════════════════ */
+// Only Premium (verified) members can send photos in chat — mirrors the
+// existing story-posting restriction. Block-status (handled above) always
+// wins over premium state: a blocked thread stays disabled regardless.
+function nxApplyDMAttachGate(){
+  const btn=$('dmAttachBtn');
+  const input=$('dmImageInput');
+  if(!btn) return;
+  const blockedOut = !!(input && input.disabled);
+  btn.style.opacity = (!blockedOut && _cache.myVerified) ? '1' : '.4';
+}
+function nxAttachDMImage(){
+  const input=$('dmImageInput');
+  if(input && input.disabled) return; // blocked thread — banner already explains why
+  if(!_cache.myVerified){
+    showToast('Only Premium members can send photos in chat. Premium is unlocked automatically based on your activity and contribution. Keep posting and engaging!', 'err');
+    return;
+  }
+  if(input) input.click();
+}
 function nxHandleDMImage(input) {
   const file = input.files && input.files[0];
   if (!file) return;
+  if(!_cache.myVerified){
+    // Defense in depth — in case this handler is ever reached without
+    // going through the nxAttachDMImage() gate above.
+    showToast('Only Premium members can send photos in chat. Premium is unlocked automatically based on your activity and contribution. Keep posting and engaging!', 'err');
+    input.value='';
+    return;
+  }
   if (file.size > 2*1024*1024) { showToast('Please reduce the image size to less than 2 MB and try again.','err'); return; }
   const reader = new FileReader();
   reader.onload = e => {
@@ -5912,6 +5961,10 @@ window.nxSwitchTab=nxSwitchTab;
 window.nxSetMode=nxSetMode;
 window.nxOpenComposer=nxOpenComposer;
 window.nxCloseComposer=nxCloseComposer;
+window.nxAttachPostImage=nxAttachPostImage;
+window.nxHandlePostImage=nxHandlePostImage;
+window.nxRemovePostImage=nxRemovePostImage;
+window.nxAttachDMImage=nxAttachDMImage;
 window.nxCreatePost=nxCreatePost;
 window.nxCreateComment=nxCreateComment;
 window.nxCreateReply=nxCreateReply;
