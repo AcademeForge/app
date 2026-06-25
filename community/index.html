@@ -612,6 +612,8 @@ body.light .sv-prog-seg-fill{background:#111;}
 .sv-media{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
 .sv-media img,.sv-media video{max-width:100%;max-height:100%;object-fit:contain;}
 .sv-media video{width:100%;}
+@keyframes sv-media-in{from{opacity:0;transform:scale(1.018);}to{opacity:1;transform:scale(1);}}
+.sv-media img,.sv-media video{animation:sv-media-in .2s ease;}
 .sv-caption{
   padding:8px 16px 6px;color:#fff;font-size:14px;font-weight:600;
   text-align:center;flex-shrink:0;
