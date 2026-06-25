@@ -408,6 +408,9 @@ textarea.compose.over{border-color:var(--err);}
 .suggested-user-card .su-sub{font-size:12px;color:var(--tm);margin-top:2px;}
 .suggested-user-card .su-btn{flex-shrink:0;padding:6px 14px;border-radius:10px;background:var(--p);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;}
 .suggested-user-card .su-btn:active{opacity:.8;}
+.suggested-show-more-btn{display:flex;align-items:center;justify-content:center;width:100%;height:38px;margin-top:10px;border-radius:11px;background:var(--grp);border:1px solid var(--b1);color:var(--p);font-size:13px;font-weight:700;transition:opacity .15s;}
+.suggested-show-more-btn:active{opacity:.65;}
+.suggested-caught-up{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:14px 0 2px;margin-top:4px;font-size:12.5px;font-weight:600;color:var(--tm);text-align:center;}
 .conv-item{display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;background:var(--card-s);border:1px solid var(--b1);margin-bottom:10px;box-shadow:var(--sh);cursor:pointer;}
 .conv-item:active{opacity:.85;}
 .conv-item.unread{border-color:var(--rose);background:rgba(244,63,94,.02);}
@@ -1150,14 +1153,17 @@ body.light .sv-caught-up-btn{background:#111;color:#fff;}
 
     <!-- CHATS TAB -->
     <div class="af-page hidden" id="chatsTab" style="padding-bottom:120px;display:flex;flex-direction:column;background:var(--bg);">
-      <!-- Suggested Users: people who follow you but you don't follow back -->
-      <div id="suggestedUsersWrap" style="display:none;padding:14px 14px 0;">
-        <div style="font-size:13px;font-weight:700;color:var(--tm);letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px;">Follow Back to Unlock DMs</div>
-        <div id="suggestedUsersList" style="display:flex;flex-direction:column;gap:8px;"></div>
-        <div style="height:1px;background:var(--b1);margin:14px 0 0;"></div>
-      </div>
+      <!-- Unlocked DMs: conversations the user has actually exchanged at least 1 message in -->
       <div class="chat-list" id="chatList">
         <div class="state-msg">Loading…</div>
+      </div>
+      <!-- Suggested Users: people who follow you but you don't follow back -->
+      <div id="suggestedUsersWrap" style="display:none;padding:0 14px 14px;">
+        <div style="height:1px;background:var(--b1);margin:0 0 14px;"></div>
+        <div style="font-size:13px;font-weight:700;color:var(--tm);letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px;">Follow Back to Unlock DMs</div>
+        <div id="suggestedUsersList" style="display:flex;flex-direction:column;gap:8px;"></div>
+        <button type="button" class="suggested-show-more-btn hidden" id="suggestedShowMoreBtn" onclick="nxShowMoreSuggestions()">Show 5 more</button>
+        <div class="suggested-caught-up hidden" id="suggestedAllCaughtUp"><span>🎉</span><span>You're all caught up — no more follow suggestions.</span></div>
       </div>
     </div>
 
@@ -2625,6 +2631,13 @@ async function nxLoadOlderDMs(){
 let _reportPostId=null, _reportReason=null;
 let _pendingAvatarDataUrl=null;
 let _pendingPostImageDataUrl=null;
+
+// ── FOLLOW-BACK SUGGESTIONS PAGINATION ─────────────────────
+// Reveals suggestions progressively: 5 shown initially, then each
+// "Show more" tap reveals 5 more (→10), then doubles each time after
+// that (→20, →40, …) until every pending follower has been shown.
+let _suggestedVisibleCount=5;
+let _suggestedNextIncrement=5;
 
 // ── STORIES STATE ──────────────────────────────────────────
 let _storyGroups=[];          // [{student_key, student_name, stories:[...], ...}]
@@ -5323,18 +5336,29 @@ function nxRenderSuggestedUsers(){
   nxUpdatePendingFollowsBadge(); // keep badge in sync with suggestion count
   const wrap=$('suggestedUsersWrap');
   const list=$('suggestedUsersList');
+  const moreBtn=$('suggestedShowMoreBtn');
+  const caughtUpMsg=$('suggestedAllCaughtUp');
   if(!wrap||!list) return;
 
-  // People who follow me but I don't follow back yet
-  const suggestions=_cache.myFollowers.filter(u=>{
+  // People who follow me but I don't follow back yet — the full set;
+  // pagination below only controls how many of these are *rendered*,
+  // so "Show more" is instant (no extra network round-trip).
+  const allSuggestions=_cache.myFollowers.filter(u=>{
     const key=String(u.student_key||u.key||'');
     return key && key!==sKey() && !_cache.followingKeys.has(key);
-  }).slice(0,8); // cap at 8 suggestions
+  });
 
-  if(!suggestions.length){ wrap.style.display='none'; return; }
+  if(!allSuggestions.length){
+    wrap.style.display='none';
+    // Reset pagination so the next time suggestions appear they start at 5 again
+    _suggestedVisibleCount=5;
+    _suggestedNextIncrement=5;
+    return;
+  }
   wrap.style.display='block';
 
-  list.innerHTML=suggestions.map(u=>{
+  const visible=allSuggestions.slice(0,_suggestedVisibleCount);
+  list.innerHTML=visible.map(u=>{
     const key=String(u.student_key||u.key||'');
     const name=u.student_name||u.name||'Student';
     const emoji=u.emoji||'';
@@ -5351,7 +5375,26 @@ function nxRenderSuggestedUsers(){
       <button class="su-btn" id="su-btn-${safeKey}" onclick="nxSuggestedFollow('${safeKey}','${safeName}',this)">Follow</button>
     </div>`;
   }).join('');
+
+  const remaining=allSuggestions.length-visible.length;
+  if(remaining>0){
+    if(moreBtn){
+      moreBtn.classList.remove('hidden');
+      moreBtn.textContent=`Show ${Math.min(_suggestedNextIncrement,remaining)} more`;
+    }
+    if(caughtUpMsg) caughtUpMsg.classList.add('hidden');
+  } else {
+    if(moreBtn) moreBtn.classList.add('hidden');
+    if(caughtUpMsg) caughtUpMsg.classList.remove('hidden');
+  }
 }
+
+function nxShowMoreSuggestions(){
+  _suggestedVisibleCount+=_suggestedNextIncrement;
+  _suggestedNextIncrement*=2; // 5 → 10 → 20 → 40 …
+  nxRenderSuggestedUsers();
+}
+window.nxShowMoreSuggestions=nxShowMoreSuggestions;
 
 async function nxSuggestedFollow(key, name, btn){
   if(!key) return;
