@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2606,6 +2605,7 @@ let _storyGroups=[];          // [{student_key, student_name, stories:[...], ...
 let _chatsLoaded=false;       // true after the first real chat-list fetch completes
 let _svGroupIdx=0;            // which group is open
 let _svStoryIdx=0;            // which story within the group
+let _svRenderToken=0;         // bumped on every render to invalidate stale async video loads
 let _svTimer=null;            // auto-advance timer
 let _svProgressInterval=null; // progress bar interval
 let _storyPendingMedia=null;  // {dataUrl, mediaType}
@@ -2663,6 +2663,66 @@ const STORY_VIDEO_FALLBACK_DURATION = 8000;  // ms, used until a video's real du
 const STORY_IMG_MAX_BYTES = 2 * 1024 * 1024;  // 2 MB hard limit for image stories
 const STORY_VID_MAX_BYTES = 3 * 1024 * 1024;  // 3 MB hard limit for video stories (after trim)
 const STORY_VID_MAX_SECS  = 15;               // auto-trim videos longer than 15 s
+
+/* ── Story video local cache ──
+   Once a story video has been watched, it's cached on-device so re-opening
+   the same story never re-downloads it. (Using IndexedDB rather than
+   localStorage — localStorage is a small ~5MB synchronous text store and
+   isn't safe for video binary data; IndexedDB is the correct on-device
+   storage for this and gives the exact "no re-download on re-view" result.) */
+const STORY_VID_DB_NAME='nx_story_video_cache';
+const STORY_VID_STORE='videos';
+const STORY_VID_CACHE_MAX_BYTES = 8*1024*1024; // skip caching unusually large files
+let _storyVidDbPromise=null;
+function nxStoryVidDB(){
+  if(_storyVidDbPromise) return _storyVidDbPromise;
+  _storyVidDbPromise=new Promise((resolve,reject)=>{
+    try{
+      const req=indexedDB.open(STORY_VID_DB_NAME,1);
+      req.onupgradeneeded=()=>{ try{ req.result.createObjectStore(STORY_VID_STORE); }catch(e){} };
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error);
+    }catch(e){ reject(e); }
+  }).catch(()=>null);
+  return _storyVidDbPromise;
+}
+async function nxGetCachedStoryVideo(url){
+  try{
+    const db=await nxStoryVidDB();
+    if(!db) return null;
+    return await new Promise(res=>{
+      const tx=db.transaction(STORY_VID_STORE,'readonly');
+      const req=tx.objectStore(STORY_VID_STORE).get(url);
+      req.onsuccess=()=>res(req.result||null);
+      req.onerror=()=>res(null);
+    });
+  }catch(e){ return null; }
+}
+async function nxPutCachedStoryVideo(url,blob){
+  try{
+    const db=await nxStoryVidDB();
+    if(!db) return;
+    const tx=db.transaction(STORY_VID_STORE,'readwrite');
+    tx.objectStore(STORY_VID_STORE).put(blob,url);
+  }catch(e){}
+}
+// Resolves the src to actually assign to the <video> element:
+// - instant local blob: URL if this video was already cached
+// - otherwise the original network URL, while quietly fetching + caching it
+//   in the background so the NEXT view is served from cache.
+async function nxResolveStoryVideoSrc(url){
+  if(!url) return url;
+  const cached=await nxGetCachedStoryVideo(url);
+  if(cached){
+    try{ return URL.createObjectURL(cached); }catch(e){ return url; }
+  }
+  fetch(url).then(r=>r.ok?r.blob():null).then(blob=>{
+    if(blob && blob.size>0 && blob.size<=STORY_VID_CACHE_MAX_BYTES){
+      nxPutCachedStoryVideo(url,blob);
+    }
+  }).catch(()=>{});
+  return url;
+}
 
 async function nxLoadStories(){
   // Paint skeleton rings immediately before the network call
@@ -2845,6 +2905,7 @@ function nxShowCurrentStory(){
   if(_svStoryIdx>=grp.stories.length){ nxGoToGroup(_svGroupIdx+1, 'start'); return; }
 
   const story=grp.stories[_svStoryIdx];
+  const _renderToken = (++_svRenderToken);
 
   // Header
   const av=$('svHdrAv');
@@ -2938,20 +2999,37 @@ function nxShowCurrentStory(){
   let mediaEl;
   if(story.media_type==='video'){
     mediaEl=document.createElement('video');
-    mediaEl.src=story.media_url;
     mediaEl.playsInline=true;
     mediaEl.autoplay=true;
+    mediaEl.preload='auto';
+    mediaEl.muted=false;
+    // Keep it visually hidden (svMedia bg is already pure black) until the
+    // very first frame is actually ready — this is what removes the
+    // gray "play button" placeholder frame that used to flash before
+    // playback started. Black-to-video is an invisible swap either way.
+    mediaEl.style.opacity='0';
+    mediaEl.style.transition='opacity .08s linear';
+    const revealOnReady=()=>{ mediaEl.style.opacity='1'; };
+    mediaEl.addEventListener('loadeddata', revealOnReady, {once:true});
+    mediaEl.addEventListener('canplay', revealOnReady, {once:true});
     mediaEl.onended=()=>nxStoryNext();
     mediaEl.onloadedmetadata=()=>{ nxRunStoryProgress((mediaEl.duration||8)*1000); };
-    mediaEl.play().catch(()=>{});
+    mediaWrap.appendChild(mediaEl);
     nxRunStoryProgress(STORY_VIDEO_FALLBACK_DURATION);
+    // Serve from on-device cache instantly if we've watched this video
+    // before; otherwise stream it now and cache it for next time.
+    nxResolveStoryVideoSrc(story.media_url).then(src=>{
+      if(_renderToken!==_svRenderToken) return; // user already navigated away
+      mediaEl.src=src;
+      mediaEl.play().catch(()=>{});
+    });
   } else {
     mediaEl=document.createElement('img');
     mediaEl.src=story.media_url;
     mediaEl.alt='Story';
     nxRunStoryProgress(STORY_IMG_DURATION);
+    mediaWrap.appendChild(mediaEl);
   }
-  mediaWrap.appendChild(mediaEl);
 
   // Mark viewed (once per story)
   if(!story.is_viewed){
