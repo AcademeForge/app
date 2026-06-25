@@ -1643,6 +1643,16 @@ body.light .sv-caught-up-btn{background:#111;color:#fff;}
     </div>
   </div>
 
+  <!-- ── NO MUTUAL FOLLOW MODAL ── -->
+  <div id="noMutualFollowModal" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);">
+    <div style="background:var(--card);border-radius:20px;padding:28px 24px;max-width:340px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.3);">
+      <div style="font-size:40px;margin-bottom:12px;">🔒</div>
+      <div style="font-size:18px;font-weight:800;color:var(--t1);margin-bottom:8px;">Messaging Restricted</div>
+      <div id="noMutualFollowMsg" style="font-size:14px;color:var(--t2);line-height:1.5;margin-bottom:20px;">You need to follow each other to send messages. Follow them first — once they follow you back, DMs will be unlocked.</div>
+      <button class="af-btn-primary" style="width:100%;margin-bottom:10px;" onclick="nxCloseNoMutualFollowModal()">Got it</button>
+    </div>
+  </div>
+
 </div><!-- /shell -->
 
 <script>
@@ -5589,16 +5599,6 @@ function nxCloseDM(){
 /* ═══════════════════════════════════════════════════
    DM OPTIONS / CLEAR CHAT HISTORY
 ═══════════════════════════════════════════════════ */
-<!-- ── NO MUTUAL FOLLOW MODAL ── -->
-<div id="noMutualFollowModal" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);">
-  <div style="background:var(--card);border-radius:20px;padding:28px 24px;max-width:340px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.3);">
-    <div style="font-size:40px;margin-bottom:12px;">🔒</div>
-    <div style="font-size:18px;font-weight:800;color:var(--t1);margin-bottom:8px;">Messaging Restricted</div>
-    <div id="noMutualFollowMsg" style="font-size:14px;color:var(--t2);line-height:1.5;margin-bottom:20px;">You need to follow each other to send messages. Follow them first — once they follow you back, DMs will be unlocked.</div>
-    <button class="af-btn-primary" style="width:100%;margin-bottom:10px;" onclick="nxCloseNoMutualFollowModal()">Got it</button>
-  </div>
-</div>
-
 function nxOpenNoMutualFollowModal(peerName){
   const msg=$('noMutualFollowMsg');
   if(msg) msg.textContent=(peerName?'To message '+peerName+', you need to follow each other. Follow them first — once they follow you back, DMs unlock automatically.':'You need to follow each other to send messages. Follow them first — once they follow you back, DMs will be unlocked.');
