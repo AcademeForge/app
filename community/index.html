@@ -1737,13 +1737,34 @@ function saveChatReadTs(){
 }
 
 /* ═══════════════════════════════════════════════════
-   POST LIKE-STATE
-   Liked state for the current student is sourced entirely
-   from the backend (fetch_posts → liked_post_ids / is_liked,
-   and the response of toggle_post_like). No device/localStorage
-   persistence is used — a fresh load always reflects what the
-   server reports, never a locally cached copy.
+   POST LIKE-STATE PERSISTENCE
+   The edge function does not report which posts the
+   current student already liked, so likedPostIds is
+   mirrored to localStorage (scoped to the current account)
+   the same way chatReadTs is above — a liked post stays red
+   after a refresh, app close/reopen, etc. until unliked.
 ═══════════════════════════════════════════════════ */
+function likedPostIdsStorageKey(){
+  const key=sKey();
+  return key ? 'af_liked_posts:'+key : null;
+}
+function loadLikedPostIds(){
+  const storageKey=likedPostIdsStorageKey();
+  if(!storageKey) return new Set();
+  try{
+    const raw=localStorage.getItem(storageKey);
+    if(!raw) return new Set();
+    const arr=JSON.parse(raw);
+    return new Set(Array.isArray(arr)?arr:[]);
+  }catch(e){ return new Set(); }
+}
+function saveLikedPostIds(){
+  const storageKey=likedPostIdsStorageKey();
+  if(!storageKey) return;
+  try{
+    localStorage.setItem(storageKey, JSON.stringify([..._cache.likedPostIds]));
+  }catch(e){ /* storage full or unavailable — liked-state just won't persist this time */ }
+}
 
 /* ═══════════════════════════════════════════════════
    GENERIC "STALE-WHILE-REVALIDATE" SNAPSHOT CACHE
@@ -3950,7 +3971,7 @@ async function init(){
   show('mainView');
   $('lockedBox').style.display='none';
   _cache.chatReadTs = loadChatReadTs();
-  _cache.likedPostIds = new Set(); // populated from backend once fetch_posts resolves
+  _cache.likedPostIds = loadLikedPostIds();
   nxRequestNotifyPermission();
   nxLoadMyProfile();
   await Promise.all([nxLoadPosts(), nxPreloadConnections(), nxLoadBlockedUsers()]);
@@ -4302,12 +4323,16 @@ async function nxLoadPosts(isRefresh=false){
 
   const freshPosts=Array.isArray(res.posts)?res.posts:[];
 
-  // Sync liked state from the backend on every load/refresh — this is the
-  // single source of truth, no local/device cache is used.
+  // Sync liked state from server when it's actually provided.
+  // The edge function currently never returns liked_post_ids / is_liked,
+  // so in that case we keep the locally-persisted set (loaded at init)
+  // instead of wiping it back to empty on every load/refresh.
   if(Array.isArray(res.liked_post_ids)){
     _cache.likedPostIds = new Set(res.liked_post_ids);
-  } else if(freshPosts.length){
+    saveLikedPostIds();
+  } else if(freshPosts.some(p=>p.is_liked)){
     _cache.likedPostIds = new Set(freshPosts.filter(p=>p.is_liked).map(p=>p.id));
+    saveLikedPostIds();
   }
 
   // Rank: on refresh, merge intelligently; on first load just rank
@@ -4490,6 +4515,9 @@ async function nxLikePost(pid, btnEl){
     if(pIdx>=0) _cache.posts[pIdx].likes_count = newCount;
   }
 
+  // Persist locally so the red/liked state survives refresh & app reopen
+  saveLikedPostIds();
+
   try{
     await edgeCall({action:'toggle_post_like',post_id:pid});
   } catch(e){
@@ -4497,6 +4525,7 @@ async function nxLikePost(pid, btnEl){
     const wasLikedNow = !_cache.likedPostIds.has(pid);
     if(wasLikedNow){ _cache.likedPostIds.delete(pid); btnEl&&btnEl.classList.remove('liked'); }
     else { _cache.likedPostIds.add(pid); btnEl&&btnEl.classList.add('liked'); }
+    saveLikedPostIds();
   } finally {
     _likeInFlight.delete(pid);
   }
@@ -5306,7 +5335,7 @@ async function nxBlockFromFollowerList(key, name, btn){
   if(!key) return;
   const ok=await raConfirm({
     title:'Block this user?',
-    message:'Block <strong>'+esc(name)+'</strong>? They won\'t be able to follow you or send DMs.',
+    message:'Block DMs with <strong>'+esc(name)+'</strong>? They won\'t be able to send DMs.',
     confirmText:'Block'
   });
   if(!ok) return;
