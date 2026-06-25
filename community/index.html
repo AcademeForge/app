@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1804,18 +1803,14 @@ const _cache = {
    SUPABASE BOOTSTRAP
 ═══════════════════════════════════════════════════ */
 let _sb = null;
-let _sbLoadPromise = null; // cached — prevents concurrent calls each injecting a new <script>
 function loadSupabaseSDK(){
-  if(_sbLoadPromise) return _sbLoadPromise;
-  _sbLoadPromise = new Promise((res,rej)=>{
+  return new Promise((res,rej)=>{
     if(typeof supabase!=='undefined'){res();return;}
     const s=document.createElement('script');
     s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-    s.onload=res;
-    s.onerror=()=>{ _sbLoadPromise=null; rej(new Error('Supabase SDK failed.')); };
+    s.onload=res; s.onerror=()=>rej(new Error('Supabase SDK failed.'));
     document.head.appendChild(s);
   });
-  return _sbLoadPromise;
 }
 function getSb(){
   if(_sb) return _sb;
@@ -3726,7 +3721,7 @@ async function nxPostStory(){
   }
   nxCloseStoryComposer();
   showToast('Story shared!');
-  nxLoadStories(); // fire-and-forget — composer is closed, no need to block on this
+  await nxLoadStories();
 }
 
 window.nxYourStoryClick=nxYourStoryClick;
@@ -3901,7 +3896,6 @@ function nxSwitchTab(tab){
    INIT
 ═══════════════════════════════════════════════════ */
 async function init(){
-  loadSupabaseSDK(); // eagerly start SDK download — ready before first edgeCall fires
   syncAvatarBtn();
   syncTheme();
   if(!isLoggedIn()){
@@ -4061,17 +4055,15 @@ function setupRealtime(){
     })
     .subscribe();
 
-  // Stories realtime — debounced so a burst of posts triggers only one re-fetch
+  // Stories realtime
   sb.channel('realtime_stories')
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'af_nexus_stories_v1'},payload=>{
       if(payload.new && String(payload.new.student_key) === String(sKey())) return;
-      clearTimeout(_storyRefreshDebounce);
-      _storyRefreshDebounce=setTimeout(()=>nxLoadStories(), 800);
+      nxLoadStories();
     })
     .subscribe();
 }
 let _postRefreshDebounce=null;
-let _storyRefreshDebounce=null;
 
 function teardownRealtime(){
   const sb=getSb();
@@ -4084,14 +4076,8 @@ function teardownRealtime(){
   clearInterval(_presencePingTimer);
 }
 
-const _refreshInFlight=new Set(); // de-dupe: skip if a fetch for this peer is already running
 async function nxRefreshPeerChat(peerKey){
-  if(_refreshInFlight.has(peerKey)) return; // realtime + poll fired simultaneously — skip dupe
-  _refreshInFlight.add(peerKey);
-  let res;
-  try{ res=await edgeCall({action:'fetch_dms',peer_key:peerKey}); }
-  finally{ _refreshInFlight.delete(peerKey); }
-  if(!res) return;
+  const res=await edgeCall({action:'fetch_dms',peer_key:peerKey});
   if(res&&res.ok&&res.messages){
     let chatIdx=_cache.chatList.findIndex(c=>c.peer.student_key===peerKey);
     if(chatIdx>=0){
@@ -4608,8 +4594,8 @@ async function nxCreateComment(){
   if(cc) cc.textContent=Math.max(0,parseInt(cc.textContent||0)+1);
 
   _commentsCache.delete(_curPostId);
-  // Fire-and-forget: comment list refreshes in background, button re-enables immediately
-  nxLoadComments(_curPostId);
+  // Refetch ONLY the comments array dynamically without fetching the entire feed
+  await nxLoadComments(_curPostId);
 }
 
 async function nxLikeComment(cId, btnEl){
@@ -4672,8 +4658,8 @@ async function nxCreateReply(){
   if(cc) cc.textContent=Math.max(0,parseInt(cc.textContent||0)+1);
 
   _commentsCache.delete(_curPostId);
-  // Fire-and-forget: comment list refreshes in background
-  nxLoadComments(_curPostId);
+  // Reload only comments for this post
+  await nxLoadComments(_curPostId);
 }
 
 /* ═══════════════════════════════════════════════════
@@ -5114,16 +5100,13 @@ function nxCloseMyProfile(){
   nxForceRepaint();
 }
 async function nxLoadMyProfileData(){
-  // get_my_profile and my_posts are independent reads — run in parallel (halves RTT cost)
-  const [res, res2] = await Promise.all([
-    edgeCall({action:'get_my_profile'}),
-    edgeCall({action:'my_posts'}),
-  ]);
+  const res=await edgeCall({action:'get_my_profile'});
   if(res&&res.ok){
     $('myProfileFollowersCount').textContent=res.followers_count||0;
     $('myProfileFollowingCount').textContent=res.following_count||0;
     _cache.myVerified = !!res.profile?.is_verified;
   }
+  const res2=await edgeCall({action:'my_posts'});
   if(res2&&res2.ok&&Array.isArray(res2.posts)){
     $('myProfilePostsCount').textContent=res2.posts.length||0;
     renderListToContainer(res2.posts,'myProfilePostsList',false);
@@ -5247,23 +5230,20 @@ async function nxUnfollowFromList(key, name, btn){
 async function nxRemoveFollowerFromList(key, name, btn){
   if(!key) return;
   if(!confirm('Remove '+name+' from your followers?')) return;
-
-  // OPTIMISTIC: remove row + update cache immediately — UI unfreezes at once
-  const row=btn.closest('[data-follow-row]');
-  if(row){row.style.transition='opacity .2s';row.style.opacity='0';setTimeout(()=>row.remove(),200);}
-  _cache.myFollowers=_cache.myFollowers.filter(u=>String(u.student_key||u.key||u.follower_key||'')!==key);
-  saveSnapshot('followers_me',_cache.myFollowers);
-  showToast(name+' removed from followers.');
-
-  // Background: block then unblock (must stay sequential — block first)
-  // Neither call needs to block the UI; we already showed optimistic feedback.
+  btn.disabled=true; btn.textContent='…';
+  // No dedicated remove-follower API; block then immediately unblock —
+  // this drops their follow relationship without keeping a permanent block.
   const r1=await edgeCall({action:'block_user',target_key:key});
   if(r1 && r1.ok){
-    edgeCall({action:'unblock_user',target_key:key}).catch(()=>{});
+    await edgeCall({action:'unblock_user',target_key:key});
+    _cache.myFollowers=_cache.myFollowers.filter(u=>String(u.student_key||u.key||u.follower_key||'')!==key);
+    saveSnapshot('followers_me',_cache.myFollowers);
+    showToast(name+' removed from followers.');
+    const row=btn.closest('[data-follow-row]');
+    if(row){row.style.transition='opacity .3s';row.style.opacity='0';setTimeout(()=>row.remove(),300);}
   } else {
-    // Revert on failure: reload fresh list so the removed row reappears
-    showToast(r1?.message||'Could not remove follower. Tap Followers to refresh.','err');
-    loadFollowList('followers',sKey());
+    btn.disabled=false; btn.textContent='Remove';
+    showToast(r1?.message||'Could not remove follower.','err');
   }
 }
 
@@ -5672,7 +5652,6 @@ async function nxOpenDM(peerKey,peerName){
   nxBringToFront('dmScreen');
   $('dmScreen').style.display='flex';
   $('bnav').classList.add('kb-hidden');
-  nxStopChatListPoll(); // no need to poll chat list while a DM thread is open
   nxStartDMPoll(peerKey); // polling fallback for instant message sync
 
   // Hide both badges initially
@@ -5815,7 +5794,6 @@ function nxCloseDM(){
   _dmPeer=null; _dmEditingId=null;
   nxRemoveDMImage();
   nxStopDMPoll();
-  if(_activeTab==='chats') nxStartChatListPoll(); // resume chat list polling now that DM is closed
   nxForceRepaint();
 }
 
