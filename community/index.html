@@ -1130,7 +1130,7 @@ body.light .sv-caught-up-btn{background:#111;color:#fff;}
 
     <div class="view-switch" id="mainTabBar">
       <button class="view-switch-btn active" id="tabFeed" onclick="nxSwitchTab('feed')">Feed</button>
-      <button class="view-switch-btn" id="tabChats" onclick="nxSwitchTab('chats')">Chats <span class="vs-badge hidden" id="chatBadge" style="background:var(--rose);color:#fff;padding:2px 6px;border-radius:99px;font-size:10px;">0 new</span><span id="pendingFollowsBadge" style="display:none;background:#6366f1;color:#fff;padding:2px 6px;border-radius:99px;font-size:10px;margin-left:2px;font-weight:700;"></span></button>
+      <button class="view-switch-btn" id="tabChats" onclick="nxSwitchTab('chats')">Chats <span class="vs-badge hidden" id="chatBadge" style="background:var(--rose);color:#fff;padding:2px 6px;border-radius:99px;font-size:10px;">0 new</span></button>
     </div>
 
     <!-- FEED TAB -->
@@ -5335,7 +5335,7 @@ async function nxBlockFromFollowerList(key, name, btn){
   if(!key) return;
   const ok=await raConfirm({
     title:'Block this user?',
-    message:'Block <strong>'+esc(name)+'</strong>? They won\'t be able to send DMs.',
+    message:'Block DMs <strong>'+esc(name)+'</strong>? They won\'t be able to send DMs.',
     confirmText:'Block'
   });
   if(!ok) return;
