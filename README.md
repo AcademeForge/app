@@ -129,7 +129,7 @@ AcademeForge's main app includes a robust **Settings & Tools** section:
 
 ## Who Is AcademeForge For?
 
-AcademeForge is built primarily for **Indian students** — from Class 9-10 learners to young adults looking to build real-world digital skills. Its mix of structured courses, AI mentorship, gamified tests, community, and free productivity tools makes it a one-stop learning environment that goes beyond just video lessons.
+AcademeForge is built primarily for **Indian students** — from school learners to young adults looking to build real-world digital skills. Its mix of structured courses, AI mentorship, gamified tests, community, and free productivity tools makes it a one-stop learning environment that goes beyond just video lessons.
 
 With text-based courses accessible to all (including students who can't hear), instant certificates, an AI mentor, gamified quizzes, and a built-in community, AcademeForge is clearly building toward something much larger than a typical course platform.
 
